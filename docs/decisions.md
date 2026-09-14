@@ -79,3 +79,17 @@ La recherche n'est pas mise en cache : quelques dizaines d'annonces, PostgreSQL 
 ## 008 — L'IA assiste, elle ne décide pas
 
 Si le fournisseur d'IA tombe, le calendrier, la recherche et les demandes fonctionnent. Les agents proposent (extraction d'annonce, brouillon de réponse), un humain valide. Aucun agent ne confirme une réservation ni n'invente un tarif.
+
+---
+
+## 003 bis — Révision de 003 : deux colonnes DATE, contrainte sur expression (14/09/2026)
+
+**Ce qui change.** Pas de colonne `daterange`, donc pas de type DBAL custom ni de fonction DQL pour `&&`. Les entités portent `startDate` et `endDate` en `date_immutable`, types gérés nativement par Doctrine.
+
+**La garantie ne bouge pas.** PostgreSQL accepte une contrainte d'exclusion sur une expression :
+
+    EXCLUDE USING gist (accommodation_id WITH =, daterange(start_date, end_date, '[)') WITH &&)
+
+Mêmes bornes `[)` — arrivée incluse, départ exclu — même index gist, même impossibilité d'insérer deux séjours qui se chevauchent.
+
+**Côté requêtes.** Le chevauchement s'écrit en DQL ordinaire : `u.startDate < :departure AND u.endDate > :arrival`.
