@@ -1,0 +1,203 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Entity;
+
+use App\Enum\BookingRequestStatus;
+use App\Repository\BookingRequestRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
+
+#[ORM\Entity(repositoryClass: BookingRequestRepository::class)]
+#[ORM\Index(name: 'idx_booking_request_pending', columns: ['status', 'expires_at'])]
+class BookingRequest
+{
+    /**
+     * Delay left to the owner before the request expires by itself.
+     */
+    public const RESPONSE_DELAY = '+48 hours';
+
+    #[ORM\Id]
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    private Uuid $id;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Accommodation $accommodation;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    private \DateTimeImmutable $startDate;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    private \DateTimeImmutable $endDate;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    private int $adults;
+
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
+    private int $children = 0;
+
+    #[ORM\Column(length: 255)]
+    private string $guestName;
+
+    #[ORM\Column(length: 255)]
+    private string $guestEmail;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $guestPhone = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $message = null;
+
+    #[ORM\Column(enumType: BookingRequestStatus::class)]
+    private BookingRequestStatus $status = BookingRequestStatus::Pending;
+
+    /**
+     * Price in cents, frozen when the request is made. Null when the owner published no rate.
+     */
+    #[ORM\Column(nullable: true)]
+    private ?int $estimatedPrice = null;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $expiresAt;
+
+    public function __construct(
+        Accommodation $accommodation,
+        \DateTimeImmutable $startDate,
+        \DateTimeImmutable $endDate,
+        int $adults,
+        string $guestName,
+        string $guestEmail,
+    ) {
+        $this->id = Uuid::v7();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->expiresAt = $this->createdAt->modify(self::RESPONSE_DELAY);
+        $this->accommodation = $accommodation;
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+        $this->adults = $adults;
+        $this->guestName = $guestName;
+        $this->guestEmail = $guestEmail;
+    }
+
+    public function getId(): Uuid
+    {
+        return $this->id;
+    }
+
+    public function getAccommodation(): Accommodation
+    {
+        return $this->accommodation;
+    }
+
+    public function getStartDate(): \DateTimeImmutable
+    {
+        return $this->startDate;
+    }
+
+    public function getEndDate(): \DateTimeImmutable
+    {
+        return $this->endDate;
+    }
+
+    public function getAdults(): int
+    {
+        return $this->adults;
+    }
+
+    public function getChildren(): int
+    {
+        return $this->children;
+    }
+
+    public function setChildren(int $children): static
+    {
+        $this->children = $children;
+
+        return $this;
+    }
+
+    public function getGuests(): int
+    {
+        return $this->adults + $this->children;
+    }
+
+    public function getGuestName(): string
+    {
+        return $this->guestName;
+    }
+
+    public function getGuestEmail(): string
+    {
+        return $this->guestEmail;
+    }
+
+    public function getGuestPhone(): ?string
+    {
+        return $this->guestPhone;
+    }
+
+    public function setGuestPhone(?string $guestPhone): static
+    {
+        $this->guestPhone = $guestPhone;
+
+        return $this;
+    }
+
+    public function getMessage(): ?string
+    {
+        return $this->message;
+    }
+
+    public function setMessage(?string $message): static
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    public function getStatus(): BookingRequestStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(BookingRequestStatus $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getEstimatedPrice(): ?int
+    {
+        return $this->estimatedPrice;
+    }
+
+    public function setEstimatedPrice(?int $estimatedPrice): static
+    {
+        $this->estimatedPrice = $estimatedPrice;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getExpiresAt(): \DateTimeImmutable
+    {
+        return $this->expiresAt;
+    }
+
+    public function nights(): int
+    {
+        return (int) $this->startDate->diff($this->endDate)->days;
+    }
+}
