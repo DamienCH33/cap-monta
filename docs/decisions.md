@@ -93,3 +93,19 @@ Si le fournisseur d'IA tombe, le calendrier, la recherche et les demandes foncti
 Mêmes bornes `[)` — arrivée incluse, départ exclu — même index gist, même impossibilité d'insérer deux séjours qui se chevauchent.
 
 **Côté requêtes.** Le chevauchement s'écrit en DQL ordinaire : `u.startDate < :departure AND u.endDate > :arrival`.
+
+---
+
+## 010 — Les contraintes d'exclusion échappent à Doctrine
+
+Doctrine ne sait ni générer ni reconnaître une contrainte `EXCLUDE`. À chaque `make:migration`, il propose donc un `DROP INDEX <table>_no_overlap` : **ces lignes doivent être supprimées de la migration générée**, dans `up()` comme dans `down()`.
+
+`tests/Integration/DatabaseConstraintsTest.php` vérifie que les contraintes sont toujours en base. Si une migration en supprime une, la CI casse.
+
+---
+
+## 010 — Les contraintes d'exclusion échappent à Doctrine
+
+Doctrine ne sait ni générer ni reconnaître une contrainte `EXCLUDE`. À chaque `make:migration`, il propose un `DROP INDEX <table>_no_overlap` : **ces lignes sont à supprimer de la migration générée**, dans `up()` comme dans `down()`.
+
+`tests/Integration/DatabaseConstraintsTest.php` vérifie que les contraintes sont toujours en base : si une migration en supprime une, la CI casse.

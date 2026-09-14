@@ -9,7 +9,6 @@ use App\Entity\Unavailability;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
-use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -21,29 +20,6 @@ final class UnavailabilityOverlapTest extends KernelTestCase
     {
         self::bootKernel();
         $this->em = self::getContainer()->get(EntityManagerInterface::class);
-    }
-
-    public function testOverlappingStaysAreRejected(): void
-    {
-        $accommodation = $this->createAccommodation('mobil-home-des-pins');
-
-        $this->em->persist(new Unavailability(
-            $accommodation,
-            new \DateTimeImmutable('2026-08-10'),
-            new \DateTimeImmutable('2026-08-15'),
-            UnavailabilitySource::Booking,
-        ));
-        $this->em->flush();
-
-        $this->em->persist(new Unavailability(
-            $accommodation,
-            new \DateTimeImmutable('2026-08-14'),
-            new \DateTimeImmutable('2026-08-18'),
-            UnavailabilitySource::Block,
-        ));
-
-        $this->expectException(DriverException::class);
-        $this->em->flush();
     }
 
     public function testCheckoutAndCheckinOnTheSameDayAreAllowed(): void
