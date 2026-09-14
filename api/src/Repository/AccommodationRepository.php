@@ -30,13 +30,13 @@ class AccommodationRepository extends ServiceEntityRepository
         $overlapping = $this->getEntityManager()->createQueryBuilder()
             ->select('1')
             ->from(Unavailability::class, 'u')
-            ->where('u.accommodation = a')
-            ->andWhere('u.startDate < :departure')
-            ->andWhere('u.endDate > :arrival');
+            ->where('u.accommodation = a');
+
+        StayOverlap::apply($overlapping, 'u');
 
         $qb = $this->createQueryBuilder('a')
             ->andWhere('a.maxCapacity >= :guests')
-            ->andWhere('NOT EXISTS ('.$overlapping->getDQL().')')
+            ->andWhere('NOT EXISTS (' . $overlapping->getDQL() . ')')
             ->orderBy('a.slug', 'ASC')
             ->setParameter('guests', $guests)
             ->setParameter('arrival', $arrival)

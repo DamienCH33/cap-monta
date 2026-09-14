@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Accommodation;
 use App\Entity\Unavailability;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,28 +17,20 @@ class UnavailabilityRepository extends ServiceEntityRepository
         parent::__construct($registry, Unavailability::class);
     }
 
-    //    /**
-    //     * @return Unavailability[] Returns an array of Unavailability objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function hasOverlap(
+        Accommodation $accommodation,
+        \DateTimeImmutable $arrival,
+        \DateTimeImmutable $departure,
+    ): bool {
+        $qb = $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->andWhere('u.accommodation = :accommodation')
+            ->setParameter('accommodation', $accommodation)
+            ->setParameter('arrival', $arrival)
+            ->setParameter('departure', $departure);
 
-    //    public function findOneBySomeField($value): ?Unavailability
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        StayOverlap::apply($qb, 'u');
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
 }

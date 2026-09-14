@@ -29,12 +29,12 @@ class PricePeriodRepository extends ServiceEntityRepository
     ): array {
         $qb = $this->createQueryBuilder('p')
             ->andWhere('p.accommodation = :accommodation')
-            ->andWhere('p.startDate < :departure')
-            ->andWhere('p.endDate > :arrival')
             ->orderBy('p.startDate', 'ASC')
             ->setParameter('accommodation', $accommodation)
             ->setParameter('arrival', $arrival)
             ->setParameter('departure', $departure);
+
+        StayOverlap::apply($qb, 'p');
 
         /** @var list<PricePeriod> $result */
         $result = $qb->getQuery()->getResult();
