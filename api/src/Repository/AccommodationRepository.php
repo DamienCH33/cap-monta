@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Accommodation;
+use App\Entity\Unavailability;
+use App\Enum\Resort;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +18,38 @@ class AccommodationRepository extends ServiceEntityRepository
         parent::__construct($registry, Accommodation::class);
     }
 
-    //    /**
-    //     * @return Accommodation[] Returns an array of Accommodation objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('a.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<Accommodation>
+     */
+    public function searchAvailable(
+        \DateTimeImmutable $arrival,
+        \DateTimeImmutable $departure,
+        int $guests,
+        ?Resort $resort = null,
+    ): array {
+        $overlapping = $this->getEntityManager()->createQueryBuilder()
+            ->select('1')
+            ->from(Unavailability::class, 'u')
+            ->where('u.accommodation = a')
+            ->andWhere('u.startDate < :departure')
+            ->andWhere('u.endDate > :arrival');
 
-    //    public function findOneBySomeField($value): ?Accommodation
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        $qb = $this->createQueryBuilder('a')
+            ->andWhere('a.maxCapacity >= :guests')
+            ->andWhere('NOT EXISTS (' . $overlapping->getDQL() . ')')
+            ->orderBy('a.slug', 'ASC')
+            ->setParameter('guests', $guests)
+            ->setParameter('arrival', $arrival)
+            ->setParameter('departure', $departure);
+
+        if (null !== $resort) {
+            $qb->andWhere('a.resort = :resort')
+                ->setParameter('resort', $resort);
+        }
+
+        /** @var list<Accommodation> $result */
+        $result = $qb->getQuery()->getResult();
+
+        return $result;
+    }
 }
