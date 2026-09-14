@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,28 +17,28 @@ class PricePeriodRepository extends ServiceEntityRepository
         parent::__construct($registry, PricePeriod::class);
     }
 
-    //    /**
-    //     * @return PricePeriod[] Returns an array of PricePeriod objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Price periods overlapping the stay, in chronological order.
+     *
+     * @return list<PricePeriod>
+     */
+    public function findCoveringStay(
+        Accommodation $accommodation,
+        \DateTimeImmutable $arrival,
+        \DateTimeImmutable $departure,
+    ): array {
+        $qb = $this->createQueryBuilder('p')
+            ->andWhere('p.accommodation = :accommodation')
+            ->andWhere('p.startDate < :departure')
+            ->andWhere('p.endDate > :arrival')
+            ->orderBy('p.startDate', 'ASC')
+            ->setParameter('accommodation', $accommodation)
+            ->setParameter('arrival', $arrival)
+            ->setParameter('departure', $departure);
 
-    //    public function findOneBySomeField($value): ?PricePeriod
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        /** @var list<PricePeriod> $result */
+        $result = $qb->getQuery()->getResult();
+
+        return $result;
+    }
 }
