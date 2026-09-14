@@ -1,0 +1,16 @@
+parameters:
+    level: 7
+    paths:
+        - src
+        - tests
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    ignoreErrors:
+        # Fichiers générés par les recettes Symfony : appelés par le framework,
+        # jamais depuis notre code. Ne pas les modifier, ils seront réécrits.
+        -
+            identifier: method.unused
+            path: src/Kernel.php
+        -
+            identifier: function.alreadyNarrowedType
+            path: tests/bootstrap.php

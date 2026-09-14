@@ -1,0 +1,10 @@
+# api/ et web/ ont chacun leur .gitignore
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# surcharge Docker locale
+/.env

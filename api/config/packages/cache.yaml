@@ -1,0 +1,8 @@
+framework:
+    cache:
+        # Évite les collisions de clés si plusieurs apps partagent un Redis
+        prefix_seed: cap_monta/api
+
+        # Redis pour le cache applicatif (calendriers, rate limiter)
+        app: cache.adapter.redis
+        default_redis_provider: '%env(REDIS_URL)%'

@@ -1,0 +1,18 @@
+{
+  "intelephense.environment.phpVersion": "8.4.0",
+  "php-cs-fixer.executablePath": "${workspaceFolder}/api/vendor/bin/php-cs-fixer",
+  "php-cs-fixer.config": "api/.php-cs-fixer.dist.php",
+  "search.exclude": {
+    "api/vendor": true,
+    "api/var": true,
+    "web/node_modules": true,
+    "web/.angular": true,
+    "web/dist": true
+  },
+  "files.watcherExclude": {
+    "**/vendor/**": true,
+    "**/var/**": true,
+    "**/node_modules/**": true,
+    "**/.angular/**": true
+  }
+}
