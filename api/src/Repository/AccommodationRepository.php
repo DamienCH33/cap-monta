@@ -36,7 +36,7 @@ class AccommodationRepository extends ServiceEntityRepository
 
         $qb = $this->createQueryBuilder('a')
             ->andWhere('a.maxCapacity >= :guests')
-            ->andWhere('NOT EXISTS (' . $overlapping->getDQL() . ')')
+            ->andWhere('NOT EXISTS ('.$overlapping->getDQL().')')
             ->orderBy('a.slug', 'ASC')
             ->setParameter('guests', $guests)
             ->setParameter('arrival', $arrival)
