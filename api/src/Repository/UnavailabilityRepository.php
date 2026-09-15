@@ -60,4 +60,39 @@ class UnavailabilityRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    /**
+     * Unavailabilities of several accommodations at once, to avoid one query per card.
+     *
+     * @param list<string> $slugs
+     *
+     * @return array<string, list<Unavailability>> indexed by accommodation slug
+     */
+    public function findForPeriodBySlugs(array $slugs, \DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        if ([] === $slugs) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('u')
+            ->join('u.accommodation', 'a')
+            ->andWhere('a.slug IN (:slugs)')
+            ->orderBy('u.startDate', 'ASC')
+            ->setParameter('slugs', $slugs)
+            ->setParameter('arrival', $from)
+            ->setParameter('departure', $to);
+
+        StayOverlap::apply($qb, 'u');
+
+        /** @var list<Unavailability> $rows */
+        $rows = $qb->getQuery()->getResult();
+
+        $bySlug = [];
+
+        foreach ($rows as $unavailability) {
+            $bySlug[$unavailability->getAccommodation()->getSlug()][] = $unavailability;
+        }
+
+        return $bySlug;
+    }
 }
