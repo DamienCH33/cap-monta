@@ -1,1 +1,49 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --surface-0: #f5f4ef;
+  --surface-1: #faf9f5;
+  --surface-2: #ffffff;
+
+  --text-primary: #1a1a18;
+  --text-secondary: #5f5e5a;
+  --text-muted: #8a8983;
+
+  --border: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.22);
+  --radius: 8px;
+  --radius-lg: 12px;
+
+  --blue: #185fa5;
+  --blue-dark: #042c53;
+  --blue-soft: #e6f1fb;
+  --tile-sea: #b5d4f4;
+  --tile-forest: #c0dd97;
+
+  --free: #9fe1cb;
+  --taken: #d3d1c7;
+
+  --amber-bg: #faeeda;
+  --amber-text: #854f0b;
+  --success-bg: #e1f5ee;
+  --success-text: #04342c;
+
+  --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 500;
+}
