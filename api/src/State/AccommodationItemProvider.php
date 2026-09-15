@@ -34,8 +34,14 @@ final readonly class AccommodationItemProvider implements ProviderInterface
             return null;
         }
 
-        $accommodation = $this->accommodations->findOneBy(['slug' => $slug]);
+        $accommodation = $this->accommodations->findOneBySlug($slug);
 
-        return null === $accommodation ? null : AccommodationResource::fromEntity($accommodation);
+        if (null === $accommodation) {
+            return null;
+        }
+
+        $prices = $this->accommodations->findPriceFromBySlugs([$slug]);
+
+        return AccommodationResource::fromEntity($accommodation, $prices[$slug] ?? null);
     }
 }

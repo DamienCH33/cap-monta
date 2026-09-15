@@ -3,9 +3,11 @@
 namespace App\Repository;
 
 use App\Entity\Accommodation;
+use App\Entity\PricePeriod;
 use App\Entity\Unavailability;
 use App\Enum\Resort;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -51,5 +53,37 @@ class AccommodationRepository extends ServiceEntityRepository
         $result = $qb->getQuery()->getResult();
 
         return $result;
+    }
+
+    /**
+     * Lowest published weekly price for each accommodation, in cents.
+     *
+     * @param list<string> $slugs
+     *
+     * @return array<string, int|null> slug => price, null when no rate is published
+     */
+    public function findPriceFromBySlugs(array $slugs): array
+    {
+        if ([] === $slugs) {
+            return [];
+        }
+
+        /** @var list<array{slug: string, priceFrom: int|string|null}> $rows */
+        $rows = $this->createQueryBuilder('a')
+            ->select('a.slug AS slug', 'MIN(p.weeklyPrice) AS priceFrom')
+            ->leftJoin(PricePeriod::class, 'p', Join::WITH, 'p.accommodation = a')
+            ->andWhere('a.slug IN (:slugs)')
+            ->groupBy('a.slug')
+            ->setParameter('slugs', $slugs)
+            ->getQuery()
+            ->getResult();
+
+        $prices = [];
+
+        foreach ($rows as $row) {
+            $prices[$row['slug']] = null === $row['priceFrom'] ? null : (int) $row['priceFrom'];
+        }
+
+        return $prices;
     }
 }

@@ -67,10 +67,11 @@ final class AccommodationResource
         public ?int $surface,
         public array $amenities,
         public string $description,
+        public ?int $priceFrom,
     ) {
     }
 
-    public static function fromEntity(Accommodation $accommodation): self
+    public static function fromEntity(Accommodation $accommodation, ?int $priceFrom = null): self
     {
         return new self(
             $accommodation->getSlug(),
@@ -83,6 +84,7 @@ final class AccommodationResource
             $accommodation->getSurface(),
             $accommodation->getAmenities(),
             $accommodation->getDescription(),
+            $priceFrom,
         );
     }
 }

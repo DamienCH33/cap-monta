@@ -49,8 +49,18 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
             $accommodations = $this->accommodations->findBy($criteria, ['slug' => 'ASC']);
         }
 
+        $slugs = array_map(
+            static fn (Accommodation $accommodation): string => $accommodation->getSlug(),
+            $accommodations,
+        );
+
+        $prices = $this->accommodations->findPriceFromBySlugs($slugs);
+
         return array_map(
-            static fn (Accommodation $accommodation): AccommodationResource => AccommodationResource::fromEntity($accommodation),
+            static fn (Accommodation $accommodation): AccommodationResource => AccommodationResource::fromEntity(
+                $accommodation,
+                $prices[$accommodation->getSlug()] ?? null,
+            ),
             $accommodations,
         );
     }
