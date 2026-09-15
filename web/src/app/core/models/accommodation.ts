@@ -9,6 +9,7 @@ export interface Accommodation {
   surface: number | null;
   amenities: string[];
   description: string;
+  priceFrom: number | null;
 }
 
 export interface JsonLdCollection<T> {

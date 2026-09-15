@@ -82,7 +82,15 @@
         </p>
 
         <footer class="card__footer">
-          <span class="card__price">Tarifs à venir</span>
+          @if (accommodation.priceFrom) {
+            <span class="card__price">
+              {{ accommodation.priceFrom / 100 }} €
+              <span class="card__price-unit">/ semaine</span>
+            </span>
+          } @else {
+            <span class="card__price card__price--unknown">Nous consulter</span>
+          }
+
           <span class="card__link">Voir les dispos</span>
         </footer>
       </div>
