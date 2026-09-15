@@ -24,6 +24,7 @@ services:
             - "../src/Entity/"
             - "../src/Enum/"
             - "../src/ApiResource/"
+            - "../src/ValueObject/"
             - "../src/Service/Booking/NewBookingRequest.php"
             - "../src/Service/Booking/BookingRefusedException.php"
             - "../src/Kernel.php"

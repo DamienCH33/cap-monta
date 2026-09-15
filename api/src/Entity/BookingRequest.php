@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Enum\BookingRequestStatus;
 use App\Repository\BookingRequestRepository;
+use App\ValueObject\DateRange;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -18,7 +19,7 @@ class BookingRequest
     /**
      * Delay left to the owner before the request expires by itself.
      */
-    public const RESPONSE_DELAY = '+48 hours';
+    public const string RESPONSE_DELAY = '+48 hours';
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -196,8 +197,13 @@ class BookingRequest
         return $this->expiresAt;
     }
 
+    public function range(): DateRange
+    {
+        return new DateRange($this->startDate, $this->endDate);
+    }
+
     public function nights(): int
     {
-        return (int) $this->startDate->diff($this->endDate)->days;
+        return $this->range()->nights();
     }
 }

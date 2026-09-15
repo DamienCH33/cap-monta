@@ -14,7 +14,7 @@ use App\Entity\PricePeriod;
  */
 final class PriceCalculator
 {
-    private const NIGHTS_PER_WEEK = 7;
+    private const int NIGHTS_PER_WEEK = 7;
 
     /**
      * @param list<PricePeriod> $periods
@@ -64,7 +64,7 @@ final class PriceCalculator
     private function periodCovering(array $periods, \DateTimeImmutable $night): ?PricePeriod
     {
         foreach ($periods as $period) {
-            if ($period->getStartDate() <= $night && $night < $period->getEndDate()) {
+            if ($period->range()->contains($night)) {
                 return $period;
             }
         }

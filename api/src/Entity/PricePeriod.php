@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\PricePeriodRepository;
+use App\ValueObject\DateRange;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -91,6 +92,11 @@ class PricePeriod
         $this->endDate = $endDate;
 
         return $this;
+    }
+
+    public function range(): DateRange
+    {
+        return new DateRange($this->startDate, $this->endDate);
     }
 
     public function getWeeklyPrice(): ?int

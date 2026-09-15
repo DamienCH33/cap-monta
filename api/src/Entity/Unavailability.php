@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Enum\UnavailabilitySource;
 use App\Repository\UnavailabilityRepository;
+use App\ValueObject\DateRange;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -41,6 +42,9 @@ class Unavailability
     #[ORM\Column(enumType: UnavailabilitySource::class)]
     private UnavailabilitySource $source;
 
+    /**
+     * UID of the imported iCal event, null outside synchronisation.
+     */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $externalUid = null;
 
@@ -83,6 +87,19 @@ class Unavailability
         return $this->endDate;
     }
 
+    public function range(): DateRange
+    {
+        return new DateRange($this->startDate, $this->endDate);
+    }
+
+    /**
+     * Nights covered, [) bounds: 14th to 15th August is 1 night.
+     */
+    public function nights(): int
+    {
+        return $this->range()->nights();
+    }
+
     public function getSource(): UnavailabilitySource
     {
         return $this->source;
@@ -98,13 +115,5 @@ class Unavailability
         $this->externalUid = $externalUid;
 
         return $this;
-    }
-
-    /**
-     * Nights covered, [) bounds: 14th to 15th August is 1 night.
-     */
-    public function nights(): int
-    {
-        return (int) $this->startDate->diff($this->endDate)->days;
     }
 }
