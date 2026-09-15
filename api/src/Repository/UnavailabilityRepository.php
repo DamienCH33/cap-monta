@@ -33,4 +33,31 @@ class UnavailabilityRepository extends ServiceEntityRepository
 
         return (int) $qb->getQuery()->getSingleScalarResult() > 0;
     }
+
+    /**
+     * Unavailabilities touching the window, including those starting before it.
+     *
+     * StayOverlap binds :arrival and :departure, hence the parameter names.
+     *
+     * @return list<Unavailability>
+     */
+    public function findForPeriod(
+        Accommodation $accommodation,
+        \DateTimeImmutable $from,
+        \DateTimeImmutable $to,
+    ): array {
+        $qb = $this->createQueryBuilder('u')
+            ->andWhere('u.accommodation = :accommodation')
+            ->orderBy('u.startDate', 'ASC')
+            ->setParameter('accommodation', $accommodation)
+            ->setParameter('arrival', $from)
+            ->setParameter('departure', $to);
+
+        StayOverlap::apply($qb, 'u');
+
+        /** @var list<Unavailability> $result */
+        $result = $qb->getQuery()->getResult();
+
+        return $result;
+    }
 }
