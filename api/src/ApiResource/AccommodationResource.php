@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\QueryParameter;
 use App\Entity\Accommodation;
 use App\State\AccommodationCollectionProvider;
 use App\State\AccommodationItemProvider;
@@ -23,6 +24,24 @@ use App\State\AccommodationItemProvider;
     operations: [
         new GetCollection(
             uriTemplate: '/accommodations',
+            parameters: [
+                'arrival' => new QueryParameter(
+                    description: "Jour d'arrivée, inclus dans le séjour, format YYYY-MM-DD",
+                    schema: ['type' => 'string', 'format' => 'date'],
+                ),
+                'departure' => new QueryParameter(
+                    description: "Jour du départ, exclu du séjour, format YYYY-MM-DD",
+                    schema: ['type' => 'string', 'format' => 'date'],
+                ),
+                'resort' => new QueryParameter(
+                    description: "Domaine : CHM Montalivet ou Euronat",
+                    schema: ['type' => 'string', 'enum' => ['chm', 'euronat']],
+                ),
+                'guests' => new QueryParameter(
+                    description: "Nombre de personnes",
+                    schema: ['type' => 'integer', 'minimum' => 1],
+                ),
+            ],
             provider: AccommodationCollectionProvider::class,
         ),
         new Get(
@@ -48,8 +67,7 @@ final class AccommodationResource
         public ?int $surface,
         public array $amenities,
         public string $description,
-    ) {
-    }
+    ) {}
 
     public static function fromEntity(Accommodation $accommodation): self
     {

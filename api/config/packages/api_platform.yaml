@@ -1,7 +1,10 @@
 api_platform:
-    title: Hello API Platform
-    version: 1.0.0
+    title: Cap Monta
+    description: Location de mobil-homes, bungalows et caravanes au CHM Montalivet et à Euronat
+    version: 0.1.0
     defaults:
         stateless: true
         cache_headers:
-            vary: ['Content-Type', 'Authorization', 'Origin']
+            vary: ["Content-Type", "Authorization", "Origin"]
+        normalization_context:
+            skip_null_values: false
