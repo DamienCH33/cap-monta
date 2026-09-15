@@ -1,5 +1,35 @@
+<form (ngSubmit)="search()">
+  <label>
+    Arrivée
+    <input type="date" name="arrival" [ngModel]="arrival()" (ngModelChange)="arrival.set($event)" />
+  </label>
+
+  <label>
+    Départ
+    <input
+      type="date"
+      name="departure"
+      [ngModel]="departure()"
+      (ngModelChange)="departure.set($event)"
+    />
+  </label>
+
+  <label>
+    Voyageurs
+    <input
+      type="number"
+      name="guests"
+      min="1"
+      [ngModel]="guests()"
+      (ngModelChange)="guests.set($event)"
+    />
+  </label>
+
+  <button type="submit">Rechercher</button>
+</form>
+
 @for (accommodation of results(); track accommodation.slug) {
   <p>{{ accommodation.slug }}</p>
 } @empty {
-  <p>Aucun logement.</p>
+  <p>Aucun logement disponible sur ces dates.</p>
 }
