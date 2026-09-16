@@ -26,8 +26,9 @@ class AccommodationRepository extends ServiceEntityRepository
     public function searchAvailable(
         \DateTimeImmutable $arrival,
         \DateTimeImmutable $departure,
-        int $guests,
+        int $guests = 1,
         ?Resort $resort = null,
+        ?string $district = null,
     ): array {
         $overlapping = $this->getEntityManager()->createQueryBuilder()
             ->select('1')
@@ -47,6 +48,11 @@ class AccommodationRepository extends ServiceEntityRepository
         if (null !== $resort) {
             $qb->andWhere('a.resort = :resort')
                 ->setParameter('resort', $resort);
+        }
+
+        if (null !== $district) {
+            $qb->andWhere('a.district = :district')
+               ->setParameter('district', $district);
         }
 
         /** @var list<Accommodation> $result */

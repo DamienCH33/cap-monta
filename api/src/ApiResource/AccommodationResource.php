@@ -41,6 +41,10 @@ use App\State\AccommodationItemProvider;
                     description: 'Nombre de personnes',
                     schema: ['type' => 'integer', 'minimum' => 1],
                 ),
+                'district' => new QueryParameter(
+                    description: 'Quartier, tel que renvoyé par /api/districts',
+                    schema: ['type' => 'string'],
+                ),
             ],
             provider: AccommodationCollectionProvider::class,
         ),

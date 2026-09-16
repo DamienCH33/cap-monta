@@ -17,6 +17,7 @@ final readonly class StayQuery
         public ?\DateTimeImmutable $departure,
         public int $guests,
         public ?Resort $resort,
+        public ?string $district,
     ) {
     }
 
@@ -27,6 +28,8 @@ final readonly class StayQuery
     {
         $arrival = self::date($filters['arrival'] ?? null, 'arrival');
         $departure = self::date($filters['departure'] ?? null, 'departure');
+        $district = $filters['district'] ?? null;
+        $district = is_string($district) && '' !== trim($district) ? trim($district) : null;
 
         if ((null === $arrival) !== (null === $departure)) {
             throw new BadRequestHttpException('Both "arrival" and "departure" are required to search on dates.');
@@ -49,7 +52,7 @@ final readonly class StayQuery
                 ?? throw new BadRequestHttpException(sprintf('Unknown resort "%s".', $filters['resort']));
         }
 
-        return new self($arrival, $departure, $guests, $resort);
+        return new self($arrival, $departure, $guests, $resort, $district);
     }
 
     public function hasDates(): bool

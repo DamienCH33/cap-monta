@@ -47,9 +47,10 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
             /** @var \DateTimeImmutable $departure */
             $departure = $query->departure;
 
-            $accommodations = $this->accommodations->searchAvailable($arrival, $departure, $query->guests, $query->resort);
+            $accommodations = $this->accommodations->searchAvailable($arrival, $departure, $query->guests, $query->resort, $query->district);
         } else {
             $criteria = null !== $query->resort ? ['resort' => $query->resort] : [];
+            $criteria = null !== $query->district ? array_merge($criteria, ['district' => $query->district]) : $criteria;
             /** @var list<Accommodation> $accommodations */
             $accommodations = $this->accommodations->findBy($criteria, ['slug' => 'ASC']);
         }
