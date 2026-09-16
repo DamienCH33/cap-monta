@@ -3,9 +3,10 @@ import { AccommodationService } from '../../core/services/accommodation';
 import { Accommodation } from '../../core/models/accommodation';
 import { FormsModule } from '@angular/forms';
 import { SearchCriteria } from '../../core/models/search-criteria';
+import { DatePipe } from '@angular/common';
 
 @Component({
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   selector: 'cm-search',
   styleUrl: './search.scss',
   templateUrl: './search.html',
