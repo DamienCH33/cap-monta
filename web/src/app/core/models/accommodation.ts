@@ -11,6 +11,7 @@ export interface Accommodation {
   description: string;
   priceFrom: number | null;
   availability: AvailabilityWeek[];
+  pricePeriods: PricePeriod[];
 }
 
 export interface JsonLdCollection<T> {
@@ -21,4 +22,22 @@ export interface JsonLdCollection<T> {
 export interface AvailabilityWeek {
   start: string;
   free: boolean;
+}
+
+export interface PricePeriod {
+  startDate: string;
+  endDate: string;
+  weeklyPrice: number | null;
+  nightlyPrice: number | null;
+  minimumNights: number;
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  mobile_home: 'Mobil-home',
+  bungalow: 'Bungalow',
+  caravan: 'Caravane',
+};
+
+export function typeLabel(type: string): string {
+  return TYPE_LABELS[type] ?? 'Logement';
 }

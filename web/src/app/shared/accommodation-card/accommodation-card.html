@@ -5,20 +5,7 @@
 
   <div class="card__body">
     <h2 class="card__title">
-      @switch (accommodation().type) {
-        @case ('mobile_home') {
-          Mobil-home
-        }
-        @case ('bungalow') {
-          Bungalow
-        }
-        @case ('caravan') {
-          Caravane
-        }
-        @default {
-          Logement
-        }
-      }
+      {{ typeLabel(accommodation().type) }}
       @if (accommodation().district) {
         {{ accommodation().district }}
       }
@@ -61,7 +48,12 @@
         <span class="card__price card__price--unknown">Nous consulter</span>
       }
 
-      <span class="card__link">Voir les dispos</span>
+      <a
+        class="card__link"
+        [routerLink]="['/logement', accommodation().slug]"
+        queryParamsHandling="preserve"
+        >Voir les dispos</a
+      >
     </footer>
   </div>
 </article>

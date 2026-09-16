@@ -1,0 +1,90 @@
+<div class="container">
+  @if (notFound()) {
+    <p class="missing">Ce logement n'existe pas ou n'est plus en ligne.</p>
+  } @else if (accommodation(); as logement) {
+    @if (cameFromSearch()) {
+      <a class="back" routerLink="/recherche" [queryParams]="searchParams()">
+        <i class="ti ti-arrow-left"></i>
+        Retour aux résultats
+      </a>
+    } @else {
+      <a class="back" routerLink="/recherche">
+        <i class="ti ti-arrow-left"></i>
+        Voir tous les logements
+      </a>
+    }
+
+    <section class="photo"></section>
+
+    <header class="head">
+      <h1 class="head__title">
+        {{ typeLabel(logement.type) }}
+        @if (logement.district) {
+          · {{ logement.district }}
+        }
+      </h1>
+
+      <p class="head__facts">
+        {{ logement.bedrooms }} {{ logement.bedrooms > 1 ? 'chambres' : 'chambre' }} ·
+        {{ logement.maxCapacity }} pers.
+        @if (logement.surface) {
+          · {{ logement.surface }} m²
+        }
+        · {{ logement.resort === 'chm' ? 'CHM Montalivet' : 'Euronat' }}
+      </p>
+    </header>
+
+    @if (logement.amenities.length) {
+      <ul class="amenities">
+        @for (amenity of logement.amenities; track amenity) {
+          <li class="amenities__item">{{ amenity }}</li>
+        }
+      </ul>
+    }
+
+    <section class="block">
+      <h2 class="block__title">Tarifs</h2>
+
+      @if (logement.pricePeriods.length) {
+        <table class="rates">
+          <tbody>
+            @for (period of logement.pricePeriods; track period.startDate) {
+              <tr class="rates__row">
+                <td class="rates__period">
+                  {{ period.startDate | date: 'd MMM yyyy' }} –
+                  {{ period.endDate | date: 'd MMM yyyy' }}
+                </td>
+                <td class="rates__price">
+                  @if (period.weeklyPrice) {
+                    {{ period.weeklyPrice / 100 }} € <span class="rates__unit">/ sem.</span>
+                  } @else {
+                    —
+                  }
+                </td>
+                <td class="rates__price">
+                  @if (period.nightlyPrice) {
+                    {{ period.nightlyPrice / 100 }} € <span class="rates__unit">/ nuit</span>
+                  } @else {
+                    —
+                  }
+                </td>
+                <td class="rates__min">min. {{ period.minimumNights }} nuits</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="block__empty">
+          Le propriétaire n'a pas publié ses tarifs. Envoyez-lui une demande, il vous répondra.
+        </p>
+      }
+    </section>
+
+    <section class="block">
+      <h2 class="block__title">Le logement</h2>
+      <p class="description">{{ logement.description }}</p>
+    </section>
+  } @else {
+    <p class="loading">Chargement…</p>
+  }
+</div>
