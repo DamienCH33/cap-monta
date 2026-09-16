@@ -159,3 +159,21 @@
     opacity: 0.6;
   }
 }
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+  }
+
+  .layout__aside {
+    position: sticky;
+    top: 16px;
+  }
+}

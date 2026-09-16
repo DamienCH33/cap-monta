@@ -7,10 +7,11 @@ import { Accommodation, typeLabel } from '../../core/models/accommodation';
 import { AccommodationService } from '../../core/services/accommodation';
 import { Availability, BusyPeriod } from '../../core/models/availability';
 import { Calendar } from '../../shared/calendar/calendar';
+import { BookingForm } from './booking-form/booking-form';
 
 @Component({
   selector: 'cm-accommodation',
-  imports: [DatePipe, RouterLink, Calendar, DecimalPipe],
+  imports: [DatePipe, DecimalPipe, RouterLink, Calendar, BookingForm],
   templateUrl: './accommodation.html',
   styleUrl: './accommodation.scss',
 })
@@ -22,6 +23,9 @@ export class AccommodationPage implements OnInit {
   readonly notFound = signal(false);
   readonly searchParams = signal<Params>({});
   readonly busy = signal<BusyPeriod[]>([]);
+  readonly initialArrival = computed(() => this.searchParams()['arrivee'] ?? '');
+  readonly initialDeparture = computed(() => this.searchParams()['depart'] ?? '');
+  readonly initialGuests = computed(() => Number(this.searchParams()['voyageurs'] ?? 2) || 2);
 
   readonly typeLabel = typeLabel;
 

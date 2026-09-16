@@ -43,55 +43,69 @@
         }
       </ul>
     }
-    <section class="block">
-      <h2 class="block__title">Disponibilités</h2>
-      <cm-calendar [busy]="busy()" />
-    </section>
 
-    <section class="block">
-      <h2 class="block__title">Tarifs</h2>
+    <div class="layout">
+      <div class="layout__main">
+        <section class="block">
+          <h2 class="block__title">Disponibilités</h2>
+          <cm-calendar [busy]="busy()" />
+        </section>
 
-      @if (logement.pricePeriods.length) {
-        <table class="rates">
-          <tbody>
-            @for (period of logement.pricePeriods; track period.startDate) {
-              <tr class="rates__row">
-                <td class="rates__period">
-                  {{ period.startDate | date: 'd MMM yyyy' }} –
-                  {{ period.endDate | date: 'd MMM yyyy' }}
-                </td>
-                <td class="rates__price">
-                  @if (period.weeklyPrice) {
-                    {{ period.weeklyPrice! / 100 | number: '1.0-0' }} €
-                    <span class="rates__unit">/ sem.</span>
-                  } @else {
-                    —
-                  }
-                </td>
-                <td class="rates__price">
-                  @if (period.nightlyPrice) {
-                    {{ period.nightlyPrice / 100 | number: '1.0-0' }} €
-                    <span class="rates__unit">/ nuit</span>
-                  } @else {
-                    —
-                  }
-                </td>
-                <td class="rates__min">min. {{ period.minimumNights }} nuits</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      } @else {
-        <p class="block__empty">
-          Le propriétaire n'a pas publié ses tarifs. Envoyez-lui une demande, il vous répondra.
-        </p>
-      }
-    </section>
+        <section class="block">
+          <h2 class="block__title">Tarifs</h2>
 
-    <section class="block">
-      <h2 class="block__title">Le logement</h2>
-      <p class="description">{{ logement.description }}</p>
-    </section>
+          @if (logement.pricePeriods.length) {
+            <table class="rates">
+              <tbody>
+                @for (period of logement.pricePeriods; track period.startDate) {
+                  <tr class="rates__row">
+                    <td class="rates__period">
+                      {{ period.startDate | date: 'd MMM yyyy' }} –
+                      {{ period.endDate | date: 'd MMM yyyy' }}
+                    </td>
+                    <td class="rates__price">
+                      @if (period.weeklyPrice) {
+                        {{ period.weeklyPrice / 100 | number: '1.0-0' }} €
+                        <span class="rates__unit">/ sem.</span>
+                      } @else {
+                        —
+                      }
+                    </td>
+                    <td class="rates__price">
+                      @if (period.nightlyPrice) {
+                        {{ period.nightlyPrice / 100 | number: '1.0-0' }} €
+                        <span class="rates__unit">/ nuit</span>
+                      } @else {
+                        —
+                      }
+                    </td>
+                    <td class="rates__min">min. {{ period.minimumNights }} nuits</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="block__empty">
+              Le propriétaire n'a pas publié ses tarifs. Envoyez-lui une demande, il vous répondra.
+            </p>
+          }
+        </section>
+
+        <section class="block">
+          <h2 class="block__title">Le logement</h2>
+          <p class="description">{{ logement.description }}</p>
+        </section>
+      </div>
+
+      <aside class="layout__aside">
+        <cm-booking-form
+          [slug]="logement.slug"
+          [initialArrival]="initialArrival()"
+          [initialDeparture]="initialDeparture()"
+          [initialGuests]="initialGuests()"
+        />
+      </aside>
+    </div>
   } @else {
     <p class="loading">Chargement…</p>
   }

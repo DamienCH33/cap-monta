@@ -1,0 +1,174 @@
+@if (sent(); as request) {
+  <div class="box box--sent">
+    <h2 class="box__title">Demande envoyée</h2>
+
+    <p class="box__text">
+      Le propriétaire a 48 h pour répondre. Vous recevrez un email à {{ request.guestEmail }}.
+    </p>
+
+    @if (request.estimatedPrice) {
+      <p class="box__total">
+        Montant estimé
+        <strong>{{ request.estimatedPrice / 100 | number: '1.0-0' }} €</strong>
+      </p>
+    }
+
+    <p class="box__note">Aucun paiement n'a été demandé, et rien n'est encore réservé.</p>
+  </div>
+} @else {
+  <form class="box" (ngSubmit)="submit()">
+    <h2 class="box__title">Demander ces dates</h2>
+
+    <div class="box__grid">
+      <label class="field">
+        <span class="field__label">Arrivée</span>
+        <input
+          type="date"
+          name="arrival"
+          [ngModel]="arrival()"
+          (ngModelChange)="arrival.set($event); clearViolation('arrival'); refreshQuote()"
+        />
+        @if (violations()['arrival']; as violation) {
+          <span class="field__error">{{ violation }}</span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="field__label">Départ</span>
+        <input
+          type="date"
+          name="departure"
+          [ngModel]="departure()"
+          (ngModelChange)="departure.set($event); clearViolation('departure'); refreshQuote()"
+        />
+        @if (violations()['departure']; as violation) {
+          <span class="field__error">{{ violation }}</span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="field__label">Adultes</span>
+        <input
+          type="number"
+          name="adults"
+          min="1"
+          [ngModel]="adults()"
+          (ngModelChange)="adults.set($event); clearViolation('adults'); refreshQuote()"
+        />
+        @if (violations()['adults']; as violation) {
+          <span class="field__error">{{ violation }}</span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="field__label">Enfants</span>
+        <input
+          type="number"
+          name="children"
+          min="0"
+          [ngModel]="children()"
+          (ngModelChange)="children.set($event); clearViolation('children'); refreshQuote()"
+        />
+        @if (violations()['children']; as violation) {
+          <span class="field__error">{{ violation }}</span>
+        }
+      </label>
+    </div>
+
+    @if (quote(); as currentQuote) {
+      @if (currentQuote.available) {
+        <div class="summary">
+          <div class="summary__line">
+            <span>{{ currentQuote.nights }} {{ currentQuote.nights > 1 ? 'nuits' : 'nuit' }}</span>
+            <strong>
+              @if (currentQuote.total) {
+                {{ currentQuote.total / 100 | number: '1.0-0' }} €
+              } @else {
+                à convenir
+              }
+            </strong>
+          </div>
+          <p class="summary__note">
+            Redevances du domaine et taxe de séjour à régler sur place, en plus.
+          </p>
+        </div>
+      } @else {
+        <p class="refusal">{{ refusalLabel(currentQuote) }}</p>
+      }
+    }
+
+    <div class="box__grid box__grid--wide">
+      <label class="field">
+        <span class="field__label">Nom et prénom</span>
+        <input
+          type="text"
+          name="guestName"
+          required
+          autocomplete="name"
+          [ngModel]="guestName()"
+          (ngModelChange)="guestName.set($event); clearViolation('guestName')"
+        />
+        @if (violations()['guestName']; as violation) {
+          <span class="field__error">{{ violation }}</span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="field__label">Email</span>
+        <input
+          type="email"
+          name="guestEmail"
+          required
+          autocomplete="email"
+          [ngModel]="guestEmail()"
+          (ngModelChange)="guestEmail.set($event); clearViolation('guestEmail')"
+        />
+        @if (violations()['guestEmail']; as violation) {
+          <span class="field__error">{{ violation }}</span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="field__label">Téléphone</span>
+        <input
+          type="tel"
+          name="guestPhone"
+          inputmode="tel"
+          autocomplete="tel"
+          placeholder="06 12 34 56 78"
+          [ngModel]="guestPhone()"
+          (ngModelChange)="guestPhone.set($event); clearViolation('guestPhone')"
+        />
+        @if (violations()['guestPhone']; as violation) {
+          <span class="field__error">{{ violation }}</span>
+        }
+      </label>
+
+      <label class="field">
+        <span class="field__label">Message</span>
+        <textarea
+          name="message"
+          rows="3"
+          [ngModel]="message()"
+          (ngModelChange)="message.set($event); clearViolation('message')"
+        ></textarea>
+        @if (violations()['message']; as violation) {
+          <span class="field__error">{{ violation }}</span>
+        }
+      </label>
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button class="box__submit" type="submit" [disabled]="sending() || !quote()?.available">
+      {{ sending() ? 'Envoi…' : 'Envoyer la demande' }}
+    </button>
+
+    <p class="box__note">
+      Sans engagement et sans paiement. Vos coordonnées ne sont transmises au propriétaire qu'en cas
+      d'acceptation.
+    </p>
+  </form>
+}
