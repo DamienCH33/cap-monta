@@ -1,0 +1,22 @@
+framework:
+    rate_limiter:
+        # Une demande de réservation est un acte rare : cinq en un quart d'heure
+        # depuis la même adresse, c'est déjà beaucoup.
+        booking_requests:
+            policy: "sliding_window"
+            limit: 5
+            interval: "15 minutes"
+
+        # Un devis est consulté en tapotant des dates : on est plus large,
+        # mais on plafonne pour qu'un script ne martèle pas la base.
+        quotes:
+            policy: "sliding_window"
+            limit: 60
+            interval: "1 minute"
+when@test:
+    framework:
+        rate_limiter:
+            booking_requests:
+                limit: 1000
+            quotes:
+                limit: 1000

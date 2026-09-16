@@ -9,7 +9,10 @@ use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\QuoteResource;
 use App\Repository\AccommodationRepository;
 use App\Service\Booking\QuoteCalculator;
+use App\Service\Http\FloodGuard;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 /**
  * GET /api/accommodations/{slug}/quote.
@@ -21,6 +24,9 @@ final readonly class QuoteProvider implements ProviderInterface
     public function __construct(
         private AccommodationRepository $accommodations,
         private QuoteCalculator $quotes,
+        private FloodGuard $floodGuard,
+        #[Target('quotes')]
+        private RateLimiterFactoryInterface $quotesLimiter,
     ) {
     }
 
@@ -30,6 +36,8 @@ final readonly class QuoteProvider implements ProviderInterface
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?QuoteResource
     {
+        $this->floodGuard->check($this->quotesLimiter);
+
         $slug = $uriVariables['slug'] ?? null;
 
         if (!is_string($slug)) {

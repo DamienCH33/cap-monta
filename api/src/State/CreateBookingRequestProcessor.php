@@ -10,7 +10,10 @@ use App\ApiResource\BookingRequestResource;
 use App\Repository\AccommodationRepository;
 use App\Service\Booking\BookingRequestCreator;
 use App\Service\Booking\NewBookingRequest;
+use App\Service\Http\FloodGuard;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 /**
  * POST /api/booking-requests.
@@ -26,17 +29,21 @@ final readonly class CreateBookingRequestProcessor implements ProcessorInterface
     public function __construct(
         private AccommodationRepository $accommodations,
         private BookingRequestCreator $creator,
+        private FloodGuard $floodGuard,
+        #[Target('booking_requests')]
+        private RateLimiterFactoryInterface $bookingRequestsLimiter,
     ) {
     }
 
     /**
      * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $context
-     *
-     * @implements ProcessorInterface<mixed, BookingRequestResource>
      */
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): BookingRequestResource
     {
+        // Cinq demandes par quart d'heure et par adresse. Au-delà, c'est un script.
+        $this->floodGuard->check($this->bookingRequestsLimiter);
+
         if (!$data instanceof BookingRequestResource) {
             throw new \LogicException(sprintf('Expected a %s.', BookingRequestResource::class));
         }
