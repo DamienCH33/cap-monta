@@ -65,6 +65,10 @@ final class BookingRequestResource
     public string $guestEmail = '';
 
     #[Assert\Length(max: 30)]
+    #[Assert\Regex(
+        pattern: '/^(?:\+33|0)\s*[1-9](?:[\s.\-]*\d{2}){4}$/',
+        message: 'Numéro de téléphone français attendu, par exemple 06 12 34 56 78.',
+    )]
     public ?string $guestPhone = null;
 
     #[Assert\Length(max: 2000)]
