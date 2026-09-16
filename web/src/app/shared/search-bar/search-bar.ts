@@ -26,6 +26,7 @@ export class SearchBar {
         depart: this.departure() || null,
         voyageurs: this.guests() || null,
       },
+      queryParamsHandling: 'merge',
     });
   }
 }

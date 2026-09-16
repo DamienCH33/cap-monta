@@ -47,3 +47,28 @@ cm-search-bar {
   display: block;
   margin: 16px 0 12px;
 }
+
+.filters {
+  margin: 12px 0 0;
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--blue-dark);
+    background: var(--blue-soft);
+    border-radius: 20px;
+
+    button {
+      padding: 0;
+      font-size: 14px;
+      line-height: 1;
+      color: inherit;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+  }
+}

@@ -3,4 +3,5 @@ export interface SearchCriteria {
   departure?: string;
   guests?: number;
   resort?: string;
+  district?: string;
 }

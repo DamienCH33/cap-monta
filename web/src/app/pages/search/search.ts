@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { map, switchMap, tap } from 'rxjs';
 
 import { Accommodation } from '../../core/models/accommodation';
@@ -17,6 +17,7 @@ import { SearchBar } from '../../shared/search-bar/search-bar';
 export class Search implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly accommodations = inject(AccommodationService);
+  private readonly router = inject(Router);
 
   readonly criteria = signal<SearchCriteria>({});
   readonly results = signal<Accommodation[]>([]);
@@ -28,10 +29,18 @@ export class Search implements OnInit {
           arrival: params.get('arrivee') ?? undefined,
           departure: params.get('depart') ?? undefined,
           guests: Number(params.get('voyageurs')) || undefined,
+          district: params.get('quartier') ?? undefined,
         })),
         tap((criteria) => this.criteria.set(criteria)),
         switchMap((criteria) => this.accommodations.search(criteria)),
       )
       .subscribe((found) => this.results.set(found));
+  }
+
+  clearDistrict(): void {
+    this.router.navigate(['/recherche'], {
+      queryParams: { quartier: null },
+      queryParamsHandling: 'merge',
+    });
   }
 }

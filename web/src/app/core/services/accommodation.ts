@@ -26,6 +26,9 @@ export class AccommodationService {
     if (criteria.resort) {
       params = params.set('resort', criteria.resort);
     }
+    if (criteria.district) {
+      params = params.set('district', criteria.district);
+    }
 
     return this.http
       .get<JsonLdCollection<Accommodation>>(`${this.api}/accommodations`, {

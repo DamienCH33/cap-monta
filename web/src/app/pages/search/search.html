@@ -5,6 +5,15 @@
     [initialGuests]="criteria().guests ?? 2"
   />
 
+  @if (criteria().district) {
+    <div class="filters">
+      <span class="filters__chip">
+        {{ criteria().district }}
+        <button type="button" (click)="clearDistrict()" aria-label="Retirer ce filtre">×</button>
+      </span>
+    </div>
+  }
+
   <p class="results__count">
     {{ results().length }} {{ results().length > 1 ? 'logements' : 'logement' }}
   </p>
