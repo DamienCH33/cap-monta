@@ -1,15 +1,20 @@
+import { provideHttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { Accommodation } from './accommodation';
 
-describe('Accommodation', () => {
-  let service: Accommodation;
+import { AccommodationService } from './accommodation';
+
+describe('AccommodationService', () => {
+  let service: AccommodationService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Accommodation);
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient()],
+    });
+
+    service = TestBed.inject(AccommodationService);
   });
 
-  it('should be created', () => {
+  it('est instanciable', () => {
     expect(service).toBeTruthy();
   });
 });
