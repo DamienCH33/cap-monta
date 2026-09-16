@@ -14,7 +14,7 @@ use App\Entity\PricePeriod;
  */
 final class PriceCalculator
 {
-    private const int NIGHTS_PER_WEEK = 7;
+    private const NIGHTS_PER_WEEK = 7;
 
     /**
      * @param list<PricePeriod> $periods

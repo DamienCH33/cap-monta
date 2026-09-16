@@ -19,7 +19,7 @@ class BookingRequest
     /**
      * Delay left to the owner before the request expires by itself.
      */
-    public const string RESPONSE_DELAY = '+48 hours';
+    public const RESPONSE_DELAY = '+48 hours';
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
