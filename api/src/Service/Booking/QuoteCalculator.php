@@ -1,0 +1,93 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Service\Booking;
+
+use App\Entity\Accommodation;
+use App\Entity\PricePeriod;
+use App\Enum\BookingRefusalReason;
+use App\Repository\PricePeriodRepository;
+use App\Repository\UnavailabilityRepository;
+use App\Service\Pricing\PriceCalculator;
+use App\ValueObject\DateRange;
+
+/**
+ * La seule définition des règles d'un séjour : durée, capacité, disponibilité,
+ * minimum de nuits, prix. Le devis les décrit, la création les impose.
+ */
+final class QuoteCalculator
+{
+    public function __construct(
+        private readonly UnavailabilityRepository $unavailabilities,
+        private readonly PricePeriodRepository $pricePeriods,
+        private readonly PriceCalculator $priceCalculator,
+    ) {
+    }
+
+    public function quote(
+        Accommodation $accommodation,
+        \DateTimeImmutable $arrival,
+        \DateTimeImmutable $departure,
+        int $guests,
+    ): Quote {
+        $nights = (new DateRange($arrival, $departure))->nights();
+        $maxCapacity = $accommodation->getMaxCapacity();
+
+        $periods = $this->pricePeriods->findCoveringStay($accommodation, $arrival, $departure);
+        $minimumNights = $this->minimumNights($periods);
+
+        $refusal = match (true) {
+            $nights < 1 => BookingRefusalReason::StayTooShort,
+            $guests > $maxCapacity => BookingRefusalReason::TooManyGuests,
+            $this->unavailabilities->hasOverlap($accommodation, $arrival, $departure) => BookingRefusalReason::Unavailable,
+            $nights < $minimumNights => BookingRefusalReason::StayTooShort,
+            default => null,
+        };
+
+        $total = $nights >= 1
+            ? $this->priceCalculator->calculate($periods, $arrival, $departure)
+            : null;
+
+        return new Quote($nights, $guests, $maxCapacity, $minimumNights, $total, $refusal);
+    }
+
+    /**
+     * Le même devis, mais qui refuse au lieu de décrire.
+     *
+     * @throws BookingRefusedException
+     */
+    public function assert(
+        Accommodation $accommodation,
+        \DateTimeImmutable $arrival,
+        \DateTimeImmutable $departure,
+        int $guests,
+    ): Quote {
+        $quote = $this->quote($accommodation, $arrival, $departure, $guests);
+
+        if (null !== $quote->refusal) {
+            throw match ($quote->refusal) {
+                BookingRefusalReason::Unavailable => BookingRefusedException::unavailable(),
+                BookingRefusalReason::TooManyGuests => BookingRefusedException::tooManyGuests($quote->guests, $quote->maxCapacity),
+                BookingRefusalReason::StayTooShort => BookingRefusedException::stayTooShort($quote->nights, $quote->minimumNights),
+            };
+        }
+
+        return $quote;
+    }
+
+    /**
+     * Le minimum le plus strict parmi les périodes traversées.
+     *
+     * @param list<PricePeriod> $periods
+     */
+    private function minimumNights(array $periods): int
+    {
+        $minimums = array_map(
+            static fn (PricePeriod $period): int => $period->getMinimumNights(),
+            $periods,
+        );
+
+        return [] === $minimums ? 1 : max($minimums);
+    }
+}

@@ -28,6 +28,7 @@ services:
             - "../src/Service/Booking/NewBookingRequest.php"
             - "../src/Service/Booking/BookingRefusedException.php"
             - "../src/Kernel.php"
+            - "../src/Service/Booking/Quote.php"
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
