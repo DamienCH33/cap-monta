@@ -53,7 +53,8 @@ use App\State\AccommodationItemProvider;
 final class AccommodationResource
 {
     /**
-     * @param list<string> $amenities
+     * @param list<string>                                       $amenities
+     * @param list<array{start: \DateTimeImmutable, free: bool}> $availability
      */
     public function __construct(
         #[ApiProperty(identifier: true)]
@@ -68,10 +69,14 @@ final class AccommodationResource
         public array $amenities,
         public string $description,
         public ?int $priceFrom,
+        public array $availability = [],
     ) {
     }
 
-    public static function fromEntity(Accommodation $accommodation, ?int $priceFrom = null): self
+    /**
+     * @param list<array{start: \DateTimeImmutable, free: bool}> $availability
+     */
+    public static function fromEntity(Accommodation $accommodation, ?int $priceFrom = null, array $availability = []): self
     {
         return new self(
             $accommodation->getSlug(),
@@ -85,6 +90,7 @@ final class AccommodationResource
             $accommodation->getAmenities(),
             $accommodation->getDescription(),
             $priceFrom,
+            $availability,
         );
     }
 }
