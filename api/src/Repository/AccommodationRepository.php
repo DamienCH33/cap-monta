@@ -86,4 +86,32 @@ class AccommodationRepository extends ServiceEntityRepository
 
         return $prices;
     }
+
+    /**
+     * @return list<array{district: string, resort: Resort, accommodationCount: int}>
+     */
+    public function countByDistrict(): array
+    {
+        /** @var list<array{district: string, resort: Resort|string, accommodationCount: int|string}> $rows */
+        $rows = $this->createQueryBuilder('a')
+            ->select('a.district AS district', 'a.resort AS resort', 'COUNT(a.id) AS accommodationCount')
+            ->andWhere('a.district IS NOT NULL')
+            ->groupBy('a.district')
+            ->addGroupBy('a.resort')
+            ->orderBy('accommodationCount', 'DESC')
+            ->addOrderBy('district', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return array_map(
+            static fn (array $row): array => [
+                'district' => $row['district'],
+                'resort' => $row['resort'] instanceof Resort
+                    ? $row['resort']
+                    : Resort::from($row['resort']),
+                'accommodationCount' => (int) $row['accommodationCount'],
+            ],
+            $rows,
+        );
+    }
 }

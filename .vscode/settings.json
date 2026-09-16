@@ -14,5 +14,9 @@
     "**/var/**": true,
     "**/node_modules/**": true,
     "**/.angular/**": true
+  },
+  "editor.formatOnSave": true,
+  "[php]": {
+    "editor.defaultFormatter": "junstyle.php-cs-fixer"
   }
 }

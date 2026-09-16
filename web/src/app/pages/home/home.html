@@ -20,6 +20,28 @@
   </div>
 
   <section class="section">
+    <h2 class="section__title">Chercher par quartier</h2>
+    <p class="section__lead">Chacun a son ambiance, sa distance à la plage et ses tarifs.</p>
+
+    <div class="tiles">
+      @for (district of districts(); track district.name) {
+        <a
+          class="tile"
+          [class.tile--forest]="district.resort === 'euronat'"
+          routerLink="/recherche"
+          [queryParams]="queryParamsFor(district)"
+        >
+          <span class="tile__name">{{ district.name }}</span>
+          <span class="tile__count">
+            {{ district.accommodationCount }}
+            {{ district.accommodationCount > 1 ? 'logements' : 'logement' }}
+          </span>
+        </a>
+      }
+    </div>
+  </section>
+
+  <section class="section">
     <div class="section__head">
       <h2 class="section__title">Encore libre cet été</h2>
       <a class="section__link" routerLink="/recherche">Tout voir</a>
