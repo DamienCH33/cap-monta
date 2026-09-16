@@ -14,7 +14,9 @@
       </a>
     }
 
-    <section class="photo"></section>
+    <section class="photo">
+      <i class="ti ti-photo"></i>
+    </section>
 
     <header class="head">
       <h1 class="head__title">
@@ -41,6 +43,10 @@
         }
       </ul>
     }
+    <section class="block">
+      <h2 class="block__title">Disponibilités</h2>
+      <cm-calendar [busy]="busy()" />
+    </section>
 
     <section class="block">
       <h2 class="block__title">Tarifs</h2>
@@ -56,14 +62,16 @@
                 </td>
                 <td class="rates__price">
                   @if (period.weeklyPrice) {
-                    {{ period.weeklyPrice / 100 }} € <span class="rates__unit">/ sem.</span>
+                    {{ period.weeklyPrice! / 100 | number: '1.0-0' }} €
+                    <span class="rates__unit">/ sem.</span>
                   } @else {
                     —
                   }
                 </td>
                 <td class="rates__price">
                   @if (period.nightlyPrice) {
-                    {{ period.nightlyPrice / 100 }} € <span class="rates__unit">/ nuit</span>
+                    {{ period.nightlyPrice / 100 | number: '1.0-0' }} €
+                    <span class="rates__unit">/ nuit</span>
                   } @else {
                     —
                   }

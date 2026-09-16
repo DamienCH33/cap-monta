@@ -145,3 +145,17 @@
     }
   }
 }
+.photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  color: var(--blue);
+  background: var(--tile-sea);
+  border-radius: var(--radius-lg);
+
+  .ti {
+    font-size: 28px;
+    opacity: 0.6;
+  }
+}

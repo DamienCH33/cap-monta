@@ -5,6 +5,7 @@ import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Accommodation, JsonLdCollection } from '../models/accommodation';
 import { SearchCriteria } from '../models/search-criteria';
+import { Availability } from '../models/availability';
 
 @Injectable({ providedIn: 'root' })
 export class AccommodationService {
@@ -40,6 +41,12 @@ export class AccommodationService {
 
   getBySlug(slug: string): Observable<Accommodation> {
     return this.http.get<Accommodation>(`${this.api}/accommodations/${slug}`, {
+      headers: { Accept: 'application/ld+json' },
+    });
+  }
+
+  getAvailability(slug: string): Observable<Availability> {
+    return this.http.get<Availability>(`${this.api}/accommodations/${slug}/availability`, {
       headers: { Accept: 'application/ld+json' },
     });
   }

@@ -64,8 +64,10 @@ final class AppFixtures extends Fixture
                     'accommodation' => $accommodation,
                     'startDate' => new \DateTimeImmutable(sprintf('%d-%s', $season, $start)),
                     'endDate' => new \DateTimeImmutable(sprintf('%d-%s', $season, $end)),
-                    'weeklyPrice' => $weekly,
-                    'nightlyPrice' => 7 === $minimumNights ? null : intdiv($weekly, 5),
+                    'weeklyPrice' => (int) round($weekly / 100) * 100,
+                    'nightlyPrice' => 7 === $minimumNights
+                        ? null
+                        : (int) round($weekly / 5 / 100) * 100,
                     'minimumNights' => $minimumNights,
                 ]);
             }

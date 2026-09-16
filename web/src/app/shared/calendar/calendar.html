@@ -1,0 +1,55 @@
+<div class="calendar">
+  <div class="calendar__nav">
+    <button
+      class="calendar__arrow"
+      type="button"
+      (click)="previous()"
+      [disabled]="!canGoBack()"
+      aria-label="Mois précédent"
+    >
+      <i class="ti ti-chevron-left"></i>
+    </button>
+
+    <button
+      class="calendar__arrow"
+      type="button"
+      (click)="next()"
+      [disabled]="!canGoForward()"
+      aria-label="Mois suivant"
+    >
+      <i class="ti ti-chevron-right"></i>
+    </button>
+  </div>
+
+  <div class="calendar__months">
+    @for (month of months(); track month.key) {
+      <section class="month">
+        <h3 class="month__label">{{ month.first | date: 'MMMM yyyy' }}</h3>
+
+        <div class="month__grid">
+          @for (weekday of weekdays; track $index) {
+            <span class="month__weekday">{{ weekday }}</span>
+          }
+
+          @for (blank of month.blanks; track $index) {
+            <span></span>
+          }
+
+          @for (day of month.days; track day.key) {
+            <span
+              class="month__day"
+              [class.month__day--busy]="day.busy"
+              [class.month__day--past]="day.past"
+              >{{ day.label }}</span
+            >
+          }
+        </div>
+      </section>
+    }
+  </div>
+
+  <div class="calendar__legend">
+    <span><i class="calendar__swatch"></i> libre</span>
+    <span><i class="calendar__swatch calendar__swatch--busy"></i> réservé</span>
+  </div>
+</div>
