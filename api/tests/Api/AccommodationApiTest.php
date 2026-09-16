@@ -9,11 +9,11 @@ use App\Entity\Unavailability;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
+use App\Tests\ApiTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-final class AccommodationApiTest extends WebTestCase
+final class AccommodationApiTest extends ApiTestCase
 {
     private KernelBrowser $client;
     private EntityManagerInterface $em;

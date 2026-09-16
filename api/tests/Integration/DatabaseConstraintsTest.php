@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration;
 
+use App\Tests\DatabaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-final class DatabaseConstraintsTest extends KernelTestCase
+final class DatabaseConstraintsTest extends DatabaseTestCase
 {
     /**
      * The exclusion constraints cannot be expressed in Doctrine mapping, so every
@@ -15,7 +15,7 @@ final class DatabaseConstraintsTest extends KernelTestCase
      */
     public function testExclusionConstraintsAreStillInPlace(): void
     {
-        self::bootKernel();
+        parent::setUp();
         $connection = self::getContainer()->get(EntityManagerInterface::class)->getConnection();
 
         $constraints = $connection->fetchFirstColumn(

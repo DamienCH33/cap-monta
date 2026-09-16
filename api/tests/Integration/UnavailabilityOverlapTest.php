@@ -9,16 +9,16 @@ use App\Entity\Unavailability;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
+use App\Tests\DatabaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-final class UnavailabilityOverlapTest extends KernelTestCase
+final class UnavailabilityOverlapTest extends DatabaseTestCase
 {
     private EntityManagerInterface $em;
 
     protected function setUp(): void
     {
-        self::bootKernel();
+        parent::setUp();
         $this->em = self::getContainer()->get(EntityManagerInterface::class);
     }
 

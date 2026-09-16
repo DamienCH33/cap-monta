@@ -15,17 +15,17 @@ use App\Enum\UnavailabilitySource;
 use App\Service\Booking\BookingRefusedException;
 use App\Service\Booking\BookingRequestCreator;
 use App\Service\Booking\NewBookingRequest;
+use App\Tests\DatabaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-final class BookingRequestCreatorTest extends KernelTestCase
+final class BookingRequestCreatorTest extends DatabaseTestCase
 {
     private EntityManagerInterface $em;
     private BookingRequestCreator $creator;
 
     protected function setUp(): void
     {
-        self::bootKernel();
+        parent::setUp();
         $this->em = self::getContainer()->get(EntityManagerInterface::class);
         $this->creator = self::getContainer()->get(BookingRequestCreator::class);
     }

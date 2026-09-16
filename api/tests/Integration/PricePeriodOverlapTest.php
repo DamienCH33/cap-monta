@@ -8,17 +8,17 @@ use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
+use App\Tests\DatabaseTestCase;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-final class PricePeriodOverlapTest extends KernelTestCase
+final class PricePeriodOverlapTest extends DatabaseTestCase
 {
     private EntityManagerInterface $em;
 
     protected function setUp(): void
     {
-        self::bootKernel();
+        parent::setUp();
         $this->em = self::getContainer()->get(EntityManagerInterface::class);
     }
 

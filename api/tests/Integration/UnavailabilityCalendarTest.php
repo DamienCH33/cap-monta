@@ -10,17 +10,17 @@ use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
 use App\Repository\UnavailabilityRepository;
+use App\Tests\DatabaseTestCase;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-final class UnavailabilityCalendarTest extends KernelTestCase
+final class UnavailabilityCalendarTest extends DatabaseTestCase
 {
     private EntityManagerInterface $em;
     private UnavailabilityRepository $unavailabilities;
 
     protected function setUp(): void
     {
-        self::bootKernel();
+        parent::setUp();
         $this->em = self::getContainer()->get(EntityManagerInterface::class);
         $this->unavailabilities = self::getContainer()->get(UnavailabilityRepository::class);
     }
