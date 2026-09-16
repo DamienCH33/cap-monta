@@ -42,28 +42,33 @@ final class AppFixtures extends Fixture
     }
 
     /**
-     * Quatre périodes qui se suivent, du printemps à la fin septembre.
+     * Quatre périodes par saison, sur la saison en cours et la suivante.
      */
     private function publishRates(Accommodation $accommodation, int $lowSeasonWeekly): void
     {
-        $year = (int) date('Y');
+        $currentYear = (int) date('Y');
 
-        $periods = [
-            ['04-01', '06-28', $lowSeasonWeekly, 3],
-            ['06-28', '07-12', (int) round($lowSeasonWeekly * 1.6), 7],
-            ['07-12', '08-24', (int) round($lowSeasonWeekly * 2.0), 7],
-            ['08-24', '10-01', (int) round($lowSeasonWeekly * 1.2), 3],
-        ];
+        foreach ([$currentYear, $currentYear + 1] as $index => $season) {
+            // Les tarifs de la saison suivante sont revalorisés de 3 %.
+            $base = (int) round($lowSeasonWeekly * (1 + 0.03 * $index));
 
-        foreach ($periods as [$start, $end, $weekly, $minimumNights]) {
-            PricePeriodFactory::createOne([
-                'accommodation' => $accommodation,
-                'startDate' => new \DateTimeImmutable(sprintf('%d-%s', $year, $start)),
-                'endDate' => new \DateTimeImmutable(sprintf('%d-%s', $year, $end)),
-                'weeklyPrice' => $weekly,
-                'nightlyPrice' => 7 === $minimumNights ? null : intdiv($weekly, 5),
-                'minimumNights' => $minimumNights,
-            ]);
+            $periods = [
+                ['04-01', '06-28', $base, 3],
+                ['06-28', '07-12', (int) round($base * 1.6), 7],
+                ['07-12', '08-24', (int) round($base * 2.0), 7],
+                ['08-24', '10-01', (int) round($base * 1.2), 3],
+            ];
+
+            foreach ($periods as [$start, $end, $weekly, $minimumNights]) {
+                PricePeriodFactory::createOne([
+                    'accommodation' => $accommodation,
+                    'startDate' => new \DateTimeImmutable(sprintf('%d-%s', $season, $start)),
+                    'endDate' => new \DateTimeImmutable(sprintf('%d-%s', $season, $end)),
+                    'weeklyPrice' => $weekly,
+                    'nightlyPrice' => 7 === $minimumNights ? null : intdiv($weekly, 5),
+                    'minimumNights' => $minimumNights,
+                ]);
+            }
         }
     }
 

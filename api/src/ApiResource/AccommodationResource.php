@@ -59,6 +59,7 @@ final class AccommodationResource
     /**
      * @param list<string>                                       $amenities
      * @param list<array{start: \DateTimeImmutable, free: bool}> $availability
+     * @param list<PricePeriodResource>                          $pricePeriods
      */
     public function __construct(
         #[ApiProperty(identifier: true)]
@@ -74,6 +75,7 @@ final class AccommodationResource
         public string $description,
         public ?int $priceFrom,
         public array $availability = [],
+        public array $pricePeriods = [],
     ) {
     }
 

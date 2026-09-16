@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -35,6 +36,26 @@ class PricePeriodRepository extends ServiceEntityRepository
             ->setParameter('departure', $departure);
 
         StayOverlap::apply($qb, 'p');
+
+        /** @var list<PricePeriod> $result */
+        $result = $qb->getQuery()->getResult();
+
+        return $result;
+    }
+
+    /**
+     * Les périodes tarifaires encore d'actualité, de la plus proche à la plus lointaine.
+     *
+     * @return list<PricePeriod>
+     */
+    public function findUpcoming(Accommodation $accommodation, \DateTimeImmutable $from): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->andWhere('p.accommodation = :accommodation')
+            ->andWhere('p.endDate > :from')
+            ->orderBy('p.startDate', 'ASC')
+            ->setParameter('accommodation', $accommodation)
+            ->setParameter('from', $from, Types::DATE_IMMUTABLE);
 
         /** @var list<PricePeriod> $result */
         $result = $qb->getQuery()->getResult();

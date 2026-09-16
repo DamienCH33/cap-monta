@@ -7,7 +7,9 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\AccommodationResource;
+use App\ApiResource\PricePeriodResource;
 use App\Repository\AccommodationRepository;
+use App\Repository\PricePeriodRepository;
 
 /**
  * GET /api/accommodations/{slug}.
@@ -18,8 +20,10 @@ use App\Repository\AccommodationRepository;
  */
 final readonly class AccommodationItemProvider implements ProviderInterface
 {
-    public function __construct(private AccommodationRepository $accommodations)
-    {
+    public function __construct(
+        private AccommodationRepository $accommodations,
+        private PricePeriodRepository $pricePeriods,
+    ) {
     }
 
     /**
@@ -42,6 +46,13 @@ final readonly class AccommodationItemProvider implements ProviderInterface
 
         $prices = $this->accommodations->findPriceFromBySlugs([$slug]);
 
-        return AccommodationResource::fromEntity($accommodation, $prices[$slug] ?? null);
+        $resource = AccommodationResource::fromEntity($accommodation, $prices[$slug] ?? null);
+
+        $resource->pricePeriods = array_map(
+            PricePeriodResource::fromEntity(...),
+            $this->pricePeriods->findUpcoming($accommodation, new \DateTimeImmutable('today')),
+        );
+
+        return $resource;
     }
 }
