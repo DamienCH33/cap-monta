@@ -1,0 +1,67 @@
+<article class="card">
+  <div class="card__photo">
+    <span class="card__badge">Calendrier à jour</span>
+  </div>
+
+  <div class="card__body">
+    <h2 class="card__title">
+      @switch (accommodation().type) {
+        @case ('mobile_home') {
+          Mobil-home
+        }
+        @case ('bungalow') {
+          Bungalow
+        }
+        @case ('caravan') {
+          Caravane
+        }
+        @default {
+          Logement
+        }
+      }
+      @if (accommodation().district) {
+        {{ accommodation().district }}
+      }
+    </h2>
+
+    <p class="card__facts">
+      {{ accommodation().bedrooms }} {{ accommodation().bedrooms > 1 ? 'chambres' : 'chambre' }} ·
+      {{ accommodation().maxCapacity }} pers.
+      @if (accommodation().surface) {
+        · {{ accommodation().surface }} m²
+      }
+    </p>
+
+    <div class="strip">
+      @for (week of accommodation().availability; track week.start) {
+        <span
+          class="strip__week"
+          [class.strip__week--taken]="!week.free"
+          [title]="(week.start | date: 'd MMMM') + (week.free ? ' — libre' : ' — réservé')"
+        ></span>
+      }
+    </div>
+
+    @if (accommodation().availability.length) {
+      <div class="strip__months">
+        <span>{{ accommodation().availability[0].start | date: 'MMM' }}</span>
+        <span>{{
+          accommodation().availability[accommodation().availability.length - 1].start | date: 'MMM'
+        }}</span>
+      </div>
+    }
+
+    <footer class="card__footer">
+      @if (accommodation().priceFrom) {
+        <span class="card__price">
+          {{ accommodation().priceFrom! / 100 }} €
+          <span class="card__price-unit">/ semaine</span>
+        </span>
+      } @else {
+        <span class="card__price card__price--unknown">Nous consulter</span>
+      }
+
+      <span class="card__link">Voir les dispos</span>
+    </footer>
+  </div>
+</article>

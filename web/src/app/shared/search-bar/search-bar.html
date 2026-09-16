@@ -1,0 +1,42 @@
+<form class="searchbar" (ngSubmit)="submit()">
+  <label class="searchbar__field">
+    <span class="searchbar__label">Arrivée</span>
+    <input type="date" name="arrival" [ngModel]="arrival()" (ngModelChange)="arrival.set($event)" />
+  </label>
+
+  <label class="searchbar__field">
+    <span class="searchbar__label">Départ</span>
+    <input
+      type="date"
+      name="departure"
+      [ngModel]="departure()"
+      (ngModelChange)="departure.set($event)"
+    />
+  </label>
+
+  <label class="searchbar__field">
+    <span class="searchbar__label">Voyageurs</span>
+    <input
+      type="number"
+      name="guests"
+      min="1"
+      [ngModel]="guests()"
+      (ngModelChange)="guests.set($event)"
+    />
+  </label>
+
+  <button class="searchbar__submit" type="submit" aria-label="Rechercher">
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  </button>
+</form>

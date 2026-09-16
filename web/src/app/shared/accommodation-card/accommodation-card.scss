@@ -1,0 +1,98 @@
+:host {
+  display: block;
+}
+
+.card {
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  &__photo {
+    position: relative;
+    height: 110px;
+    background: var(--tile-sea);
+  }
+
+  &__badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 3px 8px;
+    font-size: 11px;
+    color: var(--success-text);
+    background: var(--success-bg);
+    border-radius: 20px;
+  }
+
+  &__body {
+    padding: 12px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  &__facts {
+    margin: 2px 0 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  &__footer {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  &__price {
+    font-size: 15px;
+    font-weight: 500;
+
+    &--unknown {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+  }
+
+  &__price-unit {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+
+  &__link {
+    font-size: 12px;
+    color: var(--blue);
+  }
+}
+
+.strip {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 5px;
+
+  &__week {
+    flex: 1;
+    height: 7px;
+    background: var(--free);
+    border-radius: 2px;
+
+    &--taken {
+      background: var(--taken);
+    }
+  }
+
+  &__months {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+}

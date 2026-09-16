@@ -1,51 +1,9 @@
 <div class="container">
-  <form class="searchbar" (ngSubmit)="search()">
-    <label class="searchbar__field">
-      <span class="searchbar__label">Arrivée</span>
-      <input
-        type="date"
-        name="arrival"
-        [ngModel]="arrival()"
-        (ngModelChange)="arrival.set($event)"
-      />
-    </label>
-
-    <label class="searchbar__field">
-      <span class="searchbar__label">Départ</span>
-      <input
-        type="date"
-        name="departure"
-        [ngModel]="departure()"
-        (ngModelChange)="departure.set($event)"
-      />
-    </label>
-
-    <label class="searchbar__field">
-      <span class="searchbar__label">Voyageurs</span>
-      <input
-        type="number"
-        name="guests"
-        min="1"
-        [ngModel]="guests()"
-        (ngModelChange)="guests.set($event)"
-      />
-    </label>
-
-    <button class="searchbar__submit" type="submit" aria-label="Rechercher">
-      <svg
-        viewBox="0 0 24 24"
-        width="16"
-        height="16"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-      >
-        <circle cx="11" cy="11" r="7" />
-        <path d="m20 20-3.5-3.5" />
-      </svg>
-    </button>
-  </form>
+  <cm-search-bar
+    [initialArrival]="criteria().arrival ?? ''"
+    [initialDeparture]="criteria().departure ?? ''"
+    [initialGuests]="criteria().guests ?? 2"
+  />
 
   <p class="results__count">
     {{ results().length }} {{ results().length > 1 ? 'logements' : 'logement' }}
@@ -53,74 +11,7 @@
 
   <div class="results">
     @for (accommodation of results(); track accommodation.slug) {
-      <article class="card">
-        <div class="card__photo">
-          <span class="card__badge">Calendrier à jour</span>
-        </div>
-
-        <div class="card__body">
-          <h2 class="card__title">
-            @switch (accommodation.type) {
-              @case ('mobile_home') {
-                Mobil-home
-              }
-              @case ('bungalow') {
-                Bungalow
-              }
-              @case ('caravan') {
-                Caravane
-              }
-              @default {
-                Logement
-              }
-            }
-            @if (accommodation.district) {
-              {{ accommodation.district }}
-            }
-          </h2>
-
-          <p class="card__facts">
-            {{ accommodation.bedrooms }} {{ accommodation.bedrooms > 1 ? 'chambres' : 'chambre' }} ·
-            {{ accommodation.maxCapacity }} pers.
-            @if (accommodation.surface) {
-              · {{ accommodation.surface }} m²
-            }
-          </p>
-
-          <div class="strip">
-            @for (week of accommodation.availability; track week.start) {
-              <span
-                class="strip__week"
-                [class.strip__week--taken]="!week.free"
-                [title]="(week.start | date: 'd MMMM') + (week.free ? ' — libre' : ' — réservé')"
-              ></span>
-            }
-          </div>
-
-          @if (accommodation.availability.length) {
-            <div class="strip__months">
-              <span>{{ accommodation.availability[0].start | date: 'MMM' }}</span>
-              <span>{{
-                accommodation.availability[accommodation.availability.length - 1].start
-                  | date: 'MMM'
-              }}</span>
-            </div>
-          }
-
-          <footer class="card__footer">
-            @if (accommodation.priceFrom) {
-              <span class="card__price">
-                {{ accommodation.priceFrom / 100 }} €
-                <span class="card__price-unit">/ semaine</span>
-              </span>
-            } @else {
-              <span class="card__price card__price--unknown">Nous consulter</span>
-            }
-
-            <span class="card__link">Voir les dispos</span>
-          </footer>
-        </div>
-      </article>
+      <cm-accommodation-card [accommodation]="accommodation" />
     } @empty {
       <p class="results__empty">Aucun logement disponible sur ces dates.</p>
     }

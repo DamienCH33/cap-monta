@@ -1,38 +1,37 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { AccommodationService } from '../../core/services/accommodation';
+import { ActivatedRoute } from '@angular/router';
+import { map, switchMap, tap } from 'rxjs';
+
 import { Accommodation } from '../../core/models/accommodation';
-import { FormsModule } from '@angular/forms';
 import { SearchCriteria } from '../../core/models/search-criteria';
-import { DatePipe } from '@angular/common';
+import { AccommodationService } from '../../core/services/accommodation';
+import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
+import { SearchBar } from '../../shared/search-bar/search-bar';
 
 @Component({
-  imports: [FormsModule, DatePipe],
   selector: 'cm-search',
-  styleUrl: './search.scss',
+  imports: [SearchBar, AccommodationCard],
   templateUrl: './search.html',
+  styleUrl: './search.scss',
 })
 export class Search implements OnInit {
-  private readonly accommodationService = inject(AccommodationService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly accommodations = inject(AccommodationService);
 
+  readonly criteria = signal<SearchCriteria>({});
   readonly results = signal<Accommodation[]>([]);
-  readonly arrival = signal('');
-  readonly departure = signal('');
-  readonly guests = signal(2);
 
   ngOnInit(): void {
-    this.search();
-  }
-
-  search(): void {
-    const criteria: SearchCriteria = { guests: this.guests() };
-
-    if (this.arrival() && this.departure()) {
-      criteria.arrival = this.arrival();
-      criteria.departure = this.departure();
-    }
-
-    this.accommodationService.search(criteria).subscribe((accommodations) => {
-      this.results.set(accommodations);
-    });
+    this.route.queryParamMap
+      .pipe(
+        map((params) => ({
+          arrival: params.get('arrivee') ?? undefined,
+          departure: params.get('depart') ?? undefined,
+          guests: Number(params.get('voyageurs')) || undefined,
+        })),
+        tap((criteria) => this.criteria.set(criteria)),
+        switchMap((criteria) => this.accommodations.search(criteria)),
+      )
+      .subscribe((found) => this.results.set(found));
   }
 }
