@@ -1,0 +1,139 @@
+:host {
+  display: block;
+  padding: 1rem 0 2rem;
+  background: var(--surface-1);
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+
+  img {
+    display: block;
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+  }
+
+  &__veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      rgb(4 44 83 / 62%) 0%,
+      rgb(4 44 83 / 40%) 38%,
+      rgb(4 44 83 / 6%) 68%,
+      rgb(4 44 83 / 0%) 100%
+    );
+  }
+
+  &__text {
+    position: absolute;
+    inset: 0;
+    padding: 26px 22px;
+  }
+
+  &__title {
+    max-width: 380px;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.22;
+    color: #fff;
+    text-shadow: 0 1px 12px rgb(4 44 83 / 35%);
+  }
+
+  &__subtitle {
+    max-width: 330px;
+    margin: 8px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--blue-soft);
+  }
+}
+
+.home__search {
+  position: relative;
+  z-index: 2;
+  margin: -34px 14px 0;
+}
+
+.section {
+  margin-top: 26px;
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  &__link {
+    font-size: 12px;
+    color: var(--blue);
+    text-decoration: none;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 12px;
+  }
+
+  &__empty {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+}
+
+.owner {
+  margin-top: 26px;
+  padding: 16px;
+  background: var(--green-bg);
+  border-radius: var(--radius-lg);
+
+  &__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--green-dark);
+  }
+
+  &__text {
+    margin: 5px 0 14px;
+    max-width: 520px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--green-text);
+  }
+
+  &__button {
+    display: inline-block;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green-bg);
+    background: var(--green-text);
+    border-radius: var(--radius);
+  }
+}
+
+@media (min-width: 720px) {
+  .hero {
+    img {
+      height: 260px;
+    }
+
+    &__title {
+      font-size: 30px;
+    }
+  }
+}

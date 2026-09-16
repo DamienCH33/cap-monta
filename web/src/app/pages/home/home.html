@@ -1,0 +1,45 @@
+<div class="container">
+  <section class="hero">
+    <picture>
+      <source media="(max-width: 640px)" srcset="/hero-mobile.png" />
+      <img src="/hero-desktop.png" alt="La plage et la dune de Montalivet" />
+    </picture>
+
+    <div class="hero__veil"></div>
+
+    <div class="hero__text">
+      <h1 class="hero__title">Louez au CHM Montalivet et à Euronat</h1>
+      <p class="hero__subtitle">
+        Des calendriers tenus à jour, une réponse du propriétaire sous 48 h.
+      </p>
+    </div>
+  </section>
+
+  <div class="home__search">
+    <cm-search-bar />
+  </div>
+
+  <section class="section">
+    <div class="section__head">
+      <h2 class="section__title">Encore libre cet été</h2>
+      <a class="section__link" routerLink="/recherche">Tout voir</a>
+    </div>
+
+    <div class="section__grid">
+      @for (accommodation of highlights(); track accommodation.slug) {
+        <cm-accommodation-card [accommodation]="accommodation" />
+      } @empty {
+        <p class="section__empty">Aucune annonce publiée pour le moment.</p>
+      }
+    </div>
+  </section>
+
+  <section class="owner">
+    <h2 class="owner__title">Vous louez votre bungalow au CHM ?</h2>
+    <p class="owner__text">
+      Collez le texte de votre annonce actuelle : périodes, tarifs et disponibilités sont remplis
+      pour vous. Vous relisez, vous publiez.
+    </p>
+    <span class="owner__button">Publier gratuitement</span>
+  </section>
+</div>
