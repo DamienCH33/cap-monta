@@ -49,3 +49,9 @@
     display: none;
   }
 }
+
+// Parasol du logo : couleur de la marque, un peu plus grand que le texte.
+.brand-icon {
+  font-size: 1.25em;
+  color: var(--blue);
+}
