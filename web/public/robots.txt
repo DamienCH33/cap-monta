@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# L'API n'a rien à faire dans un index de recherche
+Disallow: /api/
+
+# Espace privé
+Disallow: /proprietaire
+Disallow: /connexion
+
+Sitemap: https://cap-monta.fr/sitemap.xml

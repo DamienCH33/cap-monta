@@ -5,6 +5,7 @@ import { map, switchMap, tap } from 'rxjs';
 import { Accommodation } from '../../core/models/accommodation';
 import { SearchCriteria } from '../../core/models/search-criteria';
 import { AccommodationService } from '../../core/services/accommodation';
+import { SeoService } from '../../core/services/seo';
 import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
 import { SearchBar } from '../../shared/search-bar/search-bar';
 
@@ -18,11 +19,20 @@ export class Search implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly accommodations = inject(AccommodationService);
   private readonly router = inject(Router);
+  private readonly seo = inject(SeoService);
 
   readonly criteria = signal<SearchCriteria>({});
   readonly results = signal<Accommodation[]>([]);
 
   ngOnInit(): void {
+    this.seo.apply({
+      title: 'Rechercher un logement au CHM Montalivet et à Euronat',
+      description:
+        'Trouvez un mobil-home ou un bungalow libre sur vos dates, avec les disponibilités ' +
+        'affichées directement dans les résultats.',
+      path: '/recherche',
+    });
+
     this.route.queryParamMap
       .pipe(
         map((params) => ({
