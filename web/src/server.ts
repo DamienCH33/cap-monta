@@ -45,7 +45,14 @@ async function listSlugs(): Promise<string[]> {
  * propriétaire publie, un fichier statique serait périmé le lendemain.
  */
 app.get('/sitemap.xml', async (_request, response) => {
-  const paths = ['/', '/recherche'];
+  const paths = [
+    '/',
+    '/recherche',
+    '/comment-ca-marche',
+    '/mentions-legales',
+    '/conditions-generales',
+    '/confidentialite',
+  ];
 
   try {
     for (const slug of await listSlugs()) {
