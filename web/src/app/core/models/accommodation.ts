@@ -1,8 +1,11 @@
+import { DistrictArea } from './district';
 export interface Accommodation {
   slug: string;
   resort: string;
   type: string;
   district: string | null;
+  districtSlug: string | null;
+  districtArea: DistrictArea | null;
   capacity: number;
   maxCapacity: number;
   bedrooms: number;

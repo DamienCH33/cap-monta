@@ -1,21 +1,32 @@
 import { DatePipe } from '@angular/common';
 import { Component, input, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DISTRICT_AREAS, DistrictArea } from '../../core/models/district';
+import { Icon } from '../icon/icon';
+import { IconName } from '../icon/icons';
 
 import { Accommodation, typeLabel } from '../../core/models/accommodation';
-import { districtSide } from '../../core/models/search-filters';
 
 @Component({
   selector: 'cm-accommodation-card',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, Icon],
   templateUrl: './accommodation-card.html',
   styleUrl: './accommodation-card.scss',
 })
 export class AccommodationCard {
   readonly accommodation = input.required<Accommodation>();
+  readonly area = computed(() => {
+    const key = this.accommodation().districtArea;
 
+    return DISTRICT_AREAS.find((area) => area.key === key) ?? null;
+  });
+
+  readonly areaIcons: Record<DistrictArea, IconName> = {
+    dunes: 'ripple',
+    central: 'trees',
+    roadside: 'building-store',
+  };
   readonly typeLabel = typeLabel;
-  readonly side = computed(() => districtSide(this.accommodation().district));
 
   stripLabel(): string {
     const weeks = this.accommodation().availability;
