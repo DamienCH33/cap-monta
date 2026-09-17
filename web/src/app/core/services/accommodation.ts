@@ -13,6 +13,27 @@ export class AccommodationService {
   private readonly api = environment.apiUrl + '/api';
 
   search(criteria: SearchCriteria): Observable<Accommodation[]> {
+    return this.http
+      .get<JsonLdCollection<Accommodation>>(`${this.api}/accommodations`, {
+        params: this.toParams(criteria),
+        headers: { Accept: 'application/ld+json' },
+      })
+      .pipe(map((response) => response.member));
+  }
+
+  getBySlug(slug: string): Observable<Accommodation> {
+    return this.http.get<Accommodation>(`${this.api}/accommodations/${slug}`, {
+      headers: { Accept: 'application/ld+json' },
+    });
+  }
+
+  getAvailability(slug: string): Observable<Availability> {
+    return this.http.get<Availability>(`${this.api}/accommodations/${slug}/availability`, {
+      headers: { Accept: 'application/ld+json' },
+    });
+  }
+
+  private toParams(criteria: SearchCriteria): HttpParams {
     let params = new HttpParams();
 
     if (criteria.arrival) {
@@ -31,23 +52,6 @@ export class AccommodationService {
       params = params.set('district', criteria.district);
     }
 
-    return this.http
-      .get<JsonLdCollection<Accommodation>>(`${this.api}/accommodations`, {
-        params,
-        headers: { Accept: 'application/ld+json' },
-      })
-      .pipe(map((response) => response.member));
-  }
-
-  getBySlug(slug: string): Observable<Accommodation> {
-    return this.http.get<Accommodation>(`${this.api}/accommodations/${slug}`, {
-      headers: { Accept: 'application/ld+json' },
-    });
-  }
-
-  getAvailability(slug: string): Observable<Availability> {
-    return this.http.get<Availability>(`${this.api}/accommodations/${slug}/availability`, {
-      headers: { Accept: 'application/ld+json' },
-    });
+    return params;
   }
 }
