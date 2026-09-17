@@ -65,8 +65,9 @@ final class AppFixtures extends Fixture
         /** @var list<Accommodation> $accommodations */
         $accommodations = [
             // Répartition fixe plutôt qu'aléatoire : les mêmes quartiers à chaque rechargement.
-            ...AccommodationFactory::createMany(9, static fn (int $i): array => [
-                'district' => $districts[($i * 5) % count($districts)],
+            // Un logement par quartier au minimum, puis quelques-uns de plus dans les premiers.
+            ...AccommodationFactory::createMany(count($districts) + 4, static fn (int $i): array => [
+                'district' => $districts[$i % count($districts)],
             ]),
             // Les quartiers d'Euronat ne sont pas encore référencés.
             ...AccommodationFactory::createMany(3, ['resort' => Resort::Euronat]),
