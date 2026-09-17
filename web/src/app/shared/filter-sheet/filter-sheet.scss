@@ -204,19 +204,26 @@
   }
 }
 
-// Couleurs des tuiles quartier de la maquette 01 : bleu côté océan, vert côté forêt.
-.pill--ocean[aria-pressed='true'] {
+// Couleurs des zones, les mêmes que sur les cartes.
+.pill--dunes[aria-pressed='true'] {
   color: #042c53;
   background: #b5d4f4;
   border-color: #185fa5;
 }
 
-.pill--forest[aria-pressed='true'] {
+.pill--central[aria-pressed='true'] {
   color: #173404;
   background: #c0dd97;
   border-color: #3b6d11;
 }
 
+.pill--roadside[aria-pressed='true'] {
+  color: #412402;
+  background: #f1efe8;
+  border-color: #854f0b;
+}
+
+.pill--other[aria-pressed='true'],
 .amenity[aria-pressed='true'] {
   color: var(--blue-dark);
   background: var(--blue-soft);

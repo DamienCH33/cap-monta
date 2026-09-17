@@ -38,6 +38,9 @@ describe('Search', () => {
   async function open(url: string): Promise<RouterTestingHarness> {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl(url, Search);
+
+    httpMock.expectOne((req) => req.url.endsWith('/api/districts')).flush({ member: [] });
+
     return harness;
   }
 

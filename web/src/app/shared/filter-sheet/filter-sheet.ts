@@ -1,10 +1,18 @@
-import { AfterViewInit, Component, ElementRef, input, output, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  ElementRef,
+  input,
+  output,
+  viewChild,
+} from '@angular/core';
 
+import { District, DISTRICT_AREAS } from '../../core/models/district';
 import {
   ACCOMMODATION_TYPES,
   AccommodationTypeKey,
   AMENITIES,
-  DISTRICT_SIDES,
   MAX_BEDROOMS_FILTER,
   NO_FILTERS,
   SearchFilters,
@@ -19,6 +27,7 @@ import {
 export class FilterSheet implements AfterViewInit {
   readonly filters = input.required<SearchFilters>();
   readonly count = input.required<number>();
+  readonly districts = input<District[]>([]);
 
   readonly filtersChange = output<SearchFilters>();
   readonly closed = output<void>();
@@ -26,7 +35,6 @@ export class FilterSheet implements AfterViewInit {
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 
   readonly types = ACCOMMODATION_TYPES;
-  readonly sides = DISTRICT_SIDES;
   readonly amenities = AMENITIES;
   readonly bedroomOptions = [
     { value: 0, label: 'Toutes' },
@@ -35,6 +43,24 @@ export class FilterSheet implements AfterViewInit {
       label: `${index + 1}+`,
     })),
   ];
+
+  /** Les quartiers groupés de la plage vers l'avenue, puis ceux dont la zone n'est pas établie. */
+  readonly zones = computed(() => {
+    const districts = this.districts();
+
+    return [
+      ...DISTRICT_AREAS.map((area) => ({
+        key: area.key as string,
+        label: area.label,
+        districts: districts.filter((district) => district.area === area.key),
+      })),
+      {
+        key: 'other',
+        label: 'Autres quartiers',
+        districts: districts.filter((district) => district.area === null),
+      },
+    ].filter((zone) => zone.districts.length > 0);
+  });
 
   ngAfterViewInit(): void {
     const dialog = this.dialog().nativeElement;
@@ -45,12 +71,25 @@ export class FilterSheet implements AfterViewInit {
     }
   }
 
+  isDistrictSelected(district: District): boolean {
+    const selected = this.filters().districts;
+
+    // Un ancien lien peut porter le nom (« Europa ») au lieu du slug (« europa »).
+    return selected.includes(district.slug) || selected.includes(district.name);
+  }
+
   toggleType(key: AccommodationTypeKey): void {
     this.update({ types: toggle(this.filters().types, key) });
   }
 
-  toggleDistrict(district: string): void {
-    this.update({ districts: toggle(this.filters().districts, district) });
+  toggleDistrict(district: District): void {
+    const others = this.filters().districts.filter(
+      (value) => value !== district.slug && value !== district.name,
+    );
+
+    this.update({
+      districts: this.isDistrictSelected(district) ? others : [...others, district.slug],
+    });
   }
 
   setBedrooms(bedrooms: number): void {

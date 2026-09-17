@@ -22,6 +22,8 @@ import { AccommodationCard } from '../../shared/accommodation-card/accommodation
 
 import { SearchBar } from '../../shared/search-bar/search-bar';
 import { FilterSheet } from '../../shared/filter-sheet/filter-sheet';
+import { District } from '../../core/models/district';
+import { DistrictService } from '../../core/services/district';
 
 @Component({
   selector: 'cm-search',
@@ -34,6 +36,7 @@ export class Search implements OnInit {
   private readonly accommodations = inject(AccommodationService);
   private readonly router = inject(Router);
   private readonly seo = inject(SeoService);
+  private readonly districtApi = inject(DistrictService);
 
   readonly criteria = signal<SearchCriteria>({});
   readonly results = signal<Accommodation[]>([]);
@@ -43,8 +46,18 @@ export class Search implements OnInit {
   readonly sheetOpen = signal(false);
 
   readonly activeCount = computed(() => activeFilterCount(this.filters()));
-  readonly chips = computed(() => filterChips(this.filters()));
+  readonly chips = computed(() => {
+    const names = new Map<string, string>();
+
+    for (const district of this.districts()) {
+      names.set(district.slug, district.name);
+      names.set(district.name, district.name);
+    }
+
+    return filterChips(this.filters(), (value) => names.get(value) ?? value);
+  });
   readonly sortOptions = SORT_OPTIONS;
+  readonly districts = signal<District[]>([]);
 
   ngOnInit(): void {
     this.seo.apply({
@@ -55,6 +68,7 @@ export class Search implements OnInit {
       path: '/recherche',
     });
 
+    this.districtApi.list().subscribe((found) => this.districts.set(found));
     this.route.queryParamMap
       .pipe(
         tap((params) => {

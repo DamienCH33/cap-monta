@@ -2,7 +2,6 @@ import { ParamMap, Params } from '@angular/router';
 
 export type AccommodationTypeKey = 'caravan' | 'mobile_home' | 'bungalow';
 export type SortOrder = 'price_asc' | 'price_desc';
-export type DistrictSide = 'ocean' | 'forest';
 
 export interface SearchFilters {
   types: AccommodationTypeKey[];
@@ -37,16 +36,6 @@ export const ACCOMMODATION_TYPES: readonly {
   { key: 'caravan', slug: 'caravane', label: 'Caravane', hint: '1 chambre' },
   { key: 'mobile_home', slug: 'mobil-home', label: 'Mobil-home', hint: '2 à 3 chambres' },
   { key: 'bungalow', slug: 'bungalow', label: 'Bungalow', hint: '3 chambres' },
-];
-
-/** Provisoire : à déplacer dans l'API avec les pages quartier (écran 04). */
-export const DISTRICT_SIDES: readonly {
-  side: DistrictSide;
-  label: string;
-  districts: readonly string[];
-}[] = [
-  { side: 'ocean', label: 'Côté océan', districts: ['Europa', 'Californie', 'Médoc'] },
-  { side: 'forest', label: 'Côté forêt', districts: ['Bruyère', 'Lalande', 'Écureuils'] },
 ];
 
 export const AMENITIES: readonly { key: string; label: string }[] = [
@@ -115,7 +104,10 @@ export function filtersToQuery(filters: SearchFilters): Params {
   };
 }
 
-export function filterChips(filters: SearchFilters): FilterChip[] {
+export function filterChips(
+  filters: SearchFilters,
+  districtLabel: (value: string) => string = (value) => value,
+): FilterChip[] {
   return [
     ...filters.types.map((key) => ({
       key: `type-${key}`,
@@ -124,7 +116,7 @@ export function filterChips(filters: SearchFilters): FilterChip[] {
     })),
     ...filters.districts.map((district) => ({
       key: `district-${district}`,
-      label: district,
+      label: districtLabel(district),
       without: { ...filters, districts: filters.districts.filter((item) => item !== district) },
     })),
     ...(filters.bedrooms > 0
@@ -153,12 +145,4 @@ function values(params: ParamMap, name: string): string[] {
 
 function unique<T>(list: T[]): T[] {
   return [...new Set(list)];
-}
-
-export function districtSide(district: string | null): DistrictSide | null {
-  if (!district) {
-    return null;
-  }
-
-  return DISTRICT_SIDES.find((zone) => zone.districts.includes(district))?.side ?? null;
 }

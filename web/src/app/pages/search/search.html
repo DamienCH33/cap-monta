@@ -131,6 +131,7 @@
     <cm-filter-sheet
       [filters]="filters()"
       [count]="results().length"
+      [districts]="districts()"
       (filtersChange)="applyFilters($event)"
       (closed)="sheetOpen.set(false)"
     />

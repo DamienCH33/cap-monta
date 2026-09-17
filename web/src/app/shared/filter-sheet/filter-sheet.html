@@ -8,7 +8,18 @@
   <div class="sheet__inner">
     <header class="sheet__top">
       <button type="button" class="sheet__icon" aria-label="Fermer les filtres" (click)="close()">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
       </button>
       <h2 id="filter-sheet-title" class="sheet__title">Filtres</h2>
       <span class="sheet__spacer"></span>
@@ -28,13 +39,61 @@
             >
               @switch (type.key) {
                 @case ('caravan') {
-                  <svg class="type__icon" viewBox="0 0 32 24" width="28" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 17V8a3 3 0 0 1 3-3h14a7 7 0 0 1 7 7v5H3Z" /><rect x="7" y="8" width="6" height="4" rx="1" /><circle cx="11" cy="19" r="2.2" /><path d="M27 15h3" /></svg>
+                  <svg
+                    class="type__icon"
+                    viewBox="0 0 32 24"
+                    width="28"
+                    height="21"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 17V8a3 3 0 0 1 3-3h14a7 7 0 0 1 7 7v5H3Z" />
+                    <rect x="7" y="8" width="6" height="4" rx="1" />
+                    <circle cx="11" cy="19" r="2.2" />
+                    <path d="M27 15h3" />
+                  </svg>
                 }
                 @case ('mobile_home') {
-                  <svg class="type__icon" viewBox="0 0 32 24" width="28" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2 18V9h28v9H2Z" /><path d="M2 9l2-3h24l2 3" /><rect x="6" y="11" width="5" height="4" rx=".6" /><path d="M15 18v-7h4v7" /><rect x="22" y="11" width="5" height="4" rx=".6" /><path d="M4 18v3M28 18v3" /></svg>
+                  <svg
+                    class="type__icon"
+                    viewBox="0 0 32 24"
+                    width="28"
+                    height="21"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M2 18V9h28v9H2Z" />
+                    <path d="M2 9l2-3h24l2 3" />
+                    <rect x="6" y="11" width="5" height="4" rx=".6" />
+                    <path d="M15 18v-7h4v7" />
+                    <rect x="22" y="11" width="5" height="4" rx=".6" />
+                    <path d="M4 18v3M28 18v3" />
+                  </svg>
                 }
                 @default {
-                  <svg class="type__icon" viewBox="0 0 32 24" width="28" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 16 3l13 8" /><path d="M6 10v11h20V10" /><path d="M14 21v-6h4v6" /><rect x="8.5" y="13" width="3.5" height="3.5" rx=".5" /><rect x="20" y="13" width="3.5" height="3.5" rx=".5" /></svg>
+                  <svg
+                    class="type__icon"
+                    viewBox="0 0 32 24"
+                    width="28"
+                    height="21"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 11 16 3l13 8" />
+                    <path d="M6 10v11h20V10" />
+                    <path d="M14 21v-6h4v6" />
+                    <rect x="8.5" y="13" width="3.5" height="3.5" rx=".5" />
+                    <rect x="20" y="13" width="3.5" height="3.5" rx=".5" />
+                  </svg>
                 }
               }
               <span class="type__label">{{ type.label }}</span>
@@ -46,22 +105,24 @@
 
       <section class="sec">
         <h3 class="sec__title">Quartier</h3>
-        <p class="sec__hint">Plutôt plage ou plutôt ombre ?</p>
+        <p class="sec__hint">Du plus près au plus loin de la plage.</p>
         <div class="zones">
-          @for (zone of sides; track zone.side) {
+          @for (zone of zones(); track zone.key) {
             <div class="zone">
               <h4 class="zone__title">{{ zone.label }}</h4>
               <div class="zone__pills">
-                @for (district of zone.districts; track district) {
+                @for (district of zone.districts; track district.slug) {
                   <button
                     type="button"
                     class="pill"
-                    [class.pill--ocean]="zone.side === 'ocean'"
-                    [class.pill--forest]="zone.side === 'forest'"
-                    [attr.aria-pressed]="filters().districts.includes(district)"
+                    [class.pill--dunes]="zone.key === 'dunes'"
+                    [class.pill--central]="zone.key === 'central'"
+                    [class.pill--roadside]="zone.key === 'roadside'"
+                    [class.pill--other]="zone.key === 'other'"
+                    [attr.aria-pressed]="isDistrictSelected(district)"
                     (click)="toggleDistrict(district)"
                   >
-                    {{ district }}
+                    {{ district.name }}
                   </button>
                 }
               </div>
