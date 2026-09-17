@@ -23,14 +23,26 @@ export class AccommodationService {
   }
 
   suggest(criteria: SearchCriteria): Observable<StaySuggestion[]> {
+    let params = this.toParams({
+      arrival: criteria.arrival,
+      departure: criteria.departure,
+      guests: criteria.guests,
+      resort: criteria.resort,
+    });
+
+    const districts = criteria.districts ?? [];
+
+    if (districts.length === 1) {
+      params = params.set('district', districts[0]);
+    }
+
     return this.http
       .get<JsonLdCollection<StaySuggestion>>(`${this.api}/stay-suggestions`, {
-        params: this.toParams(criteria),
+        params,
         headers: { Accept: 'application/ld+json' },
       })
       .pipe(map((response) => response.member));
   }
-
   getBySlug(slug: string): Observable<Accommodation> {
     return this.http.get<Accommodation>(`${this.api}/accommodations/${slug}`, {
       headers: { Accept: 'application/ld+json' },
@@ -58,8 +70,20 @@ export class AccommodationService {
     if (criteria.resort) {
       params = params.set('resort', criteria.resort);
     }
-    if (criteria.district) {
-      params = params.set('district', criteria.district);
+    for (const district of criteria.districts ?? []) {
+      params = params.append('district[]', district);
+    }
+    for (const type of criteria.types ?? []) {
+      params = params.append('type[]', type);
+    }
+    if (criteria.bedrooms) {
+      params = params.set('bedrooms', criteria.bedrooms);
+    }
+    for (const amenity of criteria.amenities ?? []) {
+      params = params.append('amenities[]', amenity);
+    }
+    if (criteria.order) {
+      params = params.set('order', criteria.order);
     }
 
     return params;

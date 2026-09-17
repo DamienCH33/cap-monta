@@ -5,12 +5,64 @@
     [initialGuests]="guests()"
   />
 
-  @if (criteria().district) {
-    <div class="filters">
-      <span class="filters__chip">
-        {{ criteria().district }}
-        <button type="button" (click)="clearDistrict()" aria-label="Retirer ce filtre">×</button>
-      </span>
+  <div class="toolbar">
+    <button
+      type="button"
+      class="toolbar__filters"
+      [class.toolbar__filters--active]="activeCount() > 0"
+      [attr.aria-expanded]="sheetOpen()"
+      (click)="sheetOpen.set(true)"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="15"
+        height="15"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12" />
+        <circle cx="16" cy="6" r="2" />
+        <circle cx="10" cy="12" r="2" />
+        <circle cx="18" cy="18" r="2" />
+      </svg>
+      Filtres
+      @if (activeCount() > 0) {
+        <span class="toolbar__badge">{{ activeCount() }}</span>
+      }
+    </button>
+
+    <select
+      class="toolbar__sort"
+      name="order"
+      aria-label="Trier les résultats"
+      (change)="onOrderChange($event)"
+    >
+      <option value="" [selected]="filters().order === null">Tri par défaut</option>
+      @for (option of sortOptions; track option.value) {
+        <option [value]="option.value" [selected]="filters().order === option.value">
+          {{ option.label }}
+        </option>
+      }
+    </select>
+  </div>
+
+  @if (chips().length > 0) {
+    <div class="chips">
+      @for (chip of chips(); track chip.key) {
+        <button
+          type="button"
+          class="chips__chip"
+          [attr.aria-label]="'Retirer le filtre ' + chip.label"
+          (click)="applyFilters(chip.without)"
+        >
+          {{ chip.label }}
+          <span aria-hidden="true">×</span>
+        </button>
+      }
+      <button type="button" class="chips__clear" (click)="clearFilters()">Tout effacer</button>
     </div>
   }
 
@@ -43,7 +95,7 @@
                     du {{ suggestion.arrival | date: 'EEE d MMM' }} au
                     {{ suggestion.departure | date: 'EEE d MMM' }}
                     <strong>
-                      · {{ suggestion.availableCount }}
+                      &nbsp;· {{ suggestion.availableCount }}
                       {{ suggestion.availableCount > 1 ? 'logements' : 'logement' }}
                     </strong>
                   </a>
@@ -51,14 +103,20 @@
               }
             </ul>
           }
-
-          @if (criteria().district) {
-            <button type="button" class="suggestions__widen" (click)="clearDistrict()">
-              Chercher dans tout le domaine
-            </button>
-          }
         } @else {
           <p>Aucun logement ne correspond à cette recherche.</p>
+        }
+
+        @if (filters().districts.length > 0) {
+          <button type="button" class="suggestions__widen" (click)="clearDistricts()">
+            Chercher dans tout le domaine
+          </button>
+        }
+
+        @if (activeCount() > 0) {
+          <button type="button" class="suggestions__widen" (click)="clearFilters()">
+            Retirer tous les filtres
+          </button>
         }
       </div>
     }
@@ -68,4 +126,13 @@
     <span><i class="legend__swatch legend__swatch--free"></i> libre</span>
     <span><i class="legend__swatch legend__swatch--taken"></i> réservé</span>
   </div>
+
+  @if (sheetOpen()) {
+    <cm-filter-sheet
+      [filters]="filters()"
+      [count]="results().length"
+      (filtersChange)="applyFilters($event)"
+      (closed)="sheetOpen.set(false)"
+    />
+  }
 </div>
