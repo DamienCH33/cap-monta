@@ -4,18 +4,18 @@
   } @else if (accommodation(); as logement) {
     @if (cameFromSearch()) {
       <a class="back" routerLink="/recherche" [queryParams]="searchParams()">
-        <i class="ti ti-arrow-left"></i>
+        <cm-icon name="arrow-left" />
         Retour aux résultats
       </a>
     } @else {
       <a class="back" routerLink="/recherche">
-        <i class="ti ti-arrow-left"></i>
+        <cm-icon name="arrow-left" />
         Voir tous les logements
       </a>
     }
 
     <section class="photo">
-      <i class="ti ti-photo"></i>
+      <cm-icon name="photo" />
     </section>
 
     <header class="head">

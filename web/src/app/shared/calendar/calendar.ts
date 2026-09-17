@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, input, signal } from '@angular/core';
 
 import { BusyPeriod } from '../../core/models/availability';
+import { Icon } from '../icon/icon';
 
 interface Day {
   key: string;
@@ -28,7 +29,7 @@ function isoDay(date: Date): string {
 
 @Component({
   selector: 'cm-calendar',
-  imports: [DatePipe],
+  imports: [Icon, DatePipe],
   templateUrl: './calendar.html',
   styleUrl: './calendar.scss',
 })

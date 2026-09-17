@@ -30,7 +30,7 @@
                 "input": "public"
               }
             ],
-            "styles": ["@tabler/icons-webfont/dist/tabler-icons.min.css", "src/styles.scss"],
+            "styles": ["src/styles.scss"],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "security": {

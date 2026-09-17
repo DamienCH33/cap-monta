@@ -11,10 +11,11 @@ import { Calendar } from '../../shared/calendar/calendar';
 import { BookingForm } from './booking-form/booking-form';
 import { environment } from '../../../environments/environment';
 import { guestsFromQuery, travellerCount } from '../../core/models/guests';
+import { Icon } from '../../shared/icon/icon';
 
 @Component({
   selector: 'cm-accommodation',
-  imports: [DatePipe, DecimalPipe, RouterLink, Calendar, BookingForm],
+  imports: [Icon, DatePipe, DecimalPipe, RouterLink, Calendar, BookingForm],
   templateUrl: './accommodation.html',
   styleUrl: './accommodation.scss',
 })
