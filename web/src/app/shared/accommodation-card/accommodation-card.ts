@@ -1,8 +1,9 @@
 import { DatePipe } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { Component, input, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { Accommodation, typeLabel } from '../../core/models/accommodation';
+import { districtSide } from '../../core/models/search-filters';
 
 @Component({
   selector: 'cm-accommodation-card',
@@ -14,6 +15,7 @@ export class AccommodationCard {
   readonly accommodation = input.required<Accommodation>();
 
   readonly typeLabel = typeLabel;
+  readonly side = computed(() => districtSide(this.accommodation().district));
 
   stripLabel(): string {
     const weeks = this.accommodation().availability;

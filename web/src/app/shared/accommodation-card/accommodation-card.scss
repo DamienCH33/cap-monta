@@ -97,3 +97,25 @@
     color: var(--text-muted);
   }
 }
+
+.card__photo {
+  position: relative;
+
+  &--forest {
+    background: #c0dd97;
+  }
+}
+
+.card__side {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  font-size: 11px;
+  color: var(--text-primary);
+  background: rgb(255 255 255 / 85%);
+  border-radius: 20px;
+}
