@@ -182,8 +182,9 @@
   }
 }
 
-// Couleurs des tuiles quartier de la maquette 01 : bleu côté océan, vert côté forêt.
-.pill {
+// Même base pour les quartiers et les équipements. Actif = bordure épaisse + coche, jamais la couleur seule.
+.pill,
+.amenity {
   padding: 6px 12px;
   font-family: inherit;
   font-size: 13px;
@@ -201,18 +202,25 @@
       content: '✓ ';
     }
   }
+}
 
-  &--ocean[aria-pressed='true'] {
-    color: #042c53;
-    background: #b5d4f4;
-    border-color: #185fa5;
-  }
+// Couleurs des tuiles quartier de la maquette 01 : bleu côté océan, vert côté forêt.
+.pill--ocean[aria-pressed='true'] {
+  color: #042c53;
+  background: #b5d4f4;
+  border-color: #185fa5;
+}
 
-  &--forest[aria-pressed='true'] {
-    color: #173404;
-    background: #c0dd97;
-    border-color: #3b6d11;
-  }
+.pill--forest[aria-pressed='true'] {
+  color: #173404;
+  background: #c0dd97;
+  border-color: #3b6d11;
+}
+
+.amenity[aria-pressed='true'] {
+  color: var(--blue-dark);
+  background: var(--blue-soft);
+  border-color: var(--blue);
 }
 
 .seg {
@@ -248,28 +256,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
-
-.amenity {
-  padding: 6px 12px;
-  font-family: inherit;
-  font-size: 13px;
-  color: var(--text-secondary);
-  background: var(--surface-2);
-  border: 1px solid var(--border-strong);
-  border-radius: 20px;
-  cursor: pointer;
-
-  &[aria-pressed='true'] {
-    padding: 5px 11px;
-    color: var(--blue-dark);
-    background: var(--blue-soft);
-    border: 2px solid var(--blue);
-
-    &::before {
-      content: '✓ ';
-    }
-  }
 }
 
 @media (max-width: 719px) {
