@@ -1,0 +1,120 @@
+:host {
+  position: relative;
+  display: block;
+}
+
+.picker {
+  &__toggle {
+    width: 100%;
+    padding: 0;
+    font-family: inherit;
+    font-size: 16px;
+    text-align: left;
+    color: var(--text-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  &__placeholder {
+    color: var(--text-muted);
+  }
+
+  &__panel {
+    position: absolute;
+    top: calc(100% + 14px);
+    right: -10px;
+    z-index: 20;
+    width: min(340px, calc(100vw - 32px));
+    padding: 4px 20px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 28px rgb(4 44 83 / 16%);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  &__hint {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  &__counter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    span {
+      min-width: 20px;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+      line-height: 1;
+      color: var(--blue-dark);
+      background: none;
+      border: 1px solid var(--blue);
+      border-radius: 50%;
+      cursor: pointer;
+
+      &:not(:disabled):hover {
+        background: var(--blue-soft);
+      }
+
+      &:disabled {
+        color: var(--text-muted);
+        border-color: var(--border);
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  &__note {
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  &__close {
+    display: block;
+    margin: 8px 0 0 auto;
+    padding: 8px 4px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--blue-dark);
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+@media (min-width: 720px) {
+  .picker__toggle {
+    font-size: 13px;
+  }
+}
