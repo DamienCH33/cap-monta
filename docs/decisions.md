@@ -102,10 +102,3 @@ Doctrine ne sait ni générer ni reconnaître une contrainte `EXCLUDE`. À chaqu
 
 `tests/Integration/DatabaseConstraintsTest.php` vérifie que les contraintes sont toujours en base. Si une migration en supprime une, la CI casse.
 
----
-
-## 010 — Les contraintes d'exclusion échappent à Doctrine
-
-Doctrine ne sait ni générer ni reconnaître une contrainte `EXCLUDE`. À chaque `make:migration`, il propose un `DROP INDEX <table>_no_overlap` : **ces lignes sont à supprimer de la migration générée**, dans `up()` comme dans `down()`.
-
-`tests/Integration/DatabaseConstraintsTest.php` vérifie que les contraintes sont toujours en base : si une migration en supprime une, la CI casse.
