@@ -8,6 +8,8 @@ export interface NewBookingRequest {
   guestEmail: string;
   guestPhone: string | null;
   message: string | null;
+  infants: number;
+  pets: number;
 }
 
 export interface BookingRequest extends NewBookingRequest {

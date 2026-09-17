@@ -4,12 +4,14 @@ import { Component, inject, input, linkedSignal, OnInit, signal } from '@angular
 import { FormsModule } from '@angular/forms';
 
 import { BookingRequest } from '../../../core/models/booking-request';
+import { Guests, NO_GUESTS, travellerCount } from '../../../core/models/guests';
 import { Quote } from '../../../core/models/quote';
 import { BookingService } from '../../../core/services/booking';
+import { GuestPicker } from '../../../shared/guest-picker/guest-picker';
 
 @Component({
   selector: 'cm-booking-form',
-  imports: [FormsModule, DecimalPipe],
+  imports: [FormsModule, DecimalPipe, GuestPicker],
   templateUrl: './booking-form.html',
   styleUrl: './booking-form.scss',
 })
@@ -19,12 +21,14 @@ export class BookingForm implements OnInit {
   readonly slug = input.required<string>();
   readonly initialArrival = input('');
   readonly initialDeparture = input('');
-  readonly initialGuests = input(2);
+  readonly initialGuests = input<Guests>(NO_GUESTS);
 
   readonly arrival = linkedSignal(() => this.initialArrival());
   readonly departure = linkedSignal(() => this.initialDeparture());
-  readonly adults = linkedSignal(() => this.initialGuests());
-  readonly children = signal(0);
+  readonly guests = linkedSignal(() => this.initialGuests());
+
+  /** Les champs de l'API qui concernent les voyageurs, pour afficher leurs erreurs sous le sélecteur. */
+  readonly guestFields = ['adults', 'children', 'infants', 'pets'] as const;
 
   readonly guestName = signal('');
   readonly guestEmail = signal('');
@@ -42,19 +46,26 @@ export class BookingForm implements OnInit {
     this.refreshQuote();
   }
 
+  onGuestsChange(guests: Guests): void {
+    this.guests.set(guests);
+    this.guestFields.forEach((field) => this.clearViolation(field));
+    this.refreshQuote();
+  }
+
   refreshQuote(): void {
     const arrival = this.arrival();
     const departure = this.departure();
+    const travellers = travellerCount(this.guests());
 
     this.error.set(null);
 
-    if ('' === arrival || '' === departure) {
+    if ('' === arrival || '' === departure || 0 === travellers) {
       this.quote.set(null);
 
       return;
     }
 
-    this.booking.quote(this.slug(), arrival, departure, this.adults() + this.children()).subscribe({
+    this.booking.quote(this.slug(), arrival, departure, travellers).subscribe({
       next: (quote) => this.quote.set(quote),
       error: () => this.quote.set(null),
     });
@@ -63,8 +74,9 @@ export class BookingForm implements OnInit {
   submit(): void {
     const arrival = this.arrival();
     const departure = this.departure();
+    const guests = this.guests();
 
-    if ('' === arrival || '' === departure) {
+    if ('' === arrival || '' === departure || 0 === travellerCount(guests)) {
       return;
     }
 
@@ -77,8 +89,10 @@ export class BookingForm implements OnInit {
         accommodationSlug: this.slug(),
         arrival,
         departure,
-        adults: this.adults(),
-        children: this.children(),
+        adults: guests.adults,
+        children: guests.children,
+        infants: guests.infants,
+        pets: guests.pets,
         guestName: this.guestName(),
         guestEmail: this.guestEmail(),
         guestPhone: this.guestPhone() || null,
@@ -101,12 +115,25 @@ export class BookingForm implements OnInit {
       case 'unavailable':
         return 'Ces dates sont déjà prises.';
       case 'too_many_guests':
-        return `Ce logement accueille ${quote.maxCapacity} personnes au maximum.`;
+        return `Ce logement accueille ${quote.maxCapacity} personnes au maximum, bébés non compris.`;
       case 'stay_too_short':
         return `Le propriétaire demande ${quote.minimumNights} nuits minimum sur cette période.`;
       default:
         return 'Ces dates ne peuvent pas être réservées.';
     }
+  }
+
+  clearViolation(field: string): void {
+    this.violations.update((current) => {
+      if (!(field in current)) {
+        return current;
+      }
+
+      const next = { ...current };
+      delete next[field];
+
+      return next;
+    });
   }
 
   private readError(response: HttpErrorResponse): string {
@@ -127,19 +154,6 @@ export class BookingForm implements OnInit {
     }
 
     return "L'envoi a échoué. Réessayez dans un instant.";
-  }
-
-  clearViolation(field: string): void {
-    this.violations.update((current) => {
-      if (!(field in current)) {
-        return current;
-      }
-
-      const next = { ...current };
-      delete next[field];
-
-      return next;
-    });
   }
 }
 

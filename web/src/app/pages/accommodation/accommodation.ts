@@ -1,6 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Params, RouterLink } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, Params, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 
 import { Accommodation, typeLabel } from '../../core/models/accommodation';
@@ -10,6 +10,7 @@ import { SeoService } from '../../core/services/seo';
 import { Calendar } from '../../shared/calendar/calendar';
 import { BookingForm } from './booking-form/booking-form';
 import { environment } from '../../../environments/environment';
+import { guestsFromQuery, travellerCount } from '../../core/models/guests';
 
 @Component({
   selector: 'cm-accommodation',
@@ -29,7 +30,12 @@ export class AccommodationPage implements OnInit {
 
   readonly initialArrival = computed(() => this.searchParams()['arrivee'] ?? '');
   readonly initialDeparture = computed(() => this.searchParams()['depart'] ?? '');
-  readonly initialGuests = computed(() => Number(this.searchParams()['voyageurs'] ?? 2) || 2);
+  readonly initialGuests = computed(() => {
+    const guests = guestsFromQuery(convertToParamMap(this.searchParams()));
+
+    // Arrivée directe sur la fiche, sans recherche : un adulte, pour afficher un devis tout de suite.
+    return travellerCount(guests) > 0 ? guests : { ...guests, adults: 1 };
+  });
 
   readonly typeLabel = typeLabel;
 

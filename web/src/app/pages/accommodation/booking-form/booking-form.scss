@@ -156,3 +156,15 @@
   color: #7a1f1f;
   background: #f8e3e3;
 }
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.field__picker {
+  display: block;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+}

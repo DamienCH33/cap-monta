@@ -46,33 +46,19 @@
         }
       </label>
 
-      <label class="field">
-        <span class="field__label">Adultes</span>
-        <input
-          type="number"
-          name="adults"
-          min="1"
-          [ngModel]="adults()"
-          (ngModelChange)="adults.set($event); clearViolation('adults'); refreshQuote()"
+      <div class="field field--full">
+        <span class="field__label">Voyageurs</span>
+        <cm-guest-picker
+          class="field__picker"
+          [value]="guests()"
+          (valueChange)="onGuestsChange($event)"
         />
-        @if (violations()['adults']; as violation) {
-          <span class="field__error">{{ violation }}</span>
+        @for (field of guestFields; track field) {
+          @if (violations()[field]; as violation) {
+            <span class="field__error">{{ violation }}</span>
+          }
         }
-      </label>
-
-      <label class="field">
-        <span class="field__label">Enfants</span>
-        <input
-          type="number"
-          name="children"
-          min="0"
-          [ngModel]="children()"
-          (ngModelChange)="children.set($event); clearViolation('children'); refreshQuote()"
-        />
-        @if (violations()['children']; as violation) {
-          <span class="field__error">{{ violation }}</span>
-        }
-      </label>
+      </div>
     </div>
 
     @if (quote(); as currentQuote) {
