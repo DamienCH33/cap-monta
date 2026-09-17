@@ -87,8 +87,10 @@ class AccommodationRepository extends ServiceEntityRepository
         }
 
         if ([] !== $districts) {
-            $qb->andWhere('a.district IN (:districts)')
-                ->setParameter('districts', $districts, ArrayParameterType::STRING);
+            $qb->innerJoin('a.district', 'd')
+                ->andWhere('d.slug IN (:districtSlugs) OR d.name IN (:districtNames)')
+                ->setParameter('districtSlugs', $districts, ArrayParameterType::STRING)
+                ->setParameter('districtNames', $districts, ArrayParameterType::STRING);
         }
 
         if ([] !== $types) {
@@ -155,34 +157,6 @@ class AccommodationRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<array{district: string, resort: Resort, accommodationCount: int}>
-     */
-    public function countByDistrict(): array
-    {
-        /** @var list<array{district: string, resort: Resort|string, accommodationCount: int|string}> $rows */
-        $rows = $this->createQueryBuilder('a')
-            ->select('a.district AS district', 'a.resort AS resort', 'COUNT(a.id) AS accommodationCount')
-            ->andWhere('a.district IS NOT NULL')
-            ->groupBy('a.district')
-            ->addGroupBy('a.resort')
-            ->orderBy('accommodationCount', 'DESC')
-            ->addOrderBy('district', 'ASC')
-            ->getQuery()
-            ->getResult();
-
-        return array_map(
-            static fn (array $row): array => [
-                'district' => $row['district'],
-                'resort' => $row['resort'] instanceof Resort
-                    ? $row['resort']
-                    : Resort::from($row['resort']),
-                'accommodationCount' => (int) $row['accommodationCount'],
-            ],
-            $rows,
-        );
-    }
-
-    /**
      * Nearest stays of the same length, shifted by up to 14 days,
      * with the number of accommodations free on each.
      *
@@ -211,10 +185,11 @@ class AccommodationRepository extends ServiceEntityRepository
                 COUNT(a.id) AS available_count
             FROM slot
             CROSS JOIN accommodation a
+                        LEFT JOIN district d ON d.id = a.district_id
             WHERE slot.arrival >= CAST(:today AS date)
               AND a.max_capacity >= :guests
               AND (CAST(:resort AS text)   IS NULL OR a.resort   = :resort)
-              AND (CAST(:district AS text) IS NULL OR a.district = :district)
+                            AND (CAST(:district AS text) IS NULL OR d.slug = :district OR d.name = :district)
               AND NOT EXISTS (
                   SELECT 1
                   FROM unavailability u

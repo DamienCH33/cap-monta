@@ -8,6 +8,7 @@ use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
 use App\Enum\AccommodationType;
 use App\Factory\AccommodationFactory;
+use App\Factory\DistrictFactory;
 use App\Tests\ApiTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -33,17 +34,17 @@ final class AccommodationFilterTest extends ApiTestCase
 
     public function testFiltersOnSeveralDistricts(): void
     {
-        AccommodationFactory::createOne(['slug' => 'a-europa', 'district' => 'Europa']);
-        AccommodationFactory::createOne(['slug' => 'b-lalande', 'district' => 'Lalande']);
-        AccommodationFactory::createOne(['slug' => 'c-medoc', 'district' => 'Médoc']);
+        AccommodationFactory::createOne(['slug' => 'a-europa', 'district' => DistrictFactory::named('Europa')]);
+        AccommodationFactory::createOne(['slug' => 'b-lalande', 'district' => DistrictFactory::named('Lalande')]);
+        AccommodationFactory::createOne(['slug' => 'c-medoc', 'district' => DistrictFactory::named('Médoc')]);
 
         self::assertSame(['a-europa', 'b-lalande'], $this->slugs('district[]=Europa&district[]=Lalande'));
     }
 
     public function testStillAcceptsASingleDistrict(): void
     {
-        AccommodationFactory::createOne(['slug' => 'a-europa', 'district' => 'Europa']);
-        AccommodationFactory::createOne(['slug' => 'b-lalande', 'district' => 'Lalande']);
+        AccommodationFactory::createOne(['slug' => 'a-europa', 'district' => DistrictFactory::named('Europa')]);
+        AccommodationFactory::createOne(['slug' => 'b-lalande', 'district' => DistrictFactory::named('Lalande')]);
 
         self::assertSame(['a-europa'], $this->slugs('district=Europa'));
     }

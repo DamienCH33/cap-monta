@@ -95,6 +95,8 @@ final class AccommodationResource
         public ?int $priceFrom,
         public array $availability = [],
         public array $pricePeriods = [],
+        public ?string $districtSlug = null,
+        public ?string $districtArea = null,
     ) {
     }
 
@@ -107,7 +109,7 @@ final class AccommodationResource
             $accommodation->getSlug(),
             $accommodation->getResort()->value,
             $accommodation->getType()->value,
-            $accommodation->getDistrict(),
+            $accommodation->getDistrict()?->getName(),
             $accommodation->getCapacity(),
             $accommodation->getMaxCapacity(),
             $accommodation->getBedrooms(),
@@ -116,6 +118,8 @@ final class AccommodationResource
             $accommodation->getDescription(),
             $priceFrom,
             $availability,
+            districtSlug: $accommodation->getDistrict()?->getSlug(),
+            districtArea: $accommodation->getDistrict()?->getArea()?->value,
         );
     }
 }

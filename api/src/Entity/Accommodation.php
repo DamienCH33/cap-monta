@@ -35,8 +35,9 @@ class Accommodation
     #[ORM\Column(enumType: AccommodationType::class)]
     private AccommodationType $type;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $district = null;
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?District $district = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
     private int $capacity;
@@ -138,12 +139,12 @@ class Accommodation
         return $this;
     }
 
-    public function getDistrict(): ?string
+    public function getDistrict(): ?District
     {
         return $this->district;
     }
 
-    public function setDistrict(?string $district): static
+    public function setDistrict(?District $district): static
     {
         $this->district = $district;
 

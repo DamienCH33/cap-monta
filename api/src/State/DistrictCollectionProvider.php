@@ -7,29 +7,31 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\DistrictResource;
-use App\Repository\AccommodationRepository;
+use App\Repository\DistrictRepository;
 
 /**
  * @implements ProviderInterface<DistrictResource>
  */
 final readonly class DistrictCollectionProvider implements ProviderInterface
 {
-    public function __construct(private AccommodationRepository $accommodations)
+    public function __construct(private DistrictRepository $districts)
     {
     }
 
     /**
+     * @param array<string, mixed> $uriVariables
+     * @param array<string, mixed> $context
+     *
      * @return list<DistrictResource>
      */
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         return array_map(
-            static fn (array $row): DistrictResource => new DistrictResource(
+            static fn (array $row): DistrictResource => DistrictResource::fromEntity(
                 $row['district'],
-                $row['resort'],
-                (int) $row['accommodationCount'],
+                $row['accommodationCount'],
             ),
-            $this->accommodations->countByDistrict(),
+            $this->districts->findAllWithAccommodationCount(),
         );
     }
 }

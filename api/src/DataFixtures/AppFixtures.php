@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\Entity\Accommodation;
+use App\Enum\DistrictArea;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
 use App\Factory\AccommodationFactory;
+use App\Factory\DistrictFactory;
 use App\Factory\PricePeriodFactory;
 use App\Factory\UnavailabilityFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -19,15 +21,55 @@ use Doctrine\Persistence\ObjectManager;
  */
 final class AppFixtures extends Fixture
 {
+    /**
+     * The 21 districts of the official CHM site plan (2024).
+     * Area read visually on the plan: to be confirmed on site. Null = not settled yet.
+     */
+    private const CHM_DISTRICTS = [
+        ['Sables', DistrictArea::Dunes],
+        ['Ajoncs', DistrictArea::Dunes],
+        ['La Lande', DistrictArea::Dunes],
+        ['Europa', DistrictArea::Dunes],
+        ['Floride', DistrictArea::Dunes],
+        ['Pins', null],
+        ['Californie', null],
+        ['Gironde', DistrictArea::Central],
+        ['Écureuils', DistrictArea::Central],
+        ['Bruyères', DistrictArea::Central],
+        ['Atlantique', DistrictArea::Central],
+        ['Clairvie', DistrictArea::Central],
+        ['Soleil', DistrictArea::Central],
+        ['Polynésie', DistrictArea::Central],
+        ['Caraïbe', DistrictArea::Roadside],
+        ['Gascogne', DistrictArea::Roadside],
+        ['Guyane', DistrictArea::Roadside],
+        ['Basque', DistrictArea::Roadside],
+        ['Hawaï', DistrictArea::Roadside],
+        ['Médoc', DistrictArea::Roadside],
+        ['Verdure', DistrictArea::Roadside],
+    ];
+
     public function load(ObjectManager $manager): void
     {
+        $districts = [];
+
+        foreach (self::CHM_DISTRICTS as $position => [$name, $area]) {
+            $districts[] = DistrictFactory::createOne([
+                'name' => $name,
+                'resort' => Resort::Chm,
+                'area' => $area,
+                'position' => $position,
+            ]);
+        }
+
         /** @var list<Accommodation> $accommodations */
         $accommodations = [
-            ...AccommodationFactory::createMany(9),
-            ...AccommodationFactory::createMany(3, [
-                'resort' => Resort::Euronat,
-                'district' => 'Euronat',
+            // Répartition fixe plutôt qu'aléatoire : les mêmes quartiers à chaque rechargement.
+            ...AccommodationFactory::createMany(9, static fn (int $i): array => [
+                'district' => $districts[($i * 5) % count($districts)],
             ]),
+            // Les quartiers d'Euronat ne sont pas encore référencés.
+            ...AccommodationFactory::createMany(3, ['resort' => Resort::Euronat]),
         ];
 
         foreach ($accommodations as $index => $accommodation) {

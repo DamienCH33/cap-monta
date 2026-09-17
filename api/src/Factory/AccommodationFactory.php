@@ -15,8 +15,6 @@ use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
  */
 final class AccommodationFactory extends PersistentObjectFactory
 {
-    private const DISTRICTS = ['Europa', 'Californie', 'Bruyère', 'Lalande', 'Écureuils', 'Médoc'];
-
     private const AMENITIES = [
         'climatisation', 'lave-vaisselle', 'micro-ondes',
         'terrasse', 'television', 'wifi', 'plancha',
@@ -46,7 +44,6 @@ final class AccommodationFactory extends PersistentObjectFactory
                 'slug' => self::faker()->unique()->slug(3),
                 'resort' => Resort::Chm,
                 'type' => $type,
-                'district' => self::faker()->randomElement(self::DISTRICTS),
                 'capacity' => $capacity,
                 'maxCapacity' => $capacity,
                 'bedrooms' => $bedrooms,

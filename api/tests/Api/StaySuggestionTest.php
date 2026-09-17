@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Api;
 
 use App\Factory\AccommodationFactory;
+use App\Factory\DistrictFactory;
 use App\Factory\UnavailabilityFactory;
 use App\Tests\ApiTestCase;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -96,9 +97,11 @@ final class StaySuggestionTest extends ApiTestCase
 
     public function testFiltersByDistrict(): void
     {
-        AccommodationFactory::createOne(['district' => 'Europa']);
-        AccommodationFactory::createOne(['district' => 'Médoc']);
+        // Les logements reçoivent un objet District…
+        AccommodationFactory::createOne(['district' => DistrictFactory::named('Europa')]);
+        AccommodationFactory::createOne(['district' => DistrictFactory::named('Médoc')]);
 
+        // … la requête HTTP, elle, transporte du texte : le slug ou le nom.
         self::assertSame(
             [1, 1, 1],
             array_column($this->suggest(['arrival' => '2026-07-13', 'departure' => '2026-07-20', 'district' => 'Europa']), 2),
