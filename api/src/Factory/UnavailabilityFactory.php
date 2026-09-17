@@ -7,6 +7,7 @@ namespace App\Factory;
 use App\Entity\Accommodation;
 use App\Entity\Unavailability;
 use App\Enum\UnavailabilitySource;
+use Symfony\Component\Clock\Clock;
 use Zenstruck\Foundry\Object\Instantiator;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
@@ -33,7 +34,9 @@ final class UnavailabilityFactory extends PersistentObjectFactory
         int $offset,
         UnavailabilitySource $source = UnavailabilitySource::Booking,
     ): Unavailability {
-        $start = (new \DateTimeImmutable('monday this week'))
+        $start = Clock::get()->now()
+            ->modify('monday this week')
+            ->setTime(0, 0)
             ->modify(sprintf('%+d weeks', $offset));
 
         return self::createOne([
@@ -48,7 +51,7 @@ final class UnavailabilityFactory extends PersistentObjectFactory
     protected function defaults(): array|callable
     {
         return static function (): array {
-            $start = new \DateTimeImmutable('monday next week');
+            $start = Clock::get()->now()->modify('monday next week')->setTime(0, 0);
 
             return [
                 'accommodation' => AccommodationFactory::new(),

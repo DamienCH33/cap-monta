@@ -120,4 +120,70 @@ class AccommodationRepository extends ServiceEntityRepository
             $rows,
         );
     }
+
+    /**
+     * Nearest stays of the same length, shifted by up to 14 days,
+     * with the number of accommodations free on each.
+     *
+     * @return list<array{arrival: string, departure: string, available_count: int}>
+     */
+    public function findNearestAvailableStays(
+        \DateTimeImmutable $arrival,
+        \DateTimeImmutable $departure,
+        \DateTimeImmutable $today,
+        int $guests = 1,
+        ?Resort $resort = null,
+        ?string $district = null,
+    ): array {
+        $sql = <<<'SQL'
+            WITH slot AS (
+                SELECT
+                    s.shift,
+                    CAST(:arrival AS date)   + s.shift AS arrival,
+                    CAST(:departure AS date) + s.shift AS departure
+                FROM generate_series(-14, 14) AS s(shift)
+                WHERE s.shift <> 0
+            )
+            SELECT
+                slot.arrival,
+                slot.departure,
+                COUNT(a.id) AS available_count
+            FROM slot
+            CROSS JOIN accommodation a
+            WHERE slot.arrival >= CAST(:today AS date)
+              AND a.max_capacity >= :guests
+              AND (CAST(:resort AS text)   IS NULL OR a.resort   = :resort)
+              AND (CAST(:district AS text) IS NULL OR a.district = :district)
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM unavailability u
+                  WHERE u.accommodation_id = a.id
+                    AND u.start_date < slot.departure
+                    AND u.end_date   > slot.arrival
+              )
+            GROUP BY slot.shift, slot.arrival, slot.departure
+            ORDER BY abs(slot.shift), slot.shift
+            LIMIT 3
+            SQL;
+
+        $rows = $this->getEntityManager()->getConnection()
+            ->executeQuery($sql, [
+                'arrival' => $arrival->format('Y-m-d'),
+                'departure' => $departure->format('Y-m-d'),
+                'today' => $today->format('Y-m-d'),
+                'guests' => $guests,
+                'resort' => $resort?->value,
+                'district' => $district,
+            ])
+            ->fetchAllAssociative();
+
+        return array_map(
+            static fn (array $row): array => [
+                'arrival' => (string) $row['arrival'],
+                'departure' => (string) $row['departure'],
+                'available_count' => (int) $row['available_count'],
+            ],
+            $rows,
+        );
+    }
 }
