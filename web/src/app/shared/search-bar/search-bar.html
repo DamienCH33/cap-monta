@@ -14,16 +14,10 @@
     />
   </label>
 
-  <label class="searchbar__field">
+  <div class="searchbar__field searchbar__field--guests">
     <span class="searchbar__label">Voyageurs</span>
-    <input
-      type="number"
-      name="guests"
-      min="1"
-      [ngModel]="guests()"
-      (ngModelChange)="guests.set($event)"
-    />
-  </label>
+    <cm-guest-picker [(value)]="guests" />
+  </div>
 
   <button class="searchbar__submit" type="submit" aria-label="Rechercher">
     <svg

@@ -15,8 +15,9 @@
     border-bottom: 1px solid var(--border);
     cursor: text;
 
-    &:last-of-type {
+    &--guests {
       border-bottom: none;
+      cursor: default;
     }
   }
 
@@ -68,7 +69,7 @@
       border-right: 1px solid var(--border);
       border-bottom: none;
 
-      &:nth-of-type(3) {
+      &--guests {
         border-right: none;
       }
     }

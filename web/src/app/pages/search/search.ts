@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 
 import { Accommodation } from '../../core/models/accommodation';
+import { Guests, guestsFromQuery, NO_GUESTS, travellerCount } from '../../core/models/guests';
 import { SearchCriteria } from '../../core/models/search-criteria';
 import { StaySuggestion } from '../../core/models/stay-suggestion';
 import { AccommodationService } from '../../core/services/accommodation';
@@ -26,6 +27,7 @@ export class Search implements OnInit {
   readonly criteria = signal<SearchCriteria>({});
   readonly results = signal<Accommodation[]>([]);
   readonly suggestions = signal<StaySuggestion[]>([]);
+  readonly guests = signal<Guests>(NO_GUESTS);
 
   ngOnInit(): void {
     this.seo.apply({
@@ -38,10 +40,11 @@ export class Search implements OnInit {
 
     this.route.queryParamMap
       .pipe(
+        tap((params) => this.guests.set(guestsFromQuery(params))),
         map((params) => ({
           arrival: params.get('arrivee') ?? undefined,
           departure: params.get('depart') ?? undefined,
-          guests: Number(params.get('voyageurs')) || undefined,
+          guests: travellerCount(this.guests()) || undefined,
           district: params.get('quartier') ?? undefined,
         })),
         tap((criteria) => this.criteria.set(criteria)),

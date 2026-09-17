@@ -2,7 +2,7 @@
   <cm-search-bar
     [initialArrival]="criteria().arrival ?? ''"
     [initialDeparture]="criteria().departure ?? ''"
-    [initialGuests]="criteria().guests ?? 2"
+    [initialGuests]="guests()"
   />
 
   @if (criteria().district) {
@@ -25,8 +25,8 @@
       <div class="results__empty">
         @if (criteria().arrival && criteria().departure) {
           <p>
-            Aucun logement libre du {{ criteria().arrival | date: 'd MMMM' }}
-            au {{ criteria().departure | date: 'd MMMM' }}.
+            Aucun logement libre du {{ criteria().arrival | date: 'd MMMM' }} au
+            {{ criteria().departure | date: 'd MMMM' }}.
           </p>
 
           @if (suggestions().length > 0) {
@@ -34,14 +34,14 @@
             <ul class="suggestions">
               @for (suggestion of suggestions(); track suggestion.arrival) {
                 <li>
-                  
-                    <a class="suggestions__chip"
+                  <a
+                    class="suggestions__chip"
                     routerLink="/recherche"
                     [queryParams]="{ arrivee: suggestion.arrival, depart: suggestion.departure }"
                     queryParamsHandling="merge"
                   >
-                    du {{ suggestion.arrival | date: 'EEE d MMM' }}
-                    au {{ suggestion.departure | date: 'EEE d MMM' }}
+                    du {{ suggestion.arrival | date: 'EEE d MMM' }} au
+                    {{ suggestion.departure | date: 'EEE d MMM' }}
                     <strong>
                       · {{ suggestion.availableCount }}
                       {{ suggestion.availableCount > 1 ? 'logements' : 'logement' }}
