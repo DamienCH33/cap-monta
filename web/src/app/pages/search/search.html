@@ -22,7 +22,45 @@
     @for (accommodation of results(); track accommodation.slug) {
       <cm-accommodation-card [accommodation]="accommodation" />
     } @empty {
-      <p class="results__empty">Aucun logement disponible sur ces dates.</p>
+      <div class="results__empty">
+        @if (criteria().arrival && criteria().departure) {
+          <p>
+            Aucun logement libre du {{ criteria().arrival | date: 'd MMMM' }}
+            au {{ criteria().departure | date: 'd MMMM' }}.
+          </p>
+
+          @if (suggestions().length > 0) {
+            <p>En décalant un peu vos dates :</p>
+            <ul class="suggestions">
+              @for (suggestion of suggestions(); track suggestion.arrival) {
+                <li>
+                  
+                    <a class="suggestions__chip"
+                    routerLink="/recherche"
+                    [queryParams]="{ arrivee: suggestion.arrival, depart: suggestion.departure }"
+                    queryParamsHandling="merge"
+                  >
+                    du {{ suggestion.arrival | date: 'EEE d MMM' }}
+                    au {{ suggestion.departure | date: 'EEE d MMM' }}
+                    <strong>
+                      · {{ suggestion.availableCount }}
+                      {{ suggestion.availableCount > 1 ? 'logements' : 'logement' }}
+                    </strong>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (criteria().district) {
+            <button type="button" class="suggestions__widen" (click)="clearDistrict()">
+              Chercher dans tout le domaine
+            </button>
+          }
+        } @else {
+          <p>Aucun logement ne correspond à cette recherche.</p>
+        }
+      </div>
     }
   </div>
 

@@ -72,3 +72,28 @@ cm-search-bar {
     }
   }
 }
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 16px;
+  padding: 0;
+  list-style: none;
+
+  &__chip {
+    @extend .filters__chip;
+    text-decoration: none;
+  }
+
+  &__widen {
+    padding: 0;
+    font-size: 13px;
+    color: var(--blue-dark);
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+}
