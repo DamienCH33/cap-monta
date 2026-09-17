@@ -1,0 +1,40 @@
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__brand">
+      <div class="footer__name">
+        <i class="ti ti-beach"></i>
+        <span>Cap Monta</span>
+      </div>
+      <p class="footer__pitch">
+        Locations de bungalows, mobil-homes et caravanes au CHM Montalivet et à Euronat. Calendriers
+        tenus par les propriétaires, sans commission.
+      </p>
+    </div>
+
+    <nav class="footer__column" aria-label="Louer">
+      <h2 class="footer__title">Louer</h2>
+      <a routerLink="/recherche">Rechercher un logement</a>
+      <a routerLink="/comment-ca-marche">Comment ça marche</a>
+    </nav>
+
+    <nav class="footer__column" aria-label="Propriétaires">
+      <h2 class="footer__title">Propriétaires</h2>
+      <a routerLink="/proprietaire">Publier un logement</a>
+    </nav>
+
+    <nav class="footer__column" aria-label="Informations">
+      <h2 class="footer__title">Informations</h2>
+      <a routerLink="/mentions-legales">Mentions légales</a>
+      <a routerLink="/conditions-generales">Conditions générales</a>
+      <a routerLink="/confidentialite">Données personnelles</a>
+    </nav>
+  </div>
+
+  <div class="container footer__legal">
+    <p>© {{ year }} Cap Monta</p>
+    <p>
+      Site indépendant, sans lien avec la gestion du CHM Montalivet ni celle d'Euronat. Cap Monta
+      met en relation propriétaires et locataires et n'est pas partie au contrat de location.
+    </p>
+  </div>
+</footer>

@@ -1,0 +1,84 @@
+.footer {
+  margin-top: 40px;
+  padding-top: 28px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+
+  &__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding-bottom: 24px;
+  }
+
+  &__name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+
+    .ti {
+      font-size: 19px;
+      color: var(--blue);
+    }
+  }
+
+  &__pitch {
+    max-width: 320px;
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  &__column {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    a {
+      color: var(--text-secondary);
+      text-decoration: none;
+
+      &:hover {
+        color: var(--blue);
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__title {
+    margin: 0 0 3px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__legal {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 0;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+
+    p {
+      margin: 0;
+      max-width: 720px;
+    }
+  }
+}
+
+@media (min-width: 760px) {
+  .footer__inner {
+    grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+    gap: 32px;
+  }
+}
