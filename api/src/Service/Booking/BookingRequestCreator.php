@@ -46,6 +46,8 @@ final class BookingRequestCreator
 
         $request
             ->setChildren($input->children)
+            ->setInfants($input->infants)
+            ->setPets($input->pets)
             ->setGuestPhone($input->guestPhone)
             ->setMessage($input->message)
             ->setEstimatedPrice($quote->total);

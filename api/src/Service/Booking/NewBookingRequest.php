@@ -18,9 +18,14 @@ final readonly class NewBookingRequest
         public int $children = 0,
         public ?string $guestPhone = null,
         public ?string $message = null,
+        public int $infants = 0,
+        public int $pets = 0,
     ) {
     }
 
+    /**
+     * People who take a bed. Infants and pets do not count against capacity.
+     */
     public function guests(): int
     {
         return $this->adults + $this->children;

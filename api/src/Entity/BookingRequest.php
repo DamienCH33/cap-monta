@@ -39,6 +39,12 @@ class BookingRequest
     private int $adults;
 
     #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
+    private int $infants = 0;
+
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
+    private int $pets = 0;
+
+    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
     private int $children = 0;
 
     #[ORM\Column(length: 255)]
@@ -120,6 +126,30 @@ class BookingRequest
     public function setChildren(int $children): static
     {
         $this->children = $children;
+
+        return $this;
+    }
+
+    public function getInfants(): int
+    {
+        return $this->infants;
+    }
+
+    public function setInfants(int $infants): static
+    {
+        $this->infants = $infants;
+
+        return $this;
+    }
+
+    public function getPets(): int
+    {
+        return $this->pets;
+    }
+
+    public function setPets(int $pets): static
+    {
+        $this->pets = $pets;
 
         return $this;
     }

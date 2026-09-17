@@ -55,6 +55,14 @@ final class BookingRequestResource
     #[Assert\PositiveOrZero]
     public int $children = 0;
 
+    #[Assert\PositiveOrZero]
+    #[Assert\LessThanOrEqual(5)]
+    public int $infants = 0;
+
+    #[Assert\PositiveOrZero]
+    #[Assert\LessThanOrEqual(5)]
+    public int $pets = 0;
+
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     public string $guestName = '';
@@ -102,6 +110,8 @@ final class BookingRequestResource
         $resource->status = $request->getStatus()->value;
         $resource->estimatedPrice = $request->getEstimatedPrice();
         $resource->expiresAt = $request->getExpiresAt();
+        $resource->infants = $request->getInfants();
+        $resource->pets = $request->getPets();
 
         return $resource;
     }

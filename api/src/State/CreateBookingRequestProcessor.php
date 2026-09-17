@@ -62,14 +62,16 @@ final readonly class CreateBookingRequestProcessor implements ProcessorInterface
         }
 
         $request = $this->creator->create($accommodation, new NewBookingRequest(
-            $data->arrival,
-            $data->departure,
-            $data->adults,
-            $data->guestName,
-            $data->guestEmail,
-            $data->children,
-            $data->guestPhone,
-            $data->message,
+            arrival: $data->arrival,
+            departure: $data->departure,
+            adults: $data->adults,
+            guestName: $data->guestName,
+            guestEmail: $data->guestEmail,
+            children: $data->children,
+            guestPhone: $data->guestPhone,
+            message: $data->message,
+            infants: $data->infants,
+            pets: $data->pets,
         ));
 
         return BookingRequestResource::fromEntity($request);
