@@ -63,21 +63,27 @@ final class AppFixtures extends Fixture
         }
 
         /** @var list<Accommodation> $accommodations */
-        $accommodations = [
-            // Répartition fixe plutôt qu'aléatoire : les mêmes quartiers à chaque rechargement.
-            // Un logement par quartier au minimum, puis quelques-uns de plus dans les premiers.
-            ...AccommodationFactory::createMany(count($districts) + 4, static fn (int $i): array => [
-                'district' => $districts[$i % count($districts)],
-            ]),
-            // Les quartiers d'Euronat ne sont pas encore référencés.
+        $accommodations = [];
+
+        foreach ($districts as $position => $district) {
+            // De 2 à 5 logements selon le quartier, toujours les mêmes d'un rechargement à l'autre.
+            array_push(
+                $accommodations,
+                ...AccommodationFactory::createMany(2 + $position % 4, ['district' => $district]),
+            );
+        }
+
+        // Les quartiers d'Euronat ne sont pas encore référencés.
+        array_push(
+            $accommodations,
             ...AccommodationFactory::createMany(3, ['resort' => Resort::Euronat]),
-        ];
+        );
 
         foreach ($accommodations as $index => $accommodation) {
             // Le premier reste sans tarif publié : la carte doit afficher
             // « Nous consulter » et la recherche ne doit pas le perdre pour autant.
             if (0 !== $index) {
-                $this->publishRates($accommodation, 35000 + $index * 3000);
+                $this->publishRates($accommodation, 35000 + ($index % 12) * 3000);
             }
 
             $this->fillCalendar($accommodation, $index);
