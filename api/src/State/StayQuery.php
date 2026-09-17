@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\State;
 
+use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -12,12 +13,26 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 final readonly class StayQuery
 {
+    public const ORDERS = ['price_asc', 'price_desc'];
+
+    /** Upper bound for list parameters: nobody ticks more than ten boxes. */
+    private const MAX_VALUES = 10;
+
+    /**
+     * @param list<string>            $districts
+     * @param list<AccommodationType> $types
+     * @param list<string>            $amenities
+     */
     private function __construct(
         public ?\DateTimeImmutable $arrival,
         public ?\DateTimeImmutable $departure,
         public int $guests,
         public ?Resort $resort,
-        public ?string $district,
+        public array $districts,
+        public array $types,
+        public int $bedrooms,
+        public array $amenities,
+        public ?string $order,
     ) {
     }
 
@@ -28,8 +43,6 @@ final readonly class StayQuery
     {
         $arrival = self::date($filters['arrival'] ?? null, 'arrival');
         $departure = self::date($filters['departure'] ?? null, 'departure');
-        $district = $filters['district'] ?? null;
-        $district = is_string($district) && '' !== trim($district) ? trim($district) : null;
 
         if ((null === $arrival) !== (null === $departure)) {
             throw new BadRequestHttpException('Both "arrival" and "departure" are required to search on dates.');
@@ -52,12 +65,74 @@ final readonly class StayQuery
                 ?? throw new BadRequestHttpException(sprintf('Unknown resort "%s".', $filters['resort']));
         }
 
-        return new self($arrival, $departure, $guests, $resort, $district);
+        $types = array_map(
+            static fn (string $value): AccommodationType => AccommodationType::tryFrom($value)
+                ?? throw new BadRequestHttpException(sprintf('Unknown accommodation type "%s".', $value)),
+            self::strings($filters['type'] ?? null, 'type'),
+        );
+
+        $bedrooms = isset($filters['bedrooms']) ? (int) $filters['bedrooms'] : 0;
+
+        if ($bedrooms < 0) {
+            throw new BadRequestHttpException('"bedrooms" cannot be negative.');
+        }
+
+        $order = $filters['order'] ?? null;
+
+        if (null !== $order && (!is_string($order) || !in_array($order, self::ORDERS, true))) {
+            throw new BadRequestHttpException(sprintf('"order" must be one of: %s.', implode(', ', self::ORDERS)));
+        }
+
+        return new self(
+            $arrival,
+            $departure,
+            $guests,
+            $resort,
+            self::strings($filters['district'] ?? null, 'district'),
+            $types,
+            $bedrooms,
+            self::strings($filters['amenities'] ?? null, 'amenities'),
+            $order,
+        );
     }
 
     public function hasDates(): bool
     {
         return null !== $this->arrival && null !== $this->departure;
+    }
+
+    /**
+     * Accepts a single value (district=Europa) or a list (district[]=Europa&district[]=Lalande).
+     *
+     * @return list<string>
+     */
+    private static function strings(mixed $value, string $name): array
+    {
+        if (null === $value || '' === $value) {
+            return [];
+        }
+
+        $values = is_array($value) ? $value : [$value];
+
+        if (count($values) > self::MAX_VALUES) {
+            throw new BadRequestHttpException(sprintf('"%s" accepts at most %d values.', $name, self::MAX_VALUES));
+        }
+
+        $clean = [];
+
+        foreach ($values as $item) {
+            if (!is_string($item)) {
+                throw new BadRequestHttpException(sprintf('"%s" must contain text values.', $name));
+            }
+
+            $item = trim($item);
+
+            if ('' !== $item) {
+                $clean[] = $item;
+            }
+        }
+
+        return array_values(array_unique($clean));
     }
 
     private static function date(mixed $value, string $name): ?\DateTimeImmutable

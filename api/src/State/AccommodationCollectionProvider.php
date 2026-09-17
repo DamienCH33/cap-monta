@@ -41,19 +41,16 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
         $filters = $context['filters'] ?? [];
         $query = StayQuery::fromFilters($filters);
 
-        if ($query->hasDates()) {
-            /** @var \DateTimeImmutable $arrival */
-            $arrival = $query->arrival;
-            /** @var \DateTimeImmutable $departure */
-            $departure = $query->departure;
-
-            $accommodations = $this->accommodations->searchAvailable($arrival, $departure, $query->guests, $query->resort, $query->district);
-        } else {
-            $criteria = null !== $query->resort ? ['resort' => $query->resort] : [];
-            $criteria = null !== $query->district ? array_merge($criteria, ['district' => $query->district]) : $criteria;
-            /** @var list<Accommodation> $accommodations */
-            $accommodations = $this->accommodations->findBy($criteria, ['slug' => 'ASC']);
-        }
+        $accommodations = $this->accommodations->search(
+            arrival: $query->arrival,
+            departure: $query->departure,
+            guests: $query->guests,
+            resort: $query->resort,
+            districts: $query->districts,
+            types: $query->types,
+            bedrooms: $query->bedrooms,
+            amenities: $query->amenities,
+        );
 
         $slugs = array_map(
             static fn (Accommodation $accommodation): string => $accommodation->getSlug(),
@@ -61,6 +58,11 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
         );
 
         $prices = $this->accommodations->findPriceFromBySlugs($slugs);
+
+        if (null !== $query->order) {
+            $accommodations = $this->sortByPrice($accommodations, $prices, 'price_desc' === $query->order);
+        }
+
         $from = $query->arrival ?? new \DateTimeImmutable('today');
         $to = $from->modify('+9 weeks');
 
@@ -74,5 +76,37 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
             ),
             $accommodations,
         );
+    }
+
+    /**
+     * Accommodations without a published rate always come last, whatever the direction.
+     *
+     * @param list<Accommodation>     $accommodations
+     * @param array<string, int|null> $prices
+     *
+     * @return list<Accommodation>
+     */
+    private function sortByPrice(array $accommodations, array $prices, bool $descending): array
+    {
+        usort($accommodations, static function (Accommodation $a, Accommodation $b) use ($prices, $descending): int {
+            $priceA = $prices[$a->getSlug()] ?? null;
+            $priceB = $prices[$b->getSlug()] ?? null;
+
+            if ($priceA === $priceB) {
+                return strcmp($a->getSlug(), $b->getSlug());
+            }
+
+            if (null === $priceA) {
+                return 1;
+            }
+
+            if (null === $priceB) {
+                return -1;
+            }
+
+            return $descending ? $priceB <=> $priceA : $priceA <=> $priceB;
+        });
+
+        return $accommodations;
     }
 }

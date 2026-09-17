@@ -5,8 +5,10 @@ namespace App\Repository;
 use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
 use App\Entity\Unavailability;
+use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,6 +23,8 @@ class AccommodationRepository extends ServiceEntityRepository
     }
 
     /**
+     * Kept for existing callers: a search on dates, with at most one district.
+     *
      * @return list<Accommodation>
      */
     public function searchAvailable(
@@ -30,29 +34,86 @@ class AccommodationRepository extends ServiceEntityRepository
         ?Resort $resort = null,
         ?string $district = null,
     ): array {
-        $overlapping = $this->getEntityManager()->createQueryBuilder()
-            ->select('1')
-            ->from(Unavailability::class, 'u')
-            ->where('u.accommodation = a');
+        return $this->search(
+            arrival: $arrival,
+            departure: $departure,
+            guests: $guests,
+            resort: $resort,
+            districts: null === $district ? [] : [$district],
+        );
+    }
 
-        StayOverlap::apply($overlapping, 'u');
-
+    /**
+     * The public search. Dates are optional; every list filter means "any of",
+     * except amenities, which the accommodation must all have.
+     *
+     * @param list<string>            $districts
+     * @param list<AccommodationType> $types
+     * @param list<string>            $amenities
+     *
+     * @return list<Accommodation>
+     */
+    public function search(
+        ?\DateTimeImmutable $arrival = null,
+        ?\DateTimeImmutable $departure = null,
+        int $guests = 1,
+        ?Resort $resort = null,
+        array $districts = [],
+        array $types = [],
+        int $bedrooms = 0,
+        array $amenities = [],
+    ): array {
         $qb = $this->createQueryBuilder('a')
             ->andWhere('a.maxCapacity >= :guests')
-            ->andWhere('NOT EXISTS ('.$overlapping->getDQL().')')
-            ->orderBy('a.slug', 'ASC')
             ->setParameter('guests', $guests)
-            ->setParameter('arrival', $arrival)
-            ->setParameter('departure', $departure);
+            ->orderBy('a.slug', 'ASC');
+
+        if (null !== $arrival && null !== $departure) {
+            $overlapping = $this->getEntityManager()->createQueryBuilder()
+                ->select('1')
+                ->from(Unavailability::class, 'u')
+                ->where('u.accommodation = a');
+
+            StayOverlap::apply($overlapping, 'u');
+
+            $qb->andWhere('NOT EXISTS ('.$overlapping->getDQL().')')
+                ->setParameter('arrival', $arrival)
+                ->setParameter('departure', $departure);
+        }
 
         if (null !== $resort) {
             $qb->andWhere('a.resort = :resort')
                 ->setParameter('resort', $resort);
         }
 
-        if (null !== $district) {
-            $qb->andWhere('a.district = :district')
-               ->setParameter('district', $district);
+        if ([] !== $districts) {
+            $qb->andWhere('a.district IN (:districts)')
+                ->setParameter('districts', $districts, ArrayParameterType::STRING);
+        }
+
+        if ([] !== $types) {
+            $qb->andWhere('a.type IN (:types)')
+                ->setParameter(
+                    'types',
+                    array_map(static fn (AccommodationType $type): string => $type->value, $types),
+                    ArrayParameterType::STRING,
+                );
+        }
+
+        if ($bedrooms > 0) {
+            $qb->andWhere('a.bedrooms >= :bedrooms')
+                ->setParameter('bedrooms', $bedrooms);
+        }
+
+        if ([] !== $amenities) {
+            $ids = $this->idsWithAllAmenities($amenities);
+
+            if ([] === $ids) {
+                return [];
+            }
+
+            $qb->andWhere('a.id IN (:ids)')
+                ->setParameter('ids', $ids, ArrayParameterType::STRING);
         }
 
         /** @var list<Accommodation> $result */
@@ -185,5 +246,23 @@ class AccommodationRepository extends ServiceEntityRepository
             ],
             $rows,
         );
+    }
+
+    /**
+     * DQL knows nothing about JSON, so this one question goes to PostgreSQL directly.
+     *
+     * @param list<string> $amenities
+     *
+     * @return list<string>
+     */
+    private function idsWithAllAmenities(array $amenities): array
+    {
+        /** @var list<string> $ids */
+        $ids = $this->getEntityManager()->getConnection()->fetchFirstColumn(
+            'SELECT id FROM accommodation WHERE CAST(amenities AS jsonb) @> CAST(:amenities AS jsonb)',
+            ['amenities' => json_encode($amenities, JSON_THROW_ON_ERROR)],
+        );
+
+        return $ids;
     }
 }

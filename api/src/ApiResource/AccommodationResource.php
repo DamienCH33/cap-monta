@@ -42,8 +42,27 @@ use App\State\AccommodationItemProvider;
                     schema: ['type' => 'integer', 'minimum' => 1],
                 ),
                 'district' => new QueryParameter(
-                    description: 'Quartier, tel que renvoyé par /api/districts',
-                    schema: ['type' => 'string'],
+                    description: 'Un ou plusieurs quartiers : district[]=Europa&district[]=Lalande',
+                    schema: ['type' => 'array', 'items' => ['type' => 'string']],
+                    castToArray: true,
+                ),
+                'type' => new QueryParameter(
+                    description: 'Un ou plusieurs types : type[]=caravan&type[]=bungalow',
+                    schema: ['type' => 'array', 'items' => ['type' => 'string', 'enum' => ['caravan', 'mobile_home', 'bungalow']]],
+                    castToArray: true,
+                ),
+                'bedrooms' => new QueryParameter(
+                    description: 'Nombre minimum de chambres',
+                    schema: ['type' => 'integer', 'minimum' => 1],
+                ),
+                'amenities' => new QueryParameter(
+                    description: 'Équipements, le logement doit tous les avoir : amenities[]=wifi&amenities[]=terrasse',
+                    schema: ['type' => 'array', 'items' => ['type' => 'string']],
+                    castToArray: true,
+                ),
+                'order' => new QueryParameter(
+                    description: 'Tri par prix à la semaine, les logements sans tarif en dernier',
+                    schema: ['type' => 'string', 'enum' => ['price_asc', 'price_desc']],
                 ),
             ],
             provider: AccommodationCollectionProvider::class,
