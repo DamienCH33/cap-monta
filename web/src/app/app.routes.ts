@@ -1,19 +1,36 @@
 import { Routes } from '@angular/router';
 
 import { Home } from './pages/home/home';
-import { Search } from './pages/search/search';
-import { AccommodationPage } from './pages/accommodation/accommodation';
-import { Privacy } from './pages/privacy/privacy';
-import { Terms } from './pages/terms/terms';
-import { LegalNotice } from './pages/legal-notice/legal-notice';
-import { HowItWorks } from './pages/how-it-works/how-it-works';
 
+/**
+ * L'accueil est chargé tout de suite.
+ * Les autres pages ne sont téléchargées que lorsqu'on les visite.
+ */
 export const routes: Routes = [
   { path: '', component: Home },
-  { path: 'recherche', component: Search },
-  { path: 'logement/:slug', component: AccommodationPage },
-  { path: 'comment-ca-marche', component: HowItWorks },
-  { path: 'mentions-legales', component: LegalNotice },
-  { path: 'conditions-generales', component: Terms },
-  { path: 'confidentialite', component: Privacy },
+  {
+    path: 'recherche',
+    loadComponent: () => import('./pages/search/search').then((m) => m.Search),
+  },
+  {
+    path: 'logement/:slug',
+    loadComponent: () =>
+      import('./pages/accommodation/accommodation').then((m) => m.AccommodationPage),
+  },
+  {
+    path: 'comment-ca-marche',
+    loadComponent: () => import('./pages/how-it-works/how-it-works').then((m) => m.HowItWorks),
+  },
+  {
+    path: 'mentions-legales',
+    loadComponent: () => import('./pages/legal-notice/legal-notice').then((m) => m.LegalNotice),
+  },
+  {
+    path: 'conditions-generales',
+    loadComponent: () => import('./pages/terms/terms').then((m) => m.Terms),
+  },
+  {
+    path: 'confidentialite',
+    loadComponent: () => import('./pages/privacy/privacy').then((m) => m.Privacy),
+  },
 ];
