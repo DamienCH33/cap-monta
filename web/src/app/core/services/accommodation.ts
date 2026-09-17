@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { Accommodation, JsonLdCollection } from '../models/accommodation';
 import { SearchCriteria } from '../models/search-criteria';
 import { Availability } from '../models/availability';
+import { StaySuggestion } from '../models/stay-suggestion';
 
 @Injectable({ providedIn: 'root' })
 export class AccommodationService {
@@ -15,6 +16,15 @@ export class AccommodationService {
   search(criteria: SearchCriteria): Observable<Accommodation[]> {
     return this.http
       .get<JsonLdCollection<Accommodation>>(`${this.api}/accommodations`, {
+        params: this.toParams(criteria),
+        headers: { Accept: 'application/ld+json' },
+      })
+      .pipe(map((response) => response.member));
+  }
+
+  suggest(criteria: SearchCriteria): Observable<StaySuggestion[]> {
+    return this.http
+      .get<JsonLdCollection<StaySuggestion>>(`${this.api}/stay-suggestions`, {
         params: this.toParams(criteria),
         headers: { Accept: 'application/ld+json' },
       })
