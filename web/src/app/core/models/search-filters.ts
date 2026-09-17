@@ -154,3 +154,11 @@ function values(params: ParamMap, name: string): string[] {
 function unique<T>(list: T[]): T[] {
   return [...new Set(list)];
 }
+
+export function districtSide(district: string | null): DistrictSide | null {
+  if (!district) {
+    return null;
+  }
+
+  return DISTRICT_SIDES.find((zone) => zone.districts.includes(district))?.side ?? null;
+}
