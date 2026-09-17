@@ -14,4 +14,11 @@ export class AccommodationCard {
   readonly accommodation = input.required<Accommodation>();
 
   readonly typeLabel = typeLabel;
+
+  stripLabel(): string {
+    const weeks = this.accommodation().availability;
+    const free = weeks.filter((week) => week.free).length;
+
+    return `${free} ${free > 1 ? 'semaines libres' : 'semaine libre'} sur ${weeks.length}`;
+  }
 }

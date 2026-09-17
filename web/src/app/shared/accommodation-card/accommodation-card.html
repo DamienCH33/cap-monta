@@ -19,7 +19,7 @@
       }
     </p>
 
-    <div class="strip">
+    <div class="strip" role="img" [attr.aria-label]="stripLabel()">
       @for (week of accommodation().availability; track week.start) {
         <span
           class="strip__week"
