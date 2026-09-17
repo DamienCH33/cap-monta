@@ -4,16 +4,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const NAMES = [
-  'arrow-left',
-  'beach',
-  'building-store',
-  'chevron-left',
-  'chevron-right',
-  'photo',
-  'ripple',
-  'trees',
-];
+const NAMES = ['arrow-left', 'beach', 'building-store', 'chevron-left', 'chevron-right', 'photo', 'ripple', 'trees'];
 
 const source = path.join(__dirname, '..', 'node_modules', '@tabler', 'icons', 'icons', 'outline');
 const target = path.join(__dirname, '..', 'src', 'app', 'shared', 'icon', 'icons.ts');
@@ -21,15 +12,34 @@ const target = path.join(__dirname, '..', 'src', 'app', 'shared', 'icon', 'icons
 const entries = NAMES.map((name) => {
   const svg = fs.readFileSync(path.join(source, `${name}.svg`), 'utf8');
 
-  const inner = svg
-    .replace(/^[\s\S]*?<svg[^>]*>/, '')
-    .replace(/<\/svg>\s*$/, '')
-    .replace(/<path[^>]*stroke="none"[^>]*\/>/, '')
+  const body = svg
+    .replace(/^[\s\S]*?<svg[^>]*>/, '') // retire la balise <svg> d'ouverture
+    .replace(/<\/svg>\s*$/, '') // et celle de fermeture
     .replace(/\s+/g, ' ')
-    .replace(/<path(?=[a-z])/g, '<path ') // remet l'espace si la source l'a perdu
-    .trim();
+    .replace(/<path(?=[a-z])/g, '<path '); // remet l'espace si la source l'a perdu
 
-  return `  ${JSON.stringify(name)}: ${JSON.stringify(inner)},`;
+  const paths = [];
+
+  for (const [, tag, attributes] of body.matchAll(/<(\w+)\b([^>]*)>/g)) {
+    // Le composant ne sait dessiner que des <path> : on refuse le reste plutôt que de le perdre.
+    if (tag !== 'path') {
+      throw new Error(`${name} : élément <${tag}> non pris en charge`);
+    }
+
+    if (/stroke="none"/.test(attributes)) {
+      continue; // cadre transparent 24×24, inutile
+    }
+
+    const d = attributes.match(/\bd="([^"]+)"/);
+
+    if (!d) {
+      throw new Error(`${name} : tracé sans attribut d`);
+    }
+
+    paths.push(d[1]);
+  }
+
+  return `  ${JSON.stringify(name)}: ${JSON.stringify(paths)},`;
 });
 
 const output = `// Fichier généré par scripts/build-icons.cjs depuis @tabler/icons (MIT).
