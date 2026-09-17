@@ -160,4 +160,43 @@ final class BookingRequestApiTest extends ApiTestCase
         $this->em->persist($period);
         $this->em->flush();
     }
+
+    public function testKeepsInfantsAndPets(): void
+    {
+        $this->createAccommodation('mobile-home-famille');
+
+        $payload = $this->post([
+            'accommodationSlug' => 'mobile-home-famille',
+            'arrival' => '2026-07-01',
+            'departure' => '2026-07-08',
+            'adults' => 2,
+            'children' => 2,
+            'infants' => 1,
+            'pets' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+        ]);
+
+        // 2 adultes + 2 enfants dans un logement 4 places : le bébé et les animaux ne comptent pas.
+        self::assertResponseStatusCodeSame(201);
+        self::assertSame(1, $payload['infants'] ?? null);
+        self::assertSame(2, $payload['pets'] ?? null);
+    }
+
+    public function testRejectsTooManyPets(): void
+    {
+        $this->createAccommodation('mobile-home-chenil');
+
+        $this->post([
+            'accommodationSlug' => 'mobile-home-chenil',
+            'arrival' => '2026-07-01',
+            'departure' => '2026-07-08',
+            'adults' => 2,
+            'pets' => 6,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+    }
 }
