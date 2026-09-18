@@ -60,6 +60,10 @@ class Accommodation
     #[ORM\Column(type: Types::TEXT)]
     private string $description;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private User $owner;
+
     public function __construct(
         string $slug,
         Resort $resort,
@@ -67,6 +71,7 @@ class Accommodation
         int $capacity,
         int $bedrooms,
         string $description,
+        User $owner,
     ) {
         $now = new \DateTimeImmutable();
 
@@ -80,6 +85,7 @@ class Accommodation
         $this->maxCapacity = $capacity;
         $this->bedrooms = $bedrooms;
         $this->description = $description;
+        $this->owner = $owner;
     }
 
     #[ORM\PreUpdate]
@@ -227,5 +233,10 @@ class Accommodation
         $this->description = $description;
 
         return $this;
+    }
+
+    public function getOwner(): User
+    {
+        return $this->owner;
     }
 }
