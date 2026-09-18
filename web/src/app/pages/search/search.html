@@ -110,25 +110,33 @@
           <p>Aucun logement ne correspond à cette recherche.</p>
         }
 
-        @if (filters().districts.length > 0) {
-          <button type="button" class="suggestions__widen" (click)="clearDistricts()">
-            Chercher dans tout le domaine
-          </button>
-        }
+        @if (filters().districts.length > 0 || otherFilters()) {
+          <div class="results__actions">
+            @if (filters().districts.length > 0) {
+              <button type="button" class="suggestions__widen" (click)="clearDistricts()">
+                Chercher dans tout le domaine
+              </button>
+            }
 
-        @if (activeCount() > 0) {
-          <button type="button" class="suggestions__widen" (click)="clearFilters()">
-            Retirer tous les filtres
-          </button>
+            @if (otherFilters()) {
+              <button type="button" class="suggestions__widen" (click)="clearFilters()">
+                Retirer tous les filtres
+              </button>
+            }
+          </div>
         }
       </div>
     }
   </div>
+
   <cm-pagination [page]="page()" [totalPages]="totalPages()" />
-  <div class="legend">
-    <span><i class="legend__swatch legend__swatch--free"></i> libre</span>
-    <span><i class="legend__swatch legend__swatch--taken"></i> réservé</span>
-  </div>
+
+  @if (results().length > 0) {
+    <div class="legend">
+      <span><i class="legend__swatch legend__swatch--free"></i> libre</span>
+      <span><i class="legend__swatch legend__swatch--taken"></i> réservé</span>
+    </div>
+  }
 
   @if (sheetOpen()) {
     <cm-filter-sheet

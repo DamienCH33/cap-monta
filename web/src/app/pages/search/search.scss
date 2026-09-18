@@ -180,3 +180,28 @@ cm-search-bar {
 .results__page {
   color: var(--text-muted);
 }
+
+.results__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.suggestions__widen {
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--blue);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--blue);
+    color: #fff;
+  }
+}

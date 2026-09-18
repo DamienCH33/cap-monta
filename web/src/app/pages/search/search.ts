@@ -62,6 +62,11 @@ export class Search implements OnInit {
   readonly total = signal(0);
   readonly page = signal(1);
   readonly totalPages = signal(1);
+  readonly otherFilters = computed(() => {
+    const filters = this.filters();
+
+    return filters.types.length > 0 || filters.bedrooms > 0 || filters.amenities.length > 0;
+  });
 
   ngOnInit(): void {
     this.seo.apply({
