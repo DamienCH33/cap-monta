@@ -58,10 +58,28 @@ app.get('/sitemap.xml', async (_request, response) => {
     for (const slug of await listSlugs()) {
       paths.push(`/logement/${encodeURIComponent(slug)}`);
     }
+
+    for (const slug of await listDistrictSlugs()) {
+      paths.push(`/quartier/${encodeURIComponent(slug)}`);
+    }
   } catch (error) {
     // Une API indisponible ne doit pas produire une erreur 500 : Google
     // retenterait plus tard, mais un sitemap partiel vaut mieux qu'aucun.
     console.error('sitemap: API injoignable, seules les pages fixes sont listées', error);
+  }
+
+  async function listDistrictSlugs(): Promise<string[]> {
+    const response = await fetch(`${apiUrl}/api/districts`, {
+      headers: { Accept: 'application/ld+json' },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API responded ${response.status}`);
+    }
+
+    const payload = (await response.json()) as { member: { slug: string }[] };
+
+    return payload.member.map((district) => district.slug);
   }
 
   const xml = [

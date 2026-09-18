@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { Params, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { Accommodation } from '../../core/models/accommodation';
 import { District } from '../../core/models/district';
@@ -62,9 +62,5 @@ export class Home implements OnInit {
 
     this.accommodations.search({}).subscribe((found) => this.highlights.set(found.slice(0, 3)));
     this.districtApi.list().subscribe((found) => this.districts.set(found));
-  }
-
-  queryParamsFor(district: District): Params {
-    return { quartier: district.name };
   }
 }

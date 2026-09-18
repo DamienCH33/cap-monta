@@ -24,12 +24,11 @@
     <p class="section__lead">Chacun a son ambiance, sa distance à la plage et ses tarifs.</p>
 
     <div class="tiles">
-      @for (district of districts(); track district.name) {
+      @for (district of districts(); track district.slug) {
         <a
           class="tile"
-          [class.tile--forest]="district.resort === 'euronat'"
-          routerLink="/recherche"
-          [queryParams]="queryParamsFor(district)"
+          [class.tile--forest]="district.area === 'central'"
+          [routerLink]="['/quartier', district.slug]"
         >
           <span class="tile__name">{{ district.name }}</span>
           <span class="tile__count">
