@@ -13,10 +13,21 @@ framework:
             policy: "sliding_window"
             limit: 60
             interval: "1 minute"
+
+        # Une inscription est un acte unique. Trois par heure et par IP, c'est large
+        # pour un foyer, et ça empêche d'utiliser le formulaire comme une machine
+        # à envoyer des emails à des inconnus.
+        registrations:
+            policy: "sliding_window"
+            limit: 3
+            interval: "1 hour"
+
 when@test:
     framework:
         rate_limiter:
             booking_requests:
                 limit: 1000
             quotes:
+                limit: 1000
+            registrations:
                 limit: 1000
