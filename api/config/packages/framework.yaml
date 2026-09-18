@@ -3,7 +3,11 @@ framework:
     trusted_proxies: "%env(TRUSTED_PROXIES)%"
     trusted_headers: ["x-forwarded-for", "x-forwarded-proto"]
 
-    session: true
+    session:
+        handler_id: null
+        cookie_secure: auto
+        cookie_samesite: lax
+        cookie_httponly: true
 
     exceptions:
         Symfony\Component\HttpKernel\Exception\BadRequestHttpException:
