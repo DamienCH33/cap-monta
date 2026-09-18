@@ -30,4 +30,4 @@ when@test:
             quotes:
                 limit: 1000
             registrations:
-                limit: 1000
+                limit: 20
