@@ -9,6 +9,8 @@ use App\Entity\Unavailability;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
+use App\Factory\AccommodationFactory;
+use App\Factory\PricePeriodFactory;
 use App\Tests\ApiTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -129,5 +131,44 @@ final class AccommodationApiTest extends ApiTestCase
         $this->em->flush();
 
         return $accommodation;
+    }
+
+    public function testTheAccommodationPageListsItsPricePeriods(): void
+    {
+        $accommodation = AccommodationFactory::createOne(['slug' => 'mobil-home-tarifs']);
+        // Créée en second, mais attendue en premier : la fiche doit trier par date.
+        PricePeriodFactory::createOne([
+            'accommodation' => $accommodation,
+            'startDate' => new \DateTimeImmutable('2027-07-01'),
+            'endDate' => new \DateTimeImmutable('2027-08-01'),
+            'weeklyPrice' => 70000,
+            'nightlyPrice' => null,
+            'minimumNights' => 7,
+        ]);
+        PricePeriodFactory::createOne([
+            'accommodation' => $accommodation,
+            'startDate' => new \DateTimeImmutable('2027-04-01'),
+            'endDate' => new \DateTimeImmutable('2027-07-01'),
+            'weeklyPrice' => 40000,
+            'nightlyPrice' => 7000,
+            'minimumNights' => 3,
+        ]);
+        // Le tarif d'un autre logement ne doit pas apparaître ici.
+        PricePeriodFactory::createOne(['weeklyPrice' => 99000]);
+
+        $this->client->request('GET', '/api/accommodations/mobil-home-tarifs', server: ['HTTP_ACCEPT' => 'application/ld+json']);
+
+        self::assertResponseIsSuccessful();
+
+        /** @var array{pricePeriods: list<array{weeklyPrice: ?int, nightlyPrice: ?int, minimumNights: int}>} $body */
+        $body = json_decode((string) $this->client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
+
+        self::assertSame(
+            [[40000, 7000, 3], [70000, null, 7]],
+            array_map(
+                static fn (array $period): array => [$period['weeklyPrice'], $period['nightlyPrice'], $period['minimumNights']],
+                $body['pricePeriods'],
+            ),
+        );
     }
 }
