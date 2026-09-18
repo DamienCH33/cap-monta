@@ -62,6 +62,10 @@ export const routes: Routes = [
       import('./pages/reset-password/reset-password').then((m) => m.ResetPassword),
   },
   {
+    path: 'proprietaire',
+    loadComponent: () => import('./pages/owner-landing/owner-landing').then((m) => m.OwnerLanding),
+  },
+  {
     path: '**',
     loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFound),
   },

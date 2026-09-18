@@ -63,6 +63,7 @@ app.get('/sitemap.xml', async (_request, response) => {
   const paths = [
     '/',
     '/recherche',
+    '/proprietaire',
     '/comment-ca-marche',
     '/mentions-legales',
     '/conditions-generales',

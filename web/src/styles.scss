@@ -356,3 +356,22 @@ h3 {
 .auth__forgot a {
   color: var(--text-secondary);
 }
+
+.static-page__cta {
+  margin: 1.75rem 0 0;
+}
+
+.static-page__button {
+  display: inline-block;
+  padding: 0.7rem 1.5rem;
+  border-radius: 999px;
+  background: var(--blue);
+  color: var(--surface-2);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--blue-dark);
+  }
+}
