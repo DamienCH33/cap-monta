@@ -33,4 +33,8 @@ export const routes: Routes = [
     path: 'confidentialite',
     loadComponent: () => import('./pages/privacy/privacy').then((m) => m.Privacy),
   },
+  {
+    path: 'quartier/:slug',
+    loadComponent: () => import('./pages/district/district').then((m) => m.DistrictPage),
+  },
 ];

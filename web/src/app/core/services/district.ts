@@ -18,4 +18,10 @@ export class DistrictService {
       })
       .pipe(map((response) => response.member));
   }
+
+  get(slug: string): Observable<District> {
+    return this.http.get<District>(`${this.baseUrl}/districts/${encodeURIComponent(slug)}`, {
+      headers: { Accept: 'application/ld+json' },
+    });
+  }
 }

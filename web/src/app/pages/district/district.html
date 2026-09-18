@@ -1,0 +1,84 @@
+@if (missing()) {
+  <div class="container district__empty">
+    <h1 class="district__title">Quartier introuvable</h1>
+    <p>Ce quartier n'existe pas, ou il n'est pas encore référencé sur Cap Monta.</p>
+    <a class="district__cta" routerLink="/recherche">Voir tous les logements</a>
+  </div>
+} @else if (district(); as quartier) {
+  <div class="container">
+    <nav class="crumbs" aria-label="Fil d'Ariane">
+      <a routerLink="/">Accueil</a>
+      <span aria-hidden="true">›</span>
+      <a routerLink="/recherche">Rechercher</a>
+      <span aria-hidden="true">›</span>
+      <span>{{ quartier.name }}</span>
+    </nav>
+
+    <h1 class="district__title">Louer dans le quartier {{ quartier.name }}</h1>
+
+    @if (area(); as zone) {
+      <p class="district__area">{{ zone.label }}</p>
+    }
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat__value">{{ total() }}</span>
+        <span class="stat__label">{{ total() > 1 ? 'logements' : 'logement' }}</span>
+      </div>
+
+      @if (quartier.priceMin && quartier.priceMax) {
+        <div class="stat">
+          <span class="stat__value">
+            {{ quartier.priceMin / 100 | number: '1.0-0' }} –
+            {{ quartier.priceMax / 100 | number: '1.0-0' }} €
+          </span>
+          <span class="stat__label">par semaine</span>
+        </div>
+      }
+
+      <div class="stat">
+        <span class="stat__value">{{ quartier.resort === 'euronat' ? 'Euronat' : 'CHM' }}</span>
+        <span class="stat__label">domaine</span>
+      </div>
+    </div>
+
+    @if (quartier.intro) {
+      <p class="district__intro">{{ quartier.intro }}</p>
+    }
+
+    @if (quartier.highlights && quartier.highlights.length > 0) {
+      <ul class="points">
+        @for (point of quartier.highlights; track point) {
+          <li>{{ point }}</li>
+        }
+      </ul>
+    }
+
+    <div class="results">
+      @for (accommodation of results(); track accommodation.slug) {
+        <cm-accommodation-card [accommodation]="accommodation" />
+      } @empty {
+        <p class="results__empty">Aucun logement publié dans ce quartier pour le moment.</p>
+      }
+    </div>
+
+    <cm-pagination [page]="page()" [totalPages]="totalPages()" />
+
+    <a class="district__cta" routerLink="/recherche" [queryParams]="{ quartier: quartier.slug }"
+      >Chercher ici sur vos dates</a
+    >
+
+    @if (neighbours().length > 0) {
+      <section class="neighbours">
+        <h2 class="neighbours__title">{{ neighboursTitle() }}</h2>
+        <div class="neighbours__list">
+          @for (other of neighbours(); track other.slug) {
+            <a class="neighbours__link" [routerLink]="['/quartier', other.slug]"
+              >{{ other.name }} · {{ other.accommodationCount }}</a
+            >
+          }
+        </div>
+      </section>
+    }
+  </div>
+}
