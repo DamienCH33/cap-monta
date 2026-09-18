@@ -22,11 +22,13 @@ framework:
             limit: 3
             interval: "1 hour"
 
+        # Un oubli de mot de passe arrive, un script qui en demande cinquante non.
         password_resets:
             policy: "sliding_window"
             limit: 5
             interval: "1 hour"
 
+# Un test ne doit jamais échouer parce qu'un compteur partagé est plein.
 when@test:
     framework:
         rate_limiter:
@@ -35,4 +37,16 @@ when@test:
             quotes:
                 limit: 1000
             registrations:
+                limit: 1000
+            password_resets:
+                limit: 1000
+
+# Assez large pour travailler, assez bas pour croiser le 429 de temps en temps
+# et se souvenir qu'il existe.
+when@dev:
+    framework:
+        rate_limiter:
+            registrations:
+                limit: 20
+            password_resets:
                 limit: 20
