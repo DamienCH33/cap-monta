@@ -28,5 +28,20 @@ services:
       timeout: 3s
       retries: 10
 
+  # Faux serveur SMTP : les emails partent pour de vrai mais s'arrêtent ici.
+  # Boîte de réception sur http://localhost:8025 — pas de volume, rien à conserver.
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:${CAPMONTA_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${CAPMONTA_MAILPIT_PORT:-8025}:8025"
+    environment:
+      MP_MAX_MESSAGES: 200
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   database_data:

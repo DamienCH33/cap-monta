@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Api;
 
 use App\Entity\Accommodation;
-use App\Entity\User;
 use App\Entity\PricePeriod;
 use App\Entity\Unavailability;
+use App\Entity\User;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
