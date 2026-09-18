@@ -199,4 +199,26 @@ final class BookingRequestApiTest extends ApiTestCase
 
         self::assertResponseStatusCodeSame(422);
     }
+
+    public function testRefusesUnknownFieldsInTheBody(): void
+    {
+        $this->createAccommodation('mobile-home-strict');
+
+        $payload = $this->post([
+            'accommodationSlug' => 'mobile-home-strict',
+            'arrival' => '2026-07-01',
+            'departure' => '2026-07-08',
+            'adults' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+            'status' => 'confirmed',
+            'adult' => 9,
+        ]);
+
+        self::assertResponseStatusCodeSame(400);
+
+        $detail = is_string($payload['detail'] ?? null) ? $payload['detail'] : '';
+        self::assertStringContainsString('"status"', $detail);
+        self::assertStringContainsString('"adult"', $detail);
+    }
 }

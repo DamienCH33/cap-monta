@@ -12,6 +12,7 @@ use App\Entity\BookingRequest;
 use App\Service\Booking\BookingRefusedException;
 use App\State\BookingRequestItemProvider;
 use App\State\CreateBookingRequestProcessor;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -26,6 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(
             uriTemplate: '/booking-requests',
             processor: CreateBookingRequestProcessor::class,
+            denormalizationContext: [AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES => false],
             exceptionToStatus: [BookingRefusedException::class => 409],
         ),
         new Get(
