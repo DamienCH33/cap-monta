@@ -67,7 +67,10 @@
   }
 
   <p class="results__count">
-    {{ results().length }} {{ results().length > 1 ? 'logements' : 'logement' }}
+    {{ total() }} {{ total() > 1 ? 'logements' : 'logement' }}
+    @if (totalPages() > 1) {
+      <span class="results__page">· page {{ page() }} sur {{ totalPages() }}</span>
+    }
   </p>
 
   <div class="results">
@@ -121,7 +124,7 @@
       </div>
     }
   </div>
-
+  <cm-pagination [page]="page()" [totalPages]="totalPages()" />
   <div class="legend">
     <span><i class="legend__swatch legend__swatch--free"></i> libre</span>
     <span><i class="legend__swatch legend__swatch--taken"></i> réservé</span>

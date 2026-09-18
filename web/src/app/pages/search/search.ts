@@ -24,10 +24,11 @@ import { SearchBar } from '../../shared/search-bar/search-bar';
 import { FilterSheet } from '../../shared/filter-sheet/filter-sheet';
 import { District } from '../../core/models/district';
 import { DistrictService } from '../../core/services/district';
+import { Pagination } from '../../shared/pagination/pagination';
 
 @Component({
   selector: 'cm-search',
-  imports: [SearchBar, AccommodationCard, FilterSheet, RouterLink, DatePipe],
+  imports: [SearchBar, AccommodationCard, FilterSheet, RouterLink, DatePipe, Pagination],
   templateUrl: './search.html',
   styleUrl: './search.scss',
 })
@@ -58,6 +59,9 @@ export class Search implements OnInit {
   });
   readonly sortOptions = SORT_OPTIONS;
   readonly districts = signal<District[]>([]);
+  readonly total = signal(0);
+  readonly page = signal(1);
+  readonly totalPages = signal(1);
 
   ngOnInit(): void {
     this.seo.apply({
@@ -87,14 +91,15 @@ export class Search implements OnInit {
             bedrooms: filters.bedrooms || undefined,
             amenities: filters.amenities,
             order: filters.order ?? undefined,
+            page: Number(params.get('page')) || 1,
           };
         }),
         tap((criteria) => this.criteria.set(criteria)),
         switchMap((criteria) =>
-          this.accommodations.search(criteria).pipe(
+          this.accommodations.searchPage(criteria).pipe(
             switchMap((found) => {
               const needsSuggestions =
-                found.length === 0 && !!criteria.arrival && !!criteria.departure;
+                found.items.length === 0 && !!criteria.arrival && !!criteria.departure;
 
               const suggestions$ = needsSuggestions
                 ? this.accommodations
@@ -108,16 +113,18 @@ export class Search implements OnInit {
         ),
       )
       .subscribe(({ found, suggestions }) => {
-        this.results.set(found);
+        this.results.set(found.items);
+        this.total.set(found.total);
+        this.page.set(found.page);
+        this.totalPages.set(found.totalPages);
         this.suggestions.set(suggestions);
       });
   }
 
   applyFilters(filters: SearchFilters): void {
     this.router.navigate(['/recherche'], {
-      queryParams: filtersToQuery(filters),
+      queryParams: { ...filtersToQuery(filters), page: null },
       queryParamsHandling: 'merge',
-      // Chaque clic dans le panneau ne doit pas ajouter une entrée à l'historique.
       replaceUrl: true,
     });
   }

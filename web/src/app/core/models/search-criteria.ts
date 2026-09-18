@@ -10,4 +10,5 @@ export interface SearchCriteria {
   bedrooms?: number;
   amenities?: string[];
   order?: SortOrder;
+  page?: number;
 }

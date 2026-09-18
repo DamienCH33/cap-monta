@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { Accommodation, JsonLdCollection } from '../models/accommodation';
+import { Accommodation, AccommodationPage, JsonLdCollection } from '../models/accommodation';
 import { SearchCriteria } from '../models/search-criteria';
 import { Availability } from '../models/availability';
 import { StaySuggestion } from '../models/stay-suggestion';
@@ -20,6 +20,28 @@ export class AccommodationService {
         headers: { Accept: 'application/ld+json' },
       })
       .pipe(map((response) => response.member));
+  }
+
+  searchPage(criteria: SearchCriteria): Observable<AccommodationPage> {
+    return this.http
+      .get<JsonLdCollection<Accommodation>>(`${this.api}/accommodations`, {
+        params: this.toParams(criteria),
+        headers: { Accept: 'application/ld+json' },
+      })
+      .pipe(
+        map((response) => {
+          const page = criteria.page ?? 1;
+
+          return {
+            items: response.member,
+            total: response.totalItems ?? response.member.length,
+            page,
+            // Le lien « dernière page » de l'API donne le nombre de pages, sans dupliquer ici
+            // la taille de page choisie côté Symfony.
+            totalPages: pageNumberIn(response.view?.last) ?? page,
+          };
+        }),
+      );
   }
 
   suggest(criteria: SearchCriteria): Observable<StaySuggestion[]> {
@@ -85,7 +107,21 @@ export class AccommodationService {
     if (criteria.order) {
       params = params.set('order', criteria.order);
     }
+    if (criteria.page && criteria.page > 1) {
+      params = params.set('page', criteria.page);
+    }
 
     return params;
   }
+}
+
+/** Extrait le numéro de page d'un lien d'API du type « /api/accommodations?page=5 ». */
+function pageNumberIn(url: string | undefined): number | null {
+  if (!url) {
+    return null;
+  }
+
+  const page = new URLSearchParams(url.split('?')[1] ?? '').get('page');
+
+  return page ? Number(page) : null;
 }

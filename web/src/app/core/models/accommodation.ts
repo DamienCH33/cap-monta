@@ -20,6 +20,7 @@ export interface Accommodation {
 export interface JsonLdCollection<T> {
   member: T[];
   totalItems: number;
+  view?: { last?: string; next?: string; previous?: string };
 }
 
 export interface AvailabilityWeek {
@@ -43,4 +44,11 @@ const TYPE_LABELS: Record<string, string> = {
 
 export function typeLabel(type: string): string {
   return TYPE_LABELS[type] ?? 'Logement';
+}
+
+export interface AccommodationPage {
+  items: Accommodation[];
+  total: number;
+  page: number;
+  totalPages: number;
 }
