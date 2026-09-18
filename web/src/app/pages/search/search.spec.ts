@@ -58,7 +58,7 @@ describe('Search', () => {
 
     const request = httpMock.expectOne((req) => isSuggest(req.url));
     expect(request.request.params.get('arrival')).toBe('2026-10-12');
-    expect(request.request.params.get('district')).toBe('Europa');
+    expect(request.request.params.getAll('district[]')).toEqual(['Europa']);
     request.flush(suggestions);
 
     harness.detectChanges();

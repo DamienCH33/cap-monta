@@ -45,18 +45,7 @@ export class AccommodationService {
   }
 
   suggest(criteria: SearchCriteria): Observable<StaySuggestion[]> {
-    let params = this.toParams({
-      arrival: criteria.arrival,
-      departure: criteria.departure,
-      guests: criteria.guests,
-      resort: criteria.resort,
-    });
-
-    const districts = criteria.districts ?? [];
-
-    if (districts.length === 1) {
-      params = params.set('district', districts[0]);
-    }
+    const params = this.toParams({ ...criteria, order: undefined, page: undefined });
 
     return this.http
       .get<JsonLdCollection<StaySuggestion>>(`${this.api}/stay-suggestions`, {
@@ -65,6 +54,7 @@ export class AccommodationService {
       })
       .pipe(map((response) => response.member));
   }
+
   getBySlug(slug: string): Observable<Accommodation> {
     return this.http.get<Accommodation>(`${this.api}/accommodations/${slug}`, {
       headers: { Accept: 'application/ld+json' },
