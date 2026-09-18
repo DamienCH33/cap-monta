@@ -55,4 +55,20 @@ export class AuthService {
   register(payload: { email: string; displayName: string; password: string }): Observable<void> {
     return this.http.post<void>(`${this.api}/register`, payload, { withCredentials: true });
   }
+
+  askPasswordReset(email: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/password/forgotten`,
+      { email },
+      { withCredentials: true },
+    );
+  }
+
+  resetPassword(jeton: string, password: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/password/reset`,
+      { jeton, password },
+      { withCredentials: true },
+    );
+  }
 }

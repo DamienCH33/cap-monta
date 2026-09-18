@@ -347,3 +347,12 @@ h3 {
 .auth__field input[aria-invalid='true'] {
   border-color: var(--danger-text);
 }
+.auth__forgot {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.auth__forgot a {
+  color: var(--text-secondary);
+}

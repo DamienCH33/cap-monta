@@ -17,8 +17,12 @@
         nouveau.
       </p>
     }
-
-    <form class="auth__form" [formGroup]="form" (ngSubmit)="submit()">
+    @if (passwordChanged) {
+      <p class="auth__notice auth__notice--ok">
+        Votre mot de passe est enregistré. Connectez-vous avec.
+      </p>
+    }
+    <form class="auth__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       @if (failed()) {
         <p class="auth__notice auth__notice--error" role="alert">
           Adresse ou mot de passe incorrect.
@@ -27,7 +31,17 @@
 
       <label class="auth__field">
         <span class="auth__label">Adresse email</span>
-        <input #emailInput type="email" formControlName="email" autocomplete="email" required />
+        <input
+          #emailInput
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          required
+          [attr.aria-invalid]="showError('email')"
+        />
+        @if (showError('email')) {
+          <span class="auth__error" role="alert">Indiquez votre adresse email.</span>
+        }
       </label>
 
       <label class="auth__field">
@@ -37,12 +51,20 @@
           formControlName="password"
           autocomplete="current-password"
           required
+          [attr.aria-invalid]="showError('password')"
         />
+        @if (showError('password')) {
+          <span class="auth__error" role="alert">Indiquez votre mot de passe.</span>
+        }
       </label>
 
       <button type="submit" class="auth__submit" [disabled]="submitting()">
         {{ submitting() ? 'Connexion…' : 'Se connecter' }}
       </button>
+
+      <p class="auth__forgot">
+        <a routerLink="/mot-de-passe-oublie">Mot de passe oublié ?</a>
+      </p>
     </form>
   </div>
 

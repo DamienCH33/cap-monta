@@ -52,6 +52,16 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/register/register').then((m) => m.Register),
   },
   {
+    path: 'mot-de-passe-oublie',
+    loadComponent: () =>
+      import('./pages/forgotten-password/forgotten-password').then((m) => m.ForgottenPassword),
+  },
+  {
+    path: 'nouveau-mot-de-passe',
+    loadComponent: () =>
+      import('./pages/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
+  {
     path: '**',
     loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFound),
   },
@@ -67,6 +77,8 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'mon-espace', renderMode: RenderMode.Client },
   { path: 'mon-espace/**', renderMode: RenderMode.Client },
   { path: 'inscription', renderMode: RenderMode.Client },
+  { path: 'mot-de-passe-oublie', renderMode: RenderMode.Client },
+  { path: 'nouveau-mot-de-passe', renderMode: RenderMode.Client },
 
   // Tout le reste est rendu côté serveur : c'est ce qui rend le site indexable.
   { path: '**', renderMode: RenderMode.Server },

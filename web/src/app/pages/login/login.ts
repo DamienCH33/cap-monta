@@ -23,15 +23,21 @@ export class Login {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
+  private readonly emailInput = viewChild.required<ElementRef<HTMLInputElement>>('emailInput');
+
   readonly form = inject(FormBuilder).nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
   });
-  private readonly emailInput = viewChild.required<ElementRef<HTMLInputElement>>('emailInput');
 
-  readonly redirected = null !== this.route.snapshot.queryParamMap.get('suite');
   readonly submitting = signal(false);
   readonly failed = signal(false);
+
+  /** Passe à vrai à la première tentative : avant, on n'accuse personne. */
+  readonly submitted = signal(false);
+
+  readonly redirected = null !== this.route.snapshot.queryParamMap.get('suite');
+  readonly passwordChanged = 'ok' === this.route.snapshot.queryParamMap.get('motdepasse');
 
   /** Posé par le lien de vérification reçu par email : « ok » ou « lien-invalide ». */
   readonly verification = this.route.snapshot.queryParamMap.get('verification');
@@ -46,6 +52,9 @@ export class Login {
   }
 
   submit(): void {
+    this.submitted.set(true);
+    this.form.markAllAsTouched();
+
     if (this.form.invalid || this.submitting()) {
       return;
     }
@@ -67,5 +76,11 @@ export class Login {
         this.emailInput().nativeElement.focus();
       },
     });
+  }
+
+  showError(field: 'email' | 'password'): boolean {
+    const control = this.form.controls[field];
+
+    return control.invalid && (control.touched || this.submitted());
   }
 }
