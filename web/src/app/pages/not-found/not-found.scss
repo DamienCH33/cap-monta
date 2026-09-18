@@ -1,0 +1,54 @@
+.notfound {
+  padding: 4rem 1rem 6rem;
+  text-align: center;
+}
+
+.notfound__code {
+  margin: 0;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--blue);
+  letter-spacing: 0.05em;
+}
+
+.notfound__title {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 1.5rem;
+}
+
+.notfound__text {
+  margin: 0 auto;
+  max-width: 34rem;
+  color: var(--text-muted, #555);
+}
+
+.notfound__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.notfound__search {
+  display: block;
+  max-width: 46rem;
+  margin: 2.5rem auto 0;
+  // Le centrage du bloc 404 ne doit pas descendre dans les champs du formulaire.
+  text-align: left;
+}
+
+.notfound__actions {
+  margin-top: 1.5rem;
+}
+
+.notfound__link {
+  color: var(--blue);
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}

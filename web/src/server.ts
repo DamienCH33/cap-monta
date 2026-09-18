@@ -6,6 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { routes } from './app/app.routes';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -14,6 +15,20 @@ const apiUrl = process.env['API_URL'] ?? 'http://127.0.0.1:8001';
 
 /** L'origine publique, celle qui apparaît dans le sitemap. */
 const siteUrl = process.env['SITE_URL'] ?? 'http://localhost:4201';
+
+/**
+ * Les chemins qu'Angular sait rendre, dérivés de app.routes.ts plutôt que recopiés :
+ * une route ajoutée là-bas est reconnue ici sans qu'on y pense.
+ * « :slug » devient « n'importe quoi sauf un / ».
+ */
+const knownRoutes = routes
+  .map((route) => route.path)
+  .filter((path): path is string => 'string' === typeof path && '**' !== path)
+  .map((path) => new RegExp(`^/${path.replace(/:[^/]+/g, '[^/]+')}/?$`));
+
+function isKnownRoute(pathname: string): boolean {
+  return knownRoutes.some((pattern) => pattern.test(pathname));
+}
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
@@ -105,11 +120,28 @@ app.use(
 
 /**
  * Handle all other requests by rendering the Angular application.
+ * Un chemin qu'aucune route ne reconnaît est rendu par la page 404 : il doit
+ * donc partir avec un vrai code 404, sinon Google indexe une « soft 404 ».
  */
 app.use((req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
+    .then((response) => {
+      if (!response) {
+        return next();
+      }
+
+      const { pathname } = new URL(req.url, `http://${req.headers.host ?? 'localhost'}`);
+
+      if (isKnownRoute(pathname)) {
+        return writeResponseToNodeResponse(response, res);
+      }
+
+      return writeResponseToNodeResponse(
+        new Response(response.body, { status: 404, headers: response.headers }),
+        res,
+      );
+    })
     .catch(next);
 });
 

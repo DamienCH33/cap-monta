@@ -37,4 +37,8 @@ export const routes: Routes = [
     path: 'quartier/:slug',
     loadComponent: () => import('./pages/district/district').then((m) => m.DistrictPage),
   },
+  {
+    path: '**',
+    loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFound),
+  },
 ];
