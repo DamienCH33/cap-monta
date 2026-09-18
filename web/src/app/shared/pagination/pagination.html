@@ -1,0 +1,50 @@
+@if (totalPages() > 1) {
+  <nav class="pager" aria-label="Pages de résultats">
+    @if (page() > 1) {
+      <a
+        class="pager__step"
+        rel="prev"
+        [routerLink]="[]"
+        [queryParams]="paramsFor(page() - 1)"
+        queryParamsHandling="merge"
+        ><cm-icon name="chevron-left" /><span class="pager__label">Précédent</span></a
+      >
+    } @else {
+      <span class="pager__step pager__step--off"
+        ><cm-icon name="chevron-left" /><span class="pager__label">Précédent</span></span
+      >
+    }
+
+    @for (item of items(); track $index) {
+      @if (item === 'gap') {
+        <span class="pager__gap" aria-hidden="true">…</span>
+      } @else if (item === page()) {
+        <span class="pager__page pager__page--current" aria-current="page">{{ item }}</span>
+      } @else {
+        <a
+          class="pager__page"
+          [routerLink]="[]"
+          [queryParams]="paramsFor(item)"
+          queryParamsHandling="merge"
+          [attr.aria-label]="'Page ' + item"
+          >{{ item }}</a
+        >
+      }
+    }
+
+    @if (page() < totalPages()) {
+      <a
+        class="pager__step"
+        rel="next"
+        [routerLink]="[]"
+        [queryParams]="paramsFor(page() + 1)"
+        queryParamsHandling="merge"
+        ><span class="pager__label">Suivant</span><cm-icon name="chevron-right"
+      /></a>
+    } @else {
+      <span class="pager__step pager__step--off"
+        ><span class="pager__label">Suivant</span><cm-icon name="chevron-right"
+      /></span>
+    }
+  </nav>
+}
