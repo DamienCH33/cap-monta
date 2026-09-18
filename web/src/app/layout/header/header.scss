@@ -55,3 +55,33 @@
   font-size: 1.25em;
   color: var(--blue);
 }
+
+.header__account {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  // Réserve la place avant qu'on sache qui est connecté : sinon la barre
+  // se réorganise sous les yeux du visiteur au bout de 200 ms.
+  min-width: 8rem;
+}
+
+.header__who {
+  color: var(--text-secondary);
+}
+
+.header__logout {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--blue);
+  }
+}

@@ -1,0 +1,17 @@
+<div class="container auth">
+  @if (owner(); as me) {
+    <div class="auth__card">
+      <h1 class="auth__title">Bonjour {{ me.displayName }}</h1>
+      <p class="auth__intro">{{ me.email }}</p>
+
+      @if (!me.verified) {
+        <p class="auth__notice auth__notice--warn">
+          Votre adresse email n'est pas encore confirmée. Vous pourrez publier un logement dès
+          qu'elle le sera : le lien vous a été envoyé à cette adresse.
+        </p>
+      }
+
+      <p>Vos logements, votre calendrier et vos demandes de réservation arriveront ici.</p>
+    </div>
+  }
+</div>

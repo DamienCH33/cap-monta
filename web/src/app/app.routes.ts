@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { Home } from './pages/home/home';
+import { ownerGuard } from './core/guards/owner-guard';
 
 /**
  * L'accueil est chargé tout de suite.
@@ -38,7 +39,35 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/district/district').then((m) => m.DistrictPage),
   },
   {
+    path: 'connexion',
+    loadComponent: () => import('./pages/login/login').then((m) => m.Login),
+  },
+  {
+    path: 'mon-espace',
+    canActivate: [ownerGuard],
+    loadComponent: () => import('./pages/owner-home/owner-home').then((m) => m.OwnerHome),
+  },
+  {
+    path: 'inscription',
+    loadComponent: () => import('./pages/register/register').then((m) => m.Register),
+  },
+  {
     path: '**',
     loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFound),
   },
+];
+
+import { RenderMode, ServerRoute } from '@angular/ssr';
+
+export const serverRoutes: ServerRoute[] = [
+  // Pages privées : rendues dans le navigateur uniquement. Le serveur n'a pas le
+  // cookie de session, il conclurait toujours « personne n'est connecté ».
+  { path: 'connexion', renderMode: RenderMode.Client },
+  { path: 'inscription', renderMode: RenderMode.Client },
+  { path: 'mon-espace', renderMode: RenderMode.Client },
+  { path: 'mon-espace/**', renderMode: RenderMode.Client },
+  { path: 'inscription', renderMode: RenderMode.Client },
+
+  // Tout le reste est rendu côté serveur : c'est ce qui rend le site indexable.
+  { path: '**', renderMode: RenderMode.Server },
 ];

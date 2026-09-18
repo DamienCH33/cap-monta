@@ -1,0 +1,53 @@
+<div class="container auth">
+  <div class="auth__card">
+    <h1 class="auth__title">Espace propriétaire</h1>
+    <p class="auth__intro">Gérez votre calendrier, vos tarifs et vos demandes de réservation.</p>
+
+    @if (redirected) {
+      <p class="auth__notice auth__notice--info">Connectez-vous pour accéder à cette page.</p>
+    }
+    @if ('ok' === verification) {
+      <p class="auth__notice auth__notice--ok">
+        Votre adresse est confirmée. Connectez-vous pour publier votre logement.
+      </p>
+    }
+    @if ('lien-invalide' === verification) {
+      <p class="auth__notice auth__notice--warn">
+        Ce lien de confirmation n'est plus valable. Connectez-vous, nous vous en enverrons un
+        nouveau.
+      </p>
+    }
+
+    <form class="auth__form" [formGroup]="form" (ngSubmit)="submit()">
+      @if (failed()) {
+        <p class="auth__notice auth__notice--error" role="alert">
+          Adresse ou mot de passe incorrect.
+        </p>
+      }
+
+      <label class="auth__field">
+        <span class="auth__label">Adresse email</span>
+        <input #emailInput type="email" formControlName="email" autocomplete="email" required />
+      </label>
+
+      <label class="auth__field">
+        <span class="auth__label">Mot de passe</span>
+        <input
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          required
+        />
+      </label>
+
+      <button type="submit" class="auth__submit" [disabled]="submitting()">
+        {{ submitting() ? 'Connexion…' : 'Se connecter' }}
+      </button>
+    </form>
+  </div>
+
+  <p class="auth__switch">
+    Pas encore de compte ?
+    <a routerLink="/inscription">Créer un compte propriétaire</a>
+  </p>
+</div>

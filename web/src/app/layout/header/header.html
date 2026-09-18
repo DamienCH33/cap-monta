@@ -7,7 +7,23 @@
 
     <nav class="header__nav">
       <a routerLink="/recherche">Rechercher</a>
-      <a class="header__cta" routerLink="/proprietaire">Louer mon logement</a>
+
+      @if (null !== owner()) {
+        <a routerLink="/mon-espace">Mon espace</a>
+      } @else {
+        <a class="header__cta" routerLink="/inscription">Louer mon logement</a>
+      }
+
+      <span class="header__account">
+        @if (sessionChecked()) {
+          @if (owner(); as me) {
+            <span class="header__who">{{ me.displayName }}</span>
+            <button type="button" class="header__logout" (click)="logout()">Se déconnecter</button>
+          } @else {
+            <a routerLink="/connexion">Se connecter</a>
+          }
+        }
+      </span>
     </nav>
   </div>
 </header>
