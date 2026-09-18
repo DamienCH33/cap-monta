@@ -64,6 +64,10 @@ use App\State\AccommodationItemProvider;
                     description: 'Tri par prix à la semaine, les logements sans tarif en dernier',
                     schema: ['type' => 'string', 'enum' => ['price_asc', 'price_desc']],
                 ),
+                'page' => new QueryParameter(
+                    description: 'Numéro de page, 15 logements par page',
+                    schema: ['type' => 'integer', 'minimum' => 1],
+                ),
             ],
             provider: AccommodationCollectionProvider::class,
         ),

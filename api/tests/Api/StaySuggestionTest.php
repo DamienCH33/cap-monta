@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Api;
 
+use App\Enum\AccommodationType;
 use App\Factory\AccommodationFactory;
 use App\Factory\DistrictFactory;
 use App\Factory\UnavailabilityFactory;
@@ -105,6 +106,29 @@ final class StaySuggestionTest extends ApiTestCase
         self::assertSame(
             [1, 1, 1],
             array_column($this->suggest(['arrival' => '2026-07-13', 'departure' => '2026-07-20', 'district' => 'Europa']), 2),
+        );
+    }
+
+    public function testAppliesTheSearchFiltersToTheSuggestedStays(): void
+    {
+        AccommodationFactory::createOne(['type' => AccommodationType::MobileHome, 'bedrooms' => 3]);
+        AccommodationFactory::createOne(['type' => AccommodationType::Caravan, 'bedrooms' => 1]);
+
+        // Sans filtre, les deux logements sont libres sur chacun des trois créneaux.
+        self::assertSame(
+            [2, 2, 2],
+            array_column($this->suggest(['arrival' => '2026-07-13', 'departure' => '2026-07-20']), 2),
+        );
+
+        // Avec les filtres de la recherche, la caravane sort du décompte.
+        self::assertSame(
+            [1, 1, 1],
+            array_column($this->suggest([
+                'arrival' => '2026-07-13',
+                'departure' => '2026-07-20',
+                'type' => 'mobile_home',
+                'bedrooms' => 3,
+            ]), 2),
         );
     }
 

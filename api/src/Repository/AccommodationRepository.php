@@ -160,6 +160,13 @@ class AccommodationRepository extends ServiceEntityRepository
      * Nearest stays of the same length, shifted by up to 14 days,
      * with the number of accommodations free on each.
      *
+     * The criteria that do not depend on dates are delegated to search(),
+     * so both queries can never disagree on what "matching" means.
+     *
+     * @param list<string>            $districts
+     * @param list<AccommodationType> $types
+     * @param list<string>            $amenities
+     *
      * @return list<array{arrival: string, departure: string, available_count: int}>
      */
     public function findNearestAvailableStays(
@@ -168,8 +175,29 @@ class AccommodationRepository extends ServiceEntityRepository
         \DateTimeImmutable $today,
         int $guests = 1,
         ?Resort $resort = null,
-        ?string $district = null,
+        array $districts = [],
+        array $types = [],
+        int $bedrooms = 0,
+        array $amenities = [],
     ): array {
+        $candidates = $this->search(
+            guests: $guests,
+            resort: $resort,
+            districts: $districts,
+            types: $types,
+            bedrooms: $bedrooms,
+            amenities: $amenities,
+        );
+
+        if ([] === $candidates) {
+            return [];
+        }
+
+        $ids = array_map(
+            static fn (Accommodation $accommodation): string => (string) $accommodation->getId(),
+            $candidates,
+        );
+
         $sql = <<<'SQL'
             WITH slot AS (
                 SELECT
@@ -185,11 +213,8 @@ class AccommodationRepository extends ServiceEntityRepository
                 COUNT(a.id) AS available_count
             FROM slot
             CROSS JOIN accommodation a
-                        LEFT JOIN district d ON d.id = a.district_id
             WHERE slot.arrival >= CAST(:today AS date)
-              AND a.max_capacity >= :guests
-              AND (CAST(:resort AS text)   IS NULL OR a.resort   = :resort)
-                            AND (CAST(:district AS text) IS NULL OR d.slug = :district OR d.name = :district)
+              AND a.id IN (:ids)
               AND NOT EXISTS (
                   SELECT 1
                   FROM unavailability u
@@ -203,14 +228,18 @@ class AccommodationRepository extends ServiceEntityRepository
             SQL;
 
         $rows = $this->getEntityManager()->getConnection()
-            ->executeQuery($sql, [
-                'arrival' => $arrival->format('Y-m-d'),
-                'departure' => $departure->format('Y-m-d'),
-                'today' => $today->format('Y-m-d'),
-                'guests' => $guests,
-                'resort' => $resort?->value,
-                'district' => $district,
-            ])
+            ->executeQuery(
+                $sql,
+                [
+                    'arrival' => $arrival->format('Y-m-d'),
+                    'departure' => $departure->format('Y-m-d'),
+                    'today' => $today->format('Y-m-d'),
+                    'ids' => $ids,
+                ],
+                [
+                    'ids' => ArrayParameterType::STRING,
+                ],
+            )
             ->fetchAllAssociative();
 
         return array_map(

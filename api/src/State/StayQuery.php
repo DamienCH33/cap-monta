@@ -14,6 +14,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 final readonly class StayQuery
 {
     public const ORDERS = ['price_asc', 'price_desc'];
+    public const PER_PAGE = 15;
 
     /** Upper bound for list parameters: nobody ticks more than ten boxes. */
     private const MAX_VALUES = 10;
@@ -33,6 +34,7 @@ final readonly class StayQuery
         public int $bedrooms,
         public array $amenities,
         public ?string $order,
+        public int $page,
     ) {
     }
 
@@ -83,6 +85,12 @@ final readonly class StayQuery
             throw new BadRequestHttpException(sprintf('"order" must be one of: %s.', implode(', ', self::ORDERS)));
         }
 
+        $page = isset($filters['page']) ? (int) $filters['page'] : 1;
+
+        if ($page < 1) {
+            throw new BadRequestHttpException('"page" must be at least 1.');
+        }
+
         return new self(
             $arrival,
             $departure,
@@ -93,6 +101,7 @@ final readonly class StayQuery
             $bedrooms,
             self::strings($filters['amenities'] ?? null, 'amenities'),
             $order,
+            $page,
         );
     }
 
@@ -148,7 +157,7 @@ final readonly class StayQuery
         // The leading "!" resets the time to midnight instead of keeping the current one.
         $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value);
 
-        if (false === $date) {
+        if (false === $date || $date->format('Y-m-d') !== $value) {
             throw new BadRequestHttpException(sprintf('"%s" must be a date formatted YYYY-MM-DD.', $name));
         }
 

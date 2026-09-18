@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\State;
 
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\AccommodationResource;
 use App\Entity\Accommodation;
@@ -33,9 +34,9 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
      * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $context
      *
-     * @return list<AccommodationResource>
+     * @return iterable<AccommodationResource>
      */
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): iterable
     {
         /** @var array<string, mixed> $filters */
         $filters = $context['filters'] ?? [];
@@ -52,29 +53,43 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
             amenities: $query->amenities,
         );
 
-        $slugs = array_map(
+        // Les prix servent au tri : il les faut pour toute la liste, pas seulement pour la page.
+        $prices = $this->accommodations->findPriceFromBySlugs(array_map(
             static fn (Accommodation $accommodation): string => $accommodation->getSlug(),
             $accommodations,
-        );
-
-        $prices = $this->accommodations->findPriceFromBySlugs($slugs);
+        ));
 
         if (null !== $query->order) {
             $accommodations = $this->sortByPrice($accommodations, $prices, 'price_desc' === $query->order);
         }
 
+        $total = count($accommodations);
+        $page = array_slice($accommodations, ($query->page - 1) * StayQuery::PER_PAGE, StayQuery::PER_PAGE);
+
+        // Le calcul des disponibilités, lui, ne porte que sur la page affichée.
+        $pageSlugs = array_map(
+            static fn (Accommodation $accommodation): string => $accommodation->getSlug(),
+            $page,
+        );
+
         $from = $query->arrival ?? new \DateTimeImmutable('today');
         $to = $from->modify('+9 weeks');
+        $busy = $this->unavailabilities->findForPeriodBySlugs($pageSlugs, $from, $to);
 
-        $busy = $this->unavailabilities->findForPeriodBySlugs($slugs, $from, $to);
-
-        return array_map(
+        $resources = array_map(
             fn (Accommodation $accommodation): AccommodationResource => AccommodationResource::fromEntity(
                 $accommodation,
                 $prices[$accommodation->getSlug()] ?? null,
                 $this->stripBuilder->build($busy[$accommodation->getSlug()] ?? [], $from),
             ),
-            $accommodations,
+            $page,
+        );
+
+        return new TraversablePaginator(
+            new \ArrayIterator($resources),
+            $query->page,
+            StayQuery::PER_PAGE,
+            $total,
         );
     }
 

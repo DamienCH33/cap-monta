@@ -7,7 +7,6 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\StaySuggestionResource;
-use App\Enum\Resort;
 use App\Repository\AccommodationRepository;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -34,29 +33,25 @@ final class StaySuggestionProvider implements ProviderInterface
         /** @var array<string, mixed> $filters */
         $filters = $context['filters'] ?? [];
 
-        $arrival = $this->parseDate($filters['arrival'] ?? null, 'arrival');
-        $departure = $this->parseDate($filters['departure'] ?? null, 'departure');
+        $query = StayQuery::fromFilters($filters);
 
-        if ($departure <= $arrival) {
-            throw new BadRequestHttpException('"departure" must be after "arrival".');
+        $arrival = $query->arrival;
+        $departure = $query->departure;
+
+        if (null === $arrival || null === $departure) {
+            throw new BadRequestHttpException('Both "arrival" and "departure" are required to suggest other dates.');
         }
-
-        $guestsValue = $filters['guests'] ?? null;
-        $guests = is_numeric($guestsValue) ? max(1, (int) $guestsValue) : 1;
-
-        $resortValue = $filters['resort'] ?? null;
-        $resort = is_string($resortValue) ? Resort::tryFrom($resortValue) : null;
-
-        $districtValue = $filters['district'] ?? null;
-        $district = is_string($districtValue) && '' !== $districtValue ? $districtValue : null;
 
         $rows = $this->accommodationRepository->findNearestAvailableStays(
             $arrival,
             $departure,
             $this->clock->now(),
-            $guests,
-            $resort,
-            $district,
+            $query->guests,
+            $query->resort,
+            $query->districts,
+            $query->types,
+            $query->bedrooms,
+            $query->amenities,
         );
 
         return array_map(
@@ -67,20 +62,5 @@ final class StaySuggestionProvider implements ProviderInterface
             ),
             $rows,
         );
-    }
-
-    private function parseDate(mixed $value, string $name): \DateTimeImmutable
-    {
-        if (!is_string($value)) {
-            throw new BadRequestHttpException(sprintf('Missing "%s" parameter.', $name));
-        }
-
-        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value);
-
-        if (false === $date || $date->format('Y-m-d') !== $value) {
-            throw new BadRequestHttpException(sprintf('Invalid "%s" date, expected YYYY-MM-DD.', $name));
-        }
-
-        return $date;
     }
 }

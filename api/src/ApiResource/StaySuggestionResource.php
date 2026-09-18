@@ -32,8 +32,23 @@ use App\State\StaySuggestionProvider;
             schema: ['type' => 'integer', 'minimum' => 1],
         ),
         'district' => new QueryParameter(
-            description: 'Quartier, tel que renvoyé par /api/districts',
-            schema: ['type' => 'string'],
+            description: 'Quartiers, tels que renvoyés par /api/districts',
+            schema: ['type' => 'array', 'items' => ['type' => 'string']],
+            castToArray: true,
+        ),
+        'type' => new QueryParameter(
+            description: 'Types de logement',
+            schema: ['type' => 'array', 'items' => ['type' => 'string']],
+            castToArray: true,
+        ),
+        'bedrooms' => new QueryParameter(
+            description: 'Nombre minimum de chambres',
+            schema: ['type' => 'integer', 'minimum' => 0],
+        ),
+        'amenities' => new QueryParameter(
+            description: 'Équipements que le logement doit tous avoir',
+            schema: ['type' => 'array', 'items' => ['type' => 'string']],
+            castToArray: true,
         ),
     ],
 )]
