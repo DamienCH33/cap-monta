@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Integration;
 
 use App\Entity\Accommodation;
+use App\Entity\User;
 use App\Entity\PricePeriod;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
@@ -48,7 +49,10 @@ final class PricePeriodOverlapTest extends DatabaseTestCase
 
     private function createAccommodation(string $slug): Accommodation
     {
-        $accommodation = new Accommodation($slug, Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Test accommodation');
+        $owner = new User($slug.'@example.com', 'Proprietaire test');
+        $this->em->persist($owner);
+
+        $accommodation = new Accommodation($slug, Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Test accommodation', $owner);
         $this->em->persist($accommodation);
         $this->em->flush();
 

@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Service\Pricing;
 
 use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
+use App\Entity\User;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Service\Pricing\PriceCalculator;
@@ -26,6 +27,7 @@ final class PriceCalculatorTest extends TestCase
             4,
             2,
             'Test accommodation',
+            new User('pricing@example.com', 'Proprietaire test'),
         );
     }
 

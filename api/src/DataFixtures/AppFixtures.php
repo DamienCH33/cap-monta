@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\Entity\Accommodation;
+use App\Entity\User;
 use App\Enum\DistrictArea;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
@@ -14,6 +15,7 @@ use App\Factory\PricePeriodFactory;
 use App\Factory\UnavailabilityFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Jeu de données de développement : une douzaine de logements, leurs grilles
@@ -21,6 +23,10 @@ use Doctrine\Persistence\ObjectManager;
  */
 final class AppFixtures extends Fixture
 {
+    public function __construct(
+        private readonly UserPasswordHasherInterface $hasher,
+    ) {
+    }
     /**
      * The 21 districts of the official CHM site plan (2024).
      * Area read visually on the plan: to be confirmed on site. Null = not settled yet.
@@ -51,6 +57,12 @@ final class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
+        $damien = new User('proprietaire@example.com', 'Damien C.');
+        $damien->setPassword($this->hasher->hashPassword($damien, 'motdepasse'));
+        $damien->verifyEmail(new \DateTimeImmutable());
+        $manager->persist($damien);
+        $manager->flush();
+
         $districts = [];
 
         foreach (self::CHM_DISTRICTS as $position => [$name, $area]) {
@@ -74,10 +86,12 @@ final class AppFixtures extends Fixture
         }
 
         // Les quartiers d'Euronat ne sont pas encore référencés.
-        array_push(
-            $accommodations,
-            ...AccommodationFactory::createMany(3, ['resort' => Resort::Euronat]),
-        );
+
+        array_push($accommodations, ...AccommodationFactory::createMany(3, [
+            'owner' => $damien,
+            'district' => $districts[3],
+        ]));
+        array_push($accommodations, ...AccommodationFactory::createMany(3, ['resort' => Resort::Euronat]));
 
         foreach ($accommodations as $index => $accommodation) {
             // Le premier reste sans tarif publié : la carte doit afficher

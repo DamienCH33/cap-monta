@@ -52,6 +52,7 @@ final class AccommodationFactory extends PersistentObjectFactory
                     self::faker()->randomElements(self::AMENITIES, self::faker()->numberBetween(2, 5)),
                 ),
                 'description' => self::faker()->paragraph(),
+                'owner' => UserFactory::new(),
             ];
         };
     }
