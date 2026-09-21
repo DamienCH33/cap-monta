@@ -13,6 +13,17 @@ export interface OwnerAccommodation {
   surface: number | null;
   amenities: string[];
   description: string;
+  /** Dans l'ordre : la première est la couverture. */
+  photos: OwnerPhoto[];
+}
+
+/** Une photo du logement : grande version pour la fiche, miniature pour les cartes. */
+export interface OwnerPhoto {
+  id: string;
+  url: string;
+  thumbUrl: string;
+  width: number;
+  height: number;
 }
 
 /** Création : tout peut être envoyé d'une traite. Le serveur décide du slug et du statut. */

@@ -1,9 +1,10 @@
+import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { catchError, EMPTY, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, EMPTY, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 
 import { apiErrorMessage } from '../../core/http/api-error';
 import {
@@ -19,6 +20,7 @@ import { AuthService } from '../../core/services/auth';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { OwnerFlash } from '../../core/services/owner-flash';
 import { SeoService } from '../../core/services/seo';
+import { PhotoManager } from './photo-manager/photo-manager';
 
 type Field =
   | 'resort'
@@ -76,7 +78,7 @@ const LIMITS = {
  */
 @Component({
   selector: 'cm-owner-accommodation-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, PhotoManager],
   templateUrl: './owner-accommodation-form.html',
   styleUrl: './owner-accommodation-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -185,6 +187,58 @@ export class OwnerAccommodationForm {
   readonly serverErrors = signal<Partial<Record<Field, string>>>({});
   readonly generalError = signal<string | null>(null);
 
+  /** Information neutre (pas une erreur) : brouillon enregistré automatiquement, par exemple. */
+  readonly notice = signal<string | null>(null);
+
+  /** Tenu à jour par la section Photos : il en faut au moins une pour publier. */
+  readonly photoCount = signal(0);
+
+  /** Message sous la section Photos quand la publication est demandée sans photo. */
+  readonly photosError = computed(() =>
+    this.submitted() && this.checkPublication() && 0 === this.photoCount()
+      ? 'Ajoutez au moins une photo pour publier.'
+      : null,
+  );
+
+  private readonly location = inject(Location);
+
+  /**
+   * Donnée à la section Photos : une photo a besoin d'un logement enregistré. Pour une
+   * nouvelle annonce, on l'enregistre donc en brouillon à l'ajout de la première photo,
+   * avec ce qui est déjà saisi. On reste sur la page : rien n'est perdu.
+   */
+  readonly ensureSaved = (): Observable<string> => {
+    const existing = this.existing();
+
+    if (null !== existing) {
+      return of(existing.slug);
+    }
+
+    this.submitted.set(true);
+    this.checkPublication.set(false);
+    this.form.markAllAsTouched();
+
+    if (FIELDS.some((field) => null !== this.error(field))) {
+      return throwError(
+        () =>
+          new Error(
+            "Choisissez d'abord le domaine et le type de logement : l'annonce est enregistrée en brouillon pour recevoir vos photos.",
+          ),
+      );
+    }
+
+    return this.service.create(this.newAccommodation()).pipe(
+      tap((created) => {
+        this.existing.set(created);
+        this.form.controls.resort.disable();
+        // L'adresse devient celle du brouillon, sans recharger la page ni perdre la saisie.
+        this.location.replaceState(`/mon-espace/logements/${created.slug}/modifier`);
+        this.notice.set('Brouillon enregistré automatiquement pour recevoir vos photos.');
+      }),
+      map((created) => created.slug),
+    );
+  };
+
   constructor() {
     inject(SeoService).apply({
       title: null === this.slug ? 'Ajouter un logement' : "Modifier l'annonce",
@@ -267,7 +321,7 @@ export class OwnerAccommodationForm {
     this.generalError.set(null);
     this.form.markAllAsTouched();
 
-    if (FIELDS.some((field) => null !== this.error(field))) {
+    if (FIELDS.some((field) => null !== this.error(field)) || null !== this.photosError()) {
       this.generalError.set('Certaines informations sont à compléter : voir les messages en rouge.');
       return;
     }
@@ -303,6 +357,7 @@ export class OwnerAccommodationForm {
     this.service.get(slug).subscribe({
       next: (item) => {
         this.existing.set(item);
+        this.photoCount.set(item.photos.length);
         this.form.patchValue({
           resort: item.resort,
           type: item.type,

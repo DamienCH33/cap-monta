@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Entity;
 
 use App\Entity\Accommodation;
 use App\Entity\District;
+use App\Entity\Photo;
 use App\Entity\User;
 use App\Enum\AccommodationStatus;
 use App\Enum\AccommodationType;
@@ -54,6 +55,15 @@ final class AccommodationPublicationTest extends TestCase
         self::assertSame(AccommodationStatus::Draft, $accommodation->getStatus());
     }
 
+    public function testAListingWithoutPhotoCannotBePublished(): void
+    {
+        $owner = new User('owner@example.com', 'Owner');
+        $owner->verifyEmail(new \DateTimeImmutable());
+        $accommodation = new Accommodation('home', Resort::Euronat, AccommodationType::Bungalow, 6, 3, self::LONG_DESCRIPTION, $owner);
+
+        self::assertSame(['photos'], $accommodation->missingForPublication());
+    }
+
     public function testAnArchivedListingCanBePublishedAgain(): void
     {
         $accommodation = $this->accommodation();
@@ -99,6 +109,8 @@ final class AccommodationPublicationTest extends TestCase
         if ($withDistrict) {
             $accommodation->setDistrict(new District('europa', 'Europa', Resort::Chm));
         }
+
+        $accommodation->addPhoto(new Photo($accommodation, 1600, 1066));
 
         return $accommodation;
     }

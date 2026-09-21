@@ -41,6 +41,9 @@
       @if (generalError(); as message) {
         <p class="listing-form__alert" role="alert">{{ message }}</p>
       }
+      @if (notice(); as message) {
+        <p class="listing-form__notice listing-form__notice--inline" role="status">{{ message }}</p>
+      }
 
       <!-- 1. Le logement -->
       <section class="listing-form__section">
@@ -211,14 +214,21 @@
         </label>
       </section>
 
-      <!-- 5. Photos : à venir -->
-      <section class="listing-form__section listing-form__section--soon">
-        <h2 class="listing-form__section-title">
-          Photos <span class="listing-form__soon">Bientôt</span>
-        </h2>
+      <!-- 5. Photos -->
+      <section class="listing-form__section">
+        <h2 class="listing-form__section-title">Photos</h2>
         <p class="listing-form__muted">
-          L'ajout de photos arrive à la prochaine étape. D'ici là, vous pouvez publier sans photo.
+          La première photo est la couverture : c'est elle qu'on voit dans les résultats de
+          recherche. Il en faut au moins une pour publier.
         </p>
+        <cm-photo-manager
+          [initial]="existing()?.photos ?? []"
+          [ensureSaved]="ensureSaved"
+          (photosChange)="photoCount.set($event.length)"
+        />
+        @if (photosError(); as message) {
+          <p class="listing-form__error" role="alert">{{ message }}</p>
+        }
       </section>
 
       <div class="listing-form__actions">

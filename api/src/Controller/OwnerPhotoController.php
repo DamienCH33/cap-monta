@@ -112,6 +112,10 @@ final class OwnerPhotoController
         $accommodation = $this->ownedAccommodation($slug);
         $photo = $accommodation->findPhoto($id) ?? throw new NotFoundHttpException();
 
+        if ($accommodation->isPublished() && 1 === $accommodation->countPhotos()) {
+            return $this->refuse('photo', 'Une annonce en ligne doit garder au moins une photo : ajoutez-en une autre avant de supprimer celle-ci.');
+        }
+
         $accommodation->removePhoto($photo);
         $this->em->flush();
 

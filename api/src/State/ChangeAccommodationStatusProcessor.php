@@ -86,6 +86,7 @@ final readonly class ChangeAccommodationStatusProcessor implements ProcessorInte
             static fn (string $field): string => match ($field) {
                 'description' => sprintf("Ajoutez une description d'au moins %d caractères.", Accommodation::MIN_DESCRIPTION_LENGTH),
                 'district' => 'Choisissez le quartier du logement.',
+                'photos' => 'Ajoutez au moins une photo.',
             },
             $e->missing,
         ));

@@ -103,6 +103,10 @@
   background: var(--lf-sea-soft);
 }
 
+.listing-form__form .listing-form__notice--inline {
+  margin: 0;
+}
+
 // Une section par thème : lisible d'un coup d'œil, et rassurant sur la longueur.
 .listing-form__section {
   display: grid;
@@ -117,11 +121,6 @@
     padding: 1.25rem;
   }
 
-  &--soon {
-    border-style: dashed;
-    background: #fbfaf8;
-    box-shadow: none;
-  }
 }
 
 .listing-form__section-title {
@@ -130,15 +129,6 @@
   align-items: center;
   margin: 0;
   font-size: 1.125rem;
-}
-
-.listing-form__soon {
-  padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  background: #eef1f4;
-  color: #44505c;
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 .listing-form__group {

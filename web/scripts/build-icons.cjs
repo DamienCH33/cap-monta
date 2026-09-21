@@ -4,7 +4,21 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const NAMES = ['arrow-left', 'beach', 'building-store', 'chevron-left', 'chevron-right', 'photo', 'ripple', 'trees'];
+const NAMES = [
+  'alert-circle',
+  'arrow-left',
+  'beach',
+  'building-store',
+  'chevron-left',
+  'chevron-right',
+  'photo',
+  'refresh',
+  'ripple',
+  'star',
+  'trash',
+  'trees',
+  'upload',
+];
 
 const source = path.join(__dirname, '..', 'node_modules', '@tabler', 'icons', 'icons', 'outline');
 const target = path.join(__dirname, '..', 'src', 'app', 'shared', 'icon', 'icons.ts');

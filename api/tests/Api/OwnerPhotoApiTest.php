@@ -139,6 +139,21 @@ final class OwnerPhotoApiTest extends WebTestCase
         self::assertSame([$ids[1], $ids[2]], array_column($this->json()['photos'], 'id'), 'The second photo becomes the cover.');
     }
 
+    public function testAPublishedListingKeepsAtLeastOnePhoto(): void
+    {
+        $home = $this->accommodation('alice-home', $this->loggedInOwner());
+        [$id] = $this->uploadMany('alice-home', 1);
+        $this->em->refresh($home);
+        $home->setDescription(str_repeat('Bungalow lumineux sous les pins. ', 3));
+        $home->publish();
+        $this->em->flush();
+
+        $this->client->request('DELETE', '/api/owner/accommodations/alice-home/photos/'.$id);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertFileExists($this->storage.'/'.$id.'.webp', 'Nothing was deleted.');
+    }
+
     public function testThePhotosCanBeReordered(): void
     {
         $this->accommodation('alice-home', $this->loggedInOwner());

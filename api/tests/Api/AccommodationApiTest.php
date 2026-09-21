@@ -6,6 +6,7 @@ namespace App\Tests\Api;
 
 use App\Entity\Accommodation;
 use App\Entity\District;
+use App\Entity\Photo;
 use App\Entity\Unavailability;
 use App\Entity\User;
 use App\Enum\AccommodationType;
@@ -177,6 +178,8 @@ final class AccommodationApiTest extends ApiTestCase
         $owner->verifyEmail(new \DateTimeImmutable());
         $accommodation = new Accommodation($slug, Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Test accommodation with a description long enough to be published.', $owner);
         $accommodation->setDistrict($this->testDistrict());
+        // A published listing needs a photo: an entity is enough, no file is read here.
+        $accommodation->addPhoto(new Photo($accommodation, 1600, 1066));
         if ($published) {
             $accommodation->publish();
         }

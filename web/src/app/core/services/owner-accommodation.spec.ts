@@ -66,6 +66,28 @@ describe('OwnerAccommodationService', () => {
     request.flush({});
   });
 
+  it('uploads a photo as a form, with the no-people confirmation', () => {
+    const file = new File(['x'], 'photo.jpg', { type: 'image/jpeg' });
+    service.uploadPhoto('mobil-home', file).subscribe();
+
+    const request = http.expectOne(`${api}/mobil-home/photos`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
+    const body = request.request.body as FormData;
+    expect(body.get('photo')).toBe(file);
+    expect(body.get('noPeople')).toBe('1');
+    request.flush({});
+  });
+
+  it('sends the complete new order of the photos', () => {
+    service.reorderPhotos('mobil-home', ['b', 'a']).subscribe();
+
+    const request = http.expectOne(`${api}/mobil-home/photos/order`);
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({ ids: ['b', 'a'] });
+    request.flush([]);
+  });
+
   it('reads the districts from the public list', () => {
     let names: string[] = [];
     service.districts().subscribe((list) => (names = list.map((district) => district.name)));

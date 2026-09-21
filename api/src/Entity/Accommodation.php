@@ -346,7 +346,7 @@ class Accommodation
      * What is still missing for this accommodation to be, or stay, public.
      * One definition, used when editing a published accommodation and when publishing.
      *
-     * @return list<'description'|'district'>
+     * @return list<'description'|'district'|'photos'>
      */
     public function missingForPublication(): array
     {
@@ -359,6 +359,11 @@ class Accommodation
         // Every CHM accommodation sits in a district; Euronat's are not referenced yet.
         if (Resort::Chm === $this->resort && null === $this->district) {
             $missing[] = 'district';
+        }
+
+        // A listing without a picture is almost never clicked: one is the minimum.
+        if (0 === $this->photos->count()) {
+            $missing[] = 'photos';
         }
 
         return $missing;

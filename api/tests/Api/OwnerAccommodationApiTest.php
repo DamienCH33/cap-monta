@@ -6,6 +6,7 @@ namespace App\Tests\Api;
 
 use App\Entity\Accommodation;
 use App\Entity\District;
+use App\Entity\Photo;
 use App\Entity\User;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
@@ -189,6 +190,7 @@ final class OwnerAccommodationApiTest extends WebTestCase
         $alice = $this->createOwner('alice@example.com');
         $description = str_repeat('Vue sur la pinède. ', 4);
         $accommodation = new Accommodation('alice-euronat', Resort::Euronat, AccommodationType::Bungalow, 6, 3, $description, $alice);
+        $accommodation->addPhoto(new Photo($accommodation, 1600, 1066));
         $accommodation->publish();
         $this->em->persist($accommodation);
         $this->em->flush();
@@ -373,6 +375,12 @@ final class OwnerAccommodationApiTest extends WebTestCase
         self::assertSame(42, $created['surface']);
         self::assertSame(['wifi', 'terrasse'], $created['amenities'], 'Duplicates are removed.');
 
+        // The photo arrives through its own route (tested in OwnerPhotoApiTest): an entity here.
+        $home = $this->em->getRepository(Accommodation::class)->findOneBy(['slug' => $created['slug']]);
+        self::assertNotNull($home);
+        $home->addPhoto(new Photo($home, 1600, 1066));
+        $this->em->flush();
+
         $this->transition((string) $created['slug'], 'publish');
 
         self::assertResponseIsSuccessful();
@@ -413,6 +421,8 @@ final class OwnerAccommodationApiTest extends WebTestCase
     {
         $accommodation = new Accommodation($slug, Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Test accommodation with a description long enough to be published.', $owner);
         $accommodation->setDistrict($this->testDistrict());
+        // A published listing needs a photo: an entity is enough, no file is read here.
+        $accommodation->addPhoto(new Photo($accommodation, 1600, 1066));
 
         if ($published) {
             $accommodation->publish();

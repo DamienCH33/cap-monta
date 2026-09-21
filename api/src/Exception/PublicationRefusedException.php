@@ -11,7 +11,7 @@ namespace App\Exception;
 final class PublicationRefusedException extends \DomainException
 {
     /**
-     * @param list<'description'|'district'> $missing
+     * @param list<'description'|'district'|'photos'> $missing
      */
     private function __construct(
         string $message,
@@ -27,7 +27,7 @@ final class PublicationRefusedException extends \DomainException
     }
 
     /**
-     * @param list<'description'|'district'> $missing
+     * @param list<'description'|'district'|'photos'> $missing
      */
     public static function incomplete(array $missing): self
     {

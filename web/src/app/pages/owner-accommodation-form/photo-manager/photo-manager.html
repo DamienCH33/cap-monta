@@ -1,0 +1,169 @@
+<div class="photos">
+  <label class="photos__consent">
+    <input type="checkbox" [checked]="noPeople()" (change)="onConsent($event)" />
+    <span>
+      <strong>Aucune personne n'apparaît sur ces photos.</strong>
+      Les domaines sont naturistes : par respect pour la vie privée de chacun, seules les photos
+      du logement et de ses abords sont acceptées.
+    </span>
+  </label>
+
+  <div
+    class="photos__drop"
+    [class.photos__drop--active]="dragging()"
+    [class.photos__drop--disabled]="!canAdd()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="dragging.set(false)"
+    (drop)="onDrop($event)"
+  >
+    <cm-icon class="photos__drop-icon" name="upload" />
+    @if (full()) {
+      <p class="photos__drop-title">{{ max }} photos : c'est le maximum.</p>
+      <p class="photos__drop-hint">Supprimez-en une pour en ajouter une autre.</p>
+    } @else {
+      <p class="photos__drop-title">Glissez vos photos ici</p>
+      <label class="photos__pick" [class.photos__pick--disabled]="!canAdd()">
+        ou choisissez-les sur votre appareil
+        <input
+          type="file"
+          multiple
+          accept="image/jpeg,image/png,image/webp"
+          [disabled]="!canAdd()"
+          (change)="onPick($event)"
+        />
+      </label>
+      <p class="photos__drop-hint">
+        @if (noPeople()) {
+          JPEG, PNG ou WebP · 10 Mo maximum par photo
+        } @else {
+          Cochez d'abord la case ci-dessus.
+        }
+      </p>
+    }
+  </div>
+
+  @if (error(); as message) {
+    <p class="photos__error" role="alert">{{ message }}</p>
+  }
+
+  <p class="photos__count" aria-live="polite">
+    {{ total() }} / {{ max }} photos
+    @if (total() < recommended) {
+      <span class="photos__tip">· {{ recommended }} photos ou plus rendent une annonce bien plus attractive</span>
+    }
+  </p>
+
+  @if (photos().length || queue().length) {
+    <ul class="photos__grid">
+      @for (photo of photos(); track photo.id; let i = $index, first = $first, last = $last) {
+        <li class="photos__tile">
+          <img
+            class="photos__image"
+            [src]="photo.thumbUrl"
+            [attr.width]="photo.width"
+            [attr.height]="photo.height"
+            [alt]="'Photo ' + (i + 1) + ' du logement'"
+            loading="lazy"
+          />
+          @if (first) {
+            <span class="photos__cover">Couverture</span>
+          }
+
+          @if (confirming() === photo.id) {
+            <div class="photos__overlay" role="group" aria-label="Confirmer la suppression">
+              <p>Supprimer cette photo ?</p>
+              <div class="photos__overlay-actions">
+                <button type="button" class="photos__confirm-yes" [disabled]="busy()" (click)="remove(photo)">
+                  Supprimer
+                </button>
+                <button type="button" class="photos__confirm-no" (click)="confirming.set(null)">Garder</button>
+              </div>
+            </div>
+          } @else {
+            <div class="photos__tools">
+              @if (!first) {
+                <button
+                  type="button"
+                  class="photos__tool photos__tool--wide"
+                  [disabled]="busy()"
+                  [attr.aria-label]="'Mettre la photo ' + (i + 1) + ' en couverture'"
+                  (click)="makeCover(i)"
+                >
+                  <cm-icon name="star" /> Couverture
+                </button>
+              }
+              <span class="photos__spacer"></span>
+              <button
+                type="button"
+                class="photos__tool"
+                [disabled]="busy() || first"
+                [attr.aria-label]="'Avancer la photo ' + (i + 1)"
+                title="Avancer"
+                (click)="move(i, -1)"
+              >
+                <cm-icon name="chevron-left" />
+              </button>
+              <button
+                type="button"
+                class="photos__tool"
+                [disabled]="busy() || last"
+                [attr.aria-label]="'Reculer la photo ' + (i + 1)"
+                title="Reculer"
+                (click)="move(i, 1)"
+              >
+                <cm-icon name="chevron-right" />
+              </button>
+              <button
+                type="button"
+                class="photos__tool photos__tool--danger"
+                [disabled]="busy()"
+                [attr.aria-label]="'Supprimer la photo ' + (i + 1)"
+                title="Supprimer"
+                (click)="confirming.set(photo.id)"
+              >
+                <cm-icon name="trash" />
+              </button>
+            </div>
+          }
+        </li>
+      }
+
+      @for (upload of queue(); track upload.key) {
+        <li class="photos__tile photos__tile--pending" [class.photos__tile--failed]="upload.error">
+          <img class="photos__image" [src]="upload.preview" alt="" />
+
+          @if (upload.error) {
+            <div class="photos__overlay photos__overlay--error" role="alert">
+              <cm-icon name="alert-circle" />
+              <p>{{ upload.error }}</p>
+              <div class="photos__overlay-actions">
+                @if (upload.retryable) {
+                  <button type="button" class="photos__confirm-yes" (click)="retry(upload)">
+                    <cm-icon name="refresh" /> Réessayer
+                  </button>
+                }
+                <button type="button" class="photos__confirm-no" (click)="discard(upload)">Retirer</button>
+              </div>
+            </div>
+          } @else {
+            <div class="photos__progress">
+              <div
+                class="photos__bar"
+                role="progressbar"
+                aria-label="Envoi de la photo"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="upload.progress"
+              >
+                <span [style.width.%]="upload.progress"></span>
+              </div>
+              <span class="photos__progress-label">
+                {{ !upload.sending ? 'En attente…' : upload.progress < 100 ? 'Envoi… ' + upload.progress + ' %' : 'Préparation…' }}
+              </span>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

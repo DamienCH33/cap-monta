@@ -84,7 +84,7 @@ final readonly class UpdateOwnerAccommodationProcessor implements ProcessorInter
 
             if ([] !== $missing) {
                 throw new UnprocessableEntityHttpException(implode("\n", array_map(static fn (string $field): string => match ($field) {
-                    'description' => sprintf("Un logement publié doit garder une description d'au moins %d caractères.", \App\Entity\Accommodation::MIN_DESCRIPTION_LENGTH), 'district' => 'Un logement publié au CHM doit garder son quartier.',
+                    'description' => sprintf("Un logement publié doit garder une description d'au moins %d caractères.", \App\Entity\Accommodation::MIN_DESCRIPTION_LENGTH), 'district' => 'Un logement publié au CHM doit garder son quartier.', 'photos' => 'Un logement publié doit garder au moins une photo.',
                 }, $missing)));
             }
         }

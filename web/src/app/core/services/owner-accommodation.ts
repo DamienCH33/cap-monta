@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
@@ -9,6 +9,7 @@ import {
   DistrictOption,
   NewAccommodation,
   OwnerAccommodation,
+  OwnerPhoto,
 } from '../models/owner-accommodation';
 
 /**
@@ -57,6 +58,36 @@ export class OwnerAccommodationService {
 
   archive(slug: string): Observable<OwnerAccommodation> {
     return this.transition(slug, 'archive');
+  }
+
+  /**
+   * Envoie une photo. Rend les événements de progression, pour afficher une barre :
+   * utile au téléphone, où une photo met plusieurs secondes à partir.
+   */
+  uploadPhoto(slug: string, file: File): Observable<HttpEvent<OwnerPhoto>> {
+    const body = new FormData();
+    body.append('photo', file);
+    // Case cochée par le propriétaire avant l'envoi : aucune personne sur la photo.
+    body.append('noPeople', '1');
+
+    return this.http.post<OwnerPhoto>(`${this.url(slug)}/photos`, body, {
+      withCredentials: true,
+      reportProgress: true,
+      observe: 'events',
+    });
+  }
+
+  deletePhoto(slug: string, id: string): Observable<void> {
+    return this.http.delete<void>(`${this.url(slug)}/photos/${encodeURIComponent(id)}`, {
+      withCredentials: true,
+    });
+  }
+
+  /** Le nouvel ordre complet : la première photo devient la couverture. */
+  reorderPhotos(slug: string, ids: string[]): Observable<OwnerPhoto[]> {
+    return this.http.put<OwnerPhoto[]>(`${this.url(slug)}/photos/order`, { ids }, {
+      withCredentials: true,
+    });
   }
 
   /** Les quartiers, pour les listes déroulantes des formulaires. Liste publique. */
