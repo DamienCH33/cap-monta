@@ -8,7 +8,10 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use App\Dto\CreateAccommodationInput;
 use App\Entity\Accommodation;
+use App\State\CreateOwnerAccommodationProcessor;
 use App\State\OwnerAccommodationCollectionProvider;
 use App\State\OwnerAccommodationItemProvider;
 
@@ -33,6 +36,11 @@ use App\State\OwnerAccommodationItemProvider;
         new Get(
             uriTemplate: '/owner/accommodations/{slug}',
             provider: OwnerAccommodationItemProvider::class,
+        ),
+        new Post(
+            uriTemplate: '/owner/accommodations',
+            input: CreateAccommodationInput::class,
+            processor: CreateOwnerAccommodationProcessor::class,
         ),
     ],
 )]
