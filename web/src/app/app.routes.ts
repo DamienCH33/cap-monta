@@ -48,6 +48,14 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/owner-home/owner-home').then((m) => m.OwnerHome),
   },
   {
+    path: 'mon-espace/logements',
+    canActivate: [ownerGuard],
+    loadComponent: () =>
+      import('./pages/owner-accommodations/owner-accommodations').then(
+        (m) => m.OwnerAccommodations,
+      ),
+  },
+  {
     path: 'inscription',
     loadComponent: () => import('./pages/register/register').then((m) => m.Register),
   },

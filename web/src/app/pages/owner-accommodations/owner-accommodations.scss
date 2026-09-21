@@ -1,0 +1,117 @@
+// À remplacer par les variables de la charte si elles existent déjà.
+:host {
+  --oa-sea: #0b5f8a;
+  --oa-pine: #2f6b4f;
+}
+
+.owner-accommodations {
+  max-width: 48rem;
+  padding-block: 2rem;
+}
+
+.owner-accommodations__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.owner-accommodations__heading {
+  margin: 0;
+}
+
+.owner-accommodations__list {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.owner-accommodations__item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgb(0 0 0 / 12%);
+  border-radius: 0.75rem;
+  background: #fff;
+
+  @media (max-width: 36rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.owner-accommodations__badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &--draft {
+    background: #eef1f4;
+    color: #44505c;
+  }
+
+  &--published {
+    background: #e3f1e9;
+    color: var(--oa-pine);
+  }
+
+  &--archived {
+    background: #f4eee6;
+    color: #7a5a2e;
+  }
+}
+
+.owner-accommodations__title {
+  margin: 0.35rem 0 0.15rem;
+  font-size: 1.05rem;
+}
+
+.owner-accommodations__slug {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+  word-break: break-all;
+}
+
+.owner-accommodations__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.owner-accommodations__button {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--oa-sea);
+  border-radius: 0.5rem;
+  background: var(--oa-sea);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &--secondary {
+    background: transparent;
+    color: var(--oa-sea);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
+// Les messages de l'API peuvent tenir sur plusieurs lignes (un manque par ligne).
+.owner-accommodations__error {
+  grid-column: 1 / -1;
+  margin: 0;
+  white-space: pre-line;
+}

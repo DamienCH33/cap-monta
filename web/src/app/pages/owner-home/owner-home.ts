@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth';
 import { SeoService } from '../../core/services/seo';
 
 @Component({
   selector: 'cm-owner-home',
+  imports: [RouterLink],
   templateUrl: './owner-home.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
