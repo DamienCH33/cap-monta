@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
 use App\Entity\Unavailability;
+use App\Entity\User;
 use App\Enum\AccommodationStatus;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
@@ -12,6 +13,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 
 /**
  * @extends ServiceEntityRepository<Accommodation>
@@ -287,5 +289,26 @@ class AccommodationRepository extends ServiceEntityRepository
         );
 
         return $ids;
+    }
+
+    /**
+     * Every accommodation of an owner, drafts and archived included, for his
+     * own space. Never for a public page: use search() or findOnePublishedBySlug().
+     *
+     * @return list<Accommodation>
+     */
+    public function findByOwner(User $owner): array
+    {
+        /** @var list<Accommodation> $result */
+        $result = $this->createQueryBuilder('a')
+            ->leftJoin('a.district', 'd')
+            ->addSelect('d')
+            ->andWhere('a.owner = :owner')
+            ->setParameter('owner', $owner->getId(), UuidType::NAME)
+            ->orderBy('a.slug', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $result;
     }
 }
