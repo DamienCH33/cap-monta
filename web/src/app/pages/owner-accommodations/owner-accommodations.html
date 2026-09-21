@@ -12,6 +12,11 @@
         <p class="owner-accommodations__summary">{{ summary() }}</p>
       }
     </div>
+    @if (accommodations()?.length) {
+      <a class="owner-accommodations__add" routerLink="/mon-espace/logements/nouveau">
+        + Ajouter un logement
+      </a>
+    }
   </header>
 
   @if (loadFailed()) {
@@ -23,6 +28,9 @@
       <div class="owner-accommodations__empty">
         <p class="owner-accommodations__empty-title">Vous n'avez pas encore de logement.</p>
         <p>Quatre informations suffisent pour commencer : vous compléterez le reste ensuite.</p>
+        <a class="owner-accommodations__add" routerLink="/mon-espace/logements/nouveau">
+          + Ajouter mon premier logement
+        </a>
       </div>
     } @else {
       <nav class="owner-accommodations__filters" aria-label="Filtrer par statut">
@@ -49,7 +57,11 @@
 
       <ul class="owner-accommodations__list">
         @for (item of visible(); track item.slug) {
-          <li class="owner-accommodations__card" [class]="'owner-accommodations__card--' + item.status">
+          <li
+            class="owner-accommodations__card"
+            [class]="'owner-accommodations__card--' + item.status"
+            [class.owner-accommodations__card--new]="item.slug === highlighted"
+          >
             <div class="owner-accommodations__body">
               <span class="owner-accommodations__badge" [class]="'owner-accommodations__badge--' + item.status">
                 {{ statusLabel(item.status) }}
@@ -62,12 +74,15 @@
               @if ('draft' === item.status) {
                 <button
                   type="button"
-                  class="owner-accommodations__button"
+                  class="owner-accommodations__button owner-accommodations__button--secondary"
                   [disabled]="null !== busy()"
                   (click)="publish(item)"
                 >
                   {{ busy() === item.slug ? 'Publication…' : 'Publier' }}
                 </button>
+                <a class="owner-accommodations__button" [routerLink]="['/mon-espace/logements', item.slug, 'modifier']">
+                  Continuer l'annonce
+                </a>
               }
               @if ('published' === item.status) {
                 <a
@@ -85,8 +100,17 @@
                 >
                   {{ busy() === item.slug ? 'Retrait…' : 'Retirer du site' }}
                 </button>
+                <a class="owner-accommodations__button" [routerLink]="['/mon-espace/logements', item.slug, 'modifier']">
+                  Modifier
+                </a>
               }
               @if ('archived' === item.status) {
+                <a
+                  class="owner-accommodations__button owner-accommodations__button--secondary"
+                  [routerLink]="['/mon-espace/logements', item.slug, 'modifier']"
+                >
+                  Modifier
+                </a>
                 <button
                   type="button"
                   class="owner-accommodations__button"

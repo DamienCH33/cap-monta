@@ -1,0 +1,445 @@
+// Mêmes couleurs que Mes logements. À relier aux variables globales de la charte.
+:host {
+  --lf-sea: #0b5f8a;
+  --lf-sea-dark: #084a6b;
+  --lf-sea-soft: #eef5f9;
+  --lf-pine: #2f6b4f;
+  --lf-ink: #1c2530;
+  --lf-muted: #5b6672;
+  --lf-line: rgb(0 0 0 / 12%);
+  --lf-error: #a3261d;
+}
+
+.listing-form {
+  padding-block: 1.5rem 3rem;
+  color: var(--lf-ink);
+
+  a {
+    color: var(--lf-sea);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.listing-form__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: var(--lf-muted);
+  font-size: 0.875rem;
+}
+
+.listing-form__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.listing-form__heading {
+  margin: 0;
+}
+
+.listing-form__badge {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &--draft {
+    background: #eef1f4;
+    color: #44505c;
+  }
+
+  &--published {
+    background: #e4f1e9;
+    color: var(--lf-pine);
+  }
+
+  &--archived {
+    background: #f5eee4;
+    color: #7a5a2e;
+  }
+}
+
+.listing-form__intro {
+  max-width: 44rem;
+  margin: 0.5rem 0 0;
+  color: var(--lf-muted);
+}
+
+.listing-form__form {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 44rem;
+  margin-top: 1.5rem;
+}
+
+.listing-form__alert,
+.listing-form__notice {
+  max-width: 44rem;
+  margin: 1.25rem 0 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.6rem;
+  white-space: pre-line;
+}
+
+.listing-form__alert {
+  background: #fbeceb;
+  color: var(--lf-error);
+}
+
+.listing-form__form .listing-form__alert {
+  margin: 0;
+}
+
+.listing-form__notice {
+  border: 1px solid rgb(11 95 138 / 25%);
+  background: var(--lf-sea-soft);
+}
+
+// Une section par thème : lisible d'un coup d'œil, et rassurant sur la longueur.
+.listing-form__section {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid rgb(0 0 0 / 9%);
+  border-radius: 0.875rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+
+  @media (max-width: 36rem) {
+    padding: 1.25rem;
+  }
+
+  &--soon {
+    border-style: dashed;
+    background: #fbfaf8;
+    box-shadow: none;
+  }
+}
+
+.listing-form__section-title {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.listing-form__soon {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: #eef1f4;
+  color: #44505c;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.listing-form__group {
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.listing-form__label {
+  padding: 0;
+  font-weight: 600;
+}
+
+.listing-form__muted {
+  margin: 0;
+  color: var(--lf-muted);
+  font-weight: 400;
+}
+
+.listing-form__readonly {
+  margin: 0;
+  font-weight: 600;
+}
+
+.listing-form__hint,
+.listing-form__counter {
+  color: var(--lf-muted);
+  font-size: 0.875rem;
+}
+
+.listing-form__counter--ok {
+  color: var(--lf-pine);
+}
+
+.listing-form__error {
+  margin: 0;
+  color: var(--lf-error);
+  font-size: 0.875rem;
+}
+
+// Grandes cases à cliquer : le bouton radio est caché, la case entière est cliquable.
+.listing-form__choices {
+  display: grid;
+  gap: 0.75rem;
+
+  &--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  &--three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    @media (max-width: 30rem) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.listing-form__choice,
+.listing-form__amenity {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--lf-line);
+  background: #fff;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:hover {
+    border-color: rgb(11 95 138 / 45%);
+  }
+
+  &:has(input:checked) {
+    border-color: var(--lf-sea);
+    background: var(--lf-sea-soft);
+    color: var(--lf-sea-dark);
+    box-shadow: inset 0 0 0 1px var(--lf-sea);
+  }
+
+  &:has(input:focus-visible) {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 2px;
+  }
+}
+
+.listing-form__choice {
+  min-height: 3.25rem;
+  padding: 0.75rem;
+  border-radius: 0.6rem;
+}
+
+// Équipements : pastilles à cocher, sur plusieurs lignes.
+.listing-form__amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.listing-form__amenity {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 500;
+
+  &:has(input:checked)::before {
+    content: '✓';
+    margin-right: 0.4rem;
+  }
+}
+
+.listing-form__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+
+  @media (max-width: 40rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Compteur − valeur + : plus rapide qu'un champ à taper, surtout au téléphone.
+.listing-form__stepper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem;
+  border: 1px solid var(--lf-line);
+  border-radius: 0.6rem;
+}
+
+.listing-form__step {
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: var(--lf-sea-soft);
+  color: var(--lf-sea-dark);
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #dcebf4;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 2px;
+  }
+}
+
+.listing-form__value {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.listing-form__suffix {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--lf-line);
+  border-radius: 0.6rem;
+  background: #fff;
+
+  input {
+    width: 100%;
+    min-width: 0;
+    padding: 0.75rem 0.8rem;
+    border: 0;
+    border-radius: 0.6rem;
+    background: transparent;
+    font: inherit;
+  }
+
+  span {
+    padding-right: 0.8rem;
+    color: var(--lf-muted);
+  }
+
+  &:focus-within {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 1px;
+    border-color: var(--lf-sea);
+  }
+}
+
+.listing-form select,
+.listing-form textarea {
+  width: 100%;
+  padding: 0.75rem 0.8rem;
+  border: 1px solid var(--lf-line);
+  border-radius: 0.6rem;
+  background: #fff;
+  color: var(--lf-ink);
+  font: inherit;
+
+  &:focus-visible {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 1px;
+    border-color: var(--lf-sea);
+  }
+}
+
+.listing-form textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+// Barre d'actions : reste visible en bas de l'écran pendant la saisie.
+.listing-form__actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  padding: 1rem 0;
+  border-top: 1px solid rgb(0 0 0 / 8%);
+  background: #f5f4f0;
+}
+
+.listing-form__button {
+  padding: 0.75rem 1.4rem;
+  border: 1px solid var(--lf-sea);
+  border-radius: 0.6rem;
+  background: var(--lf-sea);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--lf-sea-dark);
+  }
+
+  &--secondary {
+    background: #fff;
+    color: var(--lf-sea);
+
+    &:hover:not(:disabled) {
+      background: var(--lf-sea-soft);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 2px;
+  }
+}
+
+.listing-form__cancel {
+  font-weight: 600;
+}
+
+.listing-form__skeleton {
+  max-width: 44rem;
+  height: 24rem;
+  margin-top: 1.5rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(90deg, #eceae5 25%, #f5f4f0 50%, #eceae5 75%);
+  background-size: 200% 100%;
+  animation: listing-form-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes listing-form-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listing-form__skeleton {
+    animation: none;
+  }
+}

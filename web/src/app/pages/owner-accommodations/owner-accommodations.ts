@@ -17,6 +17,7 @@ import {
 } from '../../core/models/owner-accommodation';
 import { NavigationOrigin } from '../../core/services/navigation-origin';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
+import { OwnerFlash } from '../../core/services/owner-flash';
 import { SeoService } from '../../core/services/seo';
 
 /** Les brouillons d'abord : ce sont eux qui attendent une action. */
@@ -35,7 +36,7 @@ const HINTS: Record<AccommodationStatus, string> = {
 };
 
 const EMPTY_FILTER: Record<AccommodationStatus, string> = {
-  draft: "Aucun brouillon : tous vos logements ont déjà été publiés au moins une fois.",
+  draft: 'Aucun brouillon : tous vos logements ont déjà été publiés au moins une fois.',
   published: "Aucun logement en ligne pour l'instant.",
   archived: 'Aucun logement retiré du site.',
 };
@@ -56,6 +57,7 @@ interface Filter {
 })
 export class OwnerAccommodations {
   private readonly service = inject(OwnerAccommodationService);
+  private readonly route = inject(ActivatedRoute);
 
   /** null tant que la liste n'est pas arrivée. */
   readonly accommodations = signal<OwnerAccommodation[] | null>(null);
@@ -63,9 +65,15 @@ export class OwnerAccommodations {
 
   /** Le filtre vient de l'adresse (?statut=en-ligne) : il survit au rechargement. */
   readonly status = toSignal(
-    inject(ActivatedRoute).queryParamMap.pipe(map((params) => statusFromParam(params.get('statut')))),
+    this.route.queryParamMap.pipe(map((params) => statusFromParam(params.get('statut')))),
     { initialValue: null },
   );
+
+  /** Message laissé par le formulaire (« Brouillon enregistré »…), lu une seule fois. */
+  private readonly flash = inject(OwnerFlash).take();
+
+  /** Le logement qui vient d'être enregistré : mis en avant d'un halo. */
+  readonly highlighted = this.flash?.slug ?? null;
 
   /**
    * Les logements modifiés sur cette page restent affichés même s'ils ne correspondent
@@ -126,10 +134,23 @@ export class OwnerAccommodations {
     this.service.list().subscribe({
       // Trié une seule fois au chargement : une carte ne saute pas d'un groupe à l'autre
       // pendant qu'on clique dessus.
-      next: (list) =>
+      next: (list) => {
         this.accommodations.set(
           [...list].sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]),
-        ),
+        );
+
+        const flash = this.flash;
+
+        if (null !== flash) {
+          // Reste visible même s'il ne correspond pas au filtre en cours.
+          this.touched.set(new Set([flash.slug]));
+          if ('ok' === flash.tone) {
+            this.notices.set({ [flash.slug]: flash.message });
+          } else {
+            this.errors.set({ [flash.slug]: flash.message });
+          }
+        }
+      },
       error: () => this.loadFailed.set(true),
     });
   }

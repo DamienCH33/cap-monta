@@ -14,5 +14,10 @@ export function apiErrorMessage(
 
   const body = error.error as { violations?: { title?: string }[]; detail?: string } | null;
 
+  // Message générique du Serializer (type inattendu, JSON illisible) : illisible pour un visiteur.
+  if ('The input data is misformatted.' === body?.detail) {
+    return "Une information envoyée n'a pas pu être lue. Vérifiez les champs et réessayez.";
+  }
+
   return body?.violations?.[0]?.title ?? body?.detail ?? fallback;
 }

@@ -48,6 +48,22 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/owner-home/owner-home').then((m) => m.OwnerHome),
   },
   {
+    path: 'mon-espace/logements/nouveau',
+    canActivate: [ownerGuard],
+    loadComponent: () =>
+      import('./pages/owner-accommodation-form/owner-accommodation-form').then(
+        (m) => m.OwnerAccommodationForm,
+      ),
+  },
+  {
+    path: 'mon-espace/logements/:slug/modifier',
+    canActivate: [ownerGuard],
+    loadComponent: () =>
+      import('./pages/owner-accommodation-form/owner-accommodation-form').then(
+        (m) => m.OwnerAccommodationForm,
+      ),
+  },
+  {
     path: 'mon-espace/logements',
     canActivate: [ownerGuard],
     loadComponent: () =>

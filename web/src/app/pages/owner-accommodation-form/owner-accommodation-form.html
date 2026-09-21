@@ -1,0 +1,244 @@
+<div class="container listing-form">
+  <nav class="listing-form__breadcrumb" aria-label="Fil d'Ariane">
+    <a routerLink="/mon-espace">Mon espace</a>
+    <span aria-hidden="true">›</span>
+    <a routerLink="/mon-espace/logements">Mes logements</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">{{ null === slug ? 'Ajouter' : 'Modifier' }}</span>
+  </nav>
+
+  <header class="listing-form__header">
+    <h1 class="listing-form__heading">{{ title() }}</h1>
+    @if (status(); as current) {
+      <span class="listing-form__badge" [class]="'listing-form__badge--' + current">
+        {{ statusLabel(current) }}
+      </span>
+    }
+  </header>
+
+  @if (null === slug) {
+    <p class="listing-form__intro">
+      Remplissez tout d'une traite pour publier tout de suite, ou enregistrez un brouillon et
+      reprenez plus tard : rien n'est visible tant que vous ne publiez pas.
+    </p>
+  }
+
+  @if (loading()) {
+    <div class="listing-form__skeleton" aria-busy="true" aria-label="Chargement"></div>
+  } @else if (loadFailed()) {
+    <p class="listing-form__alert" role="alert">
+      Ce logement est introuvable. <a routerLink="/mon-espace/logements">Retour à mes logements</a>
+    </p>
+  } @else {
+    @if (!canPublish()) {
+      <p class="listing-form__notice">
+        Confirmez votre adresse email pour pouvoir publier : le lien vous a été envoyé à
+        l'inscription. En attendant, enregistrez votre annonce en brouillon, rien ne sera perdu.
+      </p>
+    }
+
+    <form class="listing-form__form" [formGroup]="form" (ngSubmit)="submit(primary()?.intent ?? 'draft')" novalidate>
+      @if (generalError(); as message) {
+        <p class="listing-form__alert" role="alert">{{ message }}</p>
+      }
+
+      <!-- 1. Le logement -->
+      <section class="listing-form__section">
+        <h2 class="listing-form__section-title">Le logement</h2>
+
+        <fieldset class="listing-form__group">
+          <legend class="listing-form__label">Domaine</legend>
+          @if (null === existing()) {
+            <div class="listing-form__choices listing-form__choices--two">
+              @for (option of resorts; track option.value) {
+                <label class="listing-form__choice">
+                  <input type="radio" formControlName="resort" [value]="option.value" (change)="onResortChange()" />
+                  <span>{{ option.label }}</span>
+                </label>
+              }
+            </div>
+          } @else {
+            <p class="listing-form__readonly">
+              {{ 'chm' === form.controls.resort.value ? 'CHM Montalivet' : 'Euronat' }}
+              <span class="listing-form__muted">— ne se modifie pas</span>
+            </p>
+          }
+          @if (error('resort'); as message) {
+            <p class="listing-form__error" role="alert">{{ message }}</p>
+          }
+        </fieldset>
+
+        <fieldset class="listing-form__group">
+          <legend class="listing-form__label">Type de logement</legend>
+          <div class="listing-form__choices listing-form__choices--three">
+            @for (option of types; track option.value) {
+              <label class="listing-form__choice">
+                <input type="radio" formControlName="type" [value]="option.value" (change)="forget('type')" />
+                <span>{{ option.label }}</span>
+              </label>
+            }
+          </div>
+          @if (error('type'); as message) {
+            <p class="listing-form__error" role="alert">{{ message }}</p>
+          }
+        </fieldset>
+
+        <div class="listing-form__row">
+          <div class="listing-form__group">
+            <span class="listing-form__label" id="capacity-label">Capacité</span>
+            <div class="listing-form__stepper" role="group" aria-labelledby="capacity-label">
+              <button
+                type="button"
+                class="listing-form__step"
+                aria-label="Une personne de moins"
+                [disabled]="form.controls.capacity.value <= limits.capacity.min"
+                (click)="step('capacity', -1)"
+              >−</button>
+              <output class="listing-form__value" aria-live="polite">
+                {{ plural(form.controls.capacity.value, 'personne', 'personnes') }}
+              </output>
+              <button
+                type="button"
+                class="listing-form__step"
+                aria-label="Une personne de plus"
+                [disabled]="form.controls.capacity.value >= limits.capacity.max"
+                (click)="step('capacity', 1)"
+              >+</button>
+            </div>
+            @if (error('capacity'); as message) {
+              <p class="listing-form__error" role="alert">{{ message }}</p>
+            }
+          </div>
+
+          <div class="listing-form__group">
+            <span class="listing-form__label" id="bedrooms-label">Chambres</span>
+            <div class="listing-form__stepper" role="group" aria-labelledby="bedrooms-label">
+              <button
+                type="button"
+                class="listing-form__step"
+                aria-label="Une chambre de moins"
+                [disabled]="form.controls.bedrooms.value <= limits.bedrooms.min"
+                (click)="step('bedrooms', -1)"
+              >−</button>
+              <output class="listing-form__value" aria-live="polite">
+                {{ plural(form.controls.bedrooms.value, 'chambre', 'chambres') }}
+              </output>
+              <button
+                type="button"
+                class="listing-form__step"
+                aria-label="Une chambre de plus"
+                [disabled]="form.controls.bedrooms.value >= limits.bedrooms.max"
+                (click)="step('bedrooms', 1)"
+              >+</button>
+            </div>
+            @if (error('bedrooms'); as message) {
+              <p class="listing-form__error" role="alert">{{ message }}</p>
+            }
+          </div>
+
+          <label class="listing-form__group">
+            <span class="listing-form__label">Surface <span class="listing-form__muted">(facultatif)</span></span>
+            <span class="listing-form__suffix">
+              <input type="number" inputmode="numeric" min="5" max="200" step="1" formControlName="surface" (input)="forget('surface')" />
+              <span aria-hidden="true">m²</span>
+            </span>
+            @if (error('surface'); as message) {
+              <span class="listing-form__error" role="alert">{{ message }}</span>
+            }
+          </label>
+        </div>
+      </section>
+
+      <!-- 2. Emplacement : seulement au CHM -->
+      @if (showDistrict()) {
+        <section class="listing-form__section">
+          <h2 class="listing-form__section-title">Emplacement</h2>
+          <label class="listing-form__group">
+            <span class="listing-form__label">Quartier</span>
+            <select formControlName="district" (change)="forget('district')">
+              <option value="">Je le préciserai plus tard</option>
+              @for (district of resortDistricts(); track district.slug) {
+                <option [value]="district.slug">{{ district.name }}</option>
+              }
+            </select>
+            <span class="listing-form__hint">Nécessaire pour publier l'annonce.</span>
+            @if (error('district'); as message) {
+              <span class="listing-form__error" role="alert">{{ message }}</span>
+            }
+          </label>
+        </section>
+      }
+
+      <!-- 3. Équipements -->
+      <section class="listing-form__section">
+        <h2 class="listing-form__section-title">Équipements</h2>
+        <div class="listing-form__amenities">
+          @for (amenity of amenityOptions; track amenity.key) {
+            <label class="listing-form__amenity">
+              <input type="checkbox" [checked]="hasAmenity(amenity.key)" (change)="toggleAmenity(amenity.key)" />
+              <span>{{ amenity.label }}</span>
+            </label>
+          }
+        </div>
+        @if (error('amenities'); as message) {
+          <p class="listing-form__error" role="alert">{{ message }}</p>
+        }
+      </section>
+
+      <!-- 4. Description -->
+      <section class="listing-form__section">
+        <h2 class="listing-form__section-title">Description</h2>
+        <label class="listing-form__group">
+          <span class="listing-form__label">Présentez votre logement</span>
+          <textarea
+            rows="7"
+            formControlName="description"
+            placeholder="L'ambiance, la vue, l'ombre des pins, la distance à la plage, ce que vous aimez dans ce logement…"
+            (input)="forget('description')"
+          ></textarea>
+          <span
+            class="listing-form__counter"
+            [class.listing-form__counter--ok]="descriptionLength() >= minDescription"
+          >
+            {{ descriptionLength() }} caractères
+            @if (descriptionLength() < minDescription) {
+              · encore {{ minDescription - descriptionLength() }} pour pouvoir publier
+            }
+          </span>
+          @if (error('description'); as message) {
+            <span class="listing-form__error" role="alert">{{ message }}</span>
+          }
+        </label>
+      </section>
+
+      <!-- 5. Photos : à venir -->
+      <section class="listing-form__section listing-form__section--soon">
+        <h2 class="listing-form__section-title">
+          Photos <span class="listing-form__soon">Bientôt</span>
+        </h2>
+        <p class="listing-form__muted">
+          L'ajout de photos arrive à la prochaine étape. D'ici là, vous pouvez publier sans photo.
+        </p>
+      </section>
+
+      <div class="listing-form__actions">
+        @if (primary(); as action) {
+          <button type="submit" class="listing-form__button" [disabled]="null !== saving()">
+            {{ saving() === action.intent ? 'Enregistrement…' : action.label }}
+          </button>
+        }
+        @if (secondary(); as action) {
+          <button
+            type="button"
+            class="listing-form__button listing-form__button--secondary"
+            [disabled]="null !== saving()"
+            (click)="submit(action.intent)"
+          >
+            {{ saving() === action.intent ? 'Enregistrement…' : action.label }}
+          </button>
+        }
+        <a class="listing-form__cancel" routerLink="/mon-espace/logements">Annuler</a>
+      </div>
+    </form>
+  }
+</div>

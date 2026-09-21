@@ -320,3 +320,46 @@
     animation: none;
   }
 }
+
+// « Ajouter un logement » : l'action principale de la page, en bleu mer plein.
+.owner-accommodations .owner-accommodations__add {
+  display: inline-block;
+  padding: 0.65rem 1.2rem;
+  border-radius: 0.6rem;
+  background: var(--oa-sea);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--oa-sea-dark);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 2px;
+  }
+}
+
+.owner-accommodations__empty .owner-accommodations__add {
+  margin-top: 1rem;
+}
+
+// Le logement qui vient d'être créé : un halo bleu mer, pour le repérer tout de suite.
+.owner-accommodations__card--new,
+.owner-accommodations__card--new:hover {
+  box-shadow: 0 0 0 3px rgb(11 95 138 / 25%);
+}
+
+// Liens en forme de bouton : la couleur des liens de la page ne doit pas les écraser.
+.owner-accommodations a.owner-accommodations__button {
+  display: inline-block;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+
+  &.owner-accommodations__button--secondary {
+    color: var(--oa-sea);
+  }
+}

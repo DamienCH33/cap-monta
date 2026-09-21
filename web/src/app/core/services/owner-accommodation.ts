@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { JsonLdCollection } from '../models/accommodation';
 import {
   AccommodationChanges,
+  DistrictOption,
   NewAccommodation,
   OwnerAccommodation,
 } from '../models/owner-accommodation';
@@ -56,6 +57,15 @@ export class OwnerAccommodationService {
 
   archive(slug: string): Observable<OwnerAccommodation> {
     return this.transition(slug, 'archive');
+  }
+
+  /** Les quartiers, pour les listes déroulantes des formulaires. Liste publique. */
+  districts(): Observable<DistrictOption[]> {
+    return this.http
+      .get<JsonLdCollection<DistrictOption>>(`${environment.apiUrl}/api/districts`, {
+        headers: { Accept: 'application/ld+json' },
+      })
+      .pipe(map((response) => response.member));
   }
 
   private transition(slug: string, action: 'publish' | 'archive'): Observable<OwnerAccommodation> {

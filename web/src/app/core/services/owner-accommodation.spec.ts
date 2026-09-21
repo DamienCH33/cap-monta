@@ -31,6 +31,21 @@ describe('OwnerAccommodationService', () => {
     expect(slugs).toEqual(['mobil-home-europa-6-personnes']);
   });
 
+  it('creates a draft with the session cookie', () => {
+    service.create({ resort: 'chm', type: 'mobile_home', capacity: 6, bedrooms: 2 }).subscribe();
+
+    const request = http.expectOne(api);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
+    expect(request.request.body).toEqual({
+      resort: 'chm',
+      type: 'mobile_home',
+      capacity: 6,
+      bedrooms: 2,
+    });
+    request.flush({});
+  });
+
   it('publishes through its own endpoint, without a body', () => {
     service.publish('mobil-home').subscribe();
 
@@ -49,5 +64,16 @@ describe('OwnerAccommodationService', () => {
     expect(request.request.headers.get('Content-Type')).toBe('application/merge-patch+json');
     expect(request.request.body).toEqual({ capacity: 6 });
     request.flush({});
+  });
+
+  it('reads the districts from the public list', () => {
+    let names: string[] = [];
+    service.districts().subscribe((list) => (names = list.map((district) => district.name)));
+
+    http
+      .expectOne(`${environment.apiUrl}/api/districts`)
+      .flush({ member: [{ slug: 'europa', name: 'Europa', resort: 'chm' }], totalItems: 1 });
+
+    expect(names).toEqual(['Europa']);
   });
 });

@@ -15,12 +15,14 @@ export interface OwnerAccommodation {
   description: string;
 }
 
-/** Création : le strict minimum pour un brouillon. Le serveur décide du slug et du statut. */
+/** Création : tout peut être envoyé d'une traite. Le serveur décide du slug et du statut. */
 export interface NewAccommodation {
   resort: string;
   type: string;
   capacity: number;
   bedrooms: number;
+  surface?: number | null;
+  amenities?: string[];
   description?: string;
   district?: string | null;
 }
@@ -34,6 +36,13 @@ export interface AccommodationChanges {
   amenities?: string[];
   description?: string;
   district?: string | null;
+}
+
+/** Un quartier, tel que les formulaires de l'espace propriétaire en ont besoin. */
+export interface DistrictOption {
+  slug: string;
+  name: string;
+  resort: string;
 }
 
 const STATUS_LABELS: Record<AccommodationStatus, string> = {

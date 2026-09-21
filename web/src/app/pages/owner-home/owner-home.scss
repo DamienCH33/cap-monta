@@ -80,8 +80,9 @@
   font-weight: 600;
   text-decoration: none;
 
-  &:hover .owner-home__callout-action {
-    text-decoration: underline;
+  &:hover {
+    border-color: rgb(11 95 138 / 45%);
+    text-decoration: none;
   }
 }
 
