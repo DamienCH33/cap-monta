@@ -11,9 +11,9 @@ use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
- * Seul le propriétaire d'un logement peut le consulter ou le modifier
- * dans son espace. Deux attributs distincts, même règle pour l'instant :
- * ils pourront diverger (archivé = lecture seule) sans toucher aux appelants.
+ * Only the owner of an accommodation may view or edit it in his space.
+ * Two attributes, one rule for now: they can diverge later (archived =
+ * read-only) without touching the callers.
  *
  * @extends Voter<string, Accommodation>
  */
