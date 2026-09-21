@@ -8,12 +8,15 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Dto\CreateAccommodationInput;
+use App\Dto\UpdateAccommodationInput;
 use App\Entity\Accommodation;
 use App\State\CreateOwnerAccommodationProcessor;
 use App\State\OwnerAccommodationCollectionProvider;
 use App\State\OwnerAccommodationItemProvider;
+use App\State\UpdateOwnerAccommodationProcessor;
 
 /**
  * What an owner sees of his own accommodations: every status, drafts included.
@@ -40,12 +43,25 @@ use App\State\OwnerAccommodationItemProvider;
         new Post(
             uriTemplate: '/owner/accommodations',
             input: CreateAccommodationInput::class,
+            // An unknown field (slug, status...) is refused, not silently ignored.
+            denormalizationContext: ['allow_extra_attributes' => false],
             processor: CreateOwnerAccommodationProcessor::class,
+        ),
+        // read: false, the processor loads the entity and asks the voter itself.
+        new Patch(
+            uriTemplate: '/owner/accommodations/{slug}',
+            input: UpdateAccommodationInput::class,
+            denormalizationContext: ['allow_extra_attributes' => false],
+            read: false,
+            processor: UpdateOwnerAccommodationProcessor::class,
         ),
     ],
 )]
 final class OwnerAccommodationResource
 {
+    /**
+     * @param list<string> $amenities
+     */
     public function __construct(
         #[ApiProperty(identifier: true)]
         public string $slug,
@@ -53,8 +69,12 @@ final class OwnerAccommodationResource
         public string $resort,
         public string $type,
         public ?string $district,
+        public ?string $districtSlug,
         public int $capacity,
         public int $bedrooms,
+        public ?int $surface,
+        public array $amenities,
+        public string $description,
     ) {
     }
 
@@ -66,8 +86,12 @@ final class OwnerAccommodationResource
             $accommodation->getResort()->value,
             $accommodation->getType()->value,
             $accommodation->getDistrict()?->getName(),
+            $accommodation->getDistrict()?->getSlug(),
             $accommodation->getCapacity(),
             $accommodation->getBedrooms(),
+            $accommodation->getSurface(),
+            $accommodation->getAmenities(),
+            $accommodation->getDescription(),
         );
     }
 }

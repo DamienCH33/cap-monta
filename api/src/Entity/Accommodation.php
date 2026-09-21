@@ -254,6 +254,30 @@ class Accommodation
         return AccommodationStatus::Published === $this->status;
     }
 
+    public const int MIN_DESCRIPTION_LENGTH = 50;
+
+    /**
+     * What is still missing for this accommodation to be, or stay, public.
+     * One definition, used when editing a published accommodation and when publishing.
+     *
+     * @return list<'description'|'district'>
+     */
+    public function missingForPublication(): array
+    {
+        $missing = [];
+
+        if (mb_strlen(trim($this->description)) < self::MIN_DESCRIPTION_LENGTH) {
+            $missing[] = 'description';
+        }
+
+        // Every CHM accommodation sits in a district; Euronat's are not referenced yet.
+        if (Resort::Chm === $this->resort && null === $this->district) {
+            $missing[] = 'district';
+        }
+
+        return $missing;
+    }
+
     public function publish(): void
     {
         if (!$this->owner->isVerified()) {

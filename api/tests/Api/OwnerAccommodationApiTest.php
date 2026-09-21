@@ -159,6 +159,100 @@ final class OwnerAccommodationApiTest extends WebTestCase
         return $owner;
     }
 
+    public function testAnAnonymousVisitorCannotEdit(): void
+    {
+        $this->patch('anything', ['capacity' => 2]);
+
+        self::assertResponseStatusCodeSame(401);
+    }
+
+    public function testOnlyTheFieldsSentAreChanged(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-draft', $alice, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->patch('alice-draft', ['capacity' => 6, 'description' => 'Nouvelle description']);
+
+        self::assertResponseIsSuccessful();
+        $edited = $this->json();
+        self::assertSame(6, $edited['capacity']);
+        self::assertSame('Nouvelle description', $edited['description']);
+        self::assertSame(2, $edited['bedrooms'], 'A field that was not sent keeps its value.');
+        self::assertSame('alice-draft', $edited['slug']);
+    }
+
+    public function testAPublishedAccommodationCannotBecomeIncomplete(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $description = str_repeat('Vue sur la pinède. ', 4);
+        $accommodation = new Accommodation('alice-euronat', Resort::Euronat, AccommodationType::Bungalow, 6, 3, $description, $alice);
+        $accommodation->publish();
+        $this->em->persist($accommodation);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->patch('alice-euronat', ['description' => '']);
+
+        self::assertResponseStatusCodeSame(422);
+
+        // Nothing was written: the description is still the original one.
+        $this->client->request('GET', '/api/owner/accommodations/alice-euronat');
+        self::assertSame(trim($description), trim((string) $this->json()['description']));
+    }
+
+    public function testSomeoneElsesAccommodationCannotBeEdited(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $bob = $this->createOwner('bob@example.com');
+        $this->createAccommodation('bob-draft', $bob, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->patch('bob-draft', ['capacity' => 2]);
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testTheSlugCannotBeChanged(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-draft', $alice, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->patch('alice-draft', ['slug' => 'pirate']);
+
+        self::assertResponseStatusCodeSame(400);
+    }
+
+    public function testAnOutOfRangeValueIsRejected(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-draft', $alice, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->patch('alice-draft', ['capacity' => 40]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['capacity'], array_column($this->json()['violations'], 'propertyPath'));
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function patch(string $slug, array $payload): void
+    {
+        $this->client->request(
+            'PATCH',
+            '/api/owner/accommodations/'.$slug,
+            server: ['CONTENT_TYPE' => 'application/merge-patch+json'],
+            content: json_encode($payload, \JSON_THROW_ON_ERROR),
+        );
+    }
+
     private function createOwner(string $email): User
     {
         $owner = new User($email, 'Owner test');
