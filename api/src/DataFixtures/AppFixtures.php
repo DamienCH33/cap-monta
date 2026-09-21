@@ -6,6 +6,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Accommodation;
 use App\Entity\User;
+use App\Enum\AccommodationStatus;
 use App\Enum\DistrictArea;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
@@ -85,6 +86,12 @@ final class AppFixtures extends Fixture
             );
         }
 
+        AccommodationFactory::createOne([
+            'owner' => $damien,
+            'district' => $districts[3],
+            'slug' => 'brouillon-europa',
+            'status' => AccommodationStatus::Draft,
+        ]);
         // Les quartiers d'Euronat ne sont pas encore référencés.
 
         array_push($accommodations, ...AccommodationFactory::createMany(3, [

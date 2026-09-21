@@ -41,7 +41,7 @@ final readonly class AvailabilityProvider implements ProviderInterface
             return null;
         }
 
-        $accommodation = $this->accommodations->findOneBySlug($slug);
+        $accommodation = $this->accommodations->findOnePublishedBySlug($slug);
 
         if (null === $accommodation) {
             return null;

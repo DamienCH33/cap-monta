@@ -125,12 +125,38 @@ final class AccommodationApiTest extends ApiTestCase
         return array_map(static fn (array $item): string => (string) ($item['slug'] ?? ''), $members);
     }
 
-    private function createAccommodation(string $slug): Accommodation
+    public function testADraftIsAbsentFromTheCollection(): void
+    {
+        $this->createAccommodation('published-one');
+        $this->createAccommodation('draft-one', published: false);
+
+        $this->client->request('GET', '/api/accommodations');
+        $data = json_decode((string) $this->client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(1, $data['totalItems']);
+        self::assertSame('published-one', $data['member'][0]['slug']);
+    }
+
+    public function testADraftDetailPageIsNotFound(): void
+    {
+        $this->createAccommodation('draft-one', published: false);
+
+        $this->client->request('GET', '/api/accommodations/draft-one');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    private function createAccommodation(string $slug, bool $published = true): Accommodation
     {
         $owner = new User($slug.'@example.com', 'Proprietaire test');
         $this->em->persist($owner);
 
+        $owner->verifyEmail(new \DateTimeImmutable());
         $accommodation = new Accommodation($slug, Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Test accommodation', $owner);
+        if ($published) {
+            $accommodation->publish();
+        }
         $this->em->persist($accommodation);
         $this->em->flush();
 

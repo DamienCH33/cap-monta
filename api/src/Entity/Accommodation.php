@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\AccommodationStatus;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Repository\AccommodationRepository;
@@ -50,6 +51,9 @@ class Accommodation
 
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $surface = null;
+
+    #[ORM\Column(enumType: AccommodationStatus::class)]
+    private AccommodationStatus $status = AccommodationStatus::Draft;
 
     /**
      * @var list<string>
@@ -238,5 +242,31 @@ class Accommodation
     public function getOwner(): User
     {
         return $this->owner;
+    }
+
+    public function getStatus(): AccommodationStatus
+    {
+        return $this->status;
+    }
+
+    public function isPublished(): bool
+    {
+        return AccommodationStatus::Published === $this->status;
+    }
+
+    public function publish(): void
+    {
+        if (!$this->owner->isVerified()) {
+            throw new \DomainException('The owner must confirm their email address first.');
+        }
+
+        $this->status = AccommodationStatus::Published;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function archive(): void
+    {
+        $this->status = AccommodationStatus::Archived;
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
 use App\Entity\Unavailability;
+use App\Enum\AccommodationStatus;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -20,6 +21,21 @@ class AccommodationRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Accommodation::class);
+    }
+
+    /**
+     * Une fiche telle que le public la voit : un brouillon ou une annonce
+     * archivée n'existe pas pour lui.
+     *
+     * Une vraie méthode plutôt que le findOneBySlug() magique de Doctrine :
+     * une lecture qui porte une règle métier doit pouvoir la nommer.
+     */
+    public function findOnePublishedBySlug(string $slug): ?Accommodation
+    {
+        return $this->findOneBy([
+            'slug' => $slug,
+            'status' => AccommodationStatus::Published,
+        ]);
     }
 
     /**
@@ -63,9 +79,12 @@ class AccommodationRepository extends ServiceEntityRepository
         int $bedrooms = 0,
         array $amenities = [],
     ): array {
+        // Les deux règles toujours vraies : assez grand, et publié.
         $qb = $this->createQueryBuilder('a')
             ->andWhere('a.maxCapacity >= :guests')
+            ->andWhere('a.status = :published')
             ->setParameter('guests', $guests)
+            ->setParameter('published', AccommodationStatus::Published)
             ->orderBy('a.slug', 'ASC');
 
         if (null !== $arrival && null !== $departure) {

@@ -54,7 +54,7 @@ final readonly class CreateBookingRequestProcessor implements ProcessorInterface
             throw new \LogicException('Validation should have rejected a request without dates.');
         }
 
-        $accommodation = $this->accommodations->findOneBySlug($data->accommodationSlug);
+        $accommodation = $this->accommodations->findOnePublishedBySlug($data->accommodationSlug);
 
         if (null === $accommodation) {
             // Not a refusal: the resource itself does not exist.

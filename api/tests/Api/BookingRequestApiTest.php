@@ -149,7 +149,9 @@ final class BookingRequestApiTest extends ApiTestCase
         $owner = new User($slug.'@example.com', 'Proprietaire test');
         $this->em->persist($owner);
 
+        $owner->verifyEmail(new \DateTimeImmutable());
         $accommodation = new Accommodation($slug, Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Test accommodation', $owner);
+        $accommodation->publish();
         $this->em->persist($accommodation);
         $this->em->flush();
 

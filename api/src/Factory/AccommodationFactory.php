@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Factory;
 
 use App\Entity\Accommodation;
+use App\Enum\AccommodationStatus;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use Zenstruck\Foundry\Object\Instantiator;
@@ -53,6 +54,7 @@ final class AccommodationFactory extends PersistentObjectFactory
                 ),
                 'description' => self::faker()->paragraph(),
                 'owner' => UserFactory::new(),
+                'status' => AccommodationStatus::Published,
             ];
         };
     }
@@ -60,6 +62,8 @@ final class AccommodationFactory extends PersistentObjectFactory
     #[\Override]
     protected function initialize(): static
     {
-        return $this->instantiateWith(Instantiator::withConstructor());
+        return $this->instantiateWith(
+            Instantiator::withConstructor()->alwaysForce('status'),
+        );
     }
 }
