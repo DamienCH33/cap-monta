@@ -37,6 +37,17 @@ final class CreateAccommodationInput
     #[Assert\Length(max: 5000, maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères.')]
     public string $description = '';
 
+    #[Assert\Range(notInRangeMessage: 'La surface doit être comprise entre {{ min }} et {{ max }} m².', min: 5, max: 200)]
+    public ?int $surface = null;
+
+    /** @var list<string> */
+    #[Assert\Count(max: 20, maxMessage: 'Pas plus de {{ limit }} équipements.')]
+    #[Assert\All([
+        new Assert\NotBlank(message: 'Un équipement ne peut pas être vide.'),
+        new Assert\Length(max: 40, maxMessage: 'Un équipement ne peut pas dépasser {{ limit }} caractères.'),
+    ])]
+    public array $amenities = [];
+
     /** District slug, picked from a list by the front. */
     public ?string $district = null;
 

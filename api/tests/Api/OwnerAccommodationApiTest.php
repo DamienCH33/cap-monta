@@ -355,6 +355,30 @@ final class OwnerAccommodationApiTest extends WebTestCase
         $this->client->request('POST', '/api/owner/accommodations/'.$slug.'/'.$action);
     }
 
+    public function testACompleteListingIsCreatedAndPublishedInOneGo(): void
+    {
+        $this->client->loginUser($this->createOwnerAndFlush(), 'main');
+        $this->post([
+            'resort' => 'euronat',
+            'type' => 'bungalow',
+            'capacity' => 6,
+            'bedrooms' => 3,
+            'surface' => 42,
+            'amenities' => ['wifi', 'terrasse', 'wifi'],
+            'description' => str_repeat('Bungalow lumineux sous les pins. ', 3),
+        ]);
+
+        self::assertResponseStatusCodeSame(201);
+        $created = $this->json();
+        self::assertSame(42, $created['surface']);
+        self::assertSame(['wifi', 'terrasse'], $created['amenities'], 'Duplicates are removed.');
+
+        $this->transition((string) $created['slug'], 'publish');
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('published', $this->json()['status']);
+    }
+
     private function createOwner(string $email): User
     {
         $owner = new User($email, 'Owner test');

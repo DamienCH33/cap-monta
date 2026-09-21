@@ -74,6 +74,8 @@ final readonly class CreateOwnerAccommodationProcessor implements ProcessorInter
             $owner,
         );
         $accommodation->setDistrict($district);
+        $accommodation->setSurface($data->surface);
+        $accommodation->setAmenities(array_values(array_unique($data->amenities)));
 
         $this->em->persist($accommodation);
         $this->em->flush();
