@@ -254,6 +254,107 @@ final class OwnerAccommodationApiTest extends WebTestCase
         );
     }
 
+    public function testAnAnonymousVisitorCannotPublish(): void
+    {
+        $this->transition('anything', 'publish');
+
+        self::assertResponseStatusCodeSame(401);
+    }
+
+    public function testACompleteDraftGoesOnline(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-draft', $alice, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->transition('alice-draft', 'publish');
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('published', $this->json()['status']);
+
+        $this->client->request('GET', '/api/accommodations/alice-draft');
+        self::assertResponseIsSuccessful();
+    }
+
+    public function testAnIncompleteDraftIsRefused(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->em->persist(new Accommodation('alice-short', Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Trop court', $alice));
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->transition('alice-short', 'publish');
+
+        self::assertResponseStatusCodeSame(422);
+
+        $this->client->request('GET', '/api/owner/accommodations/alice-short');
+        self::assertSame('draft', $this->json()['status']);
+    }
+
+    public function testAnUnverifiedOwnerCannotPublish(): void
+    {
+        $carol = new User('carol@example.com', 'Carol');
+        $this->em->persist($carol);
+        $this->createAccommodation('carol-draft', $carol, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($carol, 'main');
+        $this->transition('carol-draft', 'publish');
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertStringContainsString('adresse email', (string) $this->json()['detail']);
+    }
+
+    public function testADraftCannotBeArchived(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-draft', $alice, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->transition('alice-draft', 'archive');
+
+        self::assertResponseStatusCodeSame(409);
+    }
+
+    public function testAnArchivedAccommodationGoesBackOnlineAtTheSameAddress(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-home', $alice, published: true);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+
+        $this->transition('alice-home', 'archive');
+        self::assertSame('archived', $this->json()['status']);
+        $this->client->request('GET', '/api/accommodations/alice-home');
+        self::assertResponseStatusCodeSame(404);
+
+        $this->transition('alice-home', 'publish');
+        self::assertSame('published', $this->json()['status']);
+        $this->client->request('GET', '/api/accommodations/alice-home');
+        self::assertResponseIsSuccessful();
+    }
+
+    public function testSomeoneElsesAccommodationCannotBePublished(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $bob = $this->createOwner('bob@example.com');
+        $this->createAccommodation('bob-draft', $bob, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->transition('bob-draft', 'publish');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    private function transition(string $slug, string $action): void
+    {
+        $this->client->request('POST', '/api/owner/accommodations/'.$slug.'/'.$action);
+    }
+
     private function createOwner(string $email): User
     {
         $owner = new User($email, 'Owner test');

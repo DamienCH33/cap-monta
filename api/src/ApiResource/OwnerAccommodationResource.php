@@ -13,6 +13,7 @@ use ApiPlatform\Metadata\Post;
 use App\Dto\CreateAccommodationInput;
 use App\Dto\UpdateAccommodationInput;
 use App\Entity\Accommodation;
+use App\State\ChangeAccommodationStatusProcessor;
 use App\State\CreateOwnerAccommodationProcessor;
 use App\State\OwnerAccommodationCollectionProvider;
 use App\State\OwnerAccommodationItemProvider;
@@ -54,6 +55,25 @@ use App\State\UpdateOwnerAccommodationProcessor;
             denormalizationContext: ['allow_extra_attributes' => false],
             read: false,
             processor: UpdateOwnerAccommodationProcessor::class,
+        ),
+        // No body: the URL says it all. 200, not 201: nothing is created.
+        new Post(
+            uriTemplate: '/owner/accommodations/{slug}/publish',
+            status: 200,
+            input: false,
+            read: false,
+            deserialize: false,
+            processor: ChangeAccommodationStatusProcessor::class,
+            extraProperties: ['transition' => ChangeAccommodationStatusProcessor::PUBLISH],
+        ),
+        new Post(
+            uriTemplate: '/owner/accommodations/{slug}/archive',
+            status: 200,
+            input: false,
+            read: false,
+            deserialize: false,
+            processor: ChangeAccommodationStatusProcessor::class,
+            extraProperties: ['transition' => ChangeAccommodationStatusProcessor::ARCHIVE],
         ),
     ],
 )]
