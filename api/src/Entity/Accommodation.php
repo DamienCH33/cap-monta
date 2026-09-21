@@ -7,6 +7,8 @@ namespace App\Entity;
 use App\Enum\AccommodationStatus;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
+use App\Exception\InvalidStatusTransitionException;
+use App\Exception\PublicationRefusedException;
 use App\Repository\AccommodationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -280,8 +282,19 @@ class Accommodation
 
     public function publish(): void
     {
+        // Draft or archived -> published. Publishing twice changes nothing (double click).
+        if (AccommodationStatus::Published === $this->status) {
+            return;
+        }
+
         if (!$this->owner->isVerified()) {
-            throw new \DomainException('The owner must confirm their email address first.');
+            throw PublicationRefusedException::unverifiedOwner();
+        }
+
+        $missing = $this->missingForPublication();
+
+        if ([] !== $missing) {
+            throw PublicationRefusedException::incomplete($missing);
         }
 
         $this->status = AccommodationStatus::Published;
@@ -290,6 +303,15 @@ class Accommodation
 
     public function archive(): void
     {
+        // Published -> archived: off the site, not deleted. Archiving twice changes nothing.
+        if (AccommodationStatus::Archived === $this->status) {
+            return;
+        }
+
+        if (AccommodationStatus::Draft === $this->status) {
+            throw new InvalidStatusTransitionException('A draft has never been public: there is nothing to archive.');
+        }
+
         $this->status = AccommodationStatus::Archived;
         $this->updatedAt = new \DateTimeImmutable();
     }

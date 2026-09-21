@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Api;
 
 use App\Entity\Accommodation;
+use App\Entity\District;
 use App\Entity\Unavailability;
 use App\Entity\User;
 use App\Enum\AccommodationType;
@@ -89,13 +90,35 @@ final class AvailabilityApiTest extends WebTestCase
         return is_array($decoded) ? $decoded : [];
     }
 
+    private ?District $sharedDistrict = null;
+
+    private function testDistrict(): District
+    {
+        // A CHM accommodation needs a district to be published: one shared, found or created.
+        // Kept in a property: several accommodations may be persisted before a single flush,
+        // and findOneBy() only sees what is already in the database.
+        if (null !== $this->sharedDistrict) {
+            return $this->sharedDistrict;
+        }
+
+        $district = $this->em->getRepository(District::class)->findOneBy(['slug' => 'test-district']);
+
+        if (null === $district) {
+            $district = new District('test-district', 'Test district', Resort::Chm);
+            $this->em->persist($district);
+        }
+
+        return $this->sharedDistrict = $district;
+    }
+
     private function createAccommodation(string $slug): Accommodation
     {
         $owner = new User($slug.'@example.com', 'Proprietaire test');
         $this->em->persist($owner);
 
         $owner->verifyEmail(new \DateTimeImmutable());
-        $accommodation = new Accommodation($slug, Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Test accommodation', $owner);
+        $accommodation = new Accommodation($slug, Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Test accommodation with a description long enough to be published.', $owner);
+        $accommodation->setDistrict($this->testDistrict());
         $accommodation->publish();
         $this->em->persist($accommodation);
         $this->em->flush();
