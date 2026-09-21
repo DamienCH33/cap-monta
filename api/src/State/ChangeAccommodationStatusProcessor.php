@@ -12,6 +12,7 @@ use App\Exception\InvalidStatusTransitionException;
 use App\Exception\PublicationRefusedException;
 use App\Repository\AccommodationRepository;
 use App\Security\Voter\AccommodationVoter;
+use App\Service\Photo\PhotoStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -29,13 +30,14 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final readonly class ChangeAccommodationStatusProcessor implements ProcessorInterface
 {
-    public const string PUBLISH = 'publish';
-    public const string ARCHIVE = 'archive';
+    public const PUBLISH = 'publish';
+    public const ARCHIVE = 'archive';
 
     public function __construct(
         private AccommodationRepository $accommodations,
         private EntityManagerInterface $em,
         private Security $security,
+        private PhotoStorage $photos,
     ) {
     }
 
@@ -71,7 +73,7 @@ final readonly class ChangeAccommodationStatusProcessor implements ProcessorInte
 
         $this->em->flush();
 
-        return OwnerAccommodationResource::fromEntity($accommodation);
+        return OwnerAccommodationResource::fromEntity($accommodation, $this->photos);
     }
 
     private function explain(PublicationRefusedException $e): string

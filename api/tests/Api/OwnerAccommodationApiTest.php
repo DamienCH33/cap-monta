@@ -85,7 +85,7 @@ final class OwnerAccommodationApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
-    private const array VALID_PAYLOAD = ['resort' => 'euronat', 'type' => 'mobile_home', 'capacity' => 6, 'bedrooms' => 2];
+    private const VALID_PAYLOAD = ['resort' => 'euronat', 'type' => 'mobile_home', 'capacity' => 6, 'bedrooms' => 2];
 
     public function testAnAnonymousVisitorCannotCreate(): void
     {

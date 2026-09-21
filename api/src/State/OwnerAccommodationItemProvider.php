@@ -9,6 +9,7 @@ use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\OwnerAccommodationResource;
 use App\Repository\AccommodationRepository;
 use App\Security\Voter\AccommodationVoter;
+use App\Service\Photo\PhotoStorage;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -24,6 +25,7 @@ final readonly class OwnerAccommodationItemProvider implements ProviderInterface
     public function __construct(
         private AccommodationRepository $accommodations,
         private Security $security,
+        private PhotoStorage $photos,
     ) {
     }
 
@@ -45,6 +47,6 @@ final readonly class OwnerAccommodationItemProvider implements ProviderInterface
             return null;
         }
 
-        return OwnerAccommodationResource::fromEntity($accommodation);
+        return OwnerAccommodationResource::fromEntity($accommodation, $this->photos);
     }
 }

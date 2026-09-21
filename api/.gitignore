@@ -23,3 +23,8 @@ phpstan.neon
 /.phpunit.cache/
 ###< phpunit/phpunit ###
 
+
+###> photos ###
+# Photos envoyées en local par les propriétaires.
+/public/media/
+###< photos ###

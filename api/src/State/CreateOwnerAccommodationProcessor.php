@@ -14,6 +14,7 @@ use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Repository\DistrictRepository;
 use App\Service\Accommodation\AccommodationSlugger;
+use App\Service\Photo\PhotoStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -33,6 +34,7 @@ final readonly class CreateOwnerAccommodationProcessor implements ProcessorInter
         private Security $security,
         private DistrictRepository $districts,
         private AccommodationSlugger $slugger,
+        private PhotoStorage $photos,
     ) {
     }
 
@@ -80,6 +82,6 @@ final readonly class CreateOwnerAccommodationProcessor implements ProcessorInter
         $this->em->persist($accommodation);
         $this->em->flush();
 
-        return OwnerAccommodationResource::fromEntity($accommodation);
+        return OwnerAccommodationResource::fromEntity($accommodation, $this->photos);
     }
 }

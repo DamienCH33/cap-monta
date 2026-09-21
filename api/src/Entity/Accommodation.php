@@ -10,6 +10,8 @@ use App\Enum\Resort;
 use App\Exception\InvalidStatusTransitionException;
 use App\Exception\PublicationRefusedException;
 use App\Repository\AccommodationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -70,6 +72,15 @@ class Accommodation
     #[ORM\JoinColumn(nullable: false)]
     private User $owner;
 
+    /**
+     * Ordered: the first one is the cover. Removing a photo from this collection deletes it.
+     *
+     * @var Collection<int, Photo>
+     */
+    #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'accommodation', cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    private Collection $photos;
+
     public function __construct(
         string $slug,
         Resort $resort,
@@ -92,6 +103,7 @@ class Accommodation
         $this->bedrooms = $bedrooms;
         $this->description = $description;
         $this->owner = $owner;
+        $this->photos = new ArrayCollection();
     }
 
     #[ORM\PreUpdate]
@@ -244,6 +256,78 @@ class Accommodation
     public function getOwner(): User
     {
         return $this->owner;
+    }
+
+    /**
+     * @return list<Photo> ordered by position, the cover first
+     */
+    public function getPhotos(): array
+    {
+        $photos = $this->photos->toArray();
+        usort($photos, static fn (Photo $a, Photo $b): int => $a->getPosition() <=> $b->getPosition());
+
+        return $photos;
+    }
+
+    public function countPhotos(): int
+    {
+        return $this->photos->count();
+    }
+
+    /** The new photo goes last: the cover does not change behind the owner's back. */
+    public function addPhoto(Photo $photo): void
+    {
+        $photo->moveTo($this->photos->count());
+        $this->photos->add($photo);
+    }
+
+    public function removePhoto(Photo $photo): void
+    {
+        $this->photos->removeElement($photo);
+        $this->renumberPhotos($this->getPhotos());
+    }
+
+    public function findPhoto(string $id): ?Photo
+    {
+        foreach ($this->photos as $photo) {
+            if ($photo->getId()->toRfc4122() === $id) {
+                return $photo;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Puts the photos in the given order: the first id becomes the cover.
+     *
+     * @param list<string> $ids every photo of this accommodation, each exactly once
+     *
+     * @throws \InvalidArgumentException when the list does not match the photos
+     */
+    public function reorderPhotos(array $ids): void
+    {
+        if (\count($ids) !== $this->photos->count() || \count(array_unique($ids)) !== \count($ids)) {
+            throw new \InvalidArgumentException('The list must contain every photo exactly once.');
+        }
+
+        $ordered = [];
+
+        foreach ($ids as $id) {
+            $ordered[] = $this->findPhoto($id) ?? throw new \InvalidArgumentException(sprintf('Unknown photo "%s".', $id));
+        }
+
+        $this->renumberPhotos($ordered);
+    }
+
+    /**
+     * @param list<Photo> $photos
+     */
+    private function renumberPhotos(array $photos): void
+    {
+        foreach ($photos as $position => $photo) {
+            $photo->moveTo($position);
+        }
     }
 
     public function getStatus(): AccommodationStatus

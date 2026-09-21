@@ -7,8 +7,10 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\OwnerAccommodationResource;
+use App\Entity\Accommodation;
 use App\Entity\User;
 use App\Repository\AccommodationRepository;
+use App\Service\Photo\PhotoStorage;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -21,6 +23,7 @@ final readonly class OwnerAccommodationCollectionProvider implements ProviderInt
     public function __construct(
         private AccommodationRepository $accommodations,
         private Security $security,
+        private PhotoStorage $photos,
     ) {
     }
 
@@ -40,7 +43,7 @@ final readonly class OwnerAccommodationCollectionProvider implements ProviderInt
         }
 
         return array_map(
-            OwnerAccommodationResource::fromEntity(...),
+            fn (Accommodation $accommodation): OwnerAccommodationResource => OwnerAccommodationResource::fromEntity($accommodation, $this->photos),
             $this->accommodations->findByOwner($owner),
         );
     }

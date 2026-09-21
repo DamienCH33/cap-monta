@@ -13,6 +13,8 @@ use ApiPlatform\Metadata\Post;
 use App\Dto\CreateAccommodationInput;
 use App\Dto\UpdateAccommodationInput;
 use App\Entity\Accommodation;
+use App\Entity\Photo;
+use App\Service\Photo\PhotoStorage;
 use App\State\ChangeAccommodationStatusProcessor;
 use App\State\CreateOwnerAccommodationProcessor;
 use App\State\OwnerAccommodationCollectionProvider;
@@ -80,7 +82,8 @@ use App\State\UpdateOwnerAccommodationProcessor;
 final class OwnerAccommodationResource
 {
     /**
-     * @param list<string> $amenities
+     * @param list<string>                                                                    $amenities
+     * @param list<array{id: string, url: string, thumbUrl: string, width: int, height: int}> $photos    the cover first
      */
     public function __construct(
         #[ApiProperty(identifier: true)]
@@ -95,10 +98,15 @@ final class OwnerAccommodationResource
         public ?int $surface,
         public array $amenities,
         public string $description,
+        public array $photos = [],
     ) {
     }
 
-    public static function fromEntity(Accommodation $accommodation): self
+    /**
+     * The storage only gives the photos their public addresses: they change with it
+     * (local disk in development, object storage in production).
+     */
+    public static function fromEntity(Accommodation $accommodation, PhotoStorage $storage): self
     {
         return new self(
             $accommodation->getSlug(),
@@ -112,6 +120,13 @@ final class OwnerAccommodationResource
             $accommodation->getSurface(),
             $accommodation->getAmenities(),
             $accommodation->getDescription(),
+            array_map(static fn (Photo $photo): array => [
+                'id' => $photo->getId()->toRfc4122(),
+                'url' => $storage->url($photo),
+                'thumbUrl' => $storage->thumbUrl($photo),
+                'width' => $photo->getWidth(),
+                'height' => $photo->getHeight(),
+            ], $accommodation->getPhotos()),
         );
     }
 }

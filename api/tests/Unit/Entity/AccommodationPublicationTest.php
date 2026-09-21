@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 final class AccommodationPublicationTest extends TestCase
 {
-    private const string LONG_DESCRIPTION = 'A description long enough to go online, fifty characters at least.';
+    private const LONG_DESCRIPTION = 'A description long enough to go online, fifty characters at least.';
 
     public function testACompleteDraftCanBePublished(): void
     {

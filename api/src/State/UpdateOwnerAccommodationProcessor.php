@@ -14,6 +14,7 @@ use App\Enum\Resort;
 use App\Repository\AccommodationRepository;
 use App\Repository\DistrictRepository;
 use App\Security\Voter\AccommodationVoter;
+use App\Service\Photo\PhotoStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -35,6 +36,7 @@ final readonly class UpdateOwnerAccommodationProcessor implements ProcessorInter
         private DistrictRepository $districts,
         private EntityManagerInterface $em,
         private Security $security,
+        private PhotoStorage $photos,
     ) {
     }
 
@@ -90,7 +92,7 @@ final readonly class UpdateOwnerAccommodationProcessor implements ProcessorInter
         $accommodation->touch();
         $this->em->flush();
 
-        return OwnerAccommodationResource::fromEntity($accommodation);
+        return OwnerAccommodationResource::fromEntity($accommodation, $this->photos);
     }
 
     private function resolveDistrict(?string $slug, Resort $resort): ?District
