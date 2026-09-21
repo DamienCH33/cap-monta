@@ -1,0 +1,188 @@
+// Mêmes couleurs que Mes logements. À relier aux variables globales de la charte.
+:host {
+  --oh-sea: #0b5f8a;
+  --oh-sea-dark: #084a6b;
+  --oh-pine: #2f6b4f;
+  --oh-sand: #9a7440;
+  --oh-ink: #1c2530;
+  --oh-muted: #5b6672;
+  --oh-line: rgb(0 0 0 / 9%);
+
+  display: block;
+  color: var(--oh-ink);
+}
+
+// Bandeau d'accueil : la mer domine, un reflet de pinède en bas à droite.
+.owner-home__hero {
+  border-bottom: 1px solid rgb(11 95 138 / 12%);
+  background: linear-gradient(120deg, #e2eef6 0%, #eaf3f6 60%, #e8f1ec 100%);
+}
+
+.owner-home__hero-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 2.5rem;
+}
+
+.owner-home__eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--oh-sea);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.owner-home__heading {
+  margin: 0;
+}
+
+.owner-home__primary {
+  padding: 0.75rem 1.4rem;
+  border-radius: 0.6rem;
+  background: var(--oh-sea);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--oh-sea-dark);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 2px;
+  }
+}
+
+.owner-home__body {
+  padding-block: 2rem 3rem;
+}
+
+// Un brouillon attend : bandeau cliquable, avant tout le reste.
+.owner-home__callout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 56rem;
+  margin-bottom: 2rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgb(11 95 138 / 25%);
+  border-radius: 0.875rem;
+  background: #fff;
+  color: var(--oh-ink);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover .owner-home__callout-action {
+    text-decoration: underline;
+  }
+}
+
+.owner-home__callout-action {
+  color: var(--oh-sea);
+}
+
+.owner-home__section-title {
+  margin: 0 0 1rem;
+  color: var(--oh-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+// Trois chiffres, chacun avec la couleur de son statut (comme les cartes de la liste).
+.owner-home__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 56rem;
+  margin: 0 0 2.5rem;
+  padding: 0;
+  list-style: none;
+
+  @media (max-width: 36rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.owner-home__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--oh-line);
+  border-left: 4px solid #aab4be;
+  border-radius: 0.875rem;
+  background: #fff;
+  color: var(--oh-ink);
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 4px 14px rgb(0 0 0 / 7%);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 2px;
+  }
+
+  &--published {
+    border-left-color: var(--oh-pine);
+  }
+
+  &--archived {
+    border-left-color: var(--oh-sand);
+  }
+}
+
+.owner-home__stat-count {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.owner-home__stat-label {
+  color: var(--oh-muted);
+}
+
+// Ce qui arrive : discret, ne prend pas la place de ce qui existe.
+.owner-home__soon {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 56rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--oh-muted);
+
+  li {
+    padding-left: 1.25rem;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.55em;
+      left: 0;
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 50%;
+      background: rgb(11 95 138 / 35%);
+    }
+  }
+
+  strong {
+    color: var(--oh-ink);
+    font-weight: 600;
+  }
+}

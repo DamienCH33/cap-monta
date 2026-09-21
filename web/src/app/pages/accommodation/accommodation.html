@@ -2,7 +2,12 @@
   @if (notFound()) {
     <p class="missing">Ce logement n'existe pas ou n'est plus en ligne.</p>
   } @else if (accommodation(); as logement) {
-    @if (cameFromSearch()) {
+    @if (fromOwnerSpace) {
+      <a class="back" routerLink="/mon-espace/logements">
+        <cm-icon name="arrow-left" />
+        Retour à mes logements
+      </a>
+    } @else if (cameFromSearch()) {
       <a class="back" routerLink="/recherche" [queryParams]="searchParams()">
         <cm-icon name="arrow-left" />
         Retour aux résultats
@@ -98,12 +103,25 @@
       </div>
 
       <aside class="layout__aside">
-        <cm-booking-form
-          [slug]="logement.slug"
-          [initialArrival]="initialArrival()"
-          [initialDeparture]="initialDeparture()"
-          [initialGuests]="initialGuests()"
-        />
+        @if (fromOwnerSpace) {
+          <div class="owner-preview">
+            <p class="owner-preview__title">Aperçu de votre annonce</p>
+            <p class="owner-preview__text">
+              C'est ce que voient les visiteurs. Le formulaire de demande de réservation
+              apparaît ici pour eux ; il est masqué pour vous.
+            </p>
+            <a class="owner-preview__link" routerLink="/mon-espace/logements">
+              Retour à mes logements
+            </a>
+          </div>
+        } @else {
+          <cm-booking-form
+            [slug]="logement.slug"
+            [initialArrival]="initialArrival()"
+            [initialDeparture]="initialDeparture()"
+            [initialGuests]="initialGuests()"
+          />
+        }
       </aside>
     </div>
   } @else {

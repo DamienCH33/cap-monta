@@ -1,18 +1,54 @@
-<div class="container auth">
-  @if (owner(); as me) {
-    <div class="auth__card">
-      <h1 class="auth__title">Bonjour {{ me.displayName }}</h1>
-      <p class="auth__intro">{{ me.email }}</p>
-
-      @if (!me.verified) {
-        <p class="auth__notice auth__notice--warn">
-          Votre adresse email n'est pas encore confirmée. Vous pourrez publier un logement dès
-          qu'elle le sera : le lien vous a été envoyé à cette adresse.
-        </p>
-      }
-
-      <p><a routerLink="/mon-espace/logements">Mes logements</a></p>
-      <p>Votre calendrier et vos demandes de réservation arriveront ici.</p>
+@if (owner(); as me) {
+  <section class="owner-home__hero">
+    <div class="container owner-home__hero-inner">
+      <div>
+        <p class="owner-home__eyebrow">Espace propriétaire</p>
+        <h1 class="owner-home__heading">Bonjour {{ me.displayName }}</h1>
+      </div>
+      <a class="owner-home__primary" routerLink="/mon-espace/logements">Gérer mes logements</a>
     </div>
-  }
-</div>
+  </section>
+
+  <div class="container owner-home__body">
+    @if (!me.verified) {
+      <p class="auth__notice auth__notice--warn">
+        Votre adresse email n'est pas encore confirmée. Vous pourrez publier un logement dès qu'elle
+        le sera : le lien vous a été envoyé à cette adresse.
+      </p>
+    }
+
+    @if (draftNotice(); as notice) {
+      <a class="owner-home__callout" routerLink="/mon-espace/logements">
+        <span>{{ notice }}</span>
+        <span class="owner-home__callout-action">Publier →</span>
+      </a>
+    }
+
+    <h2 class="owner-home__section-title">Mes logements</h2>
+    <ul class="owner-home__stats">
+      @for (stat of stats(); track stat.status) {
+        <li>
+          <a
+            class="owner-home__stat"
+            [class]="'owner-home__stat--' + stat.status"
+            routerLink="/mon-espace/logements" [queryParams]="{ statut: stat.param }">
+            <span class="owner-home__stat-count">{{ stat.count ?? '–' }}</span>
+            <span class="owner-home__stat-label">{{ stat.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    <h2 class="owner-home__section-title">Bientôt dans votre espace</h2>
+    <ul class="owner-home__soon">
+      <li>
+        <strong>Calendrier</strong> — bloquez les semaines déjà louées ailleurs, pour ne jamais
+        recevoir de demande en double.
+      </li>
+      <li>
+        <strong>Demandes de réservation</strong> — recevez les demandes des locataires et répondez-y
+        en un clic.
+      </li>
+    </ul>
+  </div>
+}

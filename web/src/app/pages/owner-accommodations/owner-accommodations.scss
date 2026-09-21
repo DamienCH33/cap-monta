@@ -1,25 +1,110 @@
-// À remplacer par les variables de la charte si elles existent déjà.
+// Couleurs de la charte : mer dominante, pin en accent. À relier aux variables globales.
 :host {
   --oa-sea: #0b5f8a;
+  --oa-sea-dark: #084a6b;
   --oa-pine: #2f6b4f;
+  --oa-sand: #9a7440;
+  --oa-ink: #1c2530;
+  --oa-muted: #5b6672;
+  --oa-line: rgb(0 0 0 / 9%);
 }
 
 .owner-accommodations {
-  max-width: 48rem;
-  padding-block: 2rem;
+  padding-block: 1.5rem 3rem;
+  color: var(--oa-ink);
+
+  a {
+    color: var(--oa-sea);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.owner-accommodations__breadcrumb {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: var(--oa-muted);
+  font-size: 0.875rem;
 }
 
 .owner-accommodations__header {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
 }
 
 .owner-accommodations__heading {
   margin: 0;
+}
+
+.owner-accommodations__summary {
+  margin: 0.35rem 0 0;
+  color: var(--oa-muted);
+}
+
+// Filtres par statut : pastilles, le filtre actif en bleu mer plein.
+.owner-accommodations__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.owner-accommodations .owner-accommodations__filter {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--oa-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--oa-ink);
+  font-weight: 500;
+  text-decoration: none;
+
+  &:hover {
+    border-color: rgb(11 95 138 / 40%);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 2px;
+  }
+
+  &--active,
+  &--active:hover {
+    border-color: var(--oa-sea);
+    background: var(--oa-sea);
+    color: #fff;
+  }
+}
+
+.owner-accommodations__filter-count {
+  min-width: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 6%);
+  font-size: 0.8rem;
+  text-align: center;
+
+  .owner-accommodations__filter--active & {
+    background: rgb(255 255 255 / 22%);
+  }
+}
+
+// Même bord gauche que l'en-tête ; les cartes ne s'étirent pas sur tout l'écran.
+.owner-accommodations__list,
+.owner-accommodations__empty {
+  max-width: 56rem;
 }
 
 .owner-accommodations__list {
@@ -30,27 +115,50 @@
   list-style: none;
 }
 
-.owner-accommodations__item {
+// La carte : bande de couleur à gauche selon le statut, lisible d'un coup d'œil.
+.owner-accommodations__card {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 0.75rem 1rem;
+  gap: 0.25rem 1.5rem;
   align-items: center;
-  padding: 1rem 1.25rem;
-  border: 1px solid rgb(0 0 0 / 12%);
-  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border: 1px solid var(--oa-line);
+  border-left: 4px solid var(--oa-muted);
+  border-radius: 0.875rem;
   background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 4px 14px rgb(0 0 0 / 7%);
+  }
+
+  &--draft {
+    border-left-color: #aab4be;
+  }
+
+  &--published {
+    border-left-color: var(--oa-pine);
+  }
+
+  &--archived {
+    border-left-color: var(--oa-sand);
+    background: #fcfbf9;
+  }
 
   @media (max-width: 36rem) {
     grid-template-columns: 1fr;
+    padding-inline: 1.25rem;
   }
 }
 
 .owner-accommodations__badge {
   display: inline-block;
-  padding: 0.15rem 0.6rem;
+  padding: 0.2rem 0.65rem;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
 
   &--draft {
     background: #eef1f4;
@@ -58,60 +166,157 @@
   }
 
   &--published {
-    background: #e3f1e9;
+    background: #e4f1e9;
     color: var(--oa-pine);
   }
 
   &--archived {
-    background: #f4eee6;
+    background: #f5eee4;
     color: #7a5a2e;
   }
 }
 
 .owner-accommodations__title {
-  margin: 0.35rem 0 0.15rem;
-  font-size: 1.05rem;
+  margin: 0.5rem 0 0.2rem;
+  font-size: 1.125rem;
+  font-weight: 600;
 }
 
-.owner-accommodations__slug {
+.owner-accommodations__details {
   margin: 0;
-  font-size: 0.85rem;
-  opacity: 0.7;
-  word-break: break-all;
+  color: var(--oa-muted);
 }
 
 .owner-accommodations__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 1rem;
   align-items: center;
   justify-content: flex-end;
+
+  @media (max-width: 36rem) {
+    justify-content: stretch;
+    margin-top: 0.75rem;
+
+    > * {
+      flex: 1;
+      text-align: center;
+    }
+  }
+}
+
+.owner-accommodations__link {
+  font-weight: 600;
 }
 
 .owner-accommodations__button {
-  padding: 0.55rem 1rem;
+  min-width: 9rem;
+  padding: 0.6rem 1.1rem;
   border: 1px solid var(--oa-sea);
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   background: var(--oa-sea);
   color: #fff;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--oa-sea-dark);
+  }
 
   &--secondary {
-    background: transparent;
+    background: #fff;
     color: var(--oa-sea);
+
+    &:hover:not(:disabled) {
+      background: #eef5f9;
+    }
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: wait;
   }
+
+  &:focus-visible {
+    outline: 3px solid rgb(11 95 138 / 35%);
+    outline-offset: 2px;
+  }
+}
+
+// Pied de carte : aide sur le statut, ou retour de la dernière action.
+.owner-accommodations__footer {
+  grid-column: 1 / -1;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--oa-line);
+}
+
+.owner-accommodations__hint,
+.owner-accommodations__message {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.owner-accommodations__hint {
+  color: var(--oa-muted);
 }
 
 // Les messages de l'API peuvent tenir sur plusieurs lignes (un manque par ligne).
-.owner-accommodations__error {
-  grid-column: 1 / -1;
-  margin: 0;
+.owner-accommodations__message {
   white-space: pre-line;
+
+  &--error {
+    color: #a3261d;
+  }
+
+  &--ok {
+    color: var(--oa-pine);
+    font-weight: 600;
+  }
+}
+
+.owner-accommodations__empty {
+  padding: 2.5rem 2rem;
+  border: 1px dashed rgb(0 0 0 / 18%);
+  border-radius: 0.875rem;
+  background: #fff;
+  text-align: center;
+  color: var(--oa-muted);
+
+  p {
+    margin: 0.25rem 0;
+  }
+}
+
+.owner-accommodations__empty-title {
+  color: var(--oa-ink);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+// Squelettes de chargement, à la place exacte des cartes.
+.owner-accommodations__skeleton {
+  height: 8.5rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(90deg, #eceae5 25%, #f5f4f0 50%, #eceae5 75%);
+  background-size: 200% 100%;
+  animation: owner-accommodations-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes owner-accommodations-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .owner-accommodations__skeleton {
+    animation: none;
+  }
 }

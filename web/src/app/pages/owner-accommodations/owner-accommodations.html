@@ -1,7 +1,17 @@
 <div class="container owner-accommodations">
+  <nav class="owner-accommodations__breadcrumb" aria-label="Fil d'Ariane">
+    <a routerLink="/mon-espace">Mon espace</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">Mes logements</span>
+  </nav>
+
   <header class="owner-accommodations__header">
-    <h1 class="owner-accommodations__heading">Mes logements</h1>
-    <a routerLink="/mon-espace">← Mon espace</a>
+    <div>
+      <h1 class="owner-accommodations__heading">Mes logements</h1>
+      @if (accommodations()?.length) {
+        <p class="owner-accommodations__summary">{{ summary() }}</p>
+      }
+    </div>
   </header>
 
   @if (loadFailed()) {
@@ -10,72 +20,102 @@
     </p>
   } @else if (accommodations(); as list) {
     @if (0 === list.length) {
-      <p>Vous n'avez pas encore de logement.</p>
+      <div class="owner-accommodations__empty">
+        <p class="owner-accommodations__empty-title">Vous n'avez pas encore de logement.</p>
+        <p>Quatre informations suffisent pour commencer : vous compléterez le reste ensuite.</p>
+      </div>
     } @else {
+      <nav class="owner-accommodations__filters" aria-label="Filtrer par statut">
+        @for (filter of filters(); track filter.label) {
+          <a
+            class="owner-accommodations__filter"
+            [class.owner-accommodations__filter--active]="filter.status === status()"
+            [attr.aria-current]="filter.status === status() ? 'page' : null"
+            routerLink="/mon-espace/logements"
+            [queryParams]="filterParams(filter.status)"
+          >
+            {{ filter.label }}
+            <span class="owner-accommodations__filter-count">{{ filter.count }}</span>
+          </a>
+        }
+      </nav>
+
+      @if (0 === visible().length) {
+        <div class="owner-accommodations__empty">
+          <p class="owner-accommodations__empty-title">{{ emptyFilterMessage() }}</p>
+          <p><a routerLink="/mon-espace/logements">Voir tous mes logements</a></p>
+        </div>
+      }
+
       <ul class="owner-accommodations__list">
-        @for (item of list; track item.slug) {
-          <li class="owner-accommodations__item">
-            <div>
-              <span
-                class="owner-accommodations__badge owner-accommodations__badge--{{ item.status }}"
-              >
+        @for (item of visible(); track item.slug) {
+          <li class="owner-accommodations__card" [class]="'owner-accommodations__card--' + item.status">
+            <div class="owner-accommodations__body">
+              <span class="owner-accommodations__badge" [class]="'owner-accommodations__badge--' + item.status">
                 {{ statusLabel(item.status) }}
               </span>
-              <h2 class="owner-accommodations__title">
-                {{ typeLabel(item.type) }} · {{ item.capacity }} pers. · {{ place(item) }}
-              </h2>
-              <p class="owner-accommodations__slug">/logement/{{ item.slug }}</p>
+              <h2 class="owner-accommodations__title">{{ typeLabel(item.type) }} · {{ place(item) }}</h2>
+              <p class="owner-accommodations__details">{{ details(item) }}</p>
             </div>
 
             <div class="owner-accommodations__actions">
-              @switch (item.status) {
-                @case ('draft') {
-                  <button
-                    type="button"
-                    class="owner-accommodations__button"
-                    [disabled]="null !== busy()"
-                    (click)="publish(item)"
-                  >
-                    Publier
-                  </button>
-                }
-                @case ('published') {
-                  <a [routerLink]="['/logement', item.slug]">Voir l'annonce</a>
-                  <button
-                    type="button"
-                    class="owner-accommodations__button owner-accommodations__button--secondary"
-                    [disabled]="null !== busy()"
-                    (click)="archive(item)"
-                  >
-                    Retirer du site
-                  </button>
-                }
-                @case ('archived') {
-                  <button
-                    type="button"
-                    class="owner-accommodations__button"
-                    [disabled]="null !== busy()"
-                    (click)="publish(item)"
-                  >
-                    Remettre en ligne
-                  </button>
-                }
+              @if ('draft' === item.status) {
+                <button
+                  type="button"
+                  class="owner-accommodations__button"
+                  [disabled]="null !== busy()"
+                  (click)="publish(item)"
+                >
+                  {{ busy() === item.slug ? 'Publication…' : 'Publier' }}
+                </button>
+              }
+              @if ('published' === item.status) {
+                <a
+                  class="owner-accommodations__link"
+                  [routerLink]="['/logement', item.slug]"
+                  (click)="origin.openedFromOwnerSpace(item.slug)"
+                >
+                  Voir l'annonce
+                </a>
+                <button
+                  type="button"
+                  class="owner-accommodations__button owner-accommodations__button--secondary"
+                  [disabled]="null !== busy()"
+                  (click)="archive(item)"
+                >
+                  {{ busy() === item.slug ? 'Retrait…' : 'Retirer du site' }}
+                </button>
+              }
+              @if ('archived' === item.status) {
+                <button
+                  type="button"
+                  class="owner-accommodations__button"
+                  [disabled]="null !== busy()"
+                  (click)="publish(item)"
+                >
+                  {{ busy() === item.slug ? 'Publication…' : 'Remettre en ligne' }}
+                </button>
               }
             </div>
 
-            @if (errors()[item.slug]; as message) {
-              <p
-                class="auth__notice auth__notice--error owner-accommodations__error"
-                role="alert"
-              >
-                {{ message }}
-              </p>
-            }
+            <div class="owner-accommodations__footer" aria-live="polite">
+              @if (errors()[item.slug]; as message) {
+                <p class="owner-accommodations__message owner-accommodations__message--error" role="alert">{{ message }}</p>
+              } @else if (notices()[item.slug]; as message) {
+                <p class="owner-accommodations__message owner-accommodations__message--ok">{{ message }}</p>
+              } @else {
+                <p class="owner-accommodations__hint">{{ hint(item) }}</p>
+              }
+            </div>
           </li>
         }
       </ul>
     }
   } @else {
-    <p>Chargement…</p>
+    <ul class="owner-accommodations__list" aria-busy="true" aria-label="Chargement">
+      <li class="owner-accommodations__skeleton"></li>
+      <li class="owner-accommodations__skeleton"></li>
+      <li class="owner-accommodations__skeleton"></li>
+    </ul>
   }
 </div>

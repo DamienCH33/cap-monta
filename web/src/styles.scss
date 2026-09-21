@@ -375,3 +375,16 @@ h3 {
     background: var(--blue-dark);
   }
 }
+
+// Le footer reste en bas de la fenêtre, même sur une page courte : l'application
+// occupe au moins toute la hauteur, et le footer est poussé tout en bas.
+cm-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+cm-footer {
+  margin-top: auto;
+}

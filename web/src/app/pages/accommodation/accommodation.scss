@@ -177,3 +177,36 @@
     top: 16px;
   }
 }
+
+// Fiche ouverte par son propriétaire depuis « Voir l'annonce » : aperçu, pas de réservation.
+.owner-preview {
+  padding: 1.5rem;
+  border: 1px solid rgb(11 95 138 / 25%);
+  border-radius: 0.875rem;
+  background: #eef5f9;
+}
+
+.owner-preview__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.owner-preview__text {
+  margin: 0 0 1rem;
+  color: #5b6672;
+}
+
+.owner-preview__link {
+  display: inline-block;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.6rem;
+  background: #0b5f8a;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    background: #084a6b;
+  }
+}

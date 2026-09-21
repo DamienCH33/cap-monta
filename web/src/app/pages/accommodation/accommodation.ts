@@ -12,6 +12,7 @@ import { BookingForm } from './booking-form/booking-form';
 import { environment } from '../../../environments/environment';
 import { guestsFromQuery, travellerCount } from '../../core/models/guests';
 import { Icon } from '../../shared/icon/icon';
+import { NavigationOrigin } from '../../core/services/navigation-origin';
 
 @Component({
   selector: 'cm-accommodation',
@@ -20,6 +21,11 @@ import { Icon } from '../../shared/icon/icon';
   styleUrl: './accommodation.scss',
 })
 export class AccommodationPage implements OnInit {
+  /** Ouverte depuis « Voir l'annonce » dans Mes logements : le retour y ramène. */
+  readonly fromOwnerSpace = inject(NavigationOrigin).isFromOwnerSpace(
+    inject(ActivatedRoute).snapshot.paramMap.get('slug'),
+  );
+
   private readonly route = inject(ActivatedRoute);
   private readonly accommodations = inject(AccommodationService);
   private readonly seo = inject(SeoService);
