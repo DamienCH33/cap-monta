@@ -46,7 +46,22 @@ final class AvailabilityApiTest extends WebTestCase
         self::assertCount(1, $busy);
         self::assertStringStartsWith($start->format('Y-m-d'), (string) ($busy[0]['start'] ?? ''));
         self::assertStringStartsWith($end->format('Y-m-d'), (string) ($busy[0]['end'] ?? ''));
-        self::assertSame('block', $busy[0]['source'] ?? null);
+        // Why a date is taken is the owner's business, not the visitor's.
+        self::assertArrayNotHasKey('source', $busy[0]);
+    }
+
+    public function testABookingFollowedByABlockLooksLikeASinglePeriod(): void
+    {
+        $accommodation = $this->createAccommodation('mobile-home-dunes');
+
+        $start = (new \DateTimeImmutable('today'))->modify('+1 month');
+        $this->block($accommodation, $start, $start->modify('+7 days'), UnavailabilitySource::Booking);
+        $this->block($accommodation, $start->modify('+7 days'), $start->modify('+10 days'));
+
+        $busy = $this->request('/api/accommodations/mobile-home-dunes/availability')['busy'] ?? [];
+
+        self::assertCount(1, $busy);
+        self::assertStringStartsWith($start->modify('+10 days')->format('Y-m-d'), (string) ($busy[0]['end'] ?? ''));
     }
 
     public function testAnAccommodationWithNothingBookedHasAnEmptyCalendar(): void
@@ -129,9 +144,13 @@ final class AvailabilityApiTest extends WebTestCase
         return $accommodation;
     }
 
-    private function block(Accommodation $accommodation, \DateTimeImmutable $start, \DateTimeImmutable $end): void
-    {
-        $this->em->persist(new Unavailability($accommodation, $start, $end, UnavailabilitySource::Block));
+    private function block(
+        Accommodation $accommodation,
+        \DateTimeImmutable $start,
+        \DateTimeImmutable $end,
+        UnavailabilitySource $source = UnavailabilitySource::Block,
+    ): void {
+        $this->em->persist(new Unavailability($accommodation, $start, $end, $source));
         $this->em->flush();
     }
 }

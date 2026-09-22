@@ -6,3 +6,11 @@ framework:
         # Redis pour le cache applicatif (calendriers, rate limiter)
         app: cache.adapter.redis
         default_redis_provider: '%env(REDIS_URL)%'
+
+        pools:
+            # Calendrier public d'un logement (ADR 004, usage 1). Lu à chaque affichage de
+            # fiche, modifié quelques fois par mois : invalidé par étiquette à chaque
+            # blocage créé ou supprimé, et de toute façon oublié au bout d'un jour.
+            calendar.cache:
+                adapter: cache.adapter.redis_tag_aware
+                default_lifetime: 86400
