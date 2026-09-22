@@ -2,7 +2,7 @@
   @if (notFound()) {
     <p class="missing">Ce logement n'existe pas ou n'est plus en ligne.</p>
   } @else if (accommodation(); as logement) {
-    @if (fromOwnerSpace) {
+    @if (fromOwnerSpace()) {
       <a class="back" routerLink="/mon-espace/logements">
         <cm-icon name="arrow-left" />
         Retour à mes logements
@@ -112,7 +112,7 @@
       </div>
 
       <aside class="layout__aside">
-        @if (fromOwnerSpace) {
+        @if (ownedByMe()) {
           <div class="owner-preview">
             <p class="owner-preview__title">Aperçu de votre annonce</p>
             <p class="owner-preview__text">

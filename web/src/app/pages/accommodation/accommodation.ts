@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, Params, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 
@@ -13,6 +13,8 @@ import { environment } from '../../../environments/environment';
 import { guestsFromQuery, travellerCount } from '../../core/models/guests';
 import { Icon } from '../../shared/icon/icon';
 import { NavigationOrigin } from '../../core/services/navigation-origin';
+import { AuthService } from '../../core/services/auth';
+import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { PhotoGallery } from './photo-gallery/photo-gallery';
 
 @Component({
@@ -23,9 +25,22 @@ import { PhotoGallery } from './photo-gallery/photo-gallery';
 })
 export class AccommodationPage implements OnInit {
   /** Ouverte depuis « Voir l'annonce » dans Mes logements : le retour y ramène. */
-  readonly fromOwnerSpace = inject(NavigationOrigin).isFromOwnerSpace(
+  private readonly openedFromOwnerSpace = inject(NavigationOrigin).isFromOwnerSpace(
     inject(ActivatedRoute).snapshot.paramMap.get('slug'),
   );
+
+  private readonly auth = inject(AuthService);
+  private readonly ownerAccommodations = inject(OwnerAccommodationService);
+
+  /**
+   * L'annonce appartient à la personne connectée : on lui montre l'aperçu au lieu du formulaire
+   * de demande. C'est l'API qui le dit (404 sur le logement d'un autre), pas le chemin suivi
+   * pour arriver ici : déconnecté, ou connecté avec un autre compte, on voit la fiche publique.
+   */
+  readonly ownedByMe = signal(false);
+
+  /** Le lien de retour ramène à Mes logements seulement pour son propriétaire. */
+  readonly fromOwnerSpace = computed(() => this.openedFromOwnerSpace && this.ownedByMe());
 
   private readonly route = inject(ActivatedRoute);
   private readonly accommodations = inject(AccommodationService);
@@ -46,6 +61,24 @@ export class AccommodationPage implements OnInit {
   });
 
   readonly typeLabel = typeLabel;
+
+  constructor() {
+    effect((onCleanup) => {
+      const slug = this.accommodation()?.slug;
+
+      if (!slug || !this.auth.isLoggedIn()) {
+        this.ownedByMe.set(false);
+
+        return;
+      }
+
+      const check = this.ownerAccommodations.get(slug).subscribe({
+        next: () => this.ownedByMe.set(true),
+        error: () => this.ownedByMe.set(false),
+      });
+      onCleanup(() => check.unsubscribe());
+    });
+  }
 
   readonly cameFromSearch = computed(() => Object.keys(this.searchParams()).length > 0);
 
