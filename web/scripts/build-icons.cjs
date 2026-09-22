@@ -12,6 +12,8 @@ const NAMES = [
   'chevron-left',
   'chevron-right',
   'layout-grid',
+  'menu-2',
+  'paw',
   'photo',
   'refresh',
   'ripple',

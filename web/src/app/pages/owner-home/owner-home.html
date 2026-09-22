@@ -34,6 +34,18 @@
       </a>
     }
 
+    @if (!me.phone) {
+      <a class="owner-home__callout" routerLink="/mon-espace/profil">
+        <span>
+          Ajoutez un numéro de téléphone.
+          <span class="owner-home__callout-detail"
+            >Il n'est donné qu'au voyageur dont vous acceptez la demande.</span
+          >
+        </span>
+        <span class="owner-home__callout-action">Mon profil</span>
+      </a>
+    }
+
     <h2 class="owner-home__section-title">Mes logements</h2>
     <ul class="owner-home__stats">
       @for (stat of stats(); track stat.status) {

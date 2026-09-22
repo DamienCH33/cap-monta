@@ -47,6 +47,21 @@ export class AuthService {
     );
   }
 
+  /** Nom affiché et téléphone : la session garde la version renvoyée par l'API. */
+  updateProfile(payload: { displayName: string; phone: string }): Observable<Owner> {
+    return this.http
+      .patch<Owner>(`${this.api}/owner/me`, payload, { withCredentials: true })
+      .pipe(tap((owner) => this.remember(owner)));
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/owner/me/password`,
+      { currentPassword, newPassword },
+      { withCredentials: true },
+    );
+  }
+
   private remember(owner: Owner | null): void {
     this.owner.set(owner);
     this.checked.set(true);

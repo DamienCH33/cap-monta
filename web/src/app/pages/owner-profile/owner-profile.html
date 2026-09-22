@@ -1,0 +1,127 @@
+<div class="container profile-page">
+  <nav class="profile-page__breadcrumb" aria-label="Fil d'Ariane">
+    <a routerLink="/mon-espace">Mon espace</a>
+    <span aria-hidden="true">/</span>
+    <span>Mon profil</span>
+  </nav>
+
+  <h1 class="profile-page__title">Mon profil</h1>
+  @if (owner(); as me) {
+    <p class="profile-page__email">
+      Compte : <strong>{{ me.email }}</strong>
+    </p>
+  }
+
+  <section class="auth__card profile-page__card">
+    <h2 class="profile-page__card-title">Ce que voient les voyageurs</h2>
+    <form
+      class="auth__form"
+      [formGroup]="profile"
+      (ngSubmit)="saveProfile()"
+      (input)="edited('profile')"
+      novalidate
+    >
+      @if (profileError(); as message) {
+        <p class="auth__notice auth__notice--error" role="alert">{{ message }}</p>
+      }
+      @if ('saved' === profileState()) {
+        <p class="auth__notice auth__notice--ok" role="status">Profil enregistré.</p>
+      }
+
+      <label class="auth__field">
+        <span class="auth__label">Nom affiché sur vos annonces</span>
+        <input
+          type="text"
+          formControlName="displayName"
+          autocomplete="name"
+          required
+          [attr.aria-invalid]="showProfileError('displayName')"
+        />
+        @if (showProfileError('displayName')) {
+          <span class="auth__error" role="alert">Entre 2 et 80 caractères.</span>
+        } @else {
+          <span class="auth__hint">Par exemple « Damien C. » ou « Famille Martin ».</span>
+        }
+      </label>
+
+      <label class="auth__field">
+        <span class="auth__label">Téléphone (facultatif)</span>
+        <input
+          type="tel"
+          formControlName="phone"
+          autocomplete="tel"
+          inputmode="tel"
+          [attr.aria-invalid]="showProfileError('phone')"
+        />
+        @if (showProfileError('phone')) {
+          <span class="auth__error" role="alert">
+            Numéro français attendu, par exemple 06 12 34 56 78.
+          </span>
+        } @else {
+          <span class="auth__hint">
+            Jamais affiché sur l'annonce. Il n'est donné qu'au voyageur dont vous acceptez la
+            demande.
+          </span>
+        }
+      </label>
+
+      <button type="submit" class="auth__submit" [disabled]="'saving' === profileState()">
+        {{ 'saving' === profileState() ? 'Enregistrement…' : 'Enregistrer' }}
+      </button>
+    </form>
+  </section>
+
+  <section class="auth__card profile-page__card">
+    <h2 class="profile-page__card-title">Mot de passe</h2>
+    <form
+      class="auth__form"
+      [formGroup]="password"
+      (ngSubmit)="savePassword()"
+      (input)="edited('password')"
+      novalidate
+    >
+      @if (passwordError(); as message) {
+        <p class="auth__notice auth__notice--error" role="alert">{{ message }}</p>
+      }
+      @if ('saved' === passwordState()) {
+        <p class="auth__notice auth__notice--ok" role="status">Mot de passe changé.</p>
+      }
+
+      <label class="auth__field">
+        <span class="auth__label">Mot de passe actuel</span>
+        <input
+          type="password"
+          formControlName="currentPassword"
+          autocomplete="current-password"
+          required
+          [attr.aria-invalid]="showPasswordError('currentPassword')"
+        />
+        @if (showPasswordError('currentPassword')) {
+          <span class="auth__error" role="alert">Indiquez votre mot de passe actuel.</span>
+        }
+      </label>
+
+      <label class="auth__field">
+        <span class="auth__label">Nouveau mot de passe</span>
+        <input
+          type="password"
+          formControlName="newPassword"
+          autocomplete="new-password"
+          required
+          [attr.aria-invalid]="showPasswordError('newPassword')"
+        />
+        @if (showPasswordError('newPassword')) {
+          <span class="auth__error" role="alert">10 caractères minimum.</span>
+        } @else {
+          <span class="auth__hint">
+            10 caractères minimum. Quatre mots au hasard font un excellent mot de passe.
+          </span>
+        }
+      </label>
+
+      <button type="submit" class="auth__submit" [disabled]="'saving' === passwordState()">
+        {{ 'saving' === passwordState() ? 'Enregistrement…' : 'Changer le mot de passe' }}
+      </button>
+    </form>
+  </section>
+</div>

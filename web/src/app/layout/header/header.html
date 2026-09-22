@@ -5,7 +5,18 @@
       <span>Cap Monta</span>
     </a>
 
-    <nav class="header__nav">
+    <button
+      type="button"
+      class="header__toggle"
+      aria-controls="main-nav"
+      [attr.aria-expanded]="menuOpen()"
+      (click)="toggleMenu()"
+    >
+      <cm-icon [name]="menuOpen() ? 'x' : 'menu-2'" />
+      <span>Menu</span>
+    </button>
+
+    <nav id="main-nav" class="header__nav" [class.header__nav--open]="menuOpen()">
       <a routerLink="/recherche">Rechercher</a>
 
       @if (guestRequests().length && null === owner()) {
@@ -21,7 +32,9 @@
       <span class="header__account">
         @if (sessionChecked()) {
           @if (owner(); as me) {
-            <span class="header__who">{{ me.displayName }}</span>
+            <a class="header__who" routerLink="/mon-espace/profil" title="Mon profil">{{
+              me.displayName
+            }}</a>
             <button type="button" class="header__logout" (click)="logout()">Se déconnecter</button>
           } @else {
             <a routerLink="/connexion">Se connecter</a>
