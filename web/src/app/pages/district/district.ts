@@ -11,6 +11,7 @@ import { DistrictService } from '../../core/services/district';
 import { SeoService } from '../../core/services/seo';
 import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
 import { Pagination } from '../../shared/pagination/pagination';
+import { HttpStatus } from '../../core/services/http-status';
 
 @Component({
   selector: 'cm-district',
@@ -26,6 +27,7 @@ export class DistrictPage implements OnInit {
 
   readonly district = signal<District | null>(null);
   readonly missing = signal(false);
+  private readonly httpStatus = inject(HttpStatus);
   readonly results = signal<Accommodation[]>([]);
   readonly total = signal(0);
   readonly page = signal(1);
@@ -90,6 +92,9 @@ export class DistrictPage implements OnInit {
       )
       .subscribe((result) => {
         this.missing.set(null === result);
+        if (null === result) {
+          this.httpStatus.set(404);
+        }
 
         if (null === result) {
           this.district.set(null);

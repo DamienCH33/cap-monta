@@ -33,6 +33,33 @@ function isKnownRoute(pathname: string): boolean {
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
+// Pas de « X-Powered-By: Express » : inutile de dire aux curieux ce qui tourne.
+app.disable('x-powered-by');
+
+/**
+ * En-têtes de sécurité de toutes les pages. La politique de contenu (CSP) ne restreint pas
+ * les scripts : Angular injecte ses propres scripts en ligne au rendu serveur. Elle interdit
+ * ce qui ne sert jamais ici (plugins, iframes, changement de <base>, formulaires vers
+ * ailleurs), dont l'affichage du site dans le cadre d'un autre (clickjacking).
+ */
+app.use((request, response, next) => {
+  response.set({
+    'Content-Security-Policy':
+      "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  });
+
+  // HSTS seulement derrière HTTPS (Railway le signale par X-Forwarded-Proto).
+  if ('https' === request.get('x-forwarded-proto')) {
+    response.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+
+  next();
+});
+
 interface AccommodationSummary {
   slug: string;
 }
