@@ -19,6 +19,11 @@ final class PhotoResizer
 
     public function resize(string $path): ResizedPhoto
     {
+        // A 50 Mpx photo takes about 200 MB once decoded, plus the two resized copies.
+        if (self::bytes((string) ini_get('memory_limit')) < 512 * 1024 * 1024) {
+            ini_set('memory_limit', '512M');
+        }
+
         // GD images are freed automatically since PHP 8: no imagedestroy() needed.
         $source = $this->open($path);
 
@@ -101,5 +106,22 @@ final class PhotoResizer
         $rotated = imagerotate($image, $angle, 0);
 
         return false === $rotated ? $image : $rotated;
+    }
+
+    /** "256M" → 268435456; "-1" (no limit) → PHP_INT_MAX. */
+    private static function bytes(string $value): int
+    {
+        if ('-1' === $value) {
+            return \PHP_INT_MAX;
+        }
+
+        $number = (int) $value;
+
+        return match (strtoupper(substr($value, -1))) {
+            'G' => $number * 1024 ** 3,
+            'M' => $number * 1024 ** 2,
+            'K' => $number * 1024,
+            default => $number,
+        };
     }
 }

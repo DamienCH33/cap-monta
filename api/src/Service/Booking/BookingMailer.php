@@ -57,7 +57,7 @@ final readonly class BookingMailer
             $request->getGuestEmail(),
             'Votre demande pour un '.$title.' est envoyée',
             <<<TXT
-                Bonjour {$request->getGuestName()},
+                Bonjour {$this->guestName($request)},
 
                 Votre demande a bien été transmise au propriétaire.
 
@@ -105,14 +105,14 @@ final readonly class BookingMailer
         $owner = $accommodation->getOwner();
         $title = $accommodation->title();
         $summary = $this->summary($request);
-        $ownerContact = trim($owner->getDisplayName()."\n".$owner->getEmail()."\n".($owner->getPhone() ?? ''));
-        $guestContact = trim($request->getGuestName()."\n".$request->getGuestEmail()."\n".($request->getGuestPhone() ?? ''));
+        $ownerContact = trim(self::oneLine($owner->getDisplayName())."\n".$owner->getEmail()."\n".self::oneLine($owner->getPhone() ?? ''));
+        $guestContact = trim($this->guestName($request)."\n".$request->getGuestEmail()."\n".self::oneLine($request->getGuestPhone() ?? ''));
 
         $this->send(
             $request->getGuestEmail(),
             'Votre séjour est accepté — '.$title,
             <<<TXT
-                Bonjour {$request->getGuestName()},
+                Bonjour {$this->guestName($request)},
 
                 Bonne nouvelle : le propriétaire accepte votre demande.
 
@@ -158,7 +158,7 @@ final readonly class BookingMailer
             $request->getGuestEmail(),
             'Votre demande pour un '.$title,
             <<<TXT
-                Bonjour {$request->getGuestName()},
+                Bonjour {$this->guestName($request)},
 
                 Le propriétaire ne peut pas accueillir votre séjour du {$this->stay($request)}.
                 {$this->ownerMessage($request)}
@@ -179,7 +179,7 @@ final readonly class BookingMailer
             $request->getGuestEmail(),
             'Pas de réponse à votre demande — '.$title,
             <<<TXT
-                Bonjour {$request->getGuestName()},
+                Bonjour {$this->guestName($request)},
 
                 Le propriétaire n'a pas répondu à temps à votre demande du {$stay}.
                 Elle est annulée : vous ne devez rien.
@@ -217,7 +217,7 @@ final readonly class BookingMailer
             $request->getGuestEmail(),
             'Réservation annulée — '.$title,
             <<<TXT
-                Bonjour {$request->getGuestName()},
+                Bonjour {$this->guestName($request)},
 
                 Le propriétaire a annulé votre séjour du {$this->stay($request)}.
                 {$this->ownerMessage($request)}
@@ -284,12 +284,36 @@ final readonly class BookingMailer
 
     private function guestMessage(BookingRequest $request): string
     {
-        return null === $request->getMessage() ? '' : "\nSon message :\n« ".$request->getMessage()." »\n";
+        return null === $request->getMessage() ? '' : "\nSon message :\n« ".self::quoted($request->getMessage())." »\n";
     }
 
     private function ownerMessage(BookingRequest $request): string
     {
-        return null === $request->getOwnerMessage() ? '' : "\nSon message :\n« ".$request->getOwnerMessage()." »\n";
+        return null === $request->getOwnerMessage() ? '' : "\nSon message :\n« ".self::quoted($request->getOwnerMessage())." »\n";
+    }
+
+    private function guestName(BookingRequest $request): string
+    {
+        return self::oneLine($request->getGuestName());
+    }
+
+    /**
+     * What a visitor typed stays on its line: a name with line breaks could otherwise add
+     * paragraphs, links or buttons of its own to the email (MailComposer reads the layout
+     * from the text).
+     */
+    private static function oneLine(string $text): string
+    {
+        return trim((string) preg_replace('/\s+/u', ' ', $text));
+    }
+
+    /**
+     * A message keeps its line breaks but loses its blank lines: the quote then runs to its
+     * end, and nothing inside it can become a button or a table (MailComposer).
+     */
+    private static function quoted(string $text): string
+    {
+        return trim((string) preg_replace('/\R(?:\h*\R)+/u', "\n", trim($text)));
     }
 
     private function trackingUrl(BookingRequest $request): string

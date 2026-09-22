@@ -11,6 +11,7 @@ use App\Repository\BookingRequestRepository;
 use App\Repository\UnavailabilityRepository;
 use App\Service\Calendar\PublicCalendar;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
 use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -116,7 +117,7 @@ final readonly class BookingDesk
             }
 
             $accommodation->markCalendarChecked($now);
-            $this->em->flush();
+            $this->save();
         } finally {
             if ($locked) {
                 $lock->release();
@@ -141,7 +142,7 @@ final readonly class BookingDesk
 
         $request->recordAnswer($this->clock->now(), $message);
         $this->workflow->apply($request, 'decline');
-        $this->em->flush();
+        $this->save();
 
         $this->mailer->declined($request);
     }
@@ -161,7 +162,7 @@ final readonly class BookingDesk
 
         $this->cancel($request);
         $request->recordAnswer($this->clock->now(), $message);
-        $this->em->flush();
+        $this->save();
         $this->publicCalendar->invalidate($request->getAccommodation());
 
         $this->mailer->cancelledByOwner($request);
@@ -176,7 +177,7 @@ final readonly class BookingDesk
     {
         $wasAccepted = $request->isAccepted();
         $this->cancel($request);
-        $this->em->flush();
+        $this->save();
 
         if ($wasAccepted) {
             $this->publicCalendar->invalidate($request->getAccommodation());
@@ -200,7 +201,13 @@ final readonly class BookingDesk
         }
 
         $this->workflow->apply($request, 'expire');
-        $this->em->flush();
+
+        try {
+            $this->save();
+        } catch (BookingAnswerRefused) {
+            // Answered or cancelled a moment ago by someone else: nothing to expire.
+            return false;
+        }
 
         $this->mailer->expired($request);
 
@@ -245,6 +252,18 @@ final readonly class BookingDesk
 
         if ($request->hasStarted($this->today())) {
             throw BookingAnswerRefused::alreadyStarted();
+        }
+    }
+
+    /**
+     * @throws BookingAnswerRefused when someone else changed the request since it was read
+     */
+    private function save(): void
+    {
+        try {
+            $this->em->flush();
+        } catch (OptimisticLockException) {
+            throw BookingAnswerRefused::changedMeanwhile();
         }
     }
 

@@ -75,7 +75,7 @@ final class BookingRequestCreator
         $id = $request->getId()->toRfc4122();
         $this->bus->dispatch(
             new RemindOwnerOfBookingRequest($id),
-            [DelayStamp::delayUntil($request->getCreatedAt()->modify(BookingRequest::REMINDER_DELAY))],
+            [DelayStamp::delayUntil($request->remindAt())],
         );
         $this->bus->dispatch(new ExpireBookingRequest($id), [DelayStamp::delayUntil($request->getExpiresAt())]);
         $this->mailer->received($request);

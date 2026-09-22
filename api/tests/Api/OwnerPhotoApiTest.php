@@ -178,6 +178,45 @@ final class OwnerPhotoApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
     }
 
+    public function testAnUnconfirmedAccountCannotUploadPhotos(): void
+    {
+        $bob = new User('bob@example.com', 'Bob');
+        $this->em->persist($bob);
+        $this->accommodation('bob-home', $bob);
+        $this->client->loginUser($bob, 'main');
+
+        $this->upload('bob-home', $this->jpeg(800, 600));
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertStringContainsString('Confirmez', (string) $this->json()['detail']);
+    }
+
+    public function testAPictureWithTooManyPixelsIsRefusedBeforeBeingDecoded(): void
+    {
+        $this->accommodation('alice-home', $this->loggedInOwner());
+
+        $this->upload('alice-home', $this->hugePng(10_000, 10_000));
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertStringContainsString('trop grande', (string) $this->json()['detail']);
+    }
+
+    /**
+     * A tiny file that declares 100 million pixels: what a decompression bomb looks like.
+     * Only the header is read by the validator, the picture is never decoded.
+     */
+    private function hugePng(int $width, int $height): UploadedFile
+    {
+        $ihdr = 'IHDR'.pack('NNCCCCC', $width, $height, 8, 2, 0, 0, 0);
+        $idat = 'IDAT'.(string) gzcompress('');
+        $chunk = static fn (string $body): string => pack('N', \strlen($body) - 4).$body.pack('N', crc32($body));
+
+        $path = (string) tempnam(sys_get_temp_dir(), 'cm');
+        file_put_contents($path, "\x89PNG\r\n\x1a\n".$chunk($ihdr).$chunk($idat).$chunk('IEND'));
+
+        return new UploadedFile($path, 'bombe.png', 'image/png', null, true);
+    }
+
     private function loggedInOwner(): User
     {
         $alice = $this->owner('alice@example.com');

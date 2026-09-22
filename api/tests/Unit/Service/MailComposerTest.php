@@ -29,6 +29,8 @@ final class MailComposerTest extends KernelTestCase
             Répondez avant le jeudi 24 septembre à 14h00 : passé ce délai, la demande expire
             et le voyageur en est prévenu.
 
+            Voir aussi https://ailleurs.example/piege
+
             Jeanne Martin
             jeanne@example.com
 
@@ -48,6 +50,8 @@ final class MailComposerTest extends KernelTestCase
         self::assertMatchesRegularExpression('#>Séjour</td>\s*<td[^>]*>du samedi 4 juillet#u', $html);
         self::assertMatchesRegularExpression('#<a href="https://cap-monta.test/demande/abc123"[^>]*>Suivre ma demande</a>#', $html);
         self::assertStringContainsString('<a href="https://cap-monta.test/inscription"', $html);
+        // A link to another site stays text.
+        self::assertStringNotContainsString('href="https://ailleurs.example', $html);
         // A sentence wrapped by hand is joined back; a contact block keeps its lines.
         self::assertStringContainsString('la demande expire et le voyageur', $html);
         self::assertStringContainsString('Jeanne Martin<br>jeanne@example.com', $html);
@@ -60,6 +64,6 @@ final class MailComposerTest extends KernelTestCase
         $twig = self::getContainer()->get(Environment::class);
         self::assertInstanceOf(Environment::class, $twig);
 
-        return new MailComposer($twig, 'noreply@cap-monta.test');
+        return new MailComposer($twig, 'noreply@cap-monta.test', 'https://cap-monta.test');
     }
 }

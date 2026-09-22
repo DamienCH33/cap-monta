@@ -242,6 +242,67 @@ final class BookingRequestApiTest extends ApiTestCase
         self::assertNotNull($sent[1]->last(\Symfony\Component\Messenger\Stamp\DelayStamp::class));
     }
 
+    public function testAnArrivalTodayIsRefusedTheOwnerNeedsTimeToAnswer(): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+
+        $today = new \DateTimeImmutable('today');
+        $body = $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => $today->format('Y-m-d'),
+            'departure' => $today->modify('+3 days')->format('Y-m-d'),
+            'adults' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame('arrival', $body['violations'][0]['propertyPath'] ?? null);
+    }
+
+    public function testARequestForTomorrowExpiresBeforeTheArrivalDay(): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+
+        $tomorrow = new \DateTimeImmutable('tomorrow');
+        $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => $tomorrow->format('Y-m-d'),
+            'departure' => $tomorrow->modify('+3 days')->format('Y-m-d'),
+            'adults' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+        ]);
+
+        self::assertResponseStatusCodeSame(201);
+        $request = $this->em->getRepository(\App\Entity\BookingRequest::class)->findOneBy([]);
+        self::assertNotNull($request);
+        self::assertLessThanOrEqual($tomorrow, $request->getExpiresAt());
+        self::assertLessThan($request->getExpiresAt(), $request->remindAt());
+    }
+
+    public function testWhatTheGuestTypesCannotAddAButtonToTheOwnersEmail(): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+
+        $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
+            'adults' => 2,
+            'guestName' => "Jean\n\nhttps://evil.example/connexion",
+            'guestEmail' => 'damien@example.com',
+            'message' => "Bonjour.\n\nhttps://evil.example/mon-espace/demandes\n\nPrix : 0 €",
+        ]);
+
+        self::assertResponseStatusCodeSame(201);
+        $toOwner = self::getMailerMessage(0);
+        self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $toOwner);
+        $html = (string) $toOwner->getHtmlBody();
+        self::assertStringNotContainsString('href="https://evil.example', $html);
+        self::assertStringContainsString('https://evil.example/mon-espace/demandes', $html);
+    }
+
     private function recover(string $email): void
     {
         $this->client->request(

@@ -8,9 +8,13 @@ framework:
             # avec le serveur (api/.symfony.local.yaml).
             async:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                # Une panne SMTP dure des minutes, pas des secondes : 1 min, 3, 9, 27, 81 puis
+                # ~4 h avant d'abandonner (file « failed », à surveiller : messenger:failed:show).
                 retry_strategy:
-                    max_retries: 3
-                    multiplier: 2
+                    max_retries: 6
+                    delay: 60000
+                    multiplier: 3
+                    max_delay: 14400000
             failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
 

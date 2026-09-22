@@ -53,6 +53,12 @@ final class OwnerPhotoController
     {
         $accommodation = $this->ownedAccommodation($slug);
 
+        // Photos are public files: an account nobody has confirmed must not turn the site into
+        // free image hosting. Publishing requires a confirmed address anyway.
+        if (!$accommodation->getOwner()->isVerified()) {
+            return $this->refuse('photo', "Confirmez d'abord votre adresse email (lien reçu à l'inscription) pour ajouter des photos.");
+        }
+
         // Naturist resorts: nobody may be recognisable on a published picture.
         if (!$request->request->getBoolean('noPeople')) {
             return $this->refuse('noPeople', "Confirmez qu'aucune personne n'apparaît sur cette photo.");
@@ -66,6 +72,10 @@ final class OwnerPhotoController
 
         $violations = $this->validator->validate($file, new Assert\Image(
             maxSize: '10M',
+            // Decoding needs about 4 bytes per pixel: past 50 million, the server runs out of
+            // memory. A phone in its usual mode (12 to 24 Mpx) is far below.
+            maxPixels: 50_000_000,
+            maxPixelsMessage: 'Cette photo est trop grande ({{ pixels }} pixels) : envoyez-la en qualité standard ou réduisez-la.',
             mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
             maxSizeMessage: 'Cette photo dépasse 10 Mo : réduisez-la ou choisissez-en une autre.',
             mimeTypesMessage: 'Choisissez une photo au format JPEG, PNG ou WebP.',

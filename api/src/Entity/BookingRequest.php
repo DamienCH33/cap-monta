@@ -21,12 +21,17 @@ class BookingRequest
      */
     public const RESPONSE_DELAY = '+48 hours';
 
-    /** The owner is reminded once, halfway through. */
-    public const REMINDER_DELAY = '+24 hours';
-
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $id;
+
+    /**
+     * Optimistic locking: two answers read at the same time (owner accepts while the guest
+     * cancels, or the worker expires it) cannot both be written. The second gets a 409.
+     */
+    #[ORM\Version]
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 1])]
+    private int $version = 1;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -112,7 +117,9 @@ class BookingRequest
     ) {
         $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
-        $this->expiresAt = $this->createdAt->modify(self::RESPONSE_DELAY);
+        // 48 hours, but never past the eve of the arrival: a request for tomorrow cannot wait
+        // until the day after tomorrow for its answer.
+        $this->expiresAt = min($this->createdAt->modify(self::RESPONSE_DELAY), $startDate->setTime(0, 0));
         $this->accommodation = $accommodation;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
@@ -304,6 +311,14 @@ class BookingRequest
     }
 
     /** The stay has begun or is over: nothing can be accepted or cancelled any more. */
+    /** The owner is reminded once, halfway to the deadline: after 24 hours in general. */
+    public function remindAt(): \DateTimeImmutable
+    {
+        $half = intdiv($this->expiresAt->getTimestamp() - $this->createdAt->getTimestamp(), 2);
+
+        return $this->createdAt->modify(sprintf('+%d seconds', max(0, $half)));
+    }
+
     public function hasStarted(\DateTimeImmutable $today): bool
     {
         return $this->startDate <= $today;

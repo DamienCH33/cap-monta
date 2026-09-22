@@ -44,7 +44,7 @@ final class BookingRequestResource
     public string $accommodationSlug = '';
 
     #[Assert\NotNull]
-    #[Assert\GreaterThanOrEqual('today', message: 'Choisissez une date d’arrivée à venir.')]
+    #[Assert\GreaterThan('today', message: 'Choisissez une arrivée à partir de demain : le propriétaire doit avoir le temps de répondre.')]
     public ?\DateTimeImmutable $arrival = null;
 
     #[Assert\NotNull]

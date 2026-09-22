@@ -169,10 +169,12 @@ class AccommodationRepository extends ServiceEntityRepository
         /** @var list<array{slug: string, priceFrom: int|string|null}> $rows */
         $rows = $this->createQueryBuilder('a')
             ->select('a.slug AS slug', 'MIN(p.weeklyPrice) AS priceFrom')
-            ->leftJoin(PricePeriod::class, 'p', Join::WITH, 'p.accommodation = a')
+            // Past periods do not count: last summer's price is not a price one can book.
+            ->leftJoin(PricePeriod::class, 'p', Join::WITH, 'p.accommodation = a AND p.endDate > :today')
             ->andWhere('a.slug IN (:slugs)')
             ->groupBy('a.slug')
             ->setParameter('slugs', $slugs)
+            ->setParameter('today', new \DateTimeImmutable('today'), 'date_immutable')
             ->getQuery()
             ->getResult();
 

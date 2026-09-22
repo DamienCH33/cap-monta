@@ -40,6 +40,8 @@ final readonly class MailComposer
     public function __construct(
         private Environment $twig,
         #[Autowire('%app.mail_from%')] private string $from,
+        /** Only links to the site itself become clickable inside a sentence. */
+        #[Autowire('%app.front_url%')] private string $frontUrl,
     ) {
     }
 
@@ -114,7 +116,7 @@ final readonly class MailComposer
             }
 
             if ([] !== $paragraph) {
-                $blocks[] = MailBlock::paragraph(self::paragraph($paragraph));
+                $blocks[] = MailBlock::paragraph($this->paragraph($paragraph));
                 $paragraph = [];
             }
 
@@ -129,7 +131,7 @@ final readonly class MailComposer
         }
 
         if ([] !== $paragraph) {
-            $blocks[] = MailBlock::paragraph(self::paragraph($paragraph));
+            $blocks[] = MailBlock::paragraph($this->paragraph($paragraph));
         }
 
         return $blocks;
@@ -142,7 +144,7 @@ final readonly class MailComposer
      *
      * @param list<string> $lines
      */
-    private static function paragraph(array $lines): string
+    private function paragraph(array $lines): string
     {
         $html = '';
 
@@ -150,18 +152,23 @@ final readonly class MailComposer
             if ($index > 0) {
                 $html .= mb_strlen($lines[$index - 1]) >= self::WRAPPED ? ' ' : '<br>';
             }
-            $html .= self::inline($line);
+            $html .= $this->inline($line);
         }
 
         return $html;
     }
 
-    /** Escapes a line, then turns the links left inside a sentence into links. */
-    private static function inline(string $line): string
+    /**
+     * Escapes a line, then turns the links to the site left inside a sentence into links.
+     * Any other address stays plain text: a visitor's message must not bring clickable links
+     * into an email the site sends.
+     */
+    private function inline(string $line): string
     {
         $html = htmlspecialchars($line, \ENT_QUOTES | \ENT_HTML5, 'UTF-8');
+        $site = preg_quote(htmlspecialchars(rtrim($this->frontUrl, '/'), \ENT_QUOTES | \ENT_HTML5, 'UTF-8'), '#');
 
-        return (string) preg_replace('#https?://[^\s<]+#', '<a href="$0" style="color:#185fa5">$0</a>', $html);
+        return (string) preg_replace('#'.$site.'(?:/[^\s<]*)?#', '<a href="$0" style="color:#185fa5">$0</a>', $html);
     }
 
     private static function label(string $url): string

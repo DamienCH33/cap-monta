@@ -26,7 +26,12 @@ final class BookingAnswerRefused extends \DomainException
 
     public static function expired(): self
     {
-        return new self('Le délai de 48 heures est dépassé : la demande a expiré et le voyageur en est prévenu.', 'status', 409);
+        return new self('Le délai de réponse est dépassé : la demande a expiré et le voyageur en est prévenu.', 'status', 409);
+    }
+
+    public static function changedMeanwhile(): self
+    {
+        return new self('Cette demande vient de changer (réponse, annulation ou expiration) : rechargez la page.', 'status', 409);
     }
 
     public static function datesTaken(): self
