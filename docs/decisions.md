@@ -102,3 +102,35 @@ Doctrine ne sait ni générer ni reconnaître une contrainte `EXCLUDE`. À chaqu
 
 `tests/Integration/DatabaseConstraintsTest.php` vérifie que les contraintes sont toujours en base. Si une migration en supprime une, la CI casse.
 
+
+---
+
+## 011 — Règles de séjour : le minimum de nuits bloque, le jour d'arrivée informe (22/09/2026)
+
+**Contexte.** Au CHM, beaucoup de propriétaires louent du samedi au samedi en haute saison. Refuser d'avance un mardi–jeudi, c'est parfois leur faire perdre une location qu'ils auraient prise (deux nuits entre deux semaines).
+
+**Décision.** Deux natures de règles, par période tarifaire :
+- **Minimum de nuits : bloquant.** Une demande plus courte est refusée (devis `stay_too_short`, 409 à la création). Décision de Damien : « si ça ne respecte pas le nombre de nuits, c'est mort ».
+- **Arrivée le samedi : préférence.** `PricePeriod.saturdayArrival`. Le devis renvoie `outsideRules: true`, le visiteur le voit, la demande part quand même et arrive marquée « hors de vos règles » (`BookingRequest.outsideRules`). Le propriétaire décide.
+
+Les trous entre périodes sont permis : le séjour est « à convenir », le propriétaire fixe le prix en acceptant (obligatoire dans ce cas).
+
+---
+
+## 012 — Cycle de vie d'une demande : une machine à états, une seule porte (22/09/2026)
+
+**Décision.** Workflow Symfony `booking_request` (state machine) : `pending → accepted | declined | expired`, `pending | accepted → cancelled`. Seul `App\Service\Booking\BookingDesk` applique les transitions ; il tient le calendrier à jour (accepter crée l'indisponibilité liée à la demande, annuler la supprime), invalide le cache Redis du calendrier public et envoie les emails **après** l'écriture en base.
+
+- **Accepter** prend le verrou Redis `resa:logement:{id}` (ADR 004), revérifie les dates, puis refuse d'office les autres demandes en attente sur les mêmes dates, avec un email : le voyageur n'attend pas 48 h un refus déjà certain.
+- **Expiration à 48 h** : message `ExpireBookingRequest` avec `DelayStamp`, transport Doctrine (ADR 005). Filet : `app:booking-requests:expire` (cron horaire en production). Une réponse arrivée après le délai fait expirer la demande au lieu de l'accepter.
+- **Emails par le worker** (`SendEmailMessage` routé sur `async`) : une panne SMTP ne fait plus échouer la requête HTTP. Synchrones en test pour pouvoir les vérifier.
+
+**Coût.** Un worker `messenger:consume async` à faire tourner partout : en dev il démarre avec `symfony server:start` (`api/.symfony.local.yaml`), sur Railway ce sera un service à part.
+
+---
+
+## 013 — Suivi sans compte par jeton, coordonnées après acceptation (22/09/2026)
+
+**Contexte.** `GET /api/booking-requests/{id}` renvoyait l'email et le téléphone du voyageur à quiconque connaissait l'identifiant. Or un UUID v7 commence par un horodatage : ce n'est pas un secret.
+
+**Décision.** La lecture par identifiant est supprimée. Le voyageur reçoit un lien privé `/demande/{jeton}` (48 caractères hexadécimaux aléatoires, `BookingRequest.trackingToken`) pour suivre et annuler sa demande. Le propriétaire voit nom, message, dates et voyageurs ; **email et téléphone seulement après acceptation**, et le voyageur reçoit alors ceux du propriétaire. C'est la promesse écrite sous le formulaire de demande.
