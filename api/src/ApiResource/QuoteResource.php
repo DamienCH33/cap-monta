@@ -53,6 +53,8 @@ final class QuoteResource
         public bool $available,
         public ?int $total,
         public ?string $refusal,
+        /** The owner prefers another arrival day on this period: said, never blocking. */
+        public bool $outsideRules = false,
     ) {
     }
 
@@ -73,6 +75,7 @@ final class QuoteResource
             $quote->isAvailable(),
             $quote->total,
             $quote->refusal?->value,
+            $quote->outsideRules,
         );
     }
 }

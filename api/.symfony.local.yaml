@@ -1,0 +1,7 @@
+# Lancé avec `symfony server:start` : le worker qui traite les messages différés
+# (expiration des demandes de réservation au bout de 48 h). Sans lui, les demandes
+# n'expirent qu'au passage de `symfony console app:booking-requests:expire`.
+workers:
+    messenger_consume_async:
+        cmd: ['symfony', 'console', 'messenger:consume', 'async', '--time-limit=3600']
+        watch: ['config', 'src']

@@ -14,6 +14,7 @@ final class PricePeriodResource
         public ?int $weeklyPrice,
         public ?int $nightlyPrice,
         public int $minimumNights,
+        public bool $saturdayArrival = false,
     ) {
     }
 
@@ -25,6 +26,7 @@ final class PricePeriodResource
             $period->getWeeklyPrice(),
             $period->getNightlyPrice(),
             $period->getMinimumNights(),
+            $period->prefersSaturdayArrival(),
         );
     }
 }

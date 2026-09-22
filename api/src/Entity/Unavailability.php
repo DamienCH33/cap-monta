@@ -56,12 +56,18 @@ class Unavailability
 
     public const NOTE_MAX_LENGTH = 200;
 
+    /** The accepted request behind a "booking" period: cancelling it frees these dates. */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    private ?BookingRequest $bookingRequest = null;
+
     public function __construct(
         Accommodation $accommodation,
         \DateTimeImmutable $startDate,
         \DateTimeImmutable $endDate,
         UnavailabilitySource $source,
         ?string $note = null,
+        ?BookingRequest $bookingRequest = null,
     ) {
         $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
@@ -70,6 +76,12 @@ class Unavailability
         $this->endDate = $endDate;
         $this->source = $source;
         $this->note = null === $note || '' === trim($note) ? null : trim($note);
+        $this->bookingRequest = $bookingRequest;
+    }
+
+    public function getBookingRequest(): ?BookingRequest
+    {
+        return $this->bookingRequest;
     }
 
     public function getId(): Uuid

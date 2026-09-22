@@ -1,22 +1,32 @@
 framework:
     messenger:
-        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
-        # failure_transport: failed
+        failure_transport: failed
 
         transports:
-            # https://symfony.com/doc/current/messenger.html#transport-configuration
-            # async: '%env(MESSENGER_TRANSPORT_DSN)%'
-            # failed: 'doctrine://default?queue_name=failed'
+            # Messages différés (expiration d'une demande à 48 h) : transport Doctrine, ADR 005.
+            # Ils survivent à un redémarrage. En dev, le worker est lancé par la CLI Symfony
+            # avec le serveur (api/.symfony.local.yaml).
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    multiplier: 2
+            failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
 
         routing:
-            # Route your messages to the transports
-            # 'App\Message\YourMessage': async
+            App\Message\ExpireBookingRequest: async
+            # Les emails partent par le worker : une panne SMTP ne fait plus échouer la requête
+            # HTTP (la demande était enregistrée mais le voyageur voyait une erreur), et un envoi
+            # raté est retenté.
+            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
 
-# when@test:
-#    framework:
-#        messenger:
-#            transports:
-#                # replace with your transport name here (e.g., my_transport: 'in-memory://')
-#                # For more Messenger testing tools, see https://github.com/zenstruck/messenger-test
-#                async: 'in-memory://'
+when@test:
+    framework:
+        messenger:
+            transports:
+                # Rien ne part vraiment : les tests lisent ce qui a été envoyé.
+                async: 'in-memory://'
+            routing:
+                # Les tests vérifient le contenu des emails : envoyés tout de suite (vers null://).
+                Symfony\Component\Mailer\Messenger\SendEmailMessage: sync

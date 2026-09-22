@@ -361,6 +361,12 @@ class Accommodation
             && $this->calendarCheckedAt > $now->modify(sprintf('-%d days', self::CALENDAR_FRESHNESS_DAYS));
     }
 
+    /** "Mobil-home · Europa", or the resort when no district is known. As on the site. */
+    public function title(): string
+    {
+        return $this->type->label().' · '.($this->district?->getName() ?? $this->resort->label());
+    }
+
     public function isPublished(): bool
     {
         return AccommodationStatus::Published === $this->status;

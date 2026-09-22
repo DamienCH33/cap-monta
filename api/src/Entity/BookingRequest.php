@@ -74,6 +74,31 @@ class BookingRequest
     #[ORM\Column]
     private \DateTimeImmutable $expiresAt;
 
+    /**
+     * The guest's private key to follow or cancel the request, sent by email. Random, unlike
+     * the id (a UUID v7 starts with a timestamp): knowing one request says nothing of another.
+     */
+    #[ORM\Column(length: 48, unique: true)]
+    private string $trackingToken;
+
+    /** Price agreed on acceptance, in cents: the estimate, or the owner's when it was "à convenir". */
+    #[ORM\Column(nullable: true)]
+    private ?int $agreedPrice = null;
+
+    /** What the owner wrote when answering, sent to the guest. */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $ownerMessage = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $respondedAt = null;
+
+    /**
+     * The stay ignores a preference of the owner (arrival day). Informative only: the owner
+     * decides. A hard rule, like the minimum number of nights, refuses the request instead.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $outsideRules = false;
+
     public function __construct(
         Accommodation $accommodation,
         \DateTimeImmutable $startDate,
@@ -91,6 +116,7 @@ class BookingRequest
         $this->adults = $adults;
         $this->guestName = $guestName;
         $this->guestEmail = $guestEmail;
+        $this->trackingToken = bin2hex(random_bytes(24));
     }
 
     public function getId(): Uuid
@@ -198,11 +224,86 @@ class BookingRequest
         return $this->status;
     }
 
-    public function setStatus(BookingRequestStatus $status): static
+    /**
+     * Read by the workflow's marking store. The status only changes through the
+     * "booking_request" state machine: see BookingDesk.
+     */
+    public function getMarking(): string
     {
-        $this->status = $status;
+        return $this->status->value;
+    }
+
+    /**
+     * @param array<string, mixed> $context
+     */
+    public function setMarking(string $marking, array $context = []): void
+    {
+        $this->status = BookingRequestStatus::from($marking);
+    }
+
+    public function isPending(): bool
+    {
+        return BookingRequestStatus::Pending === $this->status;
+    }
+
+    public function isAccepted(): bool
+    {
+        return BookingRequestStatus::Accepted === $this->status;
+    }
+
+    public function getTrackingToken(): string
+    {
+        return $this->trackingToken;
+    }
+
+    public function getAgreedPrice(): ?int
+    {
+        return $this->agreedPrice;
+    }
+
+    /** What the guest will pay: agreed if answered, estimated otherwise; null when "à convenir". */
+    public function price(): ?int
+    {
+        return $this->agreedPrice ?? $this->estimatedPrice;
+    }
+
+    public function getOwnerMessage(): ?string
+    {
+        return $this->ownerMessage;
+    }
+
+    public function getRespondedAt(): ?\DateTimeImmutable
+    {
+        return $this->respondedAt;
+    }
+
+    /** Records the owner's answer. The status itself is changed by the workflow. */
+    public function recordAnswer(\DateTimeImmutable $at, ?string $message, ?int $agreedPrice = null): void
+    {
+        $this->respondedAt = $at;
+        $this->ownerMessage = null === $message || '' === trim($message) ? null : trim($message);
+
+        if (null !== $agreedPrice) {
+            $this->agreedPrice = $agreedPrice;
+        }
+    }
+
+    public function isOutsideRules(): bool
+    {
+        return $this->outsideRules;
+    }
+
+    public function markOutsideRules(bool $outside): static
+    {
+        $this->outsideRules = $outside;
 
         return $this;
+    }
+
+    /** The stay has begun or is over: nothing can be accepted or cancelled any more. */
+    public function hasStarted(\DateTimeImmutable $today): bool
+    {
+        return $this->startDate <= $today;
     }
 
     public function getEstimatedPrice(): ?int

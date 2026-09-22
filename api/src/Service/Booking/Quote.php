@@ -21,6 +21,11 @@ final readonly class Quote
         public int $minimumNights,
         public ?int $total,
         public ?BookingRefusalReason $refusal,
+        /**
+         * The stay ignores a preference of the owner (arrival day): the request is sent all
+         * the same, flagged for the owner. Unlike $refusal, it never blocks anything.
+         */
+        public bool $outsideRules = false,
     ) {
     }
 

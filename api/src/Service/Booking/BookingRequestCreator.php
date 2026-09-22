@@ -6,7 +6,10 @@ namespace App\Service\Booking;
 
 use App\Entity\Accommodation;
 use App\Entity\BookingRequest;
+use App\Message\ExpireBookingRequest;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 /**
  * Creates a booking request: an intent, not a reservation.
@@ -20,6 +23,8 @@ final class BookingRequestCreator
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly QuoteCalculator $quotes,
+        private readonly MessageBusInterface $bus,
+        private readonly BookingMailer $mailer,
     ) {
     }
 
@@ -50,10 +55,18 @@ final class BookingRequestCreator
             ->setPets($input->pets)
             ->setGuestPhone($input->guestPhone)
             ->setMessage($input->message)
-            ->setEstimatedPrice($quote->total);
+            ->setEstimatedPrice($quote->total)
+            ->markOutsideRules($quote->outsideRules);
 
         $this->entityManager->persist($request);
         $this->entityManager->flush();
+
+        // Delivered 48 hours later: the request expires if the owner has not answered.
+        $this->bus->dispatch(
+            new ExpireBookingRequest($request->getId()->toRfc4122()),
+            [DelayStamp::delayUntil($request->getExpiresAt())],
+        );
+        $this->mailer->received($request);
 
         return $request;
     }

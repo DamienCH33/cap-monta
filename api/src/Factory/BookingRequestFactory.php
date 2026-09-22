@@ -42,6 +42,7 @@ final class BookingRequestFactory extends PersistentObjectFactory
     #[\Override]
     protected function initialize(): static
     {
-        return $this->instantiateWith(Instantiator::withConstructor());
+        // No setter for the status: it only moves through the workflow. Tests force it.
+        return $this->instantiateWith(Instantiator::withConstructor()->alwaysForce('status'));
     }
 }

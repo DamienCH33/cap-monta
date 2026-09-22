@@ -6,17 +6,19 @@ namespace App\ApiResource;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use App\Entity\BookingRequest;
 use App\Service\Booking\BookingRefusedException;
-use App\State\BookingRequestItemProvider;
 use App\State\CreateBookingRequestProcessor;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * A booking request, as seen from the outside.
+ *
+ * Creation only. Reading it back goes through the private tracking link sent to the guest
+ * (BookingTrackingController), never by id: the id is not a secret, and the request holds
+ * the guest's contact details.
  *
  * Fields above the separator are written by the guest, fields below are filled
  * by the processor once the domain has accepted the request.
@@ -30,10 +32,6 @@ use Symfony\Component\Validator\Constraints as Assert;
             denormalizationContext: [AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES => false],
             exceptionToStatus: [BookingRefusedException::class => 409],
         ),
-        new Get(
-            uriTemplate: '/booking-requests/{id}',
-            provider: BookingRequestItemProvider::class,
-        ),
     ],
 )]
 final class BookingRequestResource
@@ -45,6 +43,7 @@ final class BookingRequestResource
     public string $accommodationSlug = '';
 
     #[Assert\NotNull]
+    #[Assert\GreaterThanOrEqual('today', message: 'Choisissez une date d’arrivée à venir.')]
     public ?\DateTimeImmutable $arrival = null;
 
     #[Assert\NotNull]
@@ -95,6 +94,10 @@ final class BookingRequestResource
     #[ApiProperty(writable: false)]
     public ?\DateTimeImmutable $expiresAt = null;
 
+    /** Returned to the guest who just sent the request, so the page can link to it. */
+    #[ApiProperty(writable: false)]
+    public ?string $trackingToken = null;
+
     public static function fromEntity(BookingRequest $request): self
     {
         $resource = new self();
@@ -112,6 +115,7 @@ final class BookingRequestResource
         $resource->status = $request->getStatus()->value;
         $resource->estimatedPrice = $request->getEstimatedPrice();
         $resource->expiresAt = $request->getExpiresAt();
+        $resource->trackingToken = $request->getTrackingToken();
         $resource->infants = $request->getInfants();
         $resource->pets = $request->getPets();
 

@@ -8,4 +8,12 @@ enum Resort: string
 {
     case Chm = 'chm';
     case Euronat = 'euronat';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Chm => 'CHM Montalivet',
+            self::Euronat => 'Euronat',
+        };
+    }
 }

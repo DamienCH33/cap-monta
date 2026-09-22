@@ -32,12 +32,12 @@ final class BookingRequestApiTest extends ApiTestCase
     public function testAGuestCanSendARequestAndGetsTheEstimatedPrice(): void
     {
         $accommodation = $this->createAccommodation('mobile-home-pins');
-        $this->addWeeklyRate($accommodation, '2026-07-01', '2026-08-01', 40000);
+        $this->addWeeklyRate($accommodation, '2027-07-01', '2027-08-01', 40000);
 
         $payload = $this->post([
             'accommodationSlug' => 'mobile-home-pins',
-            'arrival' => '2026-07-01',
-            'departure' => '2026-07-08',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
             'adults' => 2,
             'guestName' => 'Damien Chauveau',
             'guestEmail' => 'damien@example.com',
@@ -55,16 +55,16 @@ final class BookingRequestApiTest extends ApiTestCase
         $accommodation = $this->createAccommodation('mobile-home-occupe');
         $this->em->persist(new Unavailability(
             $accommodation,
-            new \DateTimeImmutable('2026-08-10'),
-            new \DateTimeImmutable('2026-08-15'),
+            new \DateTimeImmutable('2027-08-10'),
+            new \DateTimeImmutable('2027-08-15'),
             UnavailabilitySource::Booking,
         ));
         $this->em->flush();
 
         $this->post([
             'accommodationSlug' => 'mobile-home-occupe',
-            'arrival' => '2026-08-12',
-            'departure' => '2026-08-14',
+            'arrival' => '2027-08-12',
+            'departure' => '2027-08-14',
             'adults' => 2,
             'guestName' => 'Damien Chauveau',
             'guestEmail' => 'damien@example.com',
@@ -79,8 +79,8 @@ final class BookingRequestApiTest extends ApiTestCase
 
         $this->post([
             'accommodationSlug' => 'bungalow-dunes',
-            'arrival' => '2026-07-01',
-            'departure' => '2026-07-08',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
             'adults' => 2,
             'guestName' => 'Damien Chauveau',
             'guestEmail' => 'pas-un-email',
@@ -93,8 +93,8 @@ final class BookingRequestApiTest extends ApiTestCase
     {
         $this->post([
             'accommodationSlug' => 'nope',
-            'arrival' => '2026-07-01',
-            'departure' => '2026-07-08',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
             'adults' => 2,
             'guestName' => 'Damien Chauveau',
             'guestEmail' => 'damien@example.com',
@@ -103,25 +103,88 @@ final class BookingRequestApiTest extends ApiTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
-    public function testARequestCanBeReadBackById(): void
+    public function testTheGuestFollowsHisRequestWithTheTokenNeverWithTheId(): void
     {
         $this->createAccommodation('bungalow-ocean');
 
         $created = $this->post([
             'accommodationSlug' => 'bungalow-ocean',
-            'arrival' => '2026-07-01',
-            'departure' => '2026-07-08',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
             'adults' => 2,
             'guestName' => 'Damien Chauveau',
             'guestEmail' => 'damien@example.com',
         ]);
 
-        $id = $created['id'] ?? '';
-        self::assertIsString($id);
+        $token = $created['trackingToken'] ?? '';
+        self::assertIsString($token);
+        self::assertMatchesRegularExpression('/^[0-9a-f]{48}$/', $token);
 
-        $this->client->request('GET', '/api/booking-requests/'.$id, server: ['HTTP_ACCEPT' => 'application/ld+json']);
+        // The id is not a secret: it must not open the request and its contact details.
+        $this->client->request('GET', '/api/booking-requests/'.($created['id'] ?? ''));
+        self::assertResponseStatusCodeSame(404);
 
+        $this->client->request('GET', '/api/booking-requests/track/'.$token);
         self::assertResponseIsSuccessful();
+        $tracked = json_decode((string) $this->client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame('pending', $tracked['status']);
+        self::assertTrue($tracked['cancellable']);
+        self::assertNull($tracked['ownerContact'], 'The owner\'s contact comes with the acceptance only.');
+    }
+
+    public function testAnArrivalInThePastIsRefused(): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+
+        $yesterday = new \DateTimeImmutable('yesterday');
+        $body = $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => $yesterday->format('Y-m-d'),
+            'departure' => $yesterday->modify('+7 days')->format('Y-m-d'),
+            'adults' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame('arrival', $body['violations'][0]['propertyPath'] ?? null);
+    }
+
+    public function testSendingARequestWarnsBothSidesAndSchedulesTheExpiry(): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+
+        $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
+            'adults' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+            'guestPhone' => '06 12 34 56 78',
+        ]);
+
+        self::assertResponseStatusCodeSame(201);
+        self::assertEmailCount(2);
+
+        $toOwner = self::getMailerMessage(0);
+        self::assertNotNull($toOwner);
+        self::assertEmailAddressContains($toOwner, 'To', 'bungalow-ocean@example.com');
+        // Privacy promise of the booking form: no contact details before acceptance.
+        self::assertEmailTextBodyNotContains($toOwner, 'damien@example.com');
+        self::assertEmailTextBodyNotContains($toOwner, '06 12 34 56 78');
+
+        $toGuest = self::getMailerMessage(1);
+        self::assertNotNull($toGuest);
+        self::assertEmailAddressContains($toGuest, 'To', 'damien@example.com');
+        self::assertEmailTextBodyContains($toGuest, '/demande/');
+
+        $transport = self::getContainer()->get('messenger.transport.async');
+        \assert($transport instanceof \Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport);
+        $sent = $transport->getSent();
+        self::assertCount(1, $sent);
+        self::assertInstanceOf(\App\Message\ExpireBookingRequest::class, $sent[0]->getMessage());
+        self::assertNotNull($sent[0]->last(\Symfony\Component\Messenger\Stamp\DelayStamp::class));
     }
 
     /**
@@ -199,8 +262,8 @@ final class BookingRequestApiTest extends ApiTestCase
 
         $payload = $this->post([
             'accommodationSlug' => 'mobile-home-famille',
-            'arrival' => '2026-07-01',
-            'departure' => '2026-07-08',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
             'adults' => 2,
             'children' => 2,
             'infants' => 1,
@@ -221,8 +284,8 @@ final class BookingRequestApiTest extends ApiTestCase
 
         $this->post([
             'accommodationSlug' => 'mobile-home-chenil',
-            'arrival' => '2026-07-01',
-            'departure' => '2026-07-08',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
             'adults' => 2,
             'pets' => 6,
             'guestName' => 'Damien Chauveau',
@@ -238,8 +301,8 @@ final class BookingRequestApiTest extends ApiTestCase
 
         $payload = $this->post([
             'accommodationSlug' => 'mobile-home-strict',
-            'arrival' => '2026-07-01',
-            'departure' => '2026-07-08',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
             'adults' => 2,
             'guestName' => 'Damien Chauveau',
             'guestEmail' => 'damien@example.com',

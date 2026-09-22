@@ -1,2 +1,31 @@
 framework:
-    workflows: null
+    workflows:
+        # Le cycle de vie d'une demande de réservation. Une seule porte d'entrée pour
+        # changer un statut : App\Service\Booking\BookingDesk, qui applique ces transitions.
+        #
+        #   pending ──accept──▶ accepted ──cancel──▶ cancelled
+        #      │  └──decline──▶ declined
+        #      ├──expire───▶ expired     (48 h sans réponse, ou date d'arrivée passée)
+        #      └──cancel───▶ cancelled   (le locataire retire sa demande)
+        booking_request:
+            type: state_machine
+            marking_store:
+                type: method
+                property: marking
+            supports:
+                - App\Entity\BookingRequest
+            initial_marking: pending
+            places: [pending, accepted, declined, cancelled, expired]
+            transitions:
+                accept:
+                    from: pending
+                    to: accepted
+                decline:
+                    from: pending
+                    to: declined
+                expire:
+                    from: pending
+                    to: expired
+                cancel:
+                    from: [pending, accepted]
+                    to: cancelled

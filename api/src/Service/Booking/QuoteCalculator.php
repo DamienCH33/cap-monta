@@ -49,7 +49,7 @@ final class QuoteCalculator
             ? $this->priceCalculator->calculate($periods, $arrival, $departure)
             : null;
 
-        return new Quote($nights, $guests, $maxCapacity, $minimumNights, $total, $refusal);
+        return new Quote($nights, $guests, $maxCapacity, $minimumNights, $total, $refusal, $this->ignoresArrivalDay($periods, $arrival));
     }
 
     /**
@@ -74,6 +74,22 @@ final class QuoteCalculator
         }
 
         return $quote;
+    }
+
+    /**
+     * The period of the arrival night prefers Saturday arrivals, and this one is not a Saturday.
+     *
+     * @param list<PricePeriod> $periods
+     */
+    private function ignoresArrivalDay(array $periods, \DateTimeImmutable $arrival): bool
+    {
+        foreach ($periods as $period) {
+            if ($period->getStartDate() <= $arrival && $arrival < $period->getEndDate()) {
+                return $period->prefersSaturdayArrival() && '6' !== $arrival->format('N');
+            }
+        }
+
+        return false;
     }
 
     /**

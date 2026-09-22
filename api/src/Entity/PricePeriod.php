@@ -43,6 +43,14 @@ class PricePeriod
     #[ORM\Column(type: Types::SMALLINT, options: ['default' => 1])]
     private int $minimumNights = 1;
 
+    /**
+     * The owner prefers arrivals on Saturday on this period (Saturday-to-Saturday weeks).
+     * A preference, not a rule: a request arriving another day is sent all the same, and
+     * marked "hors de vos règles" in the owner's inbox. See docs/decisions.md, ADR 011.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $saturdayArrival = false;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -138,6 +146,18 @@ class PricePeriod
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function prefersSaturdayArrival(): bool
+    {
+        return $this->saturdayArrival;
+    }
+
+    public function setSaturdayArrival(bool $saturdayArrival): static
+    {
+        $this->saturdayArrival = $saturdayArrival;
+
+        return $this;
     }
 
     public function hasPrice(): bool

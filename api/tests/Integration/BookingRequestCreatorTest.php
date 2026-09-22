@@ -34,9 +34,9 @@ final class BookingRequestCreatorTest extends DatabaseTestCase
     public function testItCreatesAPendingRequestWithAFrozenPrice(): void
     {
         $accommodation = $this->createAccommodation('mobile-home-pins');
-        $this->addPricePeriod($accommodation, '2026-07-01', '2026-08-01', weekly: 40000);
+        $this->addPricePeriod($accommodation, '2027-07-01', '2027-08-01', weekly: 40000);
 
-        $request = $this->creator->create($accommodation, $this->input('2026-07-01', '2026-07-08'));
+        $request = $this->creator->create($accommodation, $this->input('2027-07-01', '2027-07-08'));
 
         self::assertSame(BookingRequestStatus::Pending, $request->getStatus());
         self::assertSame(40000, $request->getEstimatedPrice());
@@ -51,7 +51,7 @@ final class BookingRequestCreatorTest extends DatabaseTestCase
     {
         $accommodation = $this->createAccommodation('bungalow-sans-tarif');
 
-        $request = $this->creator->create($accommodation, $this->input('2026-07-01', '2026-07-08'));
+        $request = $this->creator->create($accommodation, $this->input('2027-07-01', '2027-07-08'));
 
         self::assertNull($request->getEstimatedPrice());
     }
@@ -61,15 +61,15 @@ final class BookingRequestCreatorTest extends DatabaseTestCase
         $accommodation = $this->createAccommodation('mobile-home-occupe');
         $this->em->persist(new Unavailability(
             $accommodation,
-            new \DateTimeImmutable('2026-08-10'),
-            new \DateTimeImmutable('2026-08-15'),
+            new \DateTimeImmutable('2027-08-10'),
+            new \DateTimeImmutable('2027-08-15'),
             UnavailabilitySource::Booking,
         ));
         $this->em->flush();
 
         $this->assertRefusal(
             BookingRefusalReason::Unavailable,
-            fn () => $this->creator->create($accommodation, $this->input('2026-08-12', '2026-08-14')),
+            fn () => $this->creator->create($accommodation, $this->input('2027-08-12', '2027-08-14')),
         );
     }
 
@@ -79,18 +79,18 @@ final class BookingRequestCreatorTest extends DatabaseTestCase
 
         $this->assertRefusal(
             BookingRefusalReason::TooManyGuests,
-            fn () => $this->creator->create($accommodation, $this->input('2026-07-01', '2026-07-08', adults: 5)),
+            fn () => $this->creator->create($accommodation, $this->input('2027-07-01', '2027-07-08', adults: 5)),
         );
     }
 
     public function testItRefusesAStayShorterThanTheOwnerMinimum(): void
     {
         $accommodation = $this->createAccommodation('bungalow-minimum');
-        $this->addPricePeriod($accommodation, '2026-07-01', '2026-08-01', nightly: 7000, minimumNights: 3);
+        $this->addPricePeriod($accommodation, '2027-07-01', '2027-08-01', nightly: 7000, minimumNights: 3);
 
         $this->assertRefusal(
             BookingRefusalReason::StayTooShort,
-            fn () => $this->creator->create($accommodation, $this->input('2026-07-01', '2026-07-03')),
+            fn () => $this->creator->create($accommodation, $this->input('2027-07-01', '2027-07-03')),
         );
     }
 

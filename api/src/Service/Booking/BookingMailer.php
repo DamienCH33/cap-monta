@@ -1,0 +1,309 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Service\Booking;
+
+use App\Entity\BookingRequest;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+
+/**
+ * The emails of a booking request, in plain text until the HTML templates at the end of lot 3.
+ *
+ * Privacy rule, stated on the booking form: the guest's email and phone reach the owner only
+ * once the request is accepted, and the owner's only then too. Before that, each side talks
+ * through the site.
+ */
+final readonly class BookingMailer
+{
+    public function __construct(
+        private MailerInterface $mailer,
+        #[Autowire('%app.mail_from%')] private string $from,
+        #[Autowire('%app.front_url%')] private string $frontUrl,
+    ) {
+    }
+
+    public function received(BookingRequest $request): void
+    {
+        $title = $request->getAccommodation()->title();
+        $summary = $this->summary($request);
+        $deadline = self::dateTime($request->getExpiresAt());
+        $tracking = $this->trackingUrl($request);
+
+        $this->send(
+            $request->getAccommodation()->getOwner()->getEmail(),
+            'Nouvelle demande pour votre '.$title,
+            <<<TXT
+                Bonjour,
+
+                Vous avez reçu une demande de réservation pour votre {$title}.
+
+                {$summary}
+                {$this->guestMessage($request)}
+                Répondez avant le {$deadline} : passé ce délai, la demande expire
+                et le voyageur en est prévenu.
+
+                {$this->frontUrl}/mon-espace/demandes
+
+                Les coordonnées du voyageur vous seront transmises si vous acceptez.
+
+                Cap Monta
+                TXT,
+        );
+
+        $this->send(
+            $request->getGuestEmail(),
+            'Votre demande pour un '.$title.' est envoyée',
+            <<<TXT
+                Bonjour {$request->getGuestName()},
+
+                Votre demande a bien été transmise au propriétaire.
+
+                {$summary}
+
+                Il a jusqu'au {$deadline} pour vous répondre. Vous recevrez sa réponse
+                par email. Aucun paiement n'a été demandé.
+
+                Suivre ou annuler votre demande :
+                {$tracking}
+
+                Cap Monta
+                TXT,
+        );
+    }
+
+    public function accepted(BookingRequest $request): void
+    {
+        $accommodation = $request->getAccommodation();
+        $owner = $accommodation->getOwner();
+        $title = $accommodation->title();
+        $summary = $this->summary($request);
+        $ownerContact = trim($owner->getDisplayName()."\n".$owner->getEmail()."\n".($owner->getPhone() ?? ''));
+        $guestContact = trim($request->getGuestName()."\n".$request->getGuestEmail()."\n".($request->getGuestPhone() ?? ''));
+
+        $this->send(
+            $request->getGuestEmail(),
+            'Votre séjour est accepté — '.$title,
+            <<<TXT
+                Bonjour {$request->getGuestName()},
+
+                Bonne nouvelle : le propriétaire accepte votre demande.
+
+                {$summary}
+                {$this->ownerMessage($request)}
+                Pour convenir de l'arrivée et du règlement, contactez-le directement :
+
+                {$ownerContact}
+
+                Suivre ou annuler votre réservation :
+                {$this->trackingUrl($request)}
+
+                Cap Monta
+                TXT,
+        );
+
+        $this->send(
+            $owner->getEmail(),
+            'Réservation confirmée — '.$title,
+            <<<TXT
+                Bonjour,
+
+                Vous avez accepté cette demande. Les dates sont bloquées dans votre calendrier.
+
+                {$summary}
+
+                Coordonnées du voyageur :
+
+                {$guestContact}
+
+                {$this->frontUrl}/mon-espace/demandes
+
+                Cap Monta
+                TXT,
+        );
+    }
+
+    public function declined(BookingRequest $request): void
+    {
+        $title = $request->getAccommodation()->title();
+
+        $this->send(
+            $request->getGuestEmail(),
+            'Votre demande pour un '.$title,
+            <<<TXT
+                Bonjour {$request->getGuestName()},
+
+                Le propriétaire ne peut pas accueillir votre séjour du {$this->stay($request)}.
+                {$this->ownerMessage($request)}
+                D'autres logements sont peut-être libres à ces dates :
+                {$this->searchUrl($request)}
+
+                Cap Monta
+                TXT,
+        );
+    }
+
+    public function expired(BookingRequest $request): void
+    {
+        $title = $request->getAccommodation()->title();
+        $stay = $this->stay($request);
+
+        $this->send(
+            $request->getGuestEmail(),
+            'Pas de réponse à votre demande — '.$title,
+            <<<TXT
+                Bonjour {$request->getGuestName()},
+
+                Le propriétaire n'a pas répondu à temps à votre demande du {$stay}.
+                Elle est annulée : vous ne devez rien.
+
+                D'autres logements sont peut-être libres à ces dates :
+                {$this->searchUrl($request)}
+
+                Cap Monta
+                TXT,
+        );
+
+        $this->send(
+            $request->getAccommodation()->getOwner()->getEmail(),
+            'Demande expirée — '.$title,
+            <<<TXT
+                Bonjour,
+
+                La demande du {$stay} pour votre {$title} a expiré sans réponse.
+                Le voyageur en a été prévenu.
+
+                Pour ne pas recevoir de demandes que vous ne pouvez pas honorer,
+                gardez votre calendrier à jour :
+                {$this->frontUrl}/mon-espace/logements/{$request->getAccommodation()->getSlug()}/calendrier
+
+                Cap Monta
+                TXT,
+        );
+    }
+
+    public function cancelledByOwner(BookingRequest $request): void
+    {
+        $title = $request->getAccommodation()->title();
+
+        $this->send(
+            $request->getGuestEmail(),
+            'Réservation annulée — '.$title,
+            <<<TXT
+                Bonjour {$request->getGuestName()},
+
+                Le propriétaire a annulé votre séjour du {$this->stay($request)}.
+                {$this->ownerMessage($request)}
+                D'autres logements sont peut-être libres à ces dates :
+                {$this->searchUrl($request)}
+
+                Cap Monta
+                TXT,
+        );
+    }
+
+    public function cancelledByGuest(BookingRequest $request, bool $wasAccepted): void
+    {
+        $title = $request->getAccommodation()->title();
+        $what = $wasAccepted
+            ? 'a annulé sa réservation. Les dates sont de nouveau libres dans votre calendrier.'
+            : 'a retiré sa demande.';
+
+        $this->send(
+            $request->getAccommodation()->getOwner()->getEmail(),
+            ($wasAccepted ? 'Réservation annulée' : 'Demande retirée').' — '.$title,
+            <<<TXT
+                Bonjour,
+
+                Le voyageur du {$this->stay($request)} {$what}
+
+                {$this->frontUrl}/mon-espace/demandes
+
+                Cap Monta
+                TXT,
+        );
+    }
+
+    private function summary(BookingRequest $request): string
+    {
+        $travellers = self::plural($request->getAdults(), 'adulte', 'adultes');
+
+        if ($request->getChildren() > 0) {
+            $travellers .= ', '.self::plural($request->getChildren(), 'enfant', 'enfants');
+        }
+
+        if ($request->getInfants() > 0) {
+            $travellers .= ', '.self::plural($request->getInfants(), 'bébé', 'bébés');
+        }
+
+        if ($request->getPets() > 0) {
+            $travellers .= ', '.self::plural($request->getPets(), 'animal', 'animaux');
+        }
+
+        $price = null === $request->price() ? 'à convenir' : self::euros($request->price());
+        $nights = self::plural($request->nights(), 'nuit', 'nuits');
+
+        return <<<TXT
+            Séjour : du {$this->stay($request)} ({$nights})
+            Voyageurs : {$travellers}
+            Prix : {$price}
+            TXT;
+    }
+
+    private function stay(BookingRequest $request): string
+    {
+        return self::date($request->getStartDate()).' au '.self::date($request->getEndDate());
+    }
+
+    private function guestMessage(BookingRequest $request): string
+    {
+        return null === $request->getMessage() ? '' : "\nSon message :\n« ".$request->getMessage()." »\n";
+    }
+
+    private function ownerMessage(BookingRequest $request): string
+    {
+        return null === $request->getOwnerMessage() ? '' : "\nSon message :\n« ".$request->getOwnerMessage()." »\n";
+    }
+
+    private function trackingUrl(BookingRequest $request): string
+    {
+        return $this->frontUrl.'/demande/'.$request->getTrackingToken();
+    }
+
+    private function searchUrl(BookingRequest $request): string
+    {
+        return sprintf(
+            '%s/recherche?arrivee=%s&depart=%s',
+            $this->frontUrl,
+            $request->getStartDate()->format('Y-m-d'),
+            $request->getEndDate()->format('Y-m-d'),
+        );
+    }
+
+    private function send(string $to, string $subject, string $text): void
+    {
+        $this->mailer->send((new Email())->from($this->from)->to($to)->subject($subject.' — Cap Monta')->text($text));
+    }
+
+    private static function date(\DateTimeImmutable $date): string
+    {
+        return (string) (new \IntlDateFormatter('fr_FR', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EEEE d MMMM y'))->format($date);
+    }
+
+    private static function dateTime(\DateTimeImmutable $date): string
+    {
+        return (string) (new \IntlDateFormatter('fr_FR', \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, 'Europe/Paris', null, "EEEE d MMMM 'à' HH'h'mm"))->format($date);
+    }
+
+    private static function euros(int $cents): string
+    {
+        return number_format($cents / 100, 0, ',', ' ').' €';
+    }
+
+    private static function plural(int $count, string $one, string $many): string
+    {
+        return $count.' '.($count > 1 ? $many : $one);
+    }
+}
