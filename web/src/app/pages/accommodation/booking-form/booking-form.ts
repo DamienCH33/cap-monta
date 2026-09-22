@@ -137,6 +137,11 @@ export class BookingForm implements OnInit {
   }
 
   private readError(response: HttpErrorResponse): string {
+    // Plafond anti-abus de l'API : 5 demandes par quart d'heure depuis une même connexion.
+    if (429 === response.status) {
+      return "Plusieurs demandes viennent d'être envoyées depuis votre connexion. Réessayez dans un quart d'heure.";
+    }
+
     if (409 === response.status) {
       return "Ces dates viennent d'être prises. Choisissez-en d'autres.";
     }
