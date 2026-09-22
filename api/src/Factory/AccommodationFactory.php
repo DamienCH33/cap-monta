@@ -17,8 +17,9 @@ use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 final class AccommodationFactory extends PersistentObjectFactory
 {
     private const AMENITIES = [
-        'climatisation', 'lave-vaisselle', 'micro-ondes',
-        'terrasse', 'television', 'wifi', 'plancha',
+        'climatisation', 'chauffage', 'lave-vaisselle', 'micro-ondes', 'four',
+        'terrasse', 'terrasse-couverte', 'salon-de-jardin', 'television', 'wifi', 'plancha',
+        'barbecue', 'lave-linge', 'parking', 'lit-bebe', 'linge-fourni',
     ];
 
     #[\Override]

@@ -11,6 +11,7 @@ use App\Entity\User;
 use App\Enum\AccommodationStatus;
 use App\Enum\BookingRequestStatus;
 use App\Enum\DistrictArea;
+use App\Enum\PetsPolicy;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
 use App\Factory\AccommodationFactory;
@@ -31,8 +32,10 @@ final class AppFixtures extends Fixture
     public function __construct(
         private readonly UserPasswordHasherInterface $hasher,
         private readonly QuoteCalculator $quotes,
+        private readonly FixturePhotoLibrary $photos,
     ) {
     }
+
     /**
      * The 21 districts of the official CHM site plan (2024).
      * Area read visually on the plan: to be confirmed on site. Null = not settled yet.
@@ -114,6 +117,17 @@ final class AppFixtures extends Fixture
             }
 
             $this->fillCalendar($accommodation, $index);
+
+            // Un logement sur cinq accueille les animaux, un sur cinq les refuse : le filtre de la
+            // recherche et le refus du devis ont de quoi se montrer. Les autres : sur demande.
+            $accommodation->setPetsPolicy(match ($index % 5) {
+                0 => PetsPolicy::Allowed,
+                3 => PetsPolicy::NotAllowed,
+                default => PetsPolicy::OnRequest,
+            });
+
+            // Vraies photos si le dossier FIXTURE_PHOTOS_DIR existe ; sinon, des aplats.
+            $this->photos->attachTo($accommodation, $index);
 
             // Trois propriétaires sur quatre tiennent leur calendrier : le badge
             // « Calendrier à jour » doit apparaître sur certaines cartes, pas sur toutes.
