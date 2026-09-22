@@ -137,7 +137,7 @@ Les trous entre périodes sont permis : le séjour est « à convenir », le pro
 
 ---
 
-## 014 — Redis en panne : le site dégrade, il ne tombe pas (22/09/2026)
+## 014 — Redis en panne : le site dégrade, il ne tombe pas (22/09/2026) — révisé par 021
 
 **Décision.** Redis sert au confort, pas à la vérité (ADR 004) ; sa panne ne doit donc bloquer personne.
 - **Cache du calendrier public** : lecture en base si le cache ne répond pas ; l'invalidation qui échoue est journalisée, pas propagée.
@@ -189,3 +189,38 @@ Tests : `tests/Unit/Service/RedisOutageTest.php`.
 - **Verrouillage optimiste** (`BookingRequest.version`) : deux changements d'état lus en même temps (le propriétaire accepte pendant que le voyageur annule, ou le worker fait expirer) ne s'écrivent plus l'un sur l'autre ; le second reçoit un 409 « rechargez la page ». Indépendant de Redis.
 - **Délai de réponse** : 48 h, mais jamais au-delà de minuit la veille de l'arrivée ; relance à mi-délai. Arrivée au plus tôt **demain** (le propriétaire doit pouvoir répondre). Airbnb, Abritel et Booking.com donnent 24 h : 48 h est déjà large pour des particuliers, on n'allonge pas (le voyageur attend et ses autres options partent).
 - **Fuseau** : toute l'API raisonne en heure de Paris (`Kernel::boot`), le serveur Railway étant en UTC.
+
+---
+
+## 021 — Redis : rien de ce qui protège ou décide n'en dépend (22/09/2026)
+
+**Révision de l'ADR 014.** « Laisser passer quand Redis tombe » gardait le site debout mais ouvrait les protections : une panne Redis, et la connexion redevenait testable à l'infini. Nouvelle règle, par rôle :
+
+| Rôle | Où | Si Redis tombe |
+|---|---|---|
+| Vérité (pas de double réservation, pas de réponses qui s'écrasent) | PostgreSQL : contrainte d'exclusion, `BookingRequest.version` | rien ne change |
+| Protections (limites de connexion, d'inscription, de demandes…) | PostgreSQL : pool `rate_limiter.cache` (table `cache_items`), sans verrou | rien ne change |
+| Confort (cache du calendrier, verrou `resa:logement:{id}` qui transforme une course en 409 propre) | Redis | lecture en base / acceptation sans verrou, journalisé |
+
+- Délais Redis à 1 s (service `app.redis`, `LOCK_DSN`) au lieu de 30 s par défaut : un Redis muet ne fige pas les pages.
+- `GET /api/health` : `database` / `cache` / `worker` ; 503 seulement si la base est tombée (le seul cas où l'hébergeur doit redémarrer), `degraded` sinon. À brancher sur le health check Railway et un service de surveillance (UptimeRobot ou équivalent) qui alerte sur `degraded`.
+- `ResilientLoginRateLimiter` supprimé : sans Redis dans la boucle, il n'a plus de raison d'être.
+
+**Pourquoi garder Redis ?** Le cache calendrier et le verrou restent de vrais gains, mesurables, et c'est un point d'architecture à savoir défendre : « Redis accélère, PostgreSQL décide ».
+
+---
+
+## 022 — Test d'intrusion du 22/09 : IP du client, en-têtes, signalements (22/09/2026)
+
+Test d'intrusion local (autorisation, injections, XSS, logique de réservation, upload, CORS, CSRF, en-têtes). Tenu : accès entre propriétaires (404 partout), injections SQL/DQL, XSS (y compris le JSON-LD rendu côté serveur), affectation de masse, jeton de suivi, énumération, upload, CORS, CSRF.
+
+Corrigé :
+- **IP du client falsifiable** : `TRUSTED_PROXIES=127.0.0.1` faisait croire l'en-tête `X-Forwarded-For` → chaque requête pouvait se donner une IP et remettre les limites à zéro. Vide par défaut ; en production, seulement le réseau privé de l'hébergeur (`PRIVATE_SUBNETS` sur Railway, Symfony garde l'adresse ajoutée par le dernier proxy de confiance).
+- **Connexion** : `App\Security\LoginRateLimiter`, trois compteurs dont un **par adresse email quelle que soit l'IP** (20 / heure). Contrepartie assumée : un attaquant peut bloquer la connexion d'un compte une heure ; « mot de passe oublié » reste ouvert.
+- **Front** : `X-Powered-By` retiré, CSP minimale (`frame-ancestors 'none'`, `object-src 'none'`, `base-uri`, `form-action`), `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS derrière HTTPS. Pas de `script-src` : Angular injecte des scripts en ligne au rendu serveur (à reprendre avec `autoCsp` plus tard).
+- **`/api/health`** : état global seul pour tout le monde ; détail avec l'en-tête `X-Health-Token` = `HEALTH_TOKEN`.
+- `expose_php = Off` (php.ini local ; à reprendre dans l'image de production).
+
+**Signaler une annonce** (fin du lot 3) : `POST /api/accommodations/{slug}/reports`, entité `ListingReport` gardée (preuve de traitement, LCEN/DSA), email à `APP_MODERATION_EMAIL` (« URGENT » si une personne est reconnaissable), commande `app:accommodation:suspend <slug> --reason=…` qui retire l'annonce et prévient le propriétaire. Vrai code **404** (et 503 si l'API ne répond pas) pour un logement ou un quartier inexistant, via `RESPONSE_INIT`.
+
+**À régler au déploiement** : `APP_ENV=prod` et `APP_DEBUG=0` (sinon traces complètes dans les erreurs), `TRUSTED_PROXIES`, `NG_ALLOWED_HOSTS` (sinon le serveur Angular répond 400), `HEALTH_TOKEN`, `APP_MODERATION_EMAIL`, type MIME et `nosniff` sur les photos (stockage objet).
