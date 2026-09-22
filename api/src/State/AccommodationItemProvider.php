@@ -7,9 +7,12 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\AccommodationResource;
+use App\ApiResource\PhotoResource;
 use App\ApiResource\PricePeriodResource;
+use App\Entity\Photo;
 use App\Repository\AccommodationRepository;
 use App\Repository\PricePeriodRepository;
+use App\Service\Photo\PhotoStorage;
 
 /**
  * GET /api/accommodations/{slug}.
@@ -23,6 +26,7 @@ final readonly class AccommodationItemProvider implements ProviderInterface
     public function __construct(
         private AccommodationRepository $accommodations,
         private PricePeriodRepository $pricePeriods,
+        private PhotoStorage $storage,
     ) {
     }
 
@@ -52,6 +56,12 @@ final readonly class AccommodationItemProvider implements ProviderInterface
             PricePeriodResource::fromEntity(...),
             $this->pricePeriods->findUpcoming($accommodation, new \DateTimeImmutable('today')),
         );
+
+        $resource->photos = array_map(
+            fn (Photo $photo): PhotoResource => PhotoResource::fromEntity($photo, $this->storage),
+            $accommodation->getPhotos(),
+        );
+        $resource->cover = $resource->photos[0] ?? null;
 
         return $resource;
     }

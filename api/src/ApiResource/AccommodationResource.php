@@ -83,6 +83,7 @@ final class AccommodationResource
      * @param list<string>                                       $amenities
      * @param list<array{start: \DateTimeImmutable, free: bool}> $availability
      * @param list<PricePeriodResource>                          $pricePeriods
+     * @param list<PhotoResource>                                $photos       detail page only, the cover first
      */
     public function __construct(
         #[ApiProperty(identifier: true)]
@@ -101,6 +102,8 @@ final class AccommodationResource
         public array $pricePeriods = [],
         public ?string $districtSlug = null,
         public ?string $districtArea = null,
+        public ?PhotoResource $cover = null,
+        public array $photos = [],
     ) {
     }
 

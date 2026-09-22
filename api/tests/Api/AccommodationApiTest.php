@@ -149,6 +149,64 @@ final class AccommodationApiTest extends ApiTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    public function testEachSearchCardCarriesItsCoverOnly(): void
+    {
+        $accommodation = $this->createAccommodation('mobile-home-photos');
+        $cover = $accommodation->getPhotos()[0];
+        $accommodation->addPhoto(new Photo($accommodation, 1600, 1200));
+        $this->em->flush();
+
+        $payload = $this->request('/api/accommodations');
+        /** @var array<string, mixed> $card */
+        $card = $payload['member'][0] ?? [];
+        /** @var array<string, mixed> $coverPayload */
+        $coverPayload = $card['cover'] ?? [];
+
+        self::assertResponseIsSuccessful();
+        self::assertSame([
+            'url' => 'http://localhost/media/photos/'.$cover->getId()->toRfc4122().'.webp',
+            'thumbUrl' => 'http://localhost/media/photos/'.$cover->getId()->toRfc4122().'-thumb.webp',
+            'width' => 1600,
+            'height' => 1066,
+        ], array_diff_key($coverPayload, ['@id' => true, '@type' => true]));
+        // The search page only needs the cover: the gallery is for the detail page.
+        self::assertSame([], $card['photos'] ?? null);
+    }
+
+    public function testTheDetailPageListsThePhotosCoverFirst(): void
+    {
+        $accommodation = $this->createAccommodation('mobile-home-galerie');
+        $first = $accommodation->getPhotos()[0];
+        $second = new Photo($accommodation, 1200, 1600);
+        $accommodation->addPhoto($second);
+        $accommodation->reorderPhotos([$second->getId()->toRfc4122(), $first->getId()->toRfc4122()]);
+        $this->em->flush();
+
+        $payload = $this->request('/api/accommodations/mobile-home-galerie');
+        /** @var list<array<string, mixed>> $photos */
+        $photos = $payload['photos'] ?? [];
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(2, $photos);
+        self::assertStringContainsString($second->getId()->toRfc4122(), (string) ($photos[0]['url'] ?? ''));
+        self::assertStringContainsString($first->getId()->toRfc4122(), (string) ($photos[1]['url'] ?? ''));
+        self::assertSame($photos[0], $payload['cover'] ?? null);
+        self::assertArrayNotHasKey('id', $photos[0], 'Nothing to act on from the public site.');
+    }
+
+    public function testAnAccommodationWithoutPhotoHasNoCover(): void
+    {
+        // The factory publishes without any photo, like the development fixtures.
+        AccommodationFactory::createOne(['slug' => 'sans-photo']);
+
+        $payload = $this->request('/api/accommodations/sans-photo');
+
+        self::assertResponseIsSuccessful();
+        self::assertArrayHasKey('cover', $payload);
+        self::assertNull($payload['cover']);
+        self::assertSame([], $payload['photos'] ?? null);
+    }
+
     private ?District $sharedDistrict = null;
 
     private function testDistrict(): District

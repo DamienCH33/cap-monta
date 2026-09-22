@@ -8,10 +8,13 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use ApiPlatform\State\ProviderInterface;
 use App\ApiResource\AccommodationResource;
+use App\ApiResource\PhotoResource;
 use App\Entity\Accommodation;
 use App\Repository\AccommodationRepository;
+use App\Repository\PhotoRepository;
 use App\Repository\UnavailabilityRepository;
 use App\Service\Calendar\AvailabilityStripBuilder;
+use App\Service\Photo\PhotoStorage;
 
 /**
  * GET /api/accommodations.
@@ -27,6 +30,8 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
         private AccommodationRepository $accommodations,
         private UnavailabilityRepository $unavailabilities,
         private AvailabilityStripBuilder $stripBuilder,
+        private PhotoRepository $photos,
+        private PhotoStorage $storage,
     ) {
     }
 
@@ -75,13 +80,23 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
         $from = $query->arrival ?? new \DateTimeImmutable('today');
         $to = $from->modify('+9 weeks');
         $busy = $this->unavailabilities->findForPeriodBySlugs($pageSlugs, $from, $to);
+        $covers = $this->photos->findCoversBySlugs($pageSlugs);
 
         $resources = array_map(
-            fn (Accommodation $accommodation): AccommodationResource => AccommodationResource::fromEntity(
-                $accommodation,
-                $prices[$accommodation->getSlug()] ?? null,
-                $this->stripBuilder->build($busy[$accommodation->getSlug()] ?? [], $from),
-            ),
+            function (Accommodation $accommodation) use ($prices, $busy, $covers, $from): AccommodationResource {
+                $slug = $accommodation->getSlug();
+                $resource = AccommodationResource::fromEntity(
+                    $accommodation,
+                    $prices[$slug] ?? null,
+                    $this->stripBuilder->build($busy[$slug] ?? [], $from),
+                );
+
+                if (isset($covers[$slug])) {
+                    $resource->cover = PhotoResource::fromEntity($covers[$slug], $this->storage);
+                }
+
+                return $resource;
+            },
             $page,
         );
 
