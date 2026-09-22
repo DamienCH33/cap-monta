@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -32,6 +33,8 @@ export class Login {
 
   readonly submitting = signal(false);
   readonly failed = signal(false);
+  /** Cinq essais ratés en un quart d'heure : l'API bloque, même avec le bon mot de passe. */
+  readonly throttled = signal(false);
 
   /** Passe à vrai à la première tentative : avant, on n'accuse personne. */
   readonly submitted = signal(false);
@@ -70,9 +73,10 @@ export class Login {
           this.route.snapshot.queryParamMap.get('suite') ?? '/mon-espace',
         );
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.submitting.set(false);
         this.failed.set(true);
+        this.throttled.set(/too many/i.test(String(error.error?.error ?? '')));
         this.emailInput().nativeElement.focus();
       },
     });

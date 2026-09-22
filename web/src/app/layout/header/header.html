@@ -32,9 +32,10 @@
       <span class="header__account">
         @if (sessionChecked()) {
           @if (owner(); as me) {
-            <a class="header__who" routerLink="/mon-espace/profil" title="Mon profil">{{
-              me.displayName
-            }}</a>
+            <a class="header__who" routerLink="/mon-espace/profil" title="Mon profil">
+              <cm-icon name="user-circle" />
+              {{ me.displayName }}
+            </a>
             <button type="button" class="header__logout" (click)="logout()">Se déconnecter</button>
           } @else {
             <a routerLink="/connexion">Se connecter</a>

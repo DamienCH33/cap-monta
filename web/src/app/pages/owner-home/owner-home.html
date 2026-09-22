@@ -97,5 +97,17 @@
         </ul>
       </section>
     }
+
+    <h2 class="owner-home__section-title">Mon compte</h2>
+    <a class="owner-home__callout" routerLink="/mon-espace/profil">
+      <span>
+        {{ me.displayName }} · {{ me.email }}
+        <span class="owner-home__callout-detail">
+          Téléphone : {{ me.phone ?? 'non renseigné' }}. Nom affiché, téléphone et mot de passe se
+          modifient ici.
+        </span>
+      </span>
+      <span class="owner-home__callout-action">Mon profil</span>
+    </a>
   </div>
 }

@@ -193,6 +193,13 @@
           </label>
         </div>
 
+        @if (current.weekly && !current.nightly) {
+          <p class="editor__hint">
+            Sans prix à la nuit, une nuit coûte 1/7 de la semaine, soit
+            {{ nightlyEuros(current.weekly) }} € : un séjour de 4 nuits revient à
+            {{ nightlyEuros(current.weekly) * 4 }} € environ.
+          </p>
+        }
         <p class="editor__hint">
           Le jour du départ n'est pas compté : du samedi 3 au samedi 10, c'est une semaine. Deux
           périodes peuvent se suivre sur le même samedi.

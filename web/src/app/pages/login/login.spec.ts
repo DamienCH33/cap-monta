@@ -60,6 +60,24 @@ describe('Login', () => {
     });
   });
 
+  it('dit quand le compte est bloqué pour trop de tentatives', () => {
+    const fixture = TestBed.createComponent(Login);
+    fixture.detectChanges();
+
+    fixture.componentInstance.form.setValue({ email: 'a@b.fr', password: 'motdepasse' });
+    fixture.componentInstance.submit();
+
+    httpMock
+      .expectOne((req) => req.url.endsWith('/api/login'))
+      .flush(
+        { error: 'Too many failed login attempts, please try again in 15 minutes.' },
+        { status: 401, statusText: 'Unauthorized' },
+      );
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Trop de tentatives');
+  });
+
   it("n'appelle pas l'API tant que le formulaire est incomplet", () => {
     const fixture = TestBed.createComponent(Login);
     fixture.detectChanges();

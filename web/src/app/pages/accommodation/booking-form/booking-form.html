@@ -28,7 +28,7 @@
         <input
           type="date"
           name="arrival"
-          [min]="today"
+          [min]="firstArrival"
           [ngModel]="arrival()"
           (ngModelChange)="onArrivalChange($event)"
         />
@@ -42,7 +42,7 @@
         <input
           type="date"
           name="departure"
-          [min]="arrival() ? plusDays(arrival(), 1) : today"
+          [min]="arrival() ? plusDays(arrival(), 1) : plusDays(firstArrival, 1)"
           [ngModel]="departure()"
           (ngModelChange)="departure.set($event); clearViolation('departure'); refreshQuote()"
         />

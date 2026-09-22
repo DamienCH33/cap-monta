@@ -285,11 +285,19 @@
           La première photo est la couverture : c'est elle qu'on voit dans les résultats de
           recherche. Il en faut au moins une pour publier.
         </p>
-        <cm-photo-manager
-          [initial]="existing()?.photos ?? []"
-          [ensureSaved]="ensureSaved"
-          (photosChange)="photoCount.set($event.length)"
-        />
+        @if (canPublish()) {
+          <cm-photo-manager
+            [initial]="existing()?.photos ?? []"
+            [ensureSaved]="ensureSaved"
+            (photosChange)="photoCount.set($event.length)"
+          />
+        } @else {
+          <p class="auth__notice auth__notice--warn">
+            Confirmez d'abord votre adresse email : les photos s'ajoutent dès qu'elle l'est. Le lien
+            vous a été envoyé à l'inscription. Le reste de l'annonce peut être enregistré en
+            brouillon dès maintenant.
+          </p>
+        }
         @if (photosError(); as message) {
           <p class="listing-form__error" role="alert">{{ message }}</p>
         }

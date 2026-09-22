@@ -25,7 +25,12 @@
     <form class="auth__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       @if (failed()) {
         <p class="auth__notice auth__notice--error" role="alert">
-          Adresse ou mot de passe incorrect.
+          @if (throttled()) {
+            Trop de tentatives pour cette adresse. Réessayez dans un quart d'heure, ou choisissez un
+            nouveau mot de passe avec « Mot de passe oublié ».
+          } @else {
+            Adresse ou mot de passe incorrect.
+          }
         </p>
       }
 

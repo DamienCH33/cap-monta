@@ -21,6 +21,7 @@ const NAMES = [
   'trash',
   'trees',
   'upload',
+  'user-circle',
   'x',
 ];
 

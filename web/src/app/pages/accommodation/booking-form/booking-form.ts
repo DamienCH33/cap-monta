@@ -37,6 +37,8 @@ export class BookingForm implements OnInit {
   readonly guests = linkedSignal(() => this.initialGuests());
 
   readonly today = today();
+  /** Première arrivée possible : demain. Le propriétaire doit avoir le temps de répondre. */
+  readonly firstArrival = plusDays(today(), 1);
   readonly plusDays = plusDays;
 
   onArrivalChange(arrival: string): void {

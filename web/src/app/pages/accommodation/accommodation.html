@@ -89,12 +89,16 @@
                       @if (period.nightlyPrice) {
                         {{ period.nightlyPrice / 100 | number: '1.0-0' }} €
                         <span class="rates__unit">/ nuit</span>
+                      } @else if (period.weeklyPrice && period.minimumNights < 7) {
+                        ≈ {{ nightlyFromWeek(period.weeklyPrice) / 100 | number: '1.0-0' }} €
+                        <span class="rates__unit">/ nuit</span>
                       } @else {
                         —
                       }
                     </td>
                     <td class="rates__min">
-                      min. {{ period.minimumNights }} nuits
+                      min. {{ period.minimumNights }}
+                      {{ period.minimumNights > 1 ? 'nuits' : 'nuit' }}
                       @if (period.saturdayArrival) {
                         <span class="rates__saturday">arrivée le samedi de préférence</span>
                       }
@@ -103,6 +107,10 @@
                 }
               </tbody>
             </table>
+            <p class="rates__note">
+              Une semaine ou plus : prix à la semaine, les nuits en plus au prorata. Moins d'une
+              semaine : prix à la nuit, jamais plus cher qu'une semaine.
+            </p>
           } @else {
             <p class="block__empty">
               Le propriétaire n'a pas publié ses tarifs. Envoyez-lui une demande, il vous répondra.

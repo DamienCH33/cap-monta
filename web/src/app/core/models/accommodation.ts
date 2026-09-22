@@ -52,6 +52,14 @@ export interface PricePeriod {
   saturdayArrival: boolean;
 }
 
+/**
+ * Prix d'une nuit quand le propriétaire n'a donné qu'un prix à la semaine : 1/7, arrondi à
+ * l'euro. Même règle que l'API (PriceCalculator::proRata). En centimes.
+ */
+export function nightlyFromWeek(weeklyCents: number): number {
+  return Math.round(weeklyCents / 7 / 100) * 100;
+}
+
 const TYPE_LABELS: Record<string, string> = {
   mobile_home: 'Mobil-home',
   bungalow: 'Bungalow',

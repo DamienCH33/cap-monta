@@ -119,6 +119,11 @@ export class OwnerRates {
     });
   }
 
+  /** Prix d'une nuit déduit de la semaine, en euros : la règle de PriceCalculator côté API. */
+  nightlyEuros(weekly: number): number {
+    return Math.round(weekly / 7);
+  }
+
   patch(changes: Partial<Draft>): void {
     this.draft.update((draft) => (null === draft ? null : { ...draft, ...changes }));
   }

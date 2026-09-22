@@ -3,10 +3,26 @@
 }
 
 .card {
+  // Le lien « Voir les dispos » s'étend sur toute la carte (voir &__link::after).
+  position: relative;
   overflow: hidden;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s;
+
+  &:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 6px 18px rgb(0 0 0 / 8%);
+  }
+
+  // Focus clavier sur le lien : c'est toute la carte qui s'entoure.
+  &:has(.card__link:focus-visible) {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
 
   &__photo {
     position: relative;
@@ -79,6 +95,22 @@
     font-size: 12px;
     color: var(--blue);
     text-decoration: none;
+
+    // Un seul lien, mais toute la carte est cliquable : lecteurs d'écran et moteurs de
+    // recherche voient un lien, pas dix.
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  &:hover &__link {
+    text-decoration: underline;
   }
 }
 

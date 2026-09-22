@@ -80,7 +80,14 @@
 }
 
 .header__who {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--text-secondary);
+
+  cm-icon {
+    font-size: 16px;
+  }
 
   &:hover,
   &:focus-visible {
