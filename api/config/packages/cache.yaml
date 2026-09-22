@@ -3,14 +3,31 @@ framework:
         # Évite les collisions de clés si plusieurs apps partagent un Redis
         prefix_seed: 'cap_monta/api/%kernel.environment%'
 
-        # Redis pour le cache applicatif (calendriers, rate limiter)
+        # Redis pour le cache applicatif (calendriers). Les limiteurs de débit n'y sont plus :
+        # voir rate_limiter.cache ci-dessous (ADR 021).
         app: cache.adapter.redis
-        default_redis_provider: '%env(REDIS_URL)%'
+        default_redis_provider: app.redis
+
+        default_doctrine_dbal_provider: doctrine.dbal.default_connection
 
         pools:
+            # Compteurs des limiteurs de débit (connexion, inscription, demandes…) dans
+            # PostgreSQL, table cache_items. Une protection ne doit pas s'ouvrir parce que Redis
+            # tombe : dans la base, elle tombe avec le site ou pas du tout. Quelques écritures
+            # par minute à cette échelle, PostgreSQL ne les sent pas.
+            rate_limiter.cache:
+                adapter: cache.adapter.doctrine_dbal
             # Calendrier public d'un logement (ADR 004, usage 1). Lu à chaque affichage de
             # fiche, modifié quelques fois par mois : invalidé par étiquette à chaque
             # blocage créé ou supprimé, et de toute façon oublié au bout d'un jour.
             calendar.cache:
                 adapter: cache.adapter.redis_tag_aware
                 default_lifetime: 86400
+
+when@test:
+    framework:
+        cache:
+            pools:
+                # Compteurs remis à zéro à chaque test : la purge ne touche que les entités.
+                rate_limiter.cache:
+                    adapter: cache.adapter.array

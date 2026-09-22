@@ -1,9 +1,13 @@
 framework:
     rate_limiter:
+        # Tous les compteurs sont dans PostgreSQL (rate_limiter.cache, ADR 021), sans verrou :
+        # deux requêtes simultanées peuvent passer à une près, sans importance pour un plafond.
         # Une demande de réservation est un acte rare : cinq en un quart d'heure
         # depuis la même adresse, c'est déjà beaucoup.
         booking_requests:
             policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
             limit: 5
             interval: "15 minutes"
 
@@ -11,6 +15,8 @@ framework:
         # mais on plafonne pour qu'un script ne martèle pas la base.
         quotes:
             policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
             limit: 60
             interval: "1 minute"
 
@@ -19,12 +25,16 @@ framework:
         # à envoyer des emails à des inconnus.
         registrations:
             policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
             limit: 3
             interval: "1 hour"
 
         # Un oubli de mot de passe arrive, un script qui en demande cinquante non.
         password_resets:
             policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
             limit: 5
             interval: "1 hour"
 
@@ -32,7 +42,37 @@ framework:
         # que le mot de passe oublié, pour que le formulaire ne serve pas à spammer.
         booking_recoveries:
             policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
             limit: 5
+            interval: "1 hour"
+
+        # Un signalement est rare ; un script qui en envoie cent inonde la boîte de modération.
+        listing_reports:
+            policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
+            limit: 5
+            interval: "1 hour"
+
+        # Connexion : trois compteurs, voir App\Security\LoginRateLimiter.
+        login_email_ip:
+            policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
+            limit: 5
+            interval: "15 minutes"
+        login_ip:
+            policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
+            limit: 50
+            interval: "15 minutes"
+        login_email:
+            policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
+            limit: 20
             interval: "1 hour"
 
 # Un test ne doit jamais échouer parce qu'un compteur partagé est plein.
@@ -49,6 +89,14 @@ when@test:
                 limit: 1000
             booking_recoveries:
                 limit: 1000
+            listing_reports:
+                limit: 1000
+            login_email_ip:
+                limit: 1000
+            login_ip:
+                limit: 1000
+            login_email:
+                limit: 1000
 
 # Assez large pour travailler, assez bas pour croiser le 429 de temps en temps
 # et se souvenir qu'il existe.
@@ -62,4 +110,6 @@ when@dev:
             password_resets:
                 limit: 20
             booking_recoveries:
+                limit: 20
+            listing_reports:
                 limit: 20

@@ -15,9 +15,9 @@ use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
  * Le limiteur est passé en argument : c'est l'appelant qui sait quelle règle
  * s'applique à son opération, ce service sait seulement comment la faire respecter.
  *
- * Les compteurs vivent dans Redis. Si Redis ne répond pas, on laisse passer et on le note
- * dans les journaux : mieux vaut quelques minutes sans limiteur qu'un site entier en panne
- * (inscription, demandes de réservation, mot de passe oublié).
+ * Les compteurs vivent dans PostgreSQL (ADR 021) : ils ne tombent qu'avec la base, et donc
+ * avec le site. Le filet ci-dessous (laisser passer et journaliser) ne sert plus qu'à ne pas
+ * transformer une erreur de stockage inattendue en page d'erreur.
  */
 final readonly class FloodGuard
 {

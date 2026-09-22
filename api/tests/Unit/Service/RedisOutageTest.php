@@ -9,13 +9,11 @@ use App\Entity\User;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
 use App\Repository\UnavailabilityRepository;
-use App\Security\ResilientLoginRateLimiter;
 use App\Service\Calendar\PublicCalendar;
 use App\Service\Http\FloodGuard;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Symfony\Component\Cache\Exception\InvalidArgumentException;
-use Symfony\Component\HttpFoundation\RateLimiter\RequestRateLimiterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
@@ -37,16 +35,6 @@ final class RedisOutageTest extends TestCase
         (new FloodGuard($requests, new NullLogger()))->check($limiter);
 
         $this->addToAssertionCount(1); // No exception: the request goes on.
-    }
-
-    public function testTheLoginStaysOpenWhenItsThrottlingStorageIsDown(): void
-    {
-        $inner = $this->createStub(RequestRateLimiterInterface::class);
-        $inner->method('consume')->willThrowException(new InvalidArgumentException('Redis connection failed'));
-
-        $limit = (new ResilientLoginRateLimiter($inner, new NullLogger()))->consume(Request::create('/api/login', 'POST'));
-
-        self::assertTrue($limit->isAccepted());
     }
 
     public function testThePublicCalendarIsReadFromTheDatabaseWhenTheCacheIsDown(): void
