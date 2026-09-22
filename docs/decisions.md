@@ -134,3 +134,42 @@ Les trous entre périodes sont permis : le séjour est « à convenir », le pro
 **Contexte.** `GET /api/booking-requests/{id}` renvoyait l'email et le téléphone du voyageur à quiconque connaissait l'identifiant. Or un UUID v7 commence par un horodatage : ce n'est pas un secret.
 
 **Décision.** La lecture par identifiant est supprimée. Le voyageur reçoit un lien privé `/demande/{jeton}` (48 caractères hexadécimaux aléatoires, `BookingRequest.trackingToken`) pour suivre et annuler sa demande. Le propriétaire voit nom, message, dates et voyageurs ; **email et téléphone seulement après acceptation**, et le voyageur reçoit alors ceux du propriétaire. C'est la promesse écrite sous le formulaire de demande.
+
+---
+
+## 014 — Redis en panne : le site dégrade, il ne tombe pas (22/09/2026)
+
+**Décision.** Redis sert au confort, pas à la vérité (ADR 004) ; sa panne ne doit donc bloquer personne.
+- **Cache du calendrier public** : lecture en base si le cache ne répond pas ; l'invalidation qui échoue est journalisée, pas propagée.
+- **Limiteurs de débit** (`FloodGuard`) : ils laissent passer et journalisent. Un site ouvert quelques minutes sans plafond vaut mieux qu'un site fermé.
+- **Verrou `resa:logement:{id}`** : l'acceptation continue sans lui. La contrainte d'exclusion PostgreSQL reste le vrai garde-fou contre la double réservation.
+
+Tests : `tests/Unit/Service/RedisOutageTest.php`.
+
+---
+
+## 015 — Animaux : une règle par logement, trois valeurs (22/09/2026)
+
+**Décision.** `Accommodation.petsPolicy` : `allowed`, `on_request` (défaut, et valeur des logements existants), `not_allowed`.
+- `not_allowed` **bloque** comme le minimum de nuits (ADR 011) : devis `pets_not_allowed`, 409 à la création, et la recherche avec `pets ≥ 1` écarte ces logements.
+- `on_request` **informe** : la demande part, le voyageur est invité à préciser l'animal dans son message.
+
+---
+
+## 016 — Relance du propriétaire à H+24 (22/09/2026)
+
+**Décision.** À la création d'une demande, deux messages différés : `RemindOwnerOfBookingRequest` à +24 h puis `ExpireBookingRequest` à +48 h. La relance n'envoie rien si la demande a déjà reçu une réponse ou si elle a expiré entre-temps : le gestionnaire relit l'état au moment où il s'exécute, jamais celui de la création.
+
+---
+
+## 017 — Emails HTML dérivés du texte (22/09/2026)
+
+**Décision.** Les mailers écrivent un seul texte ; `App\Service\Mail\MailComposer` en tire la version HTML (gabarit `templates/emails/layout.html.twig`) : un lien seul sur sa ligne devient un bouton, les lignes « Libellé : valeur » un tableau, un message entre « » une citation ; les lignes coupées à la main sont recollées. Un seul texte à maintenir, les tests continuent de lire le texte, et un client mail sans HTML ne perd rien. Ce que le voyageur écrit est échappé.
+
+**Limite assumée.** La mise en forme dépend de conventions d'écriture du texte. Si un email a besoin un jour d'une mise en page propre (facture, récapitulatif riche), il aura son propre gabarit Twig.
+
+---
+
+## 018 — Équipements : liste fermée, par rubriques (22/09/2026)
+
+**Décision.** 19 équipements en 4 rubriques (confort, cuisine, extérieur, pratique), définis dans `web/src/app/core/models/search-filters.ts`. Pas de texte libre : « clim », « climatisation » et « Clim réversible » casseraient le filtre de recherche. Ce qui manque va dans la description. Le filtre de la recherche ne propose que les 8 plus demandés (`filter: true`) ; les clés ne changent jamais, elles sont en base et dans les liens partagés.
