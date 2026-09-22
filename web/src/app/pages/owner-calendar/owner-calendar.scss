@@ -1,0 +1,405 @@
+:host {
+  display: block;
+  padding: 1.5rem 0 3rem;
+  background: var(--surface-0);
+}
+
+.owner-calendar {
+  &__breadcrumb {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+  }
+
+  &__heading {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 500;
+  }
+
+  &__subtitle {
+    margin: 0.25rem 0 1.25rem;
+    color: var(--text-secondary);
+  }
+
+  &__notice {
+    margin: 0 0 1rem;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.875rem;
+    color: var(--success-text);
+    background: var(--success-bg);
+    border-radius: var(--radius);
+  }
+
+  &__help {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  &__skeleton {
+    height: 420px;
+    background: var(--surface-1);
+    border-radius: var(--radius-lg);
+  }
+}
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--success-bg);
+  border-radius: var(--radius-lg);
+
+  &--stale {
+    background: var(--amber-bg);
+  }
+
+  &__text {
+    flex: 1 1 320px;
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+
+  &__months {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 1rem;
+    align-content: start;
+  }
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+
+    &__panel {
+      position: sticky;
+      top: 1rem;
+    }
+  }
+}
+
+.month {
+  padding: 0.75rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  &__label {
+    margin: 0 0 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  &__weekday {
+    padding-bottom: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+}
+
+.day {
+  aspect-ratio: 1;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  &:hover:not(:disabled) {
+    border-color: var(--blue);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 1px;
+  }
+
+  &--block {
+    background: var(--taken-pattern);
+  }
+
+  &--booking {
+    color: #fff;
+    background: var(--blue);
+  }
+
+  &--import {
+    background: var(--taken);
+  }
+
+  // La sélection en cours : un contour, pour rester lisible par-dessus une période prise.
+  &--selected {
+    color: var(--blue-dark);
+    background: var(--blue-soft);
+    border: 2px solid var(--blue);
+  }
+
+  // Sélection qui empiète sur une période prise : c'est ce que le message d'erreur désigne.
+  &--selected.day--booking,
+  &--selected.day--block,
+  &--selected.day--import {
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    border-color: var(--danger-text);
+  }
+
+  &--open {
+    border-color: var(--text-primary);
+  }
+
+  &--past {
+    color: var(--text-muted);
+    cursor: default;
+    opacity: 0.45;
+  }
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 12px;
+  color: var(--text-secondary);
+
+  span {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  &__swatch {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+
+    &--block {
+      background: var(--taken-pattern);
+    }
+
+    &--booking {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    &--import {
+      background: var(--taken);
+    }
+  }
+}
+
+// Sur mobile, le panneau d'action colle au bas de l'écran : le jour choisi peut être
+// six mois plus bas que la liste des périodes.
+@media (max-width: 959px) {
+  .panel--sheet {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    max-height: 70dvh;
+    margin: 0;
+    overflow-y: auto;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -6px 24px rgb(0 0 0 / 12%);
+  }
+}
+
+.panel {
+  margin: 0 0 1rem;
+  padding: 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  &--empty {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  &__title {
+    margin: 0;
+    font-weight: 500;
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
+
+  &__meta {
+    margin: 0.25rem 0 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+
+  &__note {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    font-style: italic;
+  }
+
+  &__label {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+
+  &__input {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 0.25rem;
+    padding: 0.5rem 0.6rem;
+    font: inherit;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+  }
+
+  &__hint {
+    margin: 0.25rem 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  &__error {
+    margin: 0.5rem 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    border-radius: var(--radius);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+}
+
+.button {
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  background: var(--blue);
+  border: 1px solid var(--blue);
+  border-radius: var(--radius);
+
+  &:hover:not(:disabled) {
+    background: var(--blue-dark);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  &--secondary {
+    color: var(--blue);
+    background: var(--surface-2);
+
+    &:hover:not(:disabled) {
+      color: #fff;
+    }
+  }
+
+  &--link {
+    padding: 0.25rem 0;
+    color: var(--blue);
+    text-align: left;
+    background: none;
+    border: none;
+
+    &:hover:not(:disabled) {
+      text-decoration: underline;
+      background: none;
+    }
+  }
+}
+
+.periods {
+  padding: 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  &__title {
+    margin: 0 0 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.45rem 0;
+    font-size: 0.8125rem;
+    border-top: 1px solid var(--border);
+
+    &:first-child {
+      border-top: none;
+    }
+  }
+
+  &__dates {
+    flex: 1;
+  }
+
+  &__note {
+    display: block;
+    color: var(--text-muted);
+  }
+
+  &__empty {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+}

@@ -1,0 +1,243 @@
+<div class="container owner-calendar">
+  <nav class="owner-calendar__breadcrumb" aria-label="Fil d'Ariane">
+    <a routerLink="/mon-espace">Mon espace</a>
+    <span aria-hidden="true">›</span>
+    <a routerLink="/mon-espace/logements">Mes logements</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">Calendrier</span>
+  </nav>
+
+  <header class="owner-calendar__header">
+    <h1 class="owner-calendar__heading">Calendrier</h1>
+    <p class="owner-calendar__subtitle">{{ title() }}</p>
+  </header>
+
+  @if (loadFailed()) {
+    <p class="auth__notice auth__notice--error" role="alert">
+      Impossible de charger ce calendrier. Rechargez la page.
+    </p>
+  } @else if (calendar(); as current) {
+    <section class="status" [class.status--stale]="!current.upToDate">
+      @if (current.upToDate) {
+        <p class="status__text">
+          <strong>Calendrier à jour.</strong>
+          Vérifié le {{ current.checkedAt | date: 'd MMMM' }} : le badge s'affiche sur votre
+          annonce.
+        </p>
+      } @else {
+        <p class="status__text">
+          <strong>À vérifier.</strong>
+          @if (current.checkedAt) {
+            Dernière vérification le {{ current.checkedAt | date: 'd MMMM' }} : le badge «
+            Calendrier à jour » n'apparaît plus sur votre annonce.
+          } @else {
+            Tant que vous n'avez pas vérifié vos dates, le badge « Calendrier à jour » n'apparaît
+            pas sur votre annonce.
+          }
+        </p>
+      }
+      <button
+        type="button"
+        class="button button--secondary"
+        [disabled]="saving()"
+        (click)="confirm()"
+      >
+        Mon calendrier est à jour
+      </button>
+    </section>
+
+    @if (notice()) {
+      <p class="owner-calendar__notice" role="status">{{ notice() }}</p>
+    }
+
+    <p class="owner-calendar__help">
+      Cliquez sur un jour pour le rendre indisponible, puis sur un second jour pour bloquer toute la
+      période entre les deux. Les visiteurs voient seulement « indisponible », jamais pourquoi.
+    </p>
+
+    <div class="layout">
+      <div class="layout__months" (pointerleave)="hover(null)">
+        @for (month of months(); track month.key) {
+          <section class="month">
+            <h2 class="month__label">{{ month.first | date: 'MMMM yyyy' }}</h2>
+
+            <div class="month__grid">
+              @for (weekday of weekdays; track $index) {
+                <span class="month__weekday">{{ weekday }}</span>
+              }
+              @for (blank of month.blanks; track $index) {
+                <span></span>
+              }
+              @for (day of month.days; track day.key) {
+                <button
+                  type="button"
+                  class="day"
+                  [class]="day.period ? 'day day--' + sourceClass(day.period.source) : 'day'"
+                  [class.day--past]="day.past"
+                  [class.day--selected]="isHighlighted(day.key)"
+                  [class.day--open]="day.period && day.period.id === selectedPeriod()?.id"
+                  [disabled]="day.past"
+                  [attr.aria-label]="dayLabel(day)"
+                  [attr.aria-pressed]="isHighlighted(day.key)"
+                  (click)="pick(day)"
+                  (pointerenter)="hover(day, $event)"
+                >
+                  {{ day.label }}
+                </button>
+              }
+            </div>
+          </section>
+        }
+
+        @if (canShowMore()) {
+          <button type="button" class="button button--link" (click)="showMore()">
+            Afficher les six mois suivants
+          </button>
+        }
+      </div>
+
+      <aside class="layout__panel">
+        <div class="legend">
+          <span><i class="legend__swatch"></i> libre</span>
+          <span><i class="legend__swatch legend__swatch--block"></i> bloqué par vous</span>
+          <span><i class="legend__swatch legend__swatch--booking"></i> réservation</span>
+        </div>
+
+        @if (selection(); as range) {
+          <div class="panel panel--sheet" aria-live="polite">
+            <p class="panel__title">
+              @if (range.start === lastDay(range)) {
+                Le {{ range.start | date: 'EEEE d MMMM' }}
+              } @else {
+                Du {{ range.start | date: 'EEEE d MMMM' }} au
+                {{ lastDay(range) | date: 'EEEE d MMMM' }}
+              }
+            </p>
+            <p class="panel__meta">
+              {{ dayCount(range) }} {{ dayCount(range) > 1 ? 'jours' : 'jour' }}
+              @if (anchor()) {
+                · cliquez sur un autre jour pour étendre la sélection
+              }
+            </p>
+
+            @if (week(); as saturday) {
+              <button type="button" class="button button--link" (click)="pickWeek()">
+                Ou toute la semaine, du samedi {{ saturday.start | date: 'd MMMM' }} au samedi
+                {{ saturday.end | date: 'd MMMM' }}
+              </button>
+            }
+
+            @if (selectionConflicts()) {
+              <p class="panel__error" role="alert">
+                Cette période contient des jours déjà indisponibles. Choisissez des jours libres.
+              </p>
+            }
+
+            <label class="panel__label" for="calendar-note">Note pour vous (facultatif)</label>
+            <input
+              id="calendar-note"
+              class="panel__input"
+              type="text"
+              maxlength="200"
+              placeholder="Famille, loué hors site…"
+              [ngModel]="note()"
+              (ngModelChange)="note.set($event)"
+            />
+            <p class="panel__hint">Jamais visible des visiteurs.</p>
+
+            <div class="panel__actions">
+              <button
+                type="button"
+                class="button"
+                [disabled]="saving() || selectionConflicts()"
+                (click)="block()"
+              >
+                {{ saving() ? 'Enregistrement…' : 'Rendre indisponible' }}
+              </button>
+              <button type="button" class="button button--secondary" (click)="clearSelection()">
+                Annuler
+              </button>
+            </div>
+          </div>
+        } @else if (selectedPeriod(); as period) {
+          <div class="panel panel--sheet">
+            <p class="panel__title">{{ sourceLabel(period.source) }}</p>
+            <p class="panel__meta">
+              Du {{ period.start | date: 'EEEE d MMMM' }} au
+              {{ lastDay(period) | date: 'EEEE d MMMM' }} · {{ dayCount(period) }}
+              {{ dayCount(period) > 1 ? 'jours' : 'jour' }}
+            </p>
+            @if (period.note) {
+              <p class="panel__note">« {{ period.note }} »</p>
+            }
+            @if (period.removable) {
+              <div class="panel__actions">
+                <button
+                  type="button"
+                  class="button"
+                  [disabled]="saving()"
+                  (click)="unblock(period)"
+                >
+                  {{ saving() ? 'Enregistrement…' : 'Rendre de nouveau disponible' }}
+                </button>
+                <button
+                  type="button"
+                  class="button button--secondary"
+                  (click)="selectedPeriod.set(null)"
+                >
+                  Fermer
+                </button>
+              </div>
+            } @else {
+              <p class="panel__hint">
+                Une réservation ne se retire pas du calendrier : elle s'annule depuis la demande.
+              </p>
+            }
+          </div>
+        } @else {
+          <p class="panel panel--empty">Choisissez un jour dans le calendrier.</p>
+        }
+
+        @if (error()) {
+          <p class="panel__error" role="alert">{{ error() }}</p>
+        }
+
+        <section class="periods">
+          <h2 class="periods__title">Périodes à venir</h2>
+          @if (upcoming().length) {
+            <ul class="periods__list">
+              @for (period of upcoming(); track period.id) {
+                <li class="periods__item">
+                  <i
+                    class="legend__swatch"
+                    [class]="'legend__swatch legend__swatch--' + sourceClass(period.source)"
+                  ></i>
+                  <span class="periods__dates">
+                    {{ period.start | date: 'd MMM' }} → {{ lastDay(period) | date: 'd MMM yyyy' }}
+                    @if (period.note) {
+                      <span class="periods__note">{{ period.note }}</span>
+                    }
+                  </span>
+                  @if (period.removable) {
+                    <button
+                      type="button"
+                      class="button button--link"
+                      [disabled]="saving()"
+                      (click)="unblock(period)"
+                    >
+                      Débloquer
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="periods__empty">Aucune date bloquée : votre logement est libre partout.</p>
+          }
+        </section>
+      </aside>
+    </div>
+  } @else {
+    <div class="owner-calendar__skeleton" aria-hidden="true"></div>
+  }
+</div>

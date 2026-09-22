@@ -63,14 +63,25 @@
             [class.owner-accommodations__card--new]="item.slug === highlighted"
           >
             <div class="owner-accommodations__body">
-              <span class="owner-accommodations__badge" [class]="'owner-accommodations__badge--' + item.status">
+              <span
+                class="owner-accommodations__badge"
+                [class]="'owner-accommodations__badge--' + item.status"
+              >
                 {{ statusLabel(item.status) }}
               </span>
-              <h2 class="owner-accommodations__title">{{ typeLabel(item.type) }} · {{ place(item) }}</h2>
+              <h2 class="owner-accommodations__title">
+                {{ typeLabel(item.type) }} · {{ place(item) }}
+              </h2>
               <p class="owner-accommodations__details">{{ details(item) }}</p>
             </div>
 
             <div class="owner-accommodations__actions">
+              <a
+                class="owner-accommodations__link"
+                [routerLink]="['/mon-espace/logements', item.slug, 'calendrier']"
+              >
+                Calendrier
+              </a>
               @if ('draft' === item.status) {
                 <button
                   type="button"
@@ -80,7 +91,10 @@
                 >
                   {{ busy() === item.slug ? 'Publication…' : 'Publier' }}
                 </button>
-                <a class="owner-accommodations__button" [routerLink]="['/mon-espace/logements', item.slug, 'modifier']">
+                <a
+                  class="owner-accommodations__button"
+                  [routerLink]="['/mon-espace/logements', item.slug, 'modifier']"
+                >
                   Continuer l'annonce
                 </a>
               }
@@ -100,7 +114,10 @@
                 >
                   {{ busy() === item.slug ? 'Retrait…' : 'Retirer du site' }}
                 </button>
-                <a class="owner-accommodations__button" [routerLink]="['/mon-espace/logements', item.slug, 'modifier']">
+                <a
+                  class="owner-accommodations__button"
+                  [routerLink]="['/mon-espace/logements', item.slug, 'modifier']"
+                >
                   Modifier
                 </a>
               }
@@ -124,9 +141,16 @@
 
             <div class="owner-accommodations__footer" aria-live="polite">
               @if (errors()[item.slug]; as message) {
-                <p class="owner-accommodations__message owner-accommodations__message--error" role="alert">{{ message }}</p>
+                <p
+                  class="owner-accommodations__message owner-accommodations__message--error"
+                  role="alert"
+                >
+                  {{ message }}
+                </p>
               } @else if (notices()[item.slug]; as message) {
-                <p class="owner-accommodations__message owner-accommodations__message--ok">{{ message }}</p>
+                <p class="owner-accommodations__message owner-accommodations__message--ok">
+                  {{ message }}
+                </p>
               } @else {
                 <p class="owner-accommodations__hint">{{ hint(item) }}</p>
               }

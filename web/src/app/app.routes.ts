@@ -64,6 +64,12 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'mon-espace/logements/:slug/calendrier',
+    canActivate: [ownerGuard],
+    loadComponent: () =>
+      import('./pages/owner-calendar/owner-calendar').then((m) => m.OwnerCalendar),
+  },
+  {
     path: 'mon-espace/logements',
     canActivate: [ownerGuard],
     loadComponent: () =>
