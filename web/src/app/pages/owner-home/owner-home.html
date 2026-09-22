@@ -17,6 +17,16 @@
       </p>
     }
 
+    @if (requestNotice(); as notice) {
+      <a class="owner-home__callout owner-home__callout--urgent" routerLink="/mon-espace/demandes">
+        <span>
+          {{ notice.text }}
+          <span class="owner-home__callout-detail">{{ notice.detail }}</span>
+        </span>
+        <span class="owner-home__callout-action">Répondre</span>
+      </a>
+    }
+
     @if (draftNotice(); as notice) {
       <a class="owner-home__callout" routerLink="/mon-espace/logements">
         <span>{{ notice }}</span>
@@ -42,7 +52,7 @@
     </ul>
 
     @if (calendars().length) {
-      <h2 class="owner-home__section-title">Vos calendriers</h2>
+      <h2 class="owner-home__section-title">Calendriers et tarifs</h2>
       <section class="owner-home__calendars">
         <p class="owner-home__calendars-summary">{{ calendarSummary() }}</p>
         <ul class="owner-home__calendar-list">
@@ -58,24 +68,22 @@
               <span class="owner-home__calendar-date">{{
                 checkedLabel(item.calendarCheckedAt)
               }}</span>
-              <a
-                class="owner-home__calendar-link"
-                [routerLink]="['/mon-espace/logements', item.slug, 'calendrier']"
-              >
-                Ouvrir le calendrier
-              </a>
+              <span class="owner-home__calendar-links">
+                <a
+                  class="owner-home__calendar-link"
+                  [routerLink]="['/mon-espace/logements', item.slug, 'calendrier']"
+                  >Calendrier</a
+                >
+                <a
+                  class="owner-home__calendar-link"
+                  [routerLink]="['/mon-espace/logements', item.slug, 'tarifs']"
+                  >Tarifs</a
+                >
+              </span>
             </li>
           }
         </ul>
       </section>
     }
-
-    <h2 class="owner-home__section-title">Bientôt dans votre espace</h2>
-    <ul class="owner-home__soon">
-      <li>
-        <strong>Demandes de réservation</strong> — recevez les demandes des locataires et répondez-y
-        en un clic.
-      </li>
-    </ul>
   </div>
 }

@@ -90,6 +90,25 @@
   color: var(--oh-sea);
 }
 
+// Des voyageurs attendent une réponse : le bandeau le plus visible de la page.
+.owner-home__callout--urgent {
+  border-color: rgb(133 79 11 / 35%);
+  background: var(--amber-bg);
+}
+
+.owner-home__callout-detail {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--amber-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.owner-home__calendar-links {
+  display: inline-flex;
+  gap: 1rem;
+}
+
 .owner-home__section-title {
   margin: 0 0 1rem;
   color: var(--oh-muted);
@@ -226,37 +245,5 @@
 
   &:hover {
     text-decoration: underline;
-  }
-}
-
-// Ce qui arrive : discret, ne prend pas la place de ce qui existe.
-.owner-home__soon {
-  display: grid;
-  gap: 0.6rem;
-  max-width: 56rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  color: var(--oh-muted);
-
-  li {
-    padding-left: 1.25rem;
-    position: relative;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0.55em;
-      left: 0;
-      width: 0.45rem;
-      height: 0.45rem;
-      border-radius: 50%;
-      background: rgb(11 95 138 / 35%);
-    }
-  }
-
-  strong {
-    color: var(--oh-ink);
-    font-weight: 600;
   }
 }

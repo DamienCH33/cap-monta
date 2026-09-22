@@ -64,6 +64,22 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'mon-espace/demandes',
+    canActivate: [ownerGuard],
+    loadComponent: () =>
+      import('./pages/owner-requests/owner-requests').then((m) => m.OwnerRequests),
+  },
+  {
+    path: 'mon-espace/logements/:slug/tarifs',
+    canActivate: [ownerGuard],
+    loadComponent: () => import('./pages/owner-rates/owner-rates').then((m) => m.OwnerRates),
+  },
+  {
+    path: 'demande/:token',
+    loadComponent: () =>
+      import('./pages/booking-tracking/booking-tracking').then((m) => m.BookingTracking),
+  },
+  {
     path: 'mon-espace/logements/:slug/calendrier',
     canActivate: [ownerGuard],
     loadComponent: () =>
@@ -99,21 +115,4 @@ export const routes: Routes = [
     path: '**',
     loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFound),
   },
-];
-
-import { RenderMode, ServerRoute } from '@angular/ssr';
-
-export const serverRoutes: ServerRoute[] = [
-  // Pages privées : rendues dans le navigateur uniquement. Le serveur n'a pas le
-  // cookie de session, il conclurait toujours « personne n'est connecté ».
-  { path: 'connexion', renderMode: RenderMode.Client },
-  { path: 'inscription', renderMode: RenderMode.Client },
-  { path: 'mon-espace', renderMode: RenderMode.Client },
-  { path: 'mon-espace/**', renderMode: RenderMode.Client },
-  { path: 'inscription', renderMode: RenderMode.Client },
-  { path: 'mot-de-passe-oublie', renderMode: RenderMode.Client },
-  { path: 'nouveau-mot-de-passe', renderMode: RenderMode.Client },
-
-  // Tout le reste est rendu côté serveur : c'est ce qui rend le site indexable.
-  { path: '**', renderMode: RenderMode.Server },
 ];

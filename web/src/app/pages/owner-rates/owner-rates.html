@@ -1,0 +1,263 @@
+<div class="container rates-page">
+  <nav class="rates-page__breadcrumb" aria-label="Fil d'Ariane">
+    <a routerLink="/mon-espace">Mon espace</a>
+    <span aria-hidden="true">›</span>
+    <a routerLink="/mon-espace/logements">Mes logements</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">Tarifs</span>
+  </nav>
+
+  <header class="rates-page__header">
+    <div>
+      <h1 class="rates-page__heading">Tarifs</h1>
+      <p class="rates-page__subtitle">{{ title() }}</p>
+    </div>
+    <a class="rates-page__calendar" [routerLink]="['/mon-espace/logements', slug, 'calendrier']">
+      Voir le calendrier
+    </a>
+  </header>
+
+  @if (loadFailed()) {
+    <p class="auth__notice auth__notice--error" role="alert">
+      Impossible de charger vos tarifs. Rechargez la page.
+    </p>
+  } @else if (rates(); as current) {
+    <p class="rates-page__help">
+      Un prix à la semaine, à la nuit, ou les deux. Le minimum de nuits est une règle : une demande
+      plus courte est refusée. La préférence du samedi est un souhait : la demande part quand même,
+      signalée « hors de vos règles ». Entre deux périodes, le prix est « à convenir » : vous le
+      fixez en acceptant la demande.
+    </p>
+
+    @if (notice()) {
+      <p class="rates-page__notice" role="status">{{ notice() }}</p>
+    }
+    @if (error() && !draft()) {
+      <p class="flag" role="alert">{{ error() }}</p>
+    }
+
+    @if (copy(); as suggestion) {
+      <section class="copy">
+        <p class="copy__text">
+          <strong>Vos tarifs {{ suggestion.to }} ne sont pas encore saisis.</strong>
+          Reprenez ceux de {{ suggestion.from }} en un clic : les dates glissent d'un an en gardant
+          les mêmes jours de la semaine (un samedi reste un samedi).
+        </p>
+        <button
+          type="button"
+          class="button button--secondary"
+          [disabled]="saving()"
+          (click)="copyYear(suggestion.from, suggestion.to)"
+        >
+          Reprendre les tarifs de {{ suggestion.from }}
+        </button>
+      </section>
+    }
+
+    @for (season of upcoming(); track season.year) {
+      <section class="season">
+        <h2 class="season__title">{{ season.year }}</h2>
+        <ul class="season__list">
+          @for (period of season.periods; track period.id) {
+            <li class="period" [class.period--editing]="draft()?.id === period.id">
+              <div class="period__dates">
+                {{ period.start | date: 'EEE d MMM' }} → {{ period.end | date: 'EEE d MMM' }}
+              </div>
+              <div class="period__prices">
+                @if (period.weeklyPrice) {
+                  <span
+                    ><strong>{{ toEuros(period.weeklyPrice) }} €</strong> / semaine</span
+                  >
+                }
+                @if (period.nightlyPrice) {
+                  <span
+                    ><strong>{{ toEuros(period.nightlyPrice) }} €</strong> / nuit</span
+                  >
+                }
+              </div>
+              <div class="period__rules">
+                <span
+                  >min. {{ period.minimumNights }}
+                  {{ period.minimumNights > 1 ? 'nuits' : 'nuit' }}</span
+                >
+                @if (period.saturdayArrival) {
+                  <span class="period__badge">arrivée le samedi</span>
+                }
+              </div>
+              <div class="period__actions">
+                @if (confirmDelete() === period.id) {
+                  <span class="period__confirm">Supprimer ?</span>
+                  <button
+                    type="button"
+                    class="button button--danger button--small"
+                    [disabled]="saving()"
+                    (click)="remove(period)"
+                  >
+                    Oui
+                  </button>
+                  <button
+                    type="button"
+                    class="button button--ghost button--small"
+                    (click)="confirmDelete.set(null)"
+                  >
+                    Non
+                  </button>
+                } @else {
+                  <button type="button" class="button button--link" (click)="edit(period)">
+                    Modifier
+                  </button>
+                  <button
+                    type="button"
+                    class="button button--link button--muted"
+                    (click)="confirmDelete.set(period.id)"
+                  >
+                    Supprimer
+                  </button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    } @empty {
+      <p class="rates-page__empty">
+        Aucun tarif pour l'instant : les demandes arrivent avec un prix « à convenir ». Ajoutez vos
+        périodes, votre annonce affichera un prix « à partir de » dans la recherche.
+      </p>
+    }
+
+    @if (draft(); as current) {
+      <form class="editor" (ngSubmit)="save()">
+        <h2 class="editor__title">{{ current.id ? 'Modifier la période' : 'Nouvelle période' }}</h2>
+
+        <div class="editor__grid">
+          <label class="field">
+            <span class="field__label">Du</span>
+            <input
+              type="date"
+              name="start"
+              [ngModel]="current.start"
+              (ngModelChange)="patch({ start: $event })"
+              required
+            />
+          </label>
+          <label class="field">
+            <span class="field__label">Au (jour du départ)</span>
+            <input
+              type="date"
+              name="end"
+              [ngModel]="current.end"
+              (ngModelChange)="patch({ end: $event })"
+              required
+            />
+          </label>
+          <label class="field">
+            <span class="field__label">Prix à la semaine (€)</span>
+            <input
+              type="number"
+              name="weekly"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              placeholder="ex. 650"
+              [ngModel]="current.weekly"
+              (ngModelChange)="patch({ weekly: $event })"
+            />
+          </label>
+          <label class="field">
+            <span class="field__label">Prix à la nuit (€)</span>
+            <input
+              type="number"
+              name="nightly"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              placeholder="facultatif"
+              [ngModel]="current.nightly"
+              (ngModelChange)="patch({ nightly: $event })"
+            />
+          </label>
+          <label class="field">
+            <span class="field__label">Minimum de nuits</span>
+            <input
+              type="number"
+              name="minimumNights"
+              min="1"
+              max="28"
+              step="1"
+              inputmode="numeric"
+              [ngModel]="current.minimumNights"
+              (ngModelChange)="patch({ minimumNights: $event })"
+              required
+            />
+          </label>
+        </div>
+
+        <p class="editor__hint">
+          Le jour du départ n'est pas compté : du samedi 3 au samedi 10, c'est une semaine. Deux
+          périodes peuvent se suivre sur le même samedi.
+        </p>
+
+        <label class="check">
+          <input
+            type="checkbox"
+            name="saturdayArrival"
+            [ngModel]="current.saturdayArrival"
+            (ngModelChange)="patch({ saturdayArrival: $event })"
+          />
+          <span>
+            <strong>Arrivée le samedi de préférence</strong>
+            <span class="check__hint">
+              Les voyageurs le voient. Une demande qui arrive un autre jour est envoyée quand même,
+              signalée « hors de vos règles ».
+            </span>
+          </span>
+        </label>
+
+        @if (error()) {
+          <p class="flag" role="alert">{{ error() }}</p>
+        }
+
+        <div class="editor__actions">
+          <button type="submit" class="button" [disabled]="saving()">
+            {{ saving() ? 'Enregistrement…' : 'Enregistrer la période' }}
+          </button>
+          <button type="button" class="button button--ghost" (click)="cancel()">Annuler</button>
+        </div>
+      </form>
+    } @else {
+      <button type="button" class="button rates-page__add" (click)="add()">
+        + Ajouter une période
+      </button>
+    }
+
+    @if (past().length) {
+      <section class="past">
+        <button
+          type="button"
+          class="button button--link button--muted"
+          (click)="showPast.set(!showPast())"
+        >
+          {{ showPast() ? 'Masquer' : 'Afficher' }} les périodes passées ({{ past().length }})
+        </button>
+        @if (showPast()) {
+          <ul class="past__list">
+            @for (period of past(); track period.id) {
+              <li>
+                {{ period.start | date: 'd MMM yyyy' }} → {{ period.end | date: 'd MMM yyyy' }} ·
+                @if (period.weeklyPrice) {
+                  {{ toEuros(period.weeklyPrice) }} € / sem.
+                }
+                @if (period.nightlyPrice) {
+                  {{ toEuros(period.nightlyPrice) }} € / nuit
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  } @else {
+    <div class="rates-page__skeleton" aria-hidden="true"></div>
+  }
+</div>

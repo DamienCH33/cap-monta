@@ -1,0 +1,294 @@
+<div class="container inbox">
+  <nav class="inbox__breadcrumb" aria-label="Fil d'Ariane">
+    <a routerLink="/mon-espace">Mon espace</a>
+    <span aria-hidden="true">›</span>
+    <span aria-current="page">Demandes</span>
+  </nav>
+
+  <h1 class="inbox__heading">Demandes de réservation</h1>
+  <p class="inbox__lead">
+    Vous avez 48 heures pour répondre. Sans réponse, la demande expire et le voyageur est prévenu.
+  </p>
+
+  @if (loadFailed()) {
+    <p class="auth__notice auth__notice--error" role="alert">
+      Impossible de charger vos demandes. Rechargez la page.
+    </p>
+  } @else if (requests()) {
+    <nav class="tabs" aria-label="Filtrer les demandes">
+      @for (item of tabs(); track item.key) {
+        <button
+          type="button"
+          class="tabs__tab"
+          [class.tabs__tab--active]="item.key === tab()"
+          [attr.aria-pressed]="item.key === tab()"
+          (click)="select(item.key)"
+        >
+          {{ item.label }}
+          <span
+            class="tabs__count"
+            [class.tabs__count--alert]="'pending' === item.key && item.count > 0"
+            >{{ item.count }}</span
+          >
+        </button>
+      }
+    </nav>
+
+    @if (notice()) {
+      <p class="inbox__notice" role="status">{{ notice() }}</p>
+    }
+
+    @if (0 === visible().length) {
+      <p class="inbox__empty">{{ emptyMessage() }}</p>
+    }
+
+    <ul class="inbox__list">
+      @for (request of visible(); track request.id) {
+        <li class="card" [class]="'card card--' + request.status">
+          <header class="card__head">
+            <div>
+              <a class="card__place" [routerLink]="['/logement', request.accommodation.slug]">{{
+                request.accommodation.title
+              }}</a>
+              <p class="card__dates">
+                Du {{ request.start | date: 'EEE d MMM' }} au
+                {{ request.end | date: 'EEE d MMM yyyy' }} · {{ request.nights }}
+                {{ request.nights > 1 ? 'nuits' : 'nuit' }}
+              </p>
+            </div>
+            <span class="pill" [class]="'pill pill--' + request.status">{{
+              statusLabel(request.status)
+            }}</span>
+          </header>
+
+          <dl class="card__facts">
+            <div>
+              <dt>Voyageur</dt>
+              <dd>{{ request.guestName }}</dd>
+            </div>
+            <div>
+              <dt>Qui</dt>
+              <dd>{{ travellers(request) }}</dd>
+            </div>
+            <div>
+              <dt>Prix</dt>
+              <dd>
+                @if (bookingPrice(request); as price) {
+                  <strong>{{ price / 100 | number: '1.0-0' }} €</strong>
+                  <span class="card__muted">{{
+                    request.agreedPrice ? 'convenu' : 'selon vos tarifs'
+                  }}</span>
+                } @else {
+                  <strong>à convenir</strong>
+                  <span class="card__muted">aucun tarif sur ces dates</span>
+                }
+              </dd>
+            </div>
+          </dl>
+
+          @if (request.message) {
+            <blockquote class="card__message">« {{ request.message }} »</blockquote>
+          }
+
+          @if ('pending' === request.status) {
+            @if (request.conflict) {
+              <p class="flag flag--danger">
+                Ces dates sont déjà prises dans votre calendrier : vous ne pouvez que refuser, ou
+                libérer les dates d'abord.
+              </p>
+            }
+            @if (request.outsideRules) {
+              <p class="flag flag--warn">
+                Hors de vos règles : arrivée un {{ request.start | date: 'EEEE' }}, vous préférez le
+                samedi sur cette période. À vous de voir.
+              </p>
+            }
+            <p class="card__deadline" [class.card__deadline--urgent]="hoursLeft(request) < 12">
+              @if (hoursLeft(request) > 0) {
+                Répondez avant le {{ request.expiresAt | date: "EEEE d MMMM 'à' HH'h'mm" }} (reste
+                {{ hoursLeft(request) }} h).
+              } @else {
+                Le délai expire dans moins d'une heure.
+              }
+            </p>
+          }
+
+          @if ('accepted' === request.status && request.contact; as contact) {
+            <div class="contact">
+              <p class="contact__title">Coordonnées du voyageur</p>
+              <a [href]="'mailto:' + contact.email">{{ contact.email }}</a>
+              @if (contact.phone) {
+                <a [href]="'tel:' + contact.phone">{{ contact.phone }}</a>
+              }
+            </div>
+          }
+
+          @if (request.ownerMessage && 'pending' !== request.status) {
+            <p class="card__answer">Votre message : « {{ request.ownerMessage }} »</p>
+          }
+
+          @if ('pending' === request.status && !request.started) {
+            @if (isOpen(request, 'accept')) {
+              <div class="answer">
+                <label class="answer__label" for="price-{{ request.id }}">
+                  Prix du séjour (€){{ null === request.estimatedPrice ? '' : ' — modifiable' }}
+                </label>
+                <input
+                  id="price-{{ request.id }}"
+                  class="answer__input answer__input--price"
+                  type="number"
+                  min="1"
+                  step="1"
+                  inputmode="numeric"
+                  [ngModel]="price()"
+                  (ngModelChange)="price.set($event)"
+                  [required]="null === request.estimatedPrice"
+                />
+                <label class="answer__label" for="accept-message-{{ request.id }}">
+                  Un mot pour le voyageur (facultatif)
+                </label>
+                <textarea
+                  id="accept-message-{{ request.id }}"
+                  class="answer__input"
+                  rows="2"
+                  maxlength="1000"
+                  placeholder="Arrivée à partir de 16 h, clés sous le pot de fleurs…"
+                  [ngModel]="message()"
+                  (ngModelChange)="message.set($event)"
+                ></textarea>
+                <p class="answer__hint">
+                  Les dates seront bloquées dans votre calendrier et vous échangerez vos
+                  coordonnées.
+                  @if (competing(request).length; as others) {
+                    <strong>
+                      {{ others }} autre{{ others > 1 ? 's' : '' }} demande{{
+                        others > 1 ? 's' : ''
+                      }}
+                      sur ces dates {{ others > 1 ? 'seront refusées' : 'sera refusée' }}
+                      automatiquement.
+                    </strong>
+                  }
+                </p>
+                @if (error()) {
+                  <p class="flag flag--danger" role="alert">{{ error() }}</p>
+                }
+                <div class="answer__actions">
+                  <button
+                    type="button"
+                    class="button"
+                    [disabled]="saving()"
+                    (click)="confirm(request, 'accept')"
+                  >
+                    {{ saving() ? 'Envoi…' : 'Confirmer et accepter' }}
+                  </button>
+                  <button type="button" class="button button--ghost" (click)="close()">
+                    Retour
+                  </button>
+                </div>
+              </div>
+            } @else if (isOpen(request, 'decline')) {
+              <div class="answer">
+                <label class="answer__label" for="decline-message-{{ request.id }}">
+                  Un mot pour le voyageur (facultatif)
+                </label>
+                <textarea
+                  id="decline-message-{{ request.id }}"
+                  class="answer__input"
+                  rows="2"
+                  maxlength="1000"
+                  placeholder="Désolé, le logement n'est pas disponible à ces dates."
+                  [ngModel]="message()"
+                  (ngModelChange)="message.set($event)"
+                ></textarea>
+                @if (error()) {
+                  <p class="flag flag--danger" role="alert">{{ error() }}</p>
+                }
+                <div class="answer__actions">
+                  <button
+                    type="button"
+                    class="button button--danger"
+                    [disabled]="saving()"
+                    (click)="confirm(request, 'decline')"
+                  >
+                    {{ saving() ? 'Envoi…' : 'Confirmer le refus' }}
+                  </button>
+                  <button type="button" class="button button--ghost" (click)="close()">
+                    Retour
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="card__actions">
+                <button
+                  type="button"
+                  class="button"
+                  [disabled]="request.conflict"
+                  (click)="start(request, 'accept')"
+                >
+                  Accepter
+                </button>
+                <button
+                  type="button"
+                  class="button button--secondary"
+                  (click)="start(request, 'decline')"
+                >
+                  Refuser
+                </button>
+              </div>
+            }
+          }
+
+          @if ('accepted' === request.status && !request.started) {
+            @if (isOpen(request, 'cancel')) {
+              <div class="answer">
+                <p class="answer__hint">
+                  <strong>Annuler une réservation acceptée reste exceptionnel.</strong> Les dates
+                  redeviennent libres et le voyageur est prévenu par email.
+                </p>
+                <label class="answer__label" for="cancel-message-{{ request.id }}"
+                  >Explication pour le voyageur</label
+                >
+                <textarea
+                  id="cancel-message-{{ request.id }}"
+                  class="answer__input"
+                  rows="2"
+                  maxlength="1000"
+                  [ngModel]="message()"
+                  (ngModelChange)="message.set($event)"
+                ></textarea>
+                @if (error()) {
+                  <p class="flag flag--danger" role="alert">{{ error() }}</p>
+                }
+                <div class="answer__actions">
+                  <button
+                    type="button"
+                    class="button button--danger"
+                    [disabled]="saving()"
+                    (click)="confirm(request, 'cancel')"
+                  >
+                    {{ saving() ? 'Envoi…' : 'Annuler la réservation' }}
+                  </button>
+                  <button type="button" class="button button--ghost" (click)="close()">
+                    Retour
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="card__actions">
+                <button
+                  type="button"
+                  class="button button--link"
+                  (click)="start(request, 'cancel')"
+                >
+                  Annuler cette réservation
+                </button>
+              </div>
+            }
+          }
+        </li>
+      }
+    </ul>
+  } @else {
+    <div class="inbox__skeleton" aria-hidden="true"></div>
+  }
+</div>

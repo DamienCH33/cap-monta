@@ -9,7 +9,9 @@ import {
   OwnerAccommodation,
   STATUS_PARAMS,
 } from '../../core/models/owner-accommodation';
+import { hoursLeft, OwnerBookingRequest } from '../../core/models/booking-answer';
 import { AuthService } from '../../core/services/auth';
+import { OwnerBookingRequestService } from '../../core/services/owner-booking-request';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { SeoService } from '../../core/services/seo';
 
@@ -74,6 +76,30 @@ export class OwnerHome {
   });
 
   /** Les logements en ligne : c'est sur eux que le badge « Calendrier à jour » se voit. */
+  private readonly requests = signal<OwnerBookingRequest[]>([]);
+
+  /** Des demandes attendent : c'est la première chose à voir en arrivant. */
+  readonly requestNotice = computed(() => {
+    const pending = this.requests().filter((r) => 'pending' === r.status);
+
+    if (0 === pending.length) {
+      return null;
+    }
+
+    const soonest = Math.min(...pending.map((r) => hoursLeft(r.expiresAt)));
+
+    return {
+      text:
+        pending.length > 1
+          ? `${pending.length} demandes de réservation attendent votre réponse.`
+          : 'Une demande de réservation attend votre réponse.',
+      detail:
+        soonest < 1
+          ? 'La plus urgente expire dans moins d’une heure.'
+          : `La plus urgente expire dans ${soonest} h.`,
+    };
+  });
+
   readonly calendars = computed(() =>
     (this.accommodations() ?? []).filter((a) => 'published' === a.status).sort(byCalendarUrgency),
   );
@@ -102,6 +128,14 @@ export class OwnerHome {
       path: '/mon-espace',
       noindex: true,
     });
+
+    inject(OwnerBookingRequestService)
+      .list()
+      .subscribe({
+        next: (list) => this.requests.set(list),
+        // Sans la liste, pas de bandeau : la page Demandes reste accessible depuis Mes logements.
+        error: () => undefined,
+      });
 
     inject(OwnerAccommodationService)
       .list()

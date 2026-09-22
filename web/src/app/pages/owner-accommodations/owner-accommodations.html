@@ -82,6 +82,12 @@
               >
                 Calendrier
               </a>
+              <a
+                class="owner-accommodations__link"
+                [routerLink]="['/mon-espace/logements', item.slug, 'tarifs']"
+              >
+                Tarifs
+              </a>
               @if ('draft' === item.status) {
                 <button
                   type="button"
