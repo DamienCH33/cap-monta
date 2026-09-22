@@ -19,6 +19,8 @@ export interface Accommodation {
   cover: Photo | null;
   /** Toutes les photos, couverture en premier. Vide dans la liste de recherche. */
   photos: Photo[];
+  /** Le propriétaire a vérifié son calendrier il y a moins de 30 jours. */
+  calendarUpToDate: boolean;
 }
 
 export interface Photo {

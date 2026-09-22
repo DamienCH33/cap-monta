@@ -16,7 +16,9 @@
         decoding="async"
       />
     }
-    <span class="card__badge">Calendrier à jour</span>
+    @if (accommodation().calendarUpToDate) {
+      <span class="card__badge">Calendrier à jour</span>
+    }
     @if (area(); as zone) {
       <span class="card__side"><cm-icon [name]="areaIcons[zone.key]" />{{ zone.label }}</span>
     }
@@ -43,7 +45,7 @@
         <span
           class="strip__week"
           [class.strip__week--taken]="!week.free"
-          [title]="(week.start | date: 'd MMMM') + (week.free ? ' — libre' : ' — réservé')"
+          [title]="(week.start | date: 'd MMMM') + (week.free ? ' — libre' : ' — indisponible')"
         ></span>
       }
     </div>
