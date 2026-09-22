@@ -78,7 +78,14 @@
       <cm-accommodation-card [accommodation]="accommodation" />
     } @empty {
       <div class="results__empty">
-        @if (criteria().arrival && criteria().departure) {
+        @if (reversedDates()) {
+          <p>
+            La date de départ ({{ criteria().departure | date: 'd MMMM' }}) vient avant l'arrivée
+            ({{ criteria().arrival | date: 'd MMMM' }}). Corrigez les dates ci-dessus.
+          </p>
+        } @else if (searchFailed()) {
+          <p>La recherche n'a pas abouti. Réessayez dans un instant.</p>
+        } @else if (criteria().arrival && criteria().departure) {
           <p>
             Aucun logement libre du {{ criteria().arrival | date: 'd MMMM' }} au
             {{ criteria().departure | date: 'd MMMM' }}.

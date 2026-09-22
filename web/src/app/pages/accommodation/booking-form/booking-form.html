@@ -28,8 +28,9 @@
         <input
           type="date"
           name="arrival"
+          [min]="today"
           [ngModel]="arrival()"
-          (ngModelChange)="arrival.set($event); clearViolation('arrival'); refreshQuote()"
+          (ngModelChange)="onArrivalChange($event)"
         />
         @if (violations()['arrival']; as violation) {
           <span class="field__error">{{ violation }}</span>
@@ -41,6 +42,7 @@
         <input
           type="date"
           name="departure"
+          [min]="arrival() ? plusDays(arrival(), 1) : today"
           [ngModel]="departure()"
           (ngModelChange)="departure.set($event); clearViolation('departure'); refreshQuote()"
         />

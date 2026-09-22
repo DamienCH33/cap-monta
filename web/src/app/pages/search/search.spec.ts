@@ -44,6 +44,28 @@ describe('Search', () => {
     return harness;
   }
 
+  it('dit que les dates sont à l’envers au lieu de chercher', async () => {
+    const harness = await open('/recherche?arrivee=2026-09-29&depart=2026-09-27');
+
+    // Aucun appel de recherche : l'API répondrait 400, la page afficherait « aucun logement ».
+    httpMock.expectNone((req) => isSearch(req.url));
+    harness.detectChanges();
+
+    expect(harness.routeNativeElement!.textContent).toContain('vient avant l');
+  });
+
+  it('reste utilisable après une erreur de l’API', async () => {
+    const harness = await open('/recherche?arrivee=2026-10-12&depart=2026-10-19');
+    httpMock
+      .expectOne((req) => isSearch(req.url))
+      .flush('boom', { status: 500, statusText: 'Error' });
+    harness.detectChanges();
+    expect(harness.routeNativeElement!.textContent).toContain('pas abouti');
+
+    await harness.navigateByUrl('/recherche?arrivee=2026-10-19&depart=2026-10-26');
+    httpMock.expectOne((req) => isSearch(req.url)).flush({ member: [{ slug: 'un-logement' }] });
+  });
+
   it('se construit', async () => {
     const harness = await open('/recherche');
     httpMock.expectOne((req) => isSearch(req.url)).flush({ member: [] });

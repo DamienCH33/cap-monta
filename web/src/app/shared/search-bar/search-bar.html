@@ -1,7 +1,13 @@
 <form class="searchbar" (ngSubmit)="submit()">
   <label class="searchbar__field">
     <span class="searchbar__label">Arrivée</span>
-    <input type="date" name="arrival" [ngModel]="arrival()" (ngModelChange)="arrival.set($event)" />
+    <input
+      type="date"
+      name="arrival"
+      [min]="today"
+      [ngModel]="arrival()"
+      (ngModelChange)="onArrivalChange($event)"
+    />
   </label>
 
   <label class="searchbar__field">
@@ -9,6 +15,7 @@
     <input
       type="date"
       name="departure"
+      [min]="arrival() ? plusDays(arrival(), 1) : today"
       [ngModel]="departure()"
       (ngModelChange)="departure.set($event)"
     />

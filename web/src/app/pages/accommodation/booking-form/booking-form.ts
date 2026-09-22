@@ -9,6 +9,7 @@ import { Guests, NO_GUESTS, travellerCount } from '../../../core/models/guests';
 import { Quote } from '../../../core/models/quote';
 import { BookingService } from '../../../core/services/booking';
 import { GuestPicker } from '../../../shared/guest-picker/guest-picker';
+import { departureAfter, plusDays, today } from '../../../core/models/stay-dates';
 
 @Component({
   selector: 'cm-booking-form',
@@ -27,6 +28,17 @@ export class BookingForm implements OnInit {
   readonly arrival = linkedSignal(() => this.initialArrival());
   readonly departure = linkedSignal(() => this.initialDeparture());
   readonly guests = linkedSignal(() => this.initialGuests());
+
+  readonly today = today();
+  readonly plusDays = plusDays;
+
+  onArrivalChange(arrival: string): void {
+    this.arrival.set(arrival);
+    this.departure.set(departureAfter(arrival, this.departure()));
+    this.clearViolation('arrival');
+    this.clearViolation('departure');
+    this.refreshQuote();
+  }
 
   /** Les champs de l'API qui concernent les voyageurs, pour afficher leurs erreurs sous le sélecteur. */
   readonly guestFields = ['adults', 'children', 'infants', 'pets'] as const;

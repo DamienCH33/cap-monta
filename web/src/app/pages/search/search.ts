@@ -16,6 +16,7 @@ import {
   SORT_OPTIONS,
 } from '../../core/models/search-filters';
 import { StaySuggestion } from '../../core/models/stay-suggestion';
+import { isReversed } from '../../core/models/stay-dates';
 import { AccommodationService } from '../../core/services/accommodation';
 import { SeoService } from '../../core/services/seo';
 import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
@@ -41,6 +42,10 @@ export class Search implements OnInit {
 
   readonly criteria = signal<SearchCriteria>({});
   readonly results = signal<Accommodation[]>([]);
+  /** Départ avant l'arrivée dans l'adresse : on le dit au lieu d'afficher « aucun logement ». */
+  readonly reversedDates = signal(false);
+  /** L'API n'a pas répondu : on le dit, et la page reste utilisable pour la recherche suivante. */
+  readonly searchFailed = signal(false);
   readonly suggestions = signal<StaySuggestion[]>([]);
   readonly guests = signal<Guests>(NO_GUESTS);
   readonly filters = signal<SearchFilters>(NO_FILTERS);
@@ -99,12 +104,30 @@ export class Search implements OnInit {
             page: Number(params.get('page')) || 1,
           };
         }),
-        tap((criteria) => this.criteria.set(criteria)),
+        tap((criteria) => {
+          this.criteria.set(criteria);
+          this.reversedDates.set(isReversed(criteria.arrival, criteria.departure));
+          this.searchFailed.set(false);
+        }),
         switchMap((criteria) =>
-          this.accommodations.searchPage(criteria).pipe(
+          (isReversed(criteria.arrival, criteria.departure)
+            ? of({ items: [], total: 0, page: 1, totalPages: 1 })
+            : this.accommodations.searchPage(criteria).pipe(
+                // Une erreur ne doit pas couper le flux : la recherche suivante doit repartir.
+                catchError(() => {
+                  this.searchFailed.set(true);
+
+                  return of({ items: [], total: 0, page: 1, totalPages: 1 });
+                }),
+              )
+          ).pipe(
             switchMap((found) => {
               const needsSuggestions =
-                found.items.length === 0 && !!criteria.arrival && !!criteria.departure;
+                found.items.length === 0 &&
+                !!criteria.arrival &&
+                !!criteria.departure &&
+                !this.reversedDates() &&
+                !this.searchFailed();
 
               const suggestions$ = needsSuggestions
                 ? this.accommodations
