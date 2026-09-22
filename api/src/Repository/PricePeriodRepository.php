@@ -44,6 +44,40 @@ class PricePeriodRepository extends ServiceEntityRepository
     }
 
     /**
+     * Another period of the accommodation overlapping these dates, the edited one excepted.
+     */
+    public function hasOverlap(Accommodation $accommodation, \DateTimeImmutable $start, \DateTimeImmutable $end, ?PricePeriod $except = null): bool
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.accommodation = :accommodation')
+            ->setParameter('accommodation', $accommodation)
+            ->setParameter('arrival', $start)
+            ->setParameter('departure', $end);
+
+        StayOverlap::apply($qb, 'p');
+
+        if (null !== $except) {
+            $qb->andWhere('p.id != :except')->setParameter('except', $except->getId(), 'uuid');
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
+
+    /**
+     * Every period of the accommodation, oldest first.
+     *
+     * @return list<PricePeriod>
+     */
+    public function findAllFor(Accommodation $accommodation): array
+    {
+        /** @var list<PricePeriod> $result */
+        $result = $this->findBy(['accommodation' => $accommodation], ['startDate' => 'ASC']);
+
+        return $result;
+    }
+
+    /**
      * Les périodes tarifaires encore d'actualité, de la plus proche à la plus lointaine.
      *
      * @return list<PricePeriod>

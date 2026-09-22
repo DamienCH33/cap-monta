@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\Entity\Accommodation;
+use App\Entity\BookingRequest;
+use App\Entity\Unavailability;
 use App\Entity\User;
 use App\Enum\AccommodationStatus;
+use App\Enum\BookingRequestStatus;
 use App\Enum\DistrictArea;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
@@ -14,6 +17,7 @@ use App\Factory\AccommodationFactory;
 use App\Factory\DistrictFactory;
 use App\Factory\PricePeriodFactory;
 use App\Factory\UnavailabilityFactory;
+use App\Service\Booking\QuoteCalculator;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -26,6 +30,7 @@ final class AppFixtures extends Fixture
 {
     public function __construct(
         private readonly UserPasswordHasherInterface $hasher,
+        private readonly QuoteCalculator $quotes,
     ) {
     }
     /**
@@ -122,6 +127,52 @@ final class AppFixtures extends Fixture
         $damiensListings[1]->markCalendarChecked(new \DateTimeImmutable('-45 days'));
 
         $manager->flush();
+
+        $this->receiveRequests($manager, $damiensListings[0], $damiensListings[2]);
+    }
+
+    /**
+     * Des demandes sur les logements du compte de test, pour que « Demandes » montre tous les
+     * cas : prix calculé, prix à convenir, arrivée hors de la préférence du samedi, acceptée.
+     * Créées sans passer par BookingRequestCreator : ni email ni message différé au chargement.
+     */
+    private function receiveRequests(ObjectManager $manager, Accommodation $first, Accommodation $second): void
+    {
+        $nextYear = (int) date('Y') + 1;
+        $weekIn = static fn (int $weeks): \DateTimeImmutable => new \DateTimeImmutable(sprintf('saturday +%d weeks', $weeks));
+
+        $cases = [
+            // [logement, arrivée, départ, adultes, enfants, nom, message, statut]
+            [$first, new \DateTimeImmutable($nextYear.'-07-17'), new \DateTimeImmutable($nextYear.'-07-24'), 2, 2, 'Claire Dubois', 'Bonjour, nous serions deux adultes et deux enfants de 6 et 9 ans. Le logement est-il loin de la plage ?', BookingRequestStatus::Pending],
+            [$first, $weekIn(20)->modify('+3 days'), $weekIn(20)->modify('+7 days'), 2, 0, 'Marc Lefèvre', 'Un long week-end au calme, si c’est possible.', BookingRequestStatus::Pending],
+            [$second, new \DateTimeImmutable('tuesday '.$nextYear.'-07-06'), new \DateTimeImmutable('tuesday '.$nextYear.'-07-06 +7 days'), 2, 0, 'Sophie Garnier', null, BookingRequestStatus::Pending],
+            [$second, new \DateTimeImmutable($nextYear.'-08-28'), new \DateTimeImmutable($nextYear.'-09-04'), 4, 0, 'Thomas Roux', 'Pour la rentrée, entre amis.', BookingRequestStatus::Accepted],
+        ];
+
+        foreach ($cases as [$accommodation, $arrival, $departure, $adults, $children, $name, $message, $status]) {
+            $quote = $this->quotes->quote($accommodation, $arrival, $departure, $adults + $children);
+
+            if (!$quote->isAvailable()) {
+                continue;
+            }
+
+            $request = new BookingRequest($accommodation, $arrival, $departure, $adults, $name, strtolower(str_replace([' ', 'è'], ['.', 'e'], $name)).'@example.com');
+            $request->setChildren($children)
+                ->setGuestPhone('06 12 34 56 78')
+                ->setMessage($message)
+                ->setEstimatedPrice($quote->total)
+                ->markOutsideRules($quote->outsideRules);
+
+            if (BookingRequestStatus::Accepted === $status) {
+                $request->recordAnswer(new \DateTimeImmutable('-2 days'), 'Avec plaisir, à bientôt !', $quote->total);
+                $request->setMarking($status->value);
+                $manager->persist(new Unavailability($accommodation, $arrival, $departure, UnavailabilitySource::Booking, bookingRequest: $request));
+            }
+
+            $manager->persist($request);
+        }
+
+        $manager->flush();
     }
 
     /**
@@ -152,6 +203,8 @@ final class AppFixtures extends Fixture
                         ? null
                         : (int) round($weekly / 5 / 100) * 100,
                     'minimumNights' => $minimumNights,
+                    // Haute saison : semaines du samedi au samedi, de préférence.
+                    'saturdayArrival' => 7 === $minimumNights,
                 ]);
             }
         }
