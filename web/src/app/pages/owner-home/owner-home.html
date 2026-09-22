@@ -31,7 +31,9 @@
           <a
             class="owner-home__stat"
             [class]="'owner-home__stat--' + stat.status"
-            routerLink="/mon-espace/logements" [queryParams]="{ statut: stat.param }">
+            routerLink="/mon-espace/logements"
+            [queryParams]="{ statut: stat.param }"
+          >
             <span class="owner-home__stat-count">{{ stat.count ?? '–' }}</span>
             <span class="owner-home__stat-label">{{ stat.label }}</span>
           </a>
@@ -39,12 +41,37 @@
       }
     </ul>
 
+    @if (calendars().length) {
+      <h2 class="owner-home__section-title">Vos calendriers</h2>
+      <section class="owner-home__calendars">
+        <p class="owner-home__calendars-summary">{{ calendarSummary() }}</p>
+        <ul class="owner-home__calendar-list">
+          @for (item of calendars(); track item.slug) {
+            <li class="owner-home__calendar">
+              <span class="owner-home__calendar-name">{{ name(item) }}</span>
+              <span
+                class="owner-home__pill"
+                [class.owner-home__pill--stale]="!item.calendarUpToDate"
+              >
+                {{ item.calendarUpToDate ? 'À jour' : 'À vérifier' }}
+              </span>
+              <span class="owner-home__calendar-date">{{
+                checkedLabel(item.calendarCheckedAt)
+              }}</span>
+              <a
+                class="owner-home__calendar-link"
+                [routerLink]="['/mon-espace/logements', item.slug, 'calendrier']"
+              >
+                Ouvrir le calendrier
+              </a>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
     <h2 class="owner-home__section-title">Bientôt dans votre espace</h2>
     <ul class="owner-home__soon">
-      <li>
-        <strong>Calendrier</strong> — bloquez les semaines déjà louées ailleurs, pour ne jamais
-        recevoir de demande en double.
-      </li>
       <li>
         <strong>Demandes de réservation</strong> — recevez les demandes des locataires et répondez-y
         en un clic.

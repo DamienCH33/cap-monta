@@ -15,6 +15,36 @@ export interface OwnerAccommodation {
   description: string;
   /** Dans l'ordre : la première est la couverture. */
   photos: OwnerPhoto[];
+  /** Dernière vérification du calendrier par le propriétaire ; null s'il ne l'a jamais fait. */
+  calendarCheckedAt: string | null;
+  /** Vérifié il y a moins de 30 jours : le badge « Calendrier à jour » s'affiche. */
+  calendarUpToDate: boolean;
+}
+
+/** « vérifié aujourd'hui », « vérifié il y a 34 jours », « jamais vérifié ». */
+export function checkedLabel(checkedAt: string | null, now = new Date()): string {
+  if (null === checkedAt) {
+    return 'jamais vérifié';
+  }
+
+  const day = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const days = Math.round((day(now) - day(new Date(checkedAt))) / 86_400_000);
+
+  if (days <= 0) {
+    return "vérifié aujourd'hui";
+  }
+
+  return 1 === days ? 'vérifié hier' : `vérifié il y a ${days} jours`;
+}
+
+/** Les calendriers à vérifier d'abord, du plus ancien au plus récent ; « jamais » en tête. */
+export function byCalendarUrgency(a: OwnerAccommodation, b: OwnerAccommodation): number {
+  if (a.calendarUpToDate !== b.calendarUpToDate) {
+    return a.calendarUpToDate ? 1 : -1;
+  }
+
+  return (a.calendarCheckedAt ?? '').localeCompare(b.calendarCheckedAt ?? '');
 }
 
 /** Une photo du logement : grande version pour la fiche, miniature pour les cartes. */

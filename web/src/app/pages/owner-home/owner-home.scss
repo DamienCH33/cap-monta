@@ -156,6 +156,79 @@
   color: var(--oh-muted);
 }
 
+// Un calendrier par logement en ligne ; ceux à vérifier en premier.
+.owner-home__calendars {
+  max-width: 56rem;
+  margin: 0 0 2.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--oh-line);
+  border-radius: 0.875rem;
+  background: #fff;
+}
+
+.owner-home__calendars-summary {
+  margin: 0 0 0.5rem;
+  color: var(--oh-muted);
+  font-size: 0.9rem;
+}
+
+.owner-home__calendar-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.owner-home__calendar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 0.35rem 1rem;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--oh-line);
+
+  &:first-child {
+    border-top: none;
+  }
+
+  @media (max-width: 36rem) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.owner-home__calendar-name {
+  font-weight: 600;
+}
+
+.owner-home__pill {
+  justify-self: start;
+  padding: 0.15rem 0.6rem;
+  border-radius: 1rem;
+  background: var(--success-bg);
+  color: var(--success-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  &--stale {
+    background: var(--amber-bg);
+    color: var(--amber-text);
+  }
+}
+
+.owner-home__calendar-date {
+  color: var(--oh-muted);
+  font-size: 0.85rem;
+}
+
+.owner-home__calendar-link {
+  color: var(--oh-sea);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 // Ce qui arrive : discret, ne prend pas la place de ce qui existe.
 .owner-home__soon {
   display: grid;
