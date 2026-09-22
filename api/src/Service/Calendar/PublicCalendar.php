@@ -8,6 +8,7 @@ use App\ApiResource\BusyPeriod;
 use App\Entity\Accommodation;
 use App\Entity\Unavailability;
 use App\Repository\UnavailabilityRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -21,6 +22,9 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
  *
  * Cached in Redis per accommodation and per day (the window starts today). Every change
  * to the calendar goes through invalidate(), which drops all the days at once by tag.
+ *
+ * Redis is a speed-up, never a dependency: when it is down, the calendar is read from
+ * PostgreSQL directly and the page still shows.
  */
 final readonly class PublicCalendar
 {
@@ -28,6 +32,7 @@ final readonly class PublicCalendar
         private UnavailabilityRepository $unavailabilities,
         #[Autowire(service: 'calendar.cache')]
         private TagAwareCacheInterface $cache,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -38,12 +43,19 @@ final readonly class PublicCalendar
     {
         $key = sprintf('calendar.%s.%s.%s', $accommodation->getId()->toRfc4122(), $from->format('Ymd'), $to->format('Ymd'));
 
-        /** @var list<array{0: string, 1: string}> $periods */
-        $periods = $this->cache->get($key, function (ItemInterface $item) use ($accommodation, $from, $to): array {
-            $item->tag(self::tag($accommodation));
+        $compute = fn (): array => self::merge($this->unavailabilities->findForPeriod($accommodation, $from, $to));
 
-            return self::merge($this->unavailabilities->findForPeriod($accommodation, $from, $to));
-        });
+        try {
+            /** @var list<array{0: string, 1: string}> $periods */
+            $periods = $this->cache->get($key, function (ItemInterface $item) use ($accommodation, $compute): array {
+                $item->tag(self::tag($accommodation));
+
+                return $compute();
+            });
+        } catch (\Throwable $e) {
+            $this->logger->warning('Calendar cache unavailable, read from the database: {message}', ['message' => $e->getMessage(), 'exception' => $e]);
+            $periods = $compute();
+        }
 
         return array_map(
             static fn (array $period): BusyPeriod => new BusyPeriod(
@@ -57,7 +69,16 @@ final readonly class PublicCalendar
     /** To call after any change to the accommodation's unavailabilities. */
     public function invalidate(Accommodation $accommodation): void
     {
-        $this->cache->invalidateTags([self::tag($accommodation)]);
+        try {
+            $this->cache->invalidateTags([self::tag($accommodation)]);
+        } catch (\Throwable $e) {
+            // Redis down: nothing was cached meanwhile, and the entries expire within a day anyway.
+            $this->logger->error('Calendar cache not invalidated for {slug}: {message}', [
+                'slug' => $accommodation->getSlug(),
+                'message' => $e->getMessage(),
+                'exception' => $e,
+            ]);
+        }
     }
 
     /**

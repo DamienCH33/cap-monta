@@ -12,7 +12,9 @@ use App\Repository\UnavailabilityRepository;
 use App\Service\Calendar\PublicCalendar;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Lock\Exception\LockAcquiringException;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Workflow\WorkflowInterface;
 
@@ -40,6 +42,7 @@ final readonly class BookingDesk
         private PublicCalendar $publicCalendar,
         private BookingMailer $mailer,
         private ClockInterface $clock,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -72,8 +75,16 @@ final readonly class BookingDesk
         // ADR 004: one request at a time per accommodation. The exclusion constraint is the
         // safety net; the lock turns a race into a clean 409 instead of a failed transaction.
         $lock = $this->locks->createLock('resa:logement:'.$accommodation->getId()->toRfc4122(), 30);
-        $lock->acquire(true);
         $others = [];
+        $locked = false;
+
+        try {
+            $locked = $lock->acquire(true);
+        } catch (LockAcquiringException $e) {
+            // Redis down: go on without the lock. The exclusion constraint still refuses a
+            // double booking; at worst the loser of a race gets an error instead of a 409.
+            $this->logger->warning('Booking lock unavailable, accepting without it: {message}', ['message' => $e->getMessage(), 'exception' => $e]);
+        }
 
         try {
             $this->em->refresh($request);
@@ -107,7 +118,9 @@ final readonly class BookingDesk
             $accommodation->markCalendarChecked($now);
             $this->em->flush();
         } finally {
-            $lock->release();
+            if ($locked) {
+                $lock->release();
+            }
         }
 
         $this->publicCalendar->invalidate($accommodation);
