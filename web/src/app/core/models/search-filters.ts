@@ -38,15 +38,55 @@ export const ACCOMMODATION_TYPES: readonly {
   { key: 'bungalow', slug: 'bungalow', label: 'Bungalow', hint: '3 chambres' },
 ];
 
-export const AMENITIES: readonly { key: string; label: string }[] = [
-  { key: 'climatisation', label: 'Climatisation' },
-  { key: 'lave-vaisselle', label: 'Lave-vaisselle' },
-  { key: 'micro-ondes', label: 'Micro-ondes' },
-  { key: 'terrasse', label: 'Terrasse' },
-  { key: 'television', label: 'Télévision' },
-  { key: 'wifi', label: 'Wi-Fi' },
-  { key: 'plancha', label: 'Plancha' },
+export type AmenityGroup = 'confort' | 'cuisine' | 'exterieur' | 'pratique';
+
+export interface Amenity {
+  key: string;
+  label: string;
+  group: AmenityGroup;
+  /** Proposé dans les filtres de la recherche : les plus demandés, pas toute la liste. */
+  filter: boolean;
+}
+
+/**
+ * Liste fermée, volontairement : un texte libre donnerait « clim », « climatisation » et
+ * « Clim réversible » pour le même équipement, et le filtre de la recherche ne trouverait
+ * plus rien. Le reste se dit dans la description. Les clés ne changent jamais : elles sont
+ * en base et dans les liens de recherche partagés.
+ */
+export const AMENITIES: readonly Amenity[] = [
+  { key: 'climatisation', label: 'Climatisation', group: 'confort', filter: true },
+  { key: 'chauffage', label: 'Chauffage', group: 'confort', filter: false },
+  { key: 'television', label: 'Télévision', group: 'confort', filter: false },
+  { key: 'wifi', label: 'Wi-Fi', group: 'confort', filter: true },
+  { key: 'lave-vaisselle', label: 'Lave-vaisselle', group: 'cuisine', filter: true },
+  { key: 'micro-ondes', label: 'Micro-ondes', group: 'cuisine', filter: false },
+  { key: 'four', label: 'Four', group: 'cuisine', filter: false },
+  { key: 'cafetiere', label: 'Cafetière', group: 'cuisine', filter: false },
+  { key: 'terrasse', label: 'Terrasse', group: 'exterieur', filter: true },
+  { key: 'terrasse-couverte', label: 'Terrasse couverte', group: 'exterieur', filter: false },
+  { key: 'salon-de-jardin', label: 'Salon de jardin', group: 'exterieur', filter: false },
+  { key: 'plancha', label: 'Plancha', group: 'exterieur', filter: true },
+  { key: 'barbecue', label: 'Barbecue', group: 'exterieur', filter: false },
+  { key: 'douche-exterieure', label: 'Douche extérieure', group: 'exterieur', filter: false },
+  { key: 'lave-linge', label: 'Lave-linge', group: 'pratique', filter: true },
+  { key: 'parking', label: 'Place de parking', group: 'pratique', filter: true },
+  { key: 'linge-fourni', label: 'Linge de lit fourni', group: 'pratique', filter: false },
+  { key: 'lit-bebe', label: 'Lit bébé', group: 'pratique', filter: true },
+  { key: 'velos', label: 'Vélos à disposition', group: 'pratique', filter: false },
 ];
+
+export const AMENITY_GROUPS: readonly { key: AmenityGroup; label: string }[] = [
+  { key: 'confort', label: 'Confort' },
+  { key: 'cuisine', label: 'Cuisine' },
+  { key: 'exterieur', label: 'Extérieur' },
+  { key: 'pratique', label: 'Pratique' },
+];
+
+/** « television » → « Télévision » ; une clé inconnue s'affiche telle quelle. */
+export function amenityLabel(key: string): string {
+  return AMENITIES.find((amenity) => amenity.key === key)?.label ?? key;
+}
 
 export const SORT_OPTIONS: readonly { value: SortOrder; slug: string; label: string }[] = [
   { value: 'price_asc', slug: 'prix-croissant', label: 'Prix / semaine croissant' },

@@ -3,7 +3,8 @@ import { Component, computed, effect, inject, OnInit, signal } from '@angular/co
 import { ActivatedRoute, convertToParamMap, Params, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 
-import { Accommodation, typeLabel } from '../../core/models/accommodation';
+import { Accommodation, petsPolicyLabel, typeLabel } from '../../core/models/accommodation';
+import { amenityLabel } from '../../core/models/search-filters';
 import { Availability, BusyPeriod } from '../../core/models/availability';
 import { AccommodationService } from '../../core/services/accommodation';
 import { SeoService } from '../../core/services/seo';
@@ -61,6 +62,8 @@ export class AccommodationPage implements OnInit {
   });
 
   readonly typeLabel = typeLabel;
+  readonly petsPolicyLabel = petsPolicyLabel;
+  readonly amenityLabel = amenityLabel;
 
   constructor() {
     effect((onCleanup) => {

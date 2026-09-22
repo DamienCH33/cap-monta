@@ -83,6 +83,11 @@
             Redevances du domaine et taxe de séjour à régler sur place, en plus.
           </p>
         </div>
+        @if ('on_request' === petsPolicy() && guests().pets > 0) {
+          <p class="preference">
+            Ce propriétaire accepte les animaux au cas par cas : précisez lequel dans votre message.
+          </p>
+        }
         @if (currentQuote.outsideRules) {
           <p class="preference">
             Sur cette période, le propriétaire préfère les arrivées le samedi. Votre demande part

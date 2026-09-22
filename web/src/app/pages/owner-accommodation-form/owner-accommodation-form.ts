@@ -15,7 +15,8 @@ import {
   plural,
   statusLabel,
 } from '../../core/models/owner-accommodation';
-import { AMENITIES } from '../../core/models/search-filters';
+import { PETS_POLICIES, PetsPolicy } from '../../core/models/accommodation';
+import { AMENITIES, AMENITY_GROUPS } from '../../core/models/search-filters';
 import { AuthService } from '../../core/services/auth';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { OwnerFlash } from '../../core/services/owner-flash';
@@ -30,6 +31,7 @@ type Field =
   | 'district'
   | 'surface'
   | 'amenities'
+  | 'petsPolicy'
   | 'description';
 
 /** Ce que veut faire le propriétaire en validant. */
@@ -43,6 +45,7 @@ const FIELDS: Field[] = [
   'district',
   'surface',
   'amenities',
+  'petsPolicy',
   'description',
 ];
 
@@ -58,6 +61,7 @@ const MESSAGES: Record<Field, string> = {
   district: 'Quartier inconnu pour ce domaine.',
   surface: 'Indiquez une surface en m² entiers, entre 5 et 200 (par exemple 40).',
   amenities: 'Pas plus de 20 équipements.',
+  petsPolicy: 'Choisissez une règle pour les animaux.',
   description: 'La description ne peut pas dépasser 5000 caractères.',
 };
 
@@ -108,7 +112,12 @@ export class OwnerAccommodationForm {
   ];
 
   /** La même liste que le filtre de la recherche : une annonce doit être trouvée par ce filtre. */
-  readonly amenityOptions = AMENITIES;
+  /** Les équipements par rubrique, dans l'ordre du formulaire. */
+  readonly amenityGroups = AMENITY_GROUPS.map((group) => ({
+    ...group,
+    options: AMENITIES.filter((amenity) => amenity.group === group.key),
+  }));
+  readonly petsPolicies = PETS_POLICIES;
   readonly limits = LIMITS;
   readonly minDescription = MIN_DESCRIPTION;
   readonly plural = plural;
@@ -120,13 +129,29 @@ export class OwnerAccommodationForm {
     capacity: [4, [Validators.required, Validators.min(1), Validators.max(12)]],
     bedrooms: [1, [Validators.required, Validators.min(0), Validators.max(6)]],
     district: [''],
-    surface: new FormControl<number | null>(null, [Validators.min(5), Validators.max(200), Validators.pattern(/^\d+$/)]),
-    amenities: new FormControl<string[]>([], { nonNullable: true, validators: Validators.maxLength(20) }),
+    surface: new FormControl<number | null>(null, [
+      Validators.min(5),
+      Validators.max(200),
+      Validators.pattern(/^\d+$/),
+    ]),
+    amenities: new FormControl<string[]>([], {
+      nonNullable: true,
+      validators: Validators.maxLength(20),
+    }),
+    petsPolicy: new FormControl<PetsPolicy>('on_request', { nonNullable: true }),
     description: ['', Validators.maxLength(5000)],
   });
 
   private readonly districts = signal<DistrictOption[]>([]);
   private readonly resort = toSignal(this.form.controls.resort.valueChanges, { initialValue: '' });
+  private readonly petsPolicy = toSignal(this.form.controls.petsPolicy.valueChanges, {
+    initialValue: this.form.controls.petsPolicy.value,
+  });
+
+  /** Ce que la règle choisie change pour le voyageur, sous les trois choix. */
+  readonly petsHint = computed(
+    () => PETS_POLICIES.find((policy) => policy.value === this.petsPolicy())?.hint ?? '',
+  );
 
   /** Le quartier n'a de sens qu'au CHM : Euronat n'a pas encore de quartiers référencés. */
   readonly showDistrict = computed(() => 'chm' === this.resort());
@@ -158,7 +183,9 @@ export class OwnerAccommodationForm {
       case 'published':
         return { intent: 'save', label: 'Enregistrer les modifications' };
       case 'archived':
-        return this.canPublish() ? { intent: 'publish', label: 'Enregistrer et remettre en ligne' } : null;
+        return this.canPublish()
+          ? { intent: 'publish', label: 'Enregistrer et remettre en ligne' }
+          : null;
       default:
         return this.canPublish() ? { intent: 'publish', label: "Publier l'annonce" } : null;
     }
@@ -316,13 +343,17 @@ export class OwnerAccommodationForm {
     }
 
     this.submitted.set(true);
-    this.checkPublication.set('publish' === intent || ('save' === intent && 'published' === this.status()));
+    this.checkPublication.set(
+      'publish' === intent || ('save' === intent && 'published' === this.status()),
+    );
     this.serverErrors.set({});
     this.generalError.set(null);
     this.form.markAllAsTouched();
 
     if (FIELDS.some((field) => null !== this.error(field)) || null !== this.photosError()) {
-      this.generalError.set('Certaines informations sont à compléter : voir les messages en rouge.');
+      this.generalError.set(
+        'Certaines informations sont à compléter : voir les messages en rouge.',
+      );
       return;
     }
 
@@ -366,6 +397,7 @@ export class OwnerAccommodationForm {
           district: item.districtSlug ?? '',
           surface: item.surface,
           amenities: item.amenities,
+          petsPolicy: item.petsPolicy,
           description: item.description,
         });
         // Un mobil-home ne change pas de domaine : pour cela, on crée un autre logement.
@@ -407,6 +439,7 @@ export class OwnerAccommodationForm {
       bedrooms: value.bedrooms,
       surface: value.surface,
       amenities: value.amenities,
+      petsPolicy: value.petsPolicy,
       description: value.description.trim(),
       district: 'chm' === value.resort && '' !== value.district ? value.district : null,
     };
@@ -434,6 +467,9 @@ export class OwnerAccommodationForm {
     if (value.amenities.join('|') !== existing.amenities.join('|')) {
       changes.amenities = value.amenities;
     }
+    if (value.petsPolicy !== existing.petsPolicy) {
+      changes.petsPolicy = value.petsPolicy;
+    }
     if (description !== existing.description) {
       changes.description = description;
     }
@@ -450,7 +486,11 @@ export class OwnerAccommodationForm {
   }
 
   /** Enregistré, mais la publication a été refusée (email non confirmé, par exemple). */
-  private publishRefused(saved: OwnerAccommodation, error: HttpErrorResponse, created: boolean): void {
+  private publishRefused(
+    saved: OwnerAccommodation,
+    error: HttpErrorResponse,
+    created: boolean,
+  ): void {
     const message = `Votre annonce est enregistrée en brouillon, mais n'a pas pu être publiée : ${apiErrorMessage(error, 'réessayez dans un instant.')}`;
 
     if (created) {

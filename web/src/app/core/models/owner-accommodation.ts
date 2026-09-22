@@ -1,3 +1,5 @@
+import { PetsPolicy } from './accommodation';
+
 /** Un logement vu par son propriétaire, dans son espace : tous les statuts. */
 export type AccommodationStatus = 'draft' | 'published' | 'archived';
 
@@ -12,6 +14,7 @@ export interface OwnerAccommodation {
   bedrooms: number;
   surface: number | null;
   amenities: string[];
+  petsPolicy: PetsPolicy;
   description: string;
   /** Dans l'ordre : la première est la couverture. */
   photos: OwnerPhoto[];
@@ -64,6 +67,7 @@ export interface NewAccommodation {
   bedrooms: number;
   surface?: number | null;
   amenities?: string[];
+  petsPolicy?: PetsPolicy;
   description?: string;
   district?: string | null;
 }
@@ -75,6 +79,7 @@ export interface AccommodationChanges {
   bedrooms?: number;
   surface?: number | null;
   amenities?: string[];
+  petsPolicy?: PetsPolicy;
   description?: string;
   district?: string | null;
 }

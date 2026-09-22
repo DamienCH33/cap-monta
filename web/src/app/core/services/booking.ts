@@ -12,11 +12,21 @@ export class BookingService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/api`;
 
-  quote(slug: string, arrival: string, departure: string, guests: number): Observable<Quote> {
-    const params = new HttpParams()
+  quote(
+    slug: string,
+    arrival: string,
+    departure: string,
+    guests: number,
+    pets = 0,
+  ): Observable<Quote> {
+    let params = new HttpParams()
       .set('arrival', arrival)
       .set('departure', departure)
       .set('guests', guests);
+
+    if (pets > 0) {
+      params = params.set('pets', pets);
+    }
 
     return this.http.get<Quote>(`${this.baseUrl}/accommodations/${slug}/quote`, {
       params,

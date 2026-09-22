@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { BookingRequest } from '../../../core/models/booking-request';
+import { PetsPolicy } from '../../../core/models/accommodation';
 import { Guests, NO_GUESTS, travellerCount } from '../../../core/models/guests';
 import { Quote } from '../../../core/models/quote';
 import { BookingService } from '../../../core/services/booking';
@@ -29,6 +30,7 @@ export class BookingForm implements OnInit {
   readonly initialArrival = input('');
   readonly initialDeparture = input('');
   readonly initialGuests = input<Guests>(NO_GUESTS);
+  readonly petsPolicy = input<PetsPolicy>('on_request');
 
   readonly arrival = linkedSignal(() => this.initialArrival());
   readonly departure = linkedSignal(() => this.initialDeparture());
@@ -83,7 +85,7 @@ export class BookingForm implements OnInit {
       return;
     }
 
-    this.booking.quote(this.slug(), arrival, departure, travellers).subscribe({
+    this.booking.quote(this.slug(), arrival, departure, travellers, this.guests().pets).subscribe({
       next: (quote) => this.quote.set(quote),
       error: () => this.quote.set(null),
     });
@@ -142,6 +144,8 @@ export class BookingForm implements OnInit {
         return `Ce logement accueille ${quote.maxCapacity} personnes au maximum, bébés non compris.`;
       case 'stay_too_short':
         return `Le propriétaire demande ${quote.minimumNights} nuits minimum sur cette période.`;
+      case 'pets_not_allowed':
+        return "Le propriétaire n'accepte pas les animaux dans ce logement.";
       default:
         return 'Ces dates ne peuvent pas être réservées.';
     }

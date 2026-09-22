@@ -37,7 +37,12 @@
       </p>
     }
 
-    <form class="listing-form__form" [formGroup]="form" (ngSubmit)="submit(primary()?.intent ?? 'draft')" novalidate>
+    <form
+      class="listing-form__form"
+      [formGroup]="form"
+      (ngSubmit)="submit(primary()?.intent ?? 'draft')"
+      novalidate
+    >
       @if (generalError(); as message) {
         <p class="listing-form__alert" role="alert">{{ message }}</p>
       }
@@ -55,7 +60,12 @@
             <div class="listing-form__choices listing-form__choices--two">
               @for (option of resorts; track option.value) {
                 <label class="listing-form__choice">
-                  <input type="radio" formControlName="resort" [value]="option.value" (change)="onResortChange()" />
+                  <input
+                    type="radio"
+                    formControlName="resort"
+                    [value]="option.value"
+                    (change)="onResortChange()"
+                  />
                   <span>{{ option.label }}</span>
                 </label>
               }
@@ -76,7 +86,12 @@
           <div class="listing-form__choices listing-form__choices--three">
             @for (option of types; track option.value) {
               <label class="listing-form__choice">
-                <input type="radio" formControlName="type" [value]="option.value" (change)="forget('type')" />
+                <input
+                  type="radio"
+                  formControlName="type"
+                  [value]="option.value"
+                  (change)="forget('type')"
+                />
                 <span>{{ option.label }}</span>
               </label>
             }
@@ -96,7 +111,9 @@
                 aria-label="Une personne de moins"
                 [disabled]="form.controls.capacity.value <= limits.capacity.min"
                 (click)="step('capacity', -1)"
-              >−</button>
+              >
+                −
+              </button>
               <output class="listing-form__value" aria-live="polite">
                 {{ plural(form.controls.capacity.value, 'personne', 'personnes') }}
               </output>
@@ -106,7 +123,9 @@
                 aria-label="Une personne de plus"
                 [disabled]="form.controls.capacity.value >= limits.capacity.max"
                 (click)="step('capacity', 1)"
-              >+</button>
+              >
+                +
+              </button>
             </div>
             @if (error('capacity'); as message) {
               <p class="listing-form__error" role="alert">{{ message }}</p>
@@ -122,7 +141,9 @@
                 aria-label="Une chambre de moins"
                 [disabled]="form.controls.bedrooms.value <= limits.bedrooms.min"
                 (click)="step('bedrooms', -1)"
-              >−</button>
+              >
+                −
+              </button>
               <output class="listing-form__value" aria-live="polite">
                 {{ plural(form.controls.bedrooms.value, 'chambre', 'chambres') }}
               </output>
@@ -132,7 +153,9 @@
                 aria-label="Une chambre de plus"
                 [disabled]="form.controls.bedrooms.value >= limits.bedrooms.max"
                 (click)="step('bedrooms', 1)"
-              >+</button>
+              >
+                +
+              </button>
             </div>
             @if (error('bedrooms'); as message) {
               <p class="listing-form__error" role="alert">{{ message }}</p>
@@ -140,9 +163,19 @@
           </div>
 
           <label class="listing-form__group">
-            <span class="listing-form__label">Surface <span class="listing-form__muted">(facultatif)</span></span>
+            <span class="listing-form__label"
+              >Surface <span class="listing-form__muted">(facultatif)</span></span
+            >
             <span class="listing-form__suffix">
-              <input type="number" inputmode="numeric" min="5" max="200" step="1" formControlName="surface" (input)="forget('surface')" />
+              <input
+                type="number"
+                inputmode="numeric"
+                min="5"
+                max="200"
+                step="1"
+                formControlName="surface"
+                (input)="forget('surface')"
+              />
               <span aria-hidden="true">m²</span>
             </span>
             @if (error('surface'); as message) {
@@ -175,17 +208,48 @@
       <!-- 3. Équipements -->
       <section class="listing-form__section">
         <h2 class="listing-form__section-title">Équipements</h2>
-        <div class="listing-form__amenities">
-          @for (amenity of amenityOptions; track amenity.key) {
-            <label class="listing-form__amenity">
-              <input type="checkbox" [checked]="hasAmenity(amenity.key)" (change)="toggleAmenity(amenity.key)" />
-              <span>{{ amenity.label }}</span>
-            </label>
-          }
-        </div>
+        @for (group of amenityGroups; track group.key) {
+          <p class="listing-form__label">{{ group.label }}</p>
+          <div class="listing-form__amenities">
+            @for (amenity of group.options; track amenity.key) {
+              <label class="listing-form__amenity">
+                <input
+                  type="checkbox"
+                  [checked]="hasAmenity(amenity.key)"
+                  (change)="toggleAmenity(amenity.key)"
+                />
+                <span>{{ amenity.label }}</span>
+              </label>
+            }
+          </div>
+        }
+        <p class="listing-form__hint">
+          Un équipement qui manque ? Décrivez-le dans la présentation.
+        </p>
         @if (error('amenities'); as message) {
           <p class="listing-form__error" role="alert">{{ message }}</p>
         }
+
+        <fieldset class="listing-form__group">
+          <legend class="listing-form__label">Animaux</legend>
+          <div class="listing-form__choices listing-form__choices--three">
+            @for (option of petsPolicies; track option.value) {
+              <label class="listing-form__choice">
+                <input
+                  type="radio"
+                  formControlName="petsPolicy"
+                  [value]="option.value"
+                  (change)="forget('petsPolicy')"
+                />
+                <span>{{ option.label }}</span>
+              </label>
+            }
+          </div>
+          <p class="listing-form__hint">{{ petsHint() }}</p>
+          @if (error('petsPolicy'); as message) {
+            <p class="listing-form__error" role="alert">{{ message }}</p>
+          }
+        </fieldset>
       </section>
 
       <!-- 4. Description -->

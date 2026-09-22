@@ -96,6 +96,7 @@ export class Search implements OnInit {
             arrival: params.get('arrivee') ?? undefined,
             departure: params.get('depart') ?? undefined,
             guests: travellerCount(this.guests()) || undefined,
+            pets: this.guests().pets || undefined,
             districts: filters.districts,
             types: filters.types,
             bedrooms: filters.bedrooms || undefined,

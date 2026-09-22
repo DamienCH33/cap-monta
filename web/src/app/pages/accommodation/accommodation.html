@@ -45,13 +45,18 @@
       </p>
     </header>
 
-    @if (logement.amenities.length) {
-      <ul class="amenities">
-        @for (amenity of logement.amenities; track amenity) {
-          <li class="amenities__item">{{ amenity }}</li>
-        }
-      </ul>
-    }
+    <ul class="amenities">
+      @for (amenity of logement.amenities; track amenity) {
+        <li class="amenities__item">{{ amenityLabel(amenity) }}</li>
+      }
+      <li
+        class="amenities__item amenities__item--pets"
+        [class.amenities__item--no]="'not_allowed' === logement.petsPolicy"
+      >
+        <cm-icon name="paw" />
+        {{ petsPolicyLabel(logement.petsPolicy) }}
+      </li>
+    </ul>
 
     <div class="layout">
       <div class="layout__main">
@@ -132,6 +137,7 @@
             [initialArrival]="initialArrival()"
             [initialDeparture]="initialDeparture()"
             [initialGuests]="initialGuests()"
+            [petsPolicy]="logement.petsPolicy"
           />
         }
       </aside>

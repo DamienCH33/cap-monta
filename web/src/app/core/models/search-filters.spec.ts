@@ -1,6 +1,7 @@
 import { convertToParamMap } from '@angular/router';
 
 import {
+  amenityLabel,
   filterChips,
   filtersFromQuery,
   filtersToQuery,
@@ -53,5 +54,12 @@ describe('search filters', () => {
     expect(chips.map((chip) => chip.label)).toEqual(['Europa', '2 ch. et +']);
     expect(chips[0].without.districts).toEqual([]);
     expect(chips[1].without.bedrooms).toBe(0);
+  });
+});
+
+describe('amenityLabel', () => {
+  it('shows the label, or the key itself when it is unknown', () => {
+    expect(amenityLabel('television')).toBe('Télévision');
+    expect(amenityLabel('sauna')).toBe('sauna');
   });
 });

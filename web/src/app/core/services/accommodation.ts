@@ -79,6 +79,9 @@ export class AccommodationService {
     if (criteria.guests) {
       params = params.set('guests', criteria.guests);
     }
+    if (criteria.pets) {
+      params = params.set('pets', criteria.pets);
+    }
     if (criteria.resort) {
       params = params.set('resort', criteria.resort);
     }

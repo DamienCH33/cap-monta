@@ -1,4 +1,5 @@
-export type RefusalReason = 'unavailable' | 'too_many_guests' | 'stay_too_short';
+export type RefusalReason =
+  'unavailable' | 'too_many_guests' | 'stay_too_short' | 'pets_not_allowed';
 
 export interface Quote {
   slug: string;

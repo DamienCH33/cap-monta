@@ -4,6 +4,8 @@ export interface SearchCriteria {
   arrival?: string;
   departure?: string;
   guests?: number;
+  /** Au moins un animal : les logements qui les refusent sont écartés. */
+  pets?: number;
   resort?: string;
   districts?: string[];
   types?: AccommodationTypeKey[];

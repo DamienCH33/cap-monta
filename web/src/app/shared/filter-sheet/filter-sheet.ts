@@ -35,7 +35,7 @@ export class FilterSheet implements AfterViewInit {
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 
   readonly types = ACCOMMODATION_TYPES;
-  readonly amenities = AMENITIES;
+  readonly amenities = AMENITIES.filter((amenity) => amenity.filter);
   readonly bedroomOptions = [
     { value: 0, label: 'Toutes' },
     ...Array.from({ length: MAX_BEDROOMS_FILTER }, (_, index) => ({

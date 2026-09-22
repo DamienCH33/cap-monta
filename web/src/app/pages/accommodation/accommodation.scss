@@ -41,6 +41,18 @@
     background: var(--green-bg);
     border-radius: 20px;
   }
+
+  &__item--pets {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__item--no {
+    color: var(--text-secondary);
+    background: none;
+    border: 1px solid var(--border);
+  }
 }
 
 .block {

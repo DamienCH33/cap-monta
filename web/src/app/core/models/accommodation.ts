@@ -11,6 +11,7 @@ export interface Accommodation {
   bedrooms: number;
   surface: number | null;
   amenities: string[];
+  petsPolicy: PetsPolicy;
   description: string;
   priceFrom: number | null;
   availability: AvailabilityWeek[];
@@ -59,6 +60,27 @@ const TYPE_LABELS: Record<string, string> = {
 
 export function typeLabel(type: string): string {
   return TYPE_LABELS[type] ?? 'Logement';
+}
+
+/** Ce que le propriétaire a décidé pour les animaux. */
+export type PetsPolicy = 'allowed' | 'on_request' | 'not_allowed';
+
+export const PETS_POLICIES: { value: PetsPolicy; label: string; hint: string }[] = [
+  { value: 'allowed', label: 'Animaux acceptés', hint: 'Les animaux sont les bienvenus.' },
+  {
+    value: 'on_request',
+    label: 'Animaux sur demande',
+    hint: 'Le voyageur le précise dans sa demande, vous décidez au cas par cas.',
+  },
+  {
+    value: 'not_allowed',
+    label: 'Animaux non acceptés',
+    hint: 'Les demandes avec un animal sont refusées automatiquement.',
+  },
+];
+
+export function petsPolicyLabel(policy: PetsPolicy): string {
+  return PETS_POLICIES.find((p) => p.value === policy)?.label ?? 'Animaux sur demande';
 }
 
 export interface AccommodationPage {
