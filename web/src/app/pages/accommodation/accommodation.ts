@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, Params, RouterLink } from '@angular/router';
@@ -12,6 +13,7 @@ import {
 import { amenityLabel } from '../../core/models/search-filters';
 import { Availability, BusyPeriod } from '../../core/models/availability';
 import { AccommodationService } from '../../core/services/accommodation';
+import { HttpStatus } from '../../core/services/http-status';
 import { SeoService } from '../../core/services/seo';
 import { Calendar } from '../../shared/calendar/calendar';
 import { BookingForm } from './booking-form/booking-form';
@@ -22,10 +24,20 @@ import { NavigationOrigin } from '../../core/services/navigation-origin';
 import { AuthService } from '../../core/services/auth';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { PhotoGallery } from './photo-gallery/photo-gallery';
+import { ReportListing } from './report-listing/report-listing';
 
 @Component({
   selector: 'cm-accommodation',
-  imports: [Icon, DatePipe, DecimalPipe, RouterLink, Calendar, BookingForm, PhotoGallery],
+  imports: [
+    Icon,
+    DatePipe,
+    DecimalPipe,
+    RouterLink,
+    Calendar,
+    BookingForm,
+    PhotoGallery,
+    ReportListing,
+  ],
   templateUrl: './accommodation.html',
   styleUrl: './accommodation.scss',
 })
@@ -54,6 +66,8 @@ export class AccommodationPage implements OnInit {
 
   readonly accommodation = signal<Accommodation | null>(null);
   readonly notFound = signal(false);
+  readonly unavailable = signal(false);
+  private readonly httpStatus = inject(HttpStatus);
   readonly searchParams = signal<Params>({});
   readonly busy = signal<BusyPeriod[]>([]);
 
@@ -106,8 +120,18 @@ export class AccommodationPage implements OnInit {
           this.accommodation.set(found);
           this.applySeo(found);
         },
-        error: () => {
+        error: (error: HttpErrorResponse) => {
+          // 404 : le logement n'existe pas ou n'est plus en ligne. Autre chose : l'API ne
+          // répond pas, la page doit le dire (503) au lieu de faire croire qu'il est supprimé.
+          if (404 !== error.status) {
+            this.unavailable.set(true);
+            this.httpStatus.set(503);
+
+            return;
+          }
+
           this.notFound.set(true);
+          this.httpStatus.set(404);
           this.seo.apply({
             title: 'Logement introuvable',
             description: 'Ce logement n’est plus en ligne. Voir les autres logements disponibles.',

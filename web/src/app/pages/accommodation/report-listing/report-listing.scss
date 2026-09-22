@@ -1,0 +1,76 @@
+.report {
+  margin-top: 24px;
+  font-size: 13px;
+
+  &__toggle {
+    cursor: pointer;
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  &__form {
+    display: grid;
+    gap: 12px;
+    max-width: 32rem;
+    margin-top: 12px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+  }
+
+  &__reasons {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  &__label {
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  &__reason {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  &__field {
+    display: grid;
+    gap: 4px;
+
+    textarea,
+    input {
+      padding: 8px 10px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      font: inherit;
+    }
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--danger-text);
+  }
+
+  &__submit {
+    justify-self: start;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 999px;
+    background: var(--blue);
+    color: var(--surface-2);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  &__done {
+    margin-top: 12px;
+    color: var(--green-dark);
+  }
+}

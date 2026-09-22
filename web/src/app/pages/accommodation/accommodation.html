@@ -1,6 +1,11 @@
 <div class="container">
   @if (notFound()) {
-    <p class="missing">Ce logement n'existe pas ou n'est plus en ligne.</p>
+    <p class="missing">
+      Ce logement n'existe pas ou n'est plus en ligne.
+      <a routerLink="/recherche">Voir les logements disponibles</a>
+    </p>
+  } @else if (unavailable()) {
+    <p class="missing">Le site ne répond pas pour le moment. Réessayez dans quelques minutes.</p>
   } @else if (accommodation(); as logement) {
     @if (fromOwnerSpace()) {
       <a class="back" routerLink="/mon-espace/logements">
@@ -121,6 +126,7 @@
         <section class="block">
           <h2 class="block__title">Le logement</h2>
           <p class="description">{{ logement.description }}</p>
+          <cm-report-listing [slug]="logement.slug" />
         </section>
       </div>
 
