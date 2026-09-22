@@ -46,6 +46,8 @@ when@test:
 when@dev:
     framework:
         rate_limiter:
+            booking_requests:
+                limit: 30
             registrations:
                 limit: 20
             password_resets:
