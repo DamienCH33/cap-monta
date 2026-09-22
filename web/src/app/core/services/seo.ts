@@ -10,6 +10,7 @@ export interface SeoTags {
   description: string;
   /** Chemin canonique, sans paramètres de requête. Commence par « / ». */
   path: string;
+  /** Chemin d'une image du site (« /hero-desktop.png ») ou adresse complète d'une photo de logement. */
   image?: string;
   /** Vrai pour une page qui ne doit pas être indexée : erreur, résultat vide, espace privé. */
   noindex?: boolean;
@@ -29,7 +30,10 @@ export class SeoService {
    */
   apply(tags: SeoTags): void {
     const url = `${environment.siteUrl}${tags.path}`;
-    const image = `${environment.siteUrl}${tags.image ?? '/hero-desktop.png'}`;
+    // Une photo de logement a déjà son adresse complète (stockage des photos) ; les images du site, non.
+    const image = /^https?:\/\//.test(tags.image ?? '')
+      ? (tags.image as string)
+      : `${environment.siteUrl}${tags.image ?? '/hero-desktop.png'}`;
     const title = `${tags.title} | Cap Monta`;
 
     this.titleService.setTitle(title);

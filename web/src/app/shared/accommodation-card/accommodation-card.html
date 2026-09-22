@@ -5,6 +5,17 @@
     [class.card__photo--roadside]="area()?.key === 'roadside'"
     [class.card__photo--unknown]="!area()"
   >
+    @if (accommodation().cover; as cover) {
+      <img
+        class="card__img"
+        [src]="cover.thumbUrl"
+        [attr.width]="cover.width"
+        [attr.height]="cover.height"
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    }
     <span class="card__badge">Calendrier à jour</span>
     @if (area(); as zone) {
       <span class="card__side"><cm-icon [name]="areaIcons[zone.key]" />{{ zone.label }}</span>

@@ -19,9 +19,13 @@
       </a>
     }
 
-    <section class="photo">
-      <cm-icon name="photo" />
-    </section>
+    @if (logement.photos.length) {
+      <cm-photo-gallery [photos]="logement.photos" [label]="photoLabel(logement)" />
+    } @else {
+      <section class="photo">
+        <cm-icon name="photo" />
+      </section>
+    }
 
     <header class="head">
       <h1 class="head__title">
@@ -107,8 +111,8 @@
           <div class="owner-preview">
             <p class="owner-preview__title">Aperçu de votre annonce</p>
             <p class="owner-preview__text">
-              C'est ce que voient les visiteurs. Le formulaire de demande de réservation
-              apparaît ici pour eux ; il est masqué pour vous.
+              C'est ce que voient les visiteurs. Le formulaire de demande de réservation apparaît
+              ici pour eux ; il est masqué pour vous.
             </p>
             <a class="owner-preview__link" routerLink="/mon-espace/logements">
               Retour à mes logements

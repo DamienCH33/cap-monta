@@ -1,0 +1,219 @@
+:host {
+  position: relative;
+  display: block;
+}
+
+// Mobile d'abord : une bande qu'on fait défiler, une photo à la fois.
+.gallery {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  border-radius: var(--radius-lg);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &__tile {
+    position: relative;
+    flex: 0 0 100%;
+    aspect-ratio: 3 / 2;
+    padding: 0;
+    overflow: hidden;
+    cursor: zoom-in;
+    background: var(--tile-sea);
+    border: none;
+    scroll-snap-align: start;
+
+    &:focus-visible {
+      outline: 3px solid var(--blue);
+      outline-offset: -3px;
+    }
+  }
+
+  &__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.15s;
+  }
+
+  &__tile:hover &__img {
+    filter: brightness(0.92);
+  }
+
+  &__more {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 500;
+    color: #fff;
+    background: rgb(4 44 83 / 55%);
+  }
+}
+
+// Reste en place quand on fait défiler la bande : hors du conteneur qui défile.
+.gallery-all {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  background: rgb(255 255 255 / 92%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+
+  &:hover {
+    background: #fff;
+  }
+}
+
+// Grand écran : une mosaïque, la couverture en grand à gauche.
+@media (min-width: 700px) {
+  .gallery {
+    display: grid;
+    height: 380px;
+    overflow: hidden;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+
+    &__tile {
+      aspect-ratio: auto;
+      min-height: 0;
+
+      &:first-child {
+        grid-row: span 2;
+      }
+
+      &--extra {
+        display: none;
+      }
+    }
+
+    // Une ou deux photos : une seule rangée, rien ne s'étend sur deux lignes.
+    &--1,
+    &--2 {
+      grid-template-rows: 1fr;
+
+      .gallery__tile:first-child {
+        grid-row: auto;
+      }
+    }
+
+    &--1 {
+      grid-template-columns: 1fr;
+    }
+
+    &--2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    &--3 {
+      grid-template-columns: 2fr 1fr;
+    }
+
+    &--4 {
+      grid-template-columns: 2fr 1fr 1fr;
+
+      .gallery__tile:last-child {
+        grid-column: span 2;
+      }
+    }
+  }
+}
+
+// Visionneuse plein écran.
+.viewer {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  background: rgb(4 20 38 / 96%);
+  border: none;
+
+  &[open] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &::backdrop {
+    background: rgb(4 20 38 / 80%);
+  }
+
+  &__img {
+    max-width: min(100vw, 1600px);
+    max-height: calc(100dvh - 96px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  &__count {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    margin: 0;
+    font-size: 13px;
+    color: rgb(255 255 255 / 85%);
+    transform: translateX(-50%);
+  }
+
+  &__close,
+  &__nav {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+    color: #fff;
+    cursor: pointer;
+    background: rgb(255 255 255 / 12%);
+    border: none;
+    border-radius: 50%;
+
+    &:hover {
+      background: rgb(255 255 255 / 24%);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+  }
+
+  &__close {
+    top: 10px;
+    right: 12px;
+  }
+
+  &__nav {
+    top: 50%;
+    transform: translateY(-50%);
+
+    &--prev {
+      left: 12px;
+    }
+
+    &--next {
+      right: 12px;
+    }
+  }
+}

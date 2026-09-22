@@ -11,6 +11,7 @@ const NAMES = [
   'building-store',
   'chevron-left',
   'chevron-right',
+  'layout-grid',
   'photo',
   'refresh',
   'ripple',
@@ -18,6 +19,7 @@ const NAMES = [
   'trash',
   'trees',
   'upload',
+  'x',
 ];
 
 const source = path.join(__dirname, '..', 'node_modules', '@tabler', 'icons', 'icons', 'outline');

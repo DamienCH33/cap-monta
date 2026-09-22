@@ -10,8 +10,17 @@
 
   &__photo {
     position: relative;
-    height: 110px;
+    height: 150px;
     background: var(--tile-sea);
+  }
+
+  // La miniature remplit le bandeau ; sans photo, l'aplat de couleur de la zone reste.
+  &__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   &__badge {

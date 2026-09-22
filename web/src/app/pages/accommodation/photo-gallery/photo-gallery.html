@@ -1,0 +1,80 @@
+<section class="gallery" [class]="'gallery--' + (photos().length > 4 ? 'many' : photos().length)">
+  @for (photo of photos(); track photo.url; let index = $index) {
+    <button
+      type="button"
+      class="gallery__tile"
+      [class.gallery__tile--extra]="index >= 5"
+      (click)="open(index)"
+    >
+      <img
+        class="gallery__img"
+        [src]="index === 0 ? photo.url : photo.thumbUrl"
+        [attr.srcset]="srcset(photo)"
+        [attr.sizes]="
+          index === 0 ? '(min-width: 700px) 60vw, 100vw' : '(min-width: 700px) 20vw, 100vw'
+        "
+        [attr.width]="photo.width"
+        [attr.height]="photo.height"
+        [alt]="alt(index)"
+        [attr.loading]="index === 0 ? 'eager' : 'lazy'"
+        [attr.fetchpriority]="index === 0 ? 'high' : null"
+        decoding="async"
+      />
+      @if (index === 4 && hidden() > 0) {
+        <span class="gallery__more">+{{ hidden() }}</span>
+      }
+    </button>
+  }
+</section>
+
+@if (photos().length > 1) {
+  <button type="button" class="gallery-all" (click)="open(0)">
+    <cm-icon name="layout-grid" />
+    Voir les {{ photos().length }} photos
+  </button>
+}
+
+<dialog
+  #viewer
+  class="viewer"
+  aria-label="Photos du logement"
+  (keydown)="onKeydown($event)"
+  (click)="onBackdropClick($event)"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)"
+>
+  @if (photos()[current()]; as photo) {
+    <p class="viewer__count" aria-live="polite">{{ current() + 1 }} / {{ photos().length }}</p>
+
+    <button type="button" class="viewer__close" (click)="close()" aria-label="Fermer">
+      <cm-icon name="x" />
+    </button>
+
+    <img
+      class="viewer__img"
+      [src]="photo.url"
+      [attr.width]="photo.width"
+      [attr.height]="photo.height"
+      [alt]="alt(current())"
+    />
+
+    @if (photos().length > 1) {
+      <button
+        type="button"
+        class="viewer__nav viewer__nav--prev"
+        (click)="previous()"
+        aria-label="Photo précédente"
+      >
+        <cm-icon name="chevron-left" />
+      </button>
+      <button
+        type="button"
+        class="viewer__nav viewer__nav--next"
+        (click)="next()"
+        aria-label="Photo suivante"
+      >
+        <cm-icon name="chevron-right" />
+      </button>
+    }
+  }
+</dialog>

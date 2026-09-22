@@ -15,6 +15,17 @@ export interface Accommodation {
   priceFrom: number | null;
   availability: AvailabilityWeek[];
   pricePeriods: PricePeriod[];
+  /** Photo de couverture : présente sur les cartes comme sur la fiche, null sans photo. */
+  cover: Photo | null;
+  /** Toutes les photos, couverture en premier. Vide dans la liste de recherche. */
+  photos: Photo[];
+}
+
+export interface Photo {
+  url: string;
+  thumbUrl: string;
+  width: number;
+  height: number;
 }
 
 export interface JsonLdCollection<T> {

@@ -13,10 +13,11 @@ import { environment } from '../../../environments/environment';
 import { guestsFromQuery, travellerCount } from '../../core/models/guests';
 import { Icon } from '../../shared/icon/icon';
 import { NavigationOrigin } from '../../core/services/navigation-origin';
+import { PhotoGallery } from './photo-gallery/photo-gallery';
 
 @Component({
   selector: 'cm-accommodation',
-  imports: [Icon, DatePipe, DecimalPipe, RouterLink, Calendar, BookingForm],
+  imports: [Icon, DatePipe, DecimalPipe, RouterLink, Calendar, BookingForm, PhotoGallery],
   templateUrl: './accommodation.html',
   styleUrl: './accommodation.scss',
 })
@@ -47,6 +48,11 @@ export class AccommodationPage implements OnInit {
   readonly typeLabel = typeLabel;
 
   readonly cameFromSearch = computed(() => Object.keys(this.searchParams()).length > 0);
+
+  /** « Mobil-home Europa » : le début du texte alternatif de chaque photo. */
+  photoLabel(logement: Accommodation): string {
+    return [typeLabel(logement.type), logement.district].filter(Boolean).join(' ');
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => this.searchParams.set(params));
@@ -98,6 +104,8 @@ export class AccommodationPage implements OnInit {
       title: `${type} ${logement.maxCapacity} pers. à ${place}`,
       description: `${type} à louer à ${place} : ${facts}.${price} Disponibilités à jour.`,
       path: `/logement/${logement.slug}`,
+      // La couverture sert d'aperçu quand le lien est partagé (Facebook, WhatsApp…).
+      image: logement.cover?.url,
     });
 
     this.seo.setJsonLd({
@@ -106,6 +114,7 @@ export class AccommodationPage implements OnInit {
       name: `${type} ${logement.maxCapacity} pers. à ${place}`,
       description: logement.description,
       url: `${environment.siteUrl}/logement/${logement.slug}`,
+      image: logement.photos.length ? logement.photos.map((photo) => photo.url) : undefined,
       address: {
         '@type': 'PostalAddress',
         addressLocality: 'chm' === logement.resort ? 'Vendays-Montalivet' : "Grayan-et-l'Hôpital",
