@@ -9,6 +9,13 @@ use App\Entity\PricePeriod;
 /**
  * Prices a stay from the rate grid published by the owner.
  *
+ * Rules, night by night within each rate period:
+ * - every full week costs the weekly rate;
+ * - the nights left over cost 1/7 of the weekly rate when the stay lasts a week or more (the
+ *   guest rents by the week, a period change in the middle must not make it dearer), and the
+ *   nightly rate for a shorter stay, or 1/7 of the weekly rate when there is none;
+ * - leftover nights never cost more than a full week.
+ *
  * Pure computation: no database, no dependency. The caller fetches the periods
  * (PricePeriodRepository::findCoveringStay) and hands them over.
  */
@@ -26,6 +33,7 @@ final class PriceCalculator
         $arrival = $arrival->setTime(0, 0);
         $departure = $departure->setTime(0, 0);
 
+        $stayNights = (int) $arrival->diff($departure)->days;
         $total = 0;
         $currentPeriod = null;
         $nights = 0;
@@ -40,7 +48,7 @@ final class PriceCalculator
 
             if ($period !== $currentPeriod) {
                 if (null !== $currentPeriod) {
-                    $total += $this->priceForNights($currentPeriod, $nights);
+                    $total += $this->priceForNights($currentPeriod, $nights, $stayNights);
                 }
 
                 $currentPeriod = $period;
@@ -55,7 +63,7 @@ final class PriceCalculator
             return null;
         }
 
-        return $total + $this->priceForNights($currentPeriod, $nights);
+        return $total + $this->priceForNights($currentPeriod, $nights, $stayNights);
     }
 
     /**
@@ -72,26 +80,31 @@ final class PriceCalculator
         return null;
     }
 
-    private function priceForNights(PricePeriod $period, int $nights): int
+    private function priceForNights(PricePeriod $period, int $nights, int $stayNights): int
     {
         $weekly = $period->getWeeklyPrice();
         $nightly = $period->getNightlyPrice();
 
-        if (null !== $weekly && null !== $nightly) {
-            return intdiv($nights, self::NIGHTS_PER_WEEK) * $weekly
-                + ($nights % self::NIGHTS_PER_WEEK) * $nightly;
+        if (null === $weekly) {
+            // Guaranteed by the price_period_has_a_price database constraint.
+            return $nights * ($nightly ?? throw new \LogicException('A price period must carry at least one rate.'));
         }
 
-        // Weekly rate only: the owner rents by the week, so we round up.
-        if (null !== $weekly) {
-            return (int) ceil($nights / self::NIGHTS_PER_WEEK) * $weekly;
-        }
+        $weeks = intdiv($nights, self::NIGHTS_PER_WEEK);
+        $extra = $nights % self::NIGHTS_PER_WEEK;
 
-        if (null !== $nightly) {
-            return $nights * $nightly;
-        }
+        $extraPrice = null !== $nightly && $stayNights < self::NIGHTS_PER_WEEK
+            ? $extra * $nightly
+            : self::proRata($weekly, $extra);
 
-        // Guaranteed by the price_period_has_a_price database constraint.
-        throw new \LogicException('A price period must carry at least one rate.');
+        return $weeks * $weekly + min($extraPrice, $weekly);
+    }
+
+    /**
+     * A share of the weekly rate, rounded to the euro: 650 € a week, 4 nights → 371 €.
+     */
+    public static function proRata(int $weekly, int $nights): int
+    {
+        return (int) round($weekly * $nights / self::NIGHTS_PER_WEEK / 100) * 100;
     }
 }
