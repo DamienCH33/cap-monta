@@ -1,0 +1,60 @@
+{# Mise en page de tous les emails : tableaux et styles en ligne, seuls compris partout (Gmail, Outlook). #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>{{ subject }}</title>
+</head>
+<body style="margin:0;padding:0;background:#eef3f7;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a18;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef3f7;">
+    <tr>
+        <td align="center" style="padding:24px 12px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+                <tr>
+                    <td style="padding:18px 28px;background:#185fa5;border-radius:10px 10px 0 0;color:#ffffff;font-size:18px;font-weight:600;letter-spacing:0.2px;">
+                        Cap Monta
+                        <span style="display:block;margin-top:2px;font-size:12px;font-weight:400;color:#cfe3f5;">Locations entre particuliers · CHM Montalivet et Euronat</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:28px;background:#ffffff;border-radius:0 0 10px 10px;font-size:15px;line-height:1.55;">
+                        {% for block in blocks %}
+                            {% if block.type == 'paragraph' %}
+                                <p style="margin:0 0 16px;">{{ block.html|raw }}</p>
+                            {% elseif block.type == 'button' %}
+                                <table role="presentation" cellpadding="0" cellspacing="0" style="margin:4px 0 20px;">
+                                    <tr>
+                                        <td style="border-radius:999px;background:#185fa5;">
+                                            <a href="{{ block.url }}" style="display:inline-block;padding:11px 22px;color:#ffffff;font-weight:600;text-decoration:none;border-radius:999px;">{{ block.text }}</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            {% elseif block.type == 'facts' %}
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;background:#e6f1fb;border-radius:8px;">
+                                    {% for row in block.rows %}
+                                        <tr>
+                                            <td style="padding:{{ loop.first ? '12px' : '4px' }} 14px {{ loop.last ? '12px' : '4px' }};width:90px;font-size:13px;color:#5f5e5a;vertical-align:top;">{{ row[0] }}</td>
+                                            <td style="padding:{{ loop.first ? '12px' : '4px' }} 14px {{ loop.last ? '12px' : '4px' }} 0;font-weight:600;color:#042c53;">{{ row[1] }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            {% elseif block.type == 'quote' %}
+                                <p style="margin:0 0 20px;padding:10px 14px;border-left:3px solid #0f6e56;background:#e1f5ee;color:#04342c;font-style:italic;white-space:pre-line;">{{ block.text }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:16px 28px;font-size:12px;line-height:1.5;color:#5f5e5a;text-align:center;">
+                        Cap Monta — sans commission, sans paiement en ligne.<br>
+                        Vous recevez ce message à la suite d'une action sur le site.
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

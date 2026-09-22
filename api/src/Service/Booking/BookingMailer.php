@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Service\Booking;
 
 use App\Entity\BookingRequest;
+use App\Service\Mail\MailComposer;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 
 /**
- * The emails of a booking request, in plain text until the HTML templates at the end of lot 3.
+ * The emails of a booking request. Written as plain text; MailComposer adds the HTML version.
  *
  * Privacy rule, stated on the booking form: the guest's email and phone reach the owner only
  * once the request is accepted, and the owner's only then too. Before that, each side talks
@@ -20,7 +20,7 @@ final readonly class BookingMailer
 {
     public function __construct(
         private MailerInterface $mailer,
-        #[Autowire('%app.mail_from%')] private string $from,
+        private MailComposer $composer,
         #[Autowire('%app.front_url%')] private string $frontUrl,
     ) {
     }
@@ -68,6 +68,31 @@ final readonly class BookingMailer
 
                 Suivre ou annuler votre demande :
                 {$tracking}
+
+                Cap Monta
+                TXT,
+        );
+    }
+
+    public function reminder(BookingRequest $request): void
+    {
+        $title = $request->getAccommodation()->title();
+        $deadline = self::dateTime($request->getExpiresAt());
+
+        $this->send(
+            $request->getAccommodation()->getOwner()->getEmail(),
+            'Rappel : une demande attend votre réponse',
+            <<<TXT
+                Bonjour,
+
+                Une demande pour votre {$title} attend toujours votre réponse.
+
+                {$this->summary($request)}
+
+                Sans réponse avant le {$deadline}, elle expirera et le voyageur ira voir
+                ailleurs. Accepter ou refuser prend un clic :
+
+                {$this->frontUrl}/mon-espace/demandes
 
                 Cap Monta
                 TXT,
@@ -337,7 +362,7 @@ final readonly class BookingMailer
 
     private function send(string $to, string $subject, string $text): void
     {
-        $this->mailer->send((new Email())->from($this->from)->to($to)->subject($subject.' — Cap Monta')->text($text));
+        $this->mailer->send($this->composer->compose($to, $subject.' — Cap Monta', $text));
     }
 
     private static function date(\DateTimeImmutable $date): string
