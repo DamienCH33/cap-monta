@@ -94,10 +94,11 @@ final class AppFixtures extends Fixture
         ]);
         // Les quartiers d'Euronat ne sont pas encore référencés.
 
-        array_push($accommodations, ...AccommodationFactory::createMany(3, [
+        $damiensListings = AccommodationFactory::createMany(3, [
             'owner' => $damien,
             'district' => $districts[3],
-        ]));
+        ]);
+        array_push($accommodations, ...$damiensListings);
         array_push($accommodations, ...AccommodationFactory::createMany(3, ['resort' => Resort::Euronat]));
 
         foreach ($accommodations as $index => $accommodation) {
@@ -108,7 +109,19 @@ final class AppFixtures extends Fixture
             }
 
             $this->fillCalendar($accommodation, $index);
+
+            // Trois propriétaires sur quatre tiennent leur calendrier : le badge
+            // « Calendrier à jour » doit apparaître sur certaines cartes, pas sur toutes.
+            if (3 !== $index % 4) {
+                $accommodation->markCalendarChecked(new \DateTimeImmutable(sprintf('-%d days', $index % 20)));
+            }
         }
+
+        // Un calendrier du compte de test oublié depuis plus d'un mois : « Vos calendriers »
+        // du tableau de bord doit montrer les deux états.
+        $damiensListings[1]->markCalendarChecked(new \DateTimeImmutable('-45 days'));
+
+        $manager->flush();
     }
 
     /**

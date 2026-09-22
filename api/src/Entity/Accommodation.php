@@ -81,6 +81,13 @@ class Accommodation
     #[ORM\OrderBy(['position' => 'ASC'])]
     private Collection $photos;
 
+    /**
+     * Last time the owner changed his calendar or confirmed it was right. Drives the
+     * "Calendrier à jour" badge: a calendar nobody has looked at for weeks is a guess.
+     */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $calendarCheckedAt = null;
+
     public function __construct(
         string $slug,
         Resort $resort,
@@ -333,6 +340,25 @@ class Accommodation
     public function getStatus(): AccommodationStatus
     {
         return $this->status;
+    }
+
+    /** Beyond this, the calendar is no longer shown as up to date. */
+    public const CALENDAR_FRESHNESS_DAYS = 30;
+
+    public function markCalendarChecked(\DateTimeImmutable $now): void
+    {
+        $this->calendarCheckedAt = $now;
+    }
+
+    public function getCalendarCheckedAt(): ?\DateTimeImmutable
+    {
+        return $this->calendarCheckedAt;
+    }
+
+    public function isCalendarUpToDate(\DateTimeImmutable $now): bool
+    {
+        return null !== $this->calendarCheckedAt
+            && $this->calendarCheckedAt > $now->modify(sprintf('-%d days', self::CALENDAR_FRESHNESS_DAYS));
     }
 
     public function isPublished(): bool

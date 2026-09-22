@@ -48,11 +48,20 @@ class Unavailability
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $externalUid = null;
 
+    /**
+     * The owner's own reminder on a block ("famille", "loué hors site"). Never public.
+     */
+    #[ORM\Column(length: self::NOTE_MAX_LENGTH, nullable: true)]
+    private ?string $note = null;
+
+    public const NOTE_MAX_LENGTH = 200;
+
     public function __construct(
         Accommodation $accommodation,
         \DateTimeImmutable $startDate,
         \DateTimeImmutable $endDate,
         UnavailabilitySource $source,
+        ?string $note = null,
     ) {
         $this->id = Uuid::v7();
         $this->createdAt = new \DateTimeImmutable();
@@ -60,6 +69,7 @@ class Unavailability
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         $this->source = $source;
+        $this->note = null === $note || '' === trim($note) ? null : trim($note);
     }
 
     public function getId(): Uuid
@@ -103,6 +113,17 @@ class Unavailability
     public function getSource(): UnavailabilitySource
     {
         return $this->source;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    /** Only the owner's manual blocks can be removed from his calendar screen. */
+    public function isOwnerBlock(): bool
+    {
+        return UnavailabilitySource::Block === $this->source;
     }
 
     public function getExternalUid(): ?string

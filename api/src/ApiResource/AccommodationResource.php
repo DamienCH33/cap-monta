@@ -104,6 +104,8 @@ final class AccommodationResource
         public ?string $districtArea = null,
         public ?PhotoResource $cover = null,
         public array $photos = [],
+        /** Checked by the owner less than Accommodation::CALENDAR_FRESHNESS_DAYS ago. */
+        public bool $calendarUpToDate = false,
     ) {
     }
 
@@ -127,6 +129,7 @@ final class AccommodationResource
             $availability,
             districtSlug: $accommodation->getDistrict()?->getSlug(),
             districtArea: $accommodation->getDistrict()?->getArea()?->value,
+            calendarUpToDate: $accommodation->isCalendarUpToDate(new \DateTimeImmutable()),
         );
     }
 }

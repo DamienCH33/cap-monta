@@ -99,6 +99,10 @@ final class OwnerAccommodationResource
         public array $amenities,
         public string $description,
         public array $photos = [],
+        /** Last check of the calendar by the owner, ISO 8601; null if never. */
+        public ?\DateTimeImmutable $calendarCheckedAt = null,
+        /** Same rule as the public badge: checked less than 30 days ago. */
+        public bool $calendarUpToDate = false,
     ) {
     }
 
@@ -127,6 +131,8 @@ final class OwnerAccommodationResource
                 'width' => $photo->getWidth(),
                 'height' => $photo->getHeight(),
             ], $accommodation->getPhotos()),
+            $accommodation->getCalendarCheckedAt(),
+            $accommodation->isCalendarUpToDate(new \DateTimeImmutable()),
         );
     }
 }
