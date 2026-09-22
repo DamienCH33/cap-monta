@@ -7,6 +7,7 @@ namespace App\Service\Booking;
 use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
 use App\Enum\BookingRefusalReason;
+use App\Enum\PetsPolicy;
 use App\Repository\PricePeriodRepository;
 use App\Repository\UnavailabilityRepository;
 use App\Service\Pricing\PriceCalculator;
@@ -30,6 +31,7 @@ final class QuoteCalculator
         \DateTimeImmutable $arrival,
         \DateTimeImmutable $departure,
         int $guests,
+        int $pets = 0,
     ): Quote {
         $nights = (new DateRange($arrival, $departure))->nights();
         $maxCapacity = $accommodation->getMaxCapacity();
@@ -40,6 +42,7 @@ final class QuoteCalculator
         $refusal = match (true) {
             $nights < 1 => BookingRefusalReason::StayTooShort,
             $guests > $maxCapacity => BookingRefusalReason::TooManyGuests,
+            $pets > 0 && PetsPolicy::NotAllowed === $accommodation->getPetsPolicy() => BookingRefusalReason::PetsNotAllowed,
             $this->unavailabilities->hasOverlap($accommodation, $arrival, $departure) => BookingRefusalReason::Unavailable,
             $nights < $minimumNights => BookingRefusalReason::StayTooShort,
             default => null,
@@ -62,14 +65,16 @@ final class QuoteCalculator
         \DateTimeImmutable $arrival,
         \DateTimeImmutable $departure,
         int $guests,
+        int $pets = 0,
     ): Quote {
-        $quote = $this->quote($accommodation, $arrival, $departure, $guests);
+        $quote = $this->quote($accommodation, $arrival, $departure, $guests, $pets);
 
         if (null !== $quote->refusal) {
             throw match ($quote->refusal) {
                 BookingRefusalReason::Unavailable => BookingRefusedException::unavailable(),
                 BookingRefusalReason::TooManyGuests => BookingRefusedException::tooManyGuests($quote->guests, $quote->maxCapacity),
                 BookingRefusalReason::StayTooShort => BookingRefusedException::stayTooShort($quote->nights, $quote->minimumNights),
+                BookingRefusalReason::PetsNotAllowed => BookingRefusedException::petsNotAllowed(),
             };
         }
 

@@ -63,7 +63,7 @@ final readonly class QuoteProvider implements ProviderInterface
         /** @var \DateTimeImmutable $departure */
         $departure = $query->departure;
 
-        $quote = $this->quotes->quote($accommodation, $arrival, $departure, $query->guests);
+        $quote = $this->quotes->quote($accommodation, $arrival, $departure, $query->guests, $query->pets);
 
         return QuoteResource::fromQuote($slug, $arrival, $departure, $quote);
     }

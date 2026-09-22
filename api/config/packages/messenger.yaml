@@ -16,6 +16,7 @@ framework:
 
         routing:
             App\Message\ExpireBookingRequest: async
+            App\Message\RemindOwnerOfBookingRequest: async
             # Les emails partent par le worker : une panne SMTP ne fait plus échouer la requête
             # HTTP (la demande était enregistrée mais le voyageur voyait une erreur), et un envoi
             # raté est retenté.

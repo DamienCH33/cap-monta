@@ -229,6 +229,25 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         self::assertSame(BookingRequestStatus::Expired, $this->reload($request)->getStatus());
     }
 
+    public function testTheOwnerIsRemindedOnlyIfHeHasNotAnswered(): void
+    {
+        $waiting = $this->request($this->home, 10, 17, 'Jeanne Martin');
+        $answered = $this->request($this->home, 20, 27, 'Paul Durand');
+        $this->login();
+        $this->client->request('POST', '/api/owner/booking-requests/'.$answered->getId()->toRfc4122().'/decline');
+
+        $handler = static::getContainer()->get(\App\MessageHandler\RemindOwnerOfBookingRequestHandler::class);
+        $before = \count(self::getMailerMessages());
+
+        $handler(new \App\Message\RemindOwnerOfBookingRequest($waiting->getId()->toRfc4122()));
+        $handler(new \App\Message\RemindOwnerOfBookingRequest($answered->getId()->toRfc4122()));
+
+        $messages = \array_slice(self::getMailerMessages(), $before);
+        self::assertCount(1, $messages, 'One reminder, for the request still waiting.');
+        self::assertEmailAddressContains($messages[0], 'To', 'alice@example.com');
+        self::assertEmailTextBodyContains($messages[0], 'attend toujours votre réponse');
+    }
+
     public function testTheCommandCatchesUpWithLostMessages(): void
     {
         $late = $this->request($this->home, 10, 17, 'Jeanne Martin');

@@ -21,6 +21,9 @@ class BookingRequest
      */
     public const RESPONSE_DELAY = '+48 hours';
 
+    /** The owner is reminded once, halfway through. */
+    public const REMINDER_DELAY = '+24 hours';
+
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $id;

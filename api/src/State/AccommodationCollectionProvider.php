@@ -56,6 +56,7 @@ final readonly class AccommodationCollectionProvider implements ProviderInterfac
             types: $query->types,
             bedrooms: $query->bedrooms,
             amenities: $query->amenities,
+            pets: $query->pets,
         );
 
         // Les prix servent au tri : il les faut pour toute la liste, pas seulement pour la page.

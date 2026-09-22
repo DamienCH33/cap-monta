@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dto;
 
 use App\Enum\AccommodationType;
+use App\Enum\PetsPolicy;
 use App\Enum\Resort;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -50,6 +51,15 @@ final class CreateAccommodationInput
 
     /** District slug, picked from a list by the front. */
     public ?string $district = null;
+
+    #[Assert\Choice(callback: 'petsPolicies', message: 'Réponse inconnue pour les animaux.')]
+    public string $petsPolicy = 'on_request';
+
+    /** @return list<string> */
+    public static function petsPolicies(): array
+    {
+        return array_column(PetsPolicy::cases(), 'value');
+    }
 
     /** @return list<string> */
     public static function resorts(): array

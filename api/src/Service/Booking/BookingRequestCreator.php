@@ -7,6 +7,7 @@ namespace App\Service\Booking;
 use App\Entity\Accommodation;
 use App\Entity\BookingRequest;
 use App\Message\ExpireBookingRequest;
+use App\Message\RemindOwnerOfBookingRequest;
 use App\Repository\BookingRequestRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -45,6 +46,7 @@ final class BookingRequestCreator
             $input->arrival,
             $input->departure,
             $input->guests(),
+            $input->pets,
         );
 
         $request = new BookingRequest(
@@ -68,11 +70,14 @@ final class BookingRequestCreator
         $this->entityManager->persist($request);
         $this->entityManager->flush();
 
-        // Delivered 48 hours later: the request expires if the owner has not answered.
+        // Delivered 24 then 48 hours later: a reminder to the owner, then the expiry,
+        // each doing nothing if he has answered in the meantime.
+        $id = $request->getId()->toRfc4122();
         $this->bus->dispatch(
-            new ExpireBookingRequest($request->getId()->toRfc4122()),
-            [DelayStamp::delayUntil($request->getExpiresAt())],
+            new RemindOwnerOfBookingRequest($id),
+            [DelayStamp::delayUntil($request->getCreatedAt()->modify(BookingRequest::REMINDER_DELAY))],
         );
+        $this->bus->dispatch(new ExpireBookingRequest($id), [DelayStamp::delayUntil($request->getExpiresAt())]);
         $this->mailer->received($request);
 
         return $request;

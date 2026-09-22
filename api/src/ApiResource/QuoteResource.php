@@ -34,6 +34,10 @@ use App\State\QuoteProvider;
                     description: 'Nombre de personnes, adultes et enfants',
                     schema: ['type' => 'integer', 'minimum' => 1],
                 ),
+                'pets' => new QueryParameter(
+                    description: 'Nombre d’animaux : exclut les logements qui ne les acceptent pas',
+                    schema: ['type' => 'integer', 'minimum' => 0],
+                ),
             ],
             provider: QuoteProvider::class,
         ),

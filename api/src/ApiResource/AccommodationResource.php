@@ -41,6 +41,10 @@ use App\State\AccommodationItemProvider;
                     description: 'Nombre de personnes',
                     schema: ['type' => 'integer', 'minimum' => 1],
                 ),
+                'pets' => new QueryParameter(
+                    description: 'Nombre d’animaux : exclut les logements qui ne les acceptent pas',
+                    schema: ['type' => 'integer', 'minimum' => 0],
+                ),
                 'district' => new QueryParameter(
                     description: 'Un ou plusieurs quartiers : district[]=Europa&district[]=Lalande',
                     schema: ['type' => 'array', 'items' => ['type' => 'string']],
@@ -106,6 +110,8 @@ final class AccommodationResource
         public array $photos = [],
         /** Checked by the owner less than Accommodation::CALENDAR_FRESHNESS_DAYS ago. */
         public bool $calendarUpToDate = false,
+        /** allowed, on_request or not_allowed. */
+        public string $petsPolicy = 'on_request',
     ) {
     }
 
@@ -130,6 +136,7 @@ final class AccommodationResource
             districtSlug: $accommodation->getDistrict()?->getSlug(),
             districtArea: $accommodation->getDistrict()?->getArea()?->value,
             calendarUpToDate: $accommodation->isCalendarUpToDate(new \DateTimeImmutable()),
+            petsPolicy: $accommodation->getPetsPolicy()->value,
         );
     }
 }

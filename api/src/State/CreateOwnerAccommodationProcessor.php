@@ -11,6 +11,7 @@ use App\Dto\CreateAccommodationInput;
 use App\Entity\Accommodation;
 use App\Entity\User;
 use App\Enum\AccommodationType;
+use App\Enum\PetsPolicy;
 use App\Enum\Resort;
 use App\Repository\DistrictRepository;
 use App\Service\Accommodation\AccommodationSlugger;
@@ -78,6 +79,7 @@ final readonly class CreateOwnerAccommodationProcessor implements ProcessorInter
         $accommodation->setDistrict($district);
         $accommodation->setSurface($data->surface);
         $accommodation->setAmenities(array_values(array_unique($data->amenities)));
+        $accommodation->setPetsPolicy(PetsPolicy::from($data->petsPolicy));
 
         $this->em->persist($accommodation);
         $this->em->flush();

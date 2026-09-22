@@ -28,6 +28,7 @@ final readonly class StayQuery
         public ?\DateTimeImmutable $arrival,
         public ?\DateTimeImmutable $departure,
         public int $guests,
+        public int $pets,
         public ?Resort $resort,
         public array $districts,
         public array $types,
@@ -58,6 +59,12 @@ final readonly class StayQuery
 
         if ($guests < 1) {
             throw new BadRequestHttpException('"guests" must be at least 1.');
+        }
+
+        $pets = isset($filters['pets']) ? (int) $filters['pets'] : 0;
+
+        if ($pets < 0) {
+            throw new BadRequestHttpException('"pets" cannot be negative.');
         }
 
         $resort = null;
@@ -95,6 +102,7 @@ final readonly class StayQuery
             $arrival,
             $departure,
             $guests,
+            $pets,
             $resort,
             self::strings($filters['district'] ?? null, 'district'),
             $types,

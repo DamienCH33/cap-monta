@@ -235,9 +235,11 @@ final class BookingRequestApiTest extends ApiTestCase
         $transport = self::getContainer()->get('messenger.transport.async');
         \assert($transport instanceof \Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport);
         $sent = $transport->getSent();
-        self::assertCount(1, $sent);
-        self::assertInstanceOf(\App\Message\ExpireBookingRequest::class, $sent[0]->getMessage());
+        self::assertCount(2, $sent);
+        self::assertInstanceOf(\App\Message\RemindOwnerOfBookingRequest::class, $sent[0]->getMessage());
+        self::assertInstanceOf(\App\Message\ExpireBookingRequest::class, $sent[1]->getMessage());
         self::assertNotNull($sent[0]->last(\Symfony\Component\Messenger\Stamp\DelayStamp::class));
+        self::assertNotNull($sent[1]->last(\Symfony\Component\Messenger\Stamp\DelayStamp::class));
     }
 
     private function recover(string $email): void

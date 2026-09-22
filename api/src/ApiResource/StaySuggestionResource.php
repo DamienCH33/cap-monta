@@ -31,6 +31,10 @@ use App\State\StaySuggestionProvider;
             description: 'Nombre de personnes',
             schema: ['type' => 'integer', 'minimum' => 1],
         ),
+        'pets' => new QueryParameter(
+            description: 'Nombre d’animaux : exclut les logements qui ne les acceptent pas',
+            schema: ['type' => 'integer', 'minimum' => 0],
+        ),
         'district' => new QueryParameter(
             description: 'Quartiers, tels que renvoyés par /api/districts',
             schema: ['type' => 'array', 'items' => ['type' => 'string']],

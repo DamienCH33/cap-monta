@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Enum\AccommodationStatus;
 use App\Enum\AccommodationType;
+use App\Enum\PetsPolicy;
 use App\Enum\Resort;
 use App\Exception\InvalidStatusTransitionException;
 use App\Exception\PublicationRefusedException;
@@ -87,6 +88,10 @@ class Accommodation
      */
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $calendarCheckedAt = null;
+
+    /** "On request" until the owner says otherwise: nothing is refused by default. */
+    #[ORM\Column(enumType: PetsPolicy::class, options: ['default' => 'on_request'])]
+    private PetsPolicy $petsPolicy = PetsPolicy::OnRequest;
 
     public function __construct(
         string $slug,
@@ -340,6 +345,16 @@ class Accommodation
     public function getStatus(): AccommodationStatus
     {
         return $this->status;
+    }
+
+    public function getPetsPolicy(): PetsPolicy
+    {
+        return $this->petsPolicy;
+    }
+
+    public function setPetsPolicy(PetsPolicy $petsPolicy): void
+    {
+        $this->petsPolicy = $petsPolicy;
     }
 
     /** Beyond this, the calendar is no longer shown as up to date. */

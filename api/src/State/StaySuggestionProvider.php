@@ -52,6 +52,7 @@ final class StaySuggestionProvider implements ProviderInterface
             $query->types,
             $query->bedrooms,
             $query->amenities,
+            $query->pets,
         );
 
         return array_map(

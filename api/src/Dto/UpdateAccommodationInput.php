@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dto;
 
 use App\Enum\AccommodationType;
+use App\Enum\PetsPolicy;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -42,6 +43,15 @@ final class UpdateAccommodationInput
 
     /** District slug, or null to remove it. */
     public ?string $district;
+
+    #[Assert\Choice(callback: 'petsPolicies', message: 'Réponse inconnue pour les animaux.')]
+    public string $petsPolicy;
+
+    /** @return list<string> */
+    public static function petsPolicies(): array
+    {
+        return array_column(PetsPolicy::cases(), 'value');
+    }
 
     /**
      * The fields actually sent: uninitialized typed properties are left out.

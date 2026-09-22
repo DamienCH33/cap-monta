@@ -40,6 +40,11 @@ final class BookingRefusedException extends \RuntimeException
         );
     }
 
+    public static function petsNotAllowed(): self
+    {
+        return new self(BookingRefusalReason::PetsNotAllowed, 'Le propriétaire n’accepte pas les animaux dans ce logement.');
+    }
+
     public function getReason(): BookingRefusalReason
     {
         return $this->reason;

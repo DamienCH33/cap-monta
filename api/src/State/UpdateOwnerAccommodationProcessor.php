@@ -10,6 +10,7 @@ use App\ApiResource\OwnerAccommodationResource;
 use App\Dto\UpdateAccommodationInput;
 use App\Entity\District;
 use App\Enum\AccommodationType;
+use App\Enum\PetsPolicy;
 use App\Enum\Resort;
 use App\Repository\AccommodationRepository;
 use App\Repository\DistrictRepository;
@@ -71,6 +72,9 @@ final readonly class UpdateOwnerAccommodationProcessor implements ProcessorInter
         }
         if (array_key_exists('amenities', $sent)) {
             $accommodation->setAmenities(array_values(array_unique($data->amenities)));
+        }
+        if (array_key_exists('petsPolicy', $sent)) {
+            $accommodation->setPetsPolicy(PetsPolicy::from($data->petsPolicy));
         }
         if (array_key_exists('description', $sent)) {
             $accommodation->setDescription(trim($data->description));

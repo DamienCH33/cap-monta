@@ -103,6 +103,7 @@ final class OwnerAccommodationResource
         public ?\DateTimeImmutable $calendarCheckedAt = null,
         /** Same rule as the public badge: checked less than 30 days ago. */
         public bool $calendarUpToDate = false,
+        public string $petsPolicy = 'on_request',
     ) {
     }
 
@@ -133,6 +134,7 @@ final class OwnerAccommodationResource
             ], $accommodation->getPhotos()),
             $accommodation->getCalendarCheckedAt(),
             $accommodation->isCalendarUpToDate(new \DateTimeImmutable()),
+            $accommodation->getPetsPolicy()->value,
         );
     }
 }

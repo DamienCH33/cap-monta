@@ -8,6 +8,7 @@ use App\Entity\Unavailability;
 use App\Entity\User;
 use App\Enum\AccommodationStatus;
 use App\Enum\AccommodationType;
+use App\Enum\PetsPolicy;
 use App\Enum\Resort;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\ArrayParameterType;
@@ -80,6 +81,7 @@ class AccommodationRepository extends ServiceEntityRepository
         array $types = [],
         int $bedrooms = 0,
         array $amenities = [],
+        int $pets = 0,
     ): array {
         // Les deux règles toujours vraies : assez grand, et publié.
         $qb = $this->createQueryBuilder('a')
@@ -126,6 +128,12 @@ class AccommodationRepository extends ServiceEntityRepository
         if ($bedrooms > 0) {
             $qb->andWhere('a.bedrooms >= :bedrooms')
                 ->setParameter('bedrooms', $bedrooms);
+        }
+
+        // Avec un animal, les logements qui les refusent n'ont rien à faire dans les résultats.
+        if ($pets > 0) {
+            $qb->andWhere('a.petsPolicy != :noPets')
+                ->setParameter('noPets', PetsPolicy::NotAllowed);
         }
 
         if ([] !== $amenities) {
@@ -200,6 +208,7 @@ class AccommodationRepository extends ServiceEntityRepository
         array $types = [],
         int $bedrooms = 0,
         array $amenities = [],
+        int $pets = 0,
     ): array {
         $candidates = $this->search(
             guests: $guests,
@@ -208,6 +217,7 @@ class AccommodationRepository extends ServiceEntityRepository
             types: $types,
             bedrooms: $bedrooms,
             amenities: $amenities,
+            pets: $pets,
         );
 
         if ([] === $candidates) {
