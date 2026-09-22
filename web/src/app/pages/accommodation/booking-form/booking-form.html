@@ -3,8 +3,11 @@
     <h2 class="box__title">Demande envoyée</h2>
 
     <p class="box__text">
-      Le propriétaire a 48 h pour répondre. Vous recevrez un email à {{ request.guestEmail }}.
+      Le propriétaire a 48 h pour répondre. Un email de confirmation vient de partir à
+      {{ request.guestEmail }}, avec un lien pour suivre ou annuler votre demande.
     </p>
+
+    <a class="box__link" [routerLink]="['/demande', request.trackingToken]">Suivre ma demande</a>
 
     @if (request.estimatedPrice) {
       <p class="box__total">
@@ -78,6 +81,12 @@
             Redevances du domaine et taxe de séjour à régler sur place, en plus.
           </p>
         </div>
+        @if (currentQuote.outsideRules) {
+          <p class="preference">
+            Sur cette période, le propriétaire préfère les arrivées le samedi. Votre demande part
+            quand même : c'est lui qui décide.
+          </p>
+        }
       } @else {
         <p class="refusal">{{ refusalLabel(currentQuote) }}</p>
       }

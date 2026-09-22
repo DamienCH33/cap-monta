@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { TrackedBookingRequest } from '../models/booking-answer';
 import { BookingRequest, NewBookingRequest } from '../models/booking-request';
 import { Quote } from '../models/quote';
 
@@ -21,6 +22,18 @@ export class BookingService {
       params,
       headers: { Accept: 'application/ld+json' },
     });
+  }
+
+  /** La demande vue par le voyageur, grâce à la clé privée reçue par email. */
+  track(token: string): Observable<TrackedBookingRequest> {
+    return this.http.get<TrackedBookingRequest>(`${this.baseUrl}/booking-requests/track/${token}`);
+  }
+
+  cancelTracked(token: string): Observable<TrackedBookingRequest> {
+    return this.http.post<TrackedBookingRequest>(
+      `${this.baseUrl}/booking-requests/track/${token}/cancel`,
+      null,
+    );
   }
 
   send(request: NewBookingRequest): Observable<BookingRequest> {

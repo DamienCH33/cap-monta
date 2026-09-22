@@ -1,0 +1,137 @@
+<div class="container tracking">
+  @if (notFound()) {
+    <div class="tracking__box">
+      <h1 class="tracking__title">Demande introuvable</h1>
+      <p>Ce lien n'est pas valide. Vérifiez qu'il a été copié en entier depuis l'email reçu.</p>
+      <a class="button" routerLink="/recherche">Voir les logements</a>
+    </div>
+  } @else if (request(); as current) {
+    <h1 class="tracking__title">Votre demande</h1>
+
+    <section class="status" [class]="'status status--' + current.status" aria-live="polite">
+      <p class="status__label">{{ statusLabel(current.status) }}</p>
+      @switch (current.status) {
+        @case ('pending') {
+          <p>
+            Le propriétaire a jusqu'au
+            <strong>{{ current.expiresAt | date: "EEEE d MMMM 'à' HH'h'mm" }}</strong> pour
+            répondre. Vous recevrez sa réponse par email.
+          </p>
+        }
+        @case ('accepted') {
+          <p>Le propriétaire accepte votre séjour. Contactez-le pour l'arrivée et le règlement.</p>
+        }
+        @case ('declined') {
+          <p>Le propriétaire ne peut pas vous accueillir à ces dates.</p>
+        }
+        @case ('expired') {
+          <p>Le propriétaire n'a pas répondu à temps. Vous ne devez rien.</p>
+        }
+        @case ('cancelled') {
+          <p>Ce séjour est annulé.</p>
+        }
+      }
+      @if (current.ownerMessage) {
+        <blockquote class="status__message">« {{ current.ownerMessage }} »</blockquote>
+      }
+    </section>
+
+    @if (current.ownerContact; as owner) {
+      <section class="tracking__box">
+        <h2 class="tracking__subtitle">Votre hôte</h2>
+        <p class="tracking__contact">
+          <strong>{{ owner.name }}</strong>
+          <a [href]="'mailto:' + owner.email">{{ owner.email }}</a>
+          @if (owner.phone) {
+            <a [href]="'tel:' + owner.phone">{{ owner.phone }}</a>
+          }
+        </p>
+      </section>
+    }
+
+    <section class="tracking__box">
+      <h2 class="tracking__subtitle">
+        <a [routerLink]="['/logement', current.accommodation.slug]">{{
+          current.accommodation.title
+        }}</a>
+      </h2>
+      <dl class="facts">
+        <div>
+          <dt>Séjour</dt>
+          <dd>
+            Du {{ current.start | date: 'EEEE d MMMM' }} au
+            {{ current.end | date: 'EEEE d MMMM yyyy' }} · {{ current.nights }}
+            {{ current.nights > 1 ? 'nuits' : 'nuit' }}
+          </dd>
+        </div>
+        <div>
+          <dt>Voyageurs</dt>
+          <dd>{{ travellers(current) }}</dd>
+        </div>
+        <div>
+          <dt>Prix</dt>
+          <dd>
+            @if (bookingPrice(current); as price) {
+              {{ price / 100 | number: '1.0-0' }} €
+              {{ current.agreedPrice ? '(convenu)' : '(estimé)' }}
+            } @else {
+              à convenir avec le propriétaire
+            }
+          </dd>
+        </div>
+      </dl>
+      <p class="tracking__note">
+        Redevances du domaine et taxe de séjour à régler sur place, en plus. Aucun paiement ne passe
+        par Cap Monta.
+      </p>
+    </section>
+
+    @if (current.cancellable) {
+      <section class="tracking__box tracking__box--quiet">
+        @if (confirming()) {
+          <p>
+            <strong>
+              {{
+                'accepted' === current.status
+                  ? 'Annuler votre réservation ?'
+                  : 'Retirer votre demande ?'
+              }}
+            </strong>
+            Le propriétaire en sera prévenu par email. Ce n'est pas réversible.
+          </p>
+          @if (error()) {
+            <p class="tracking__error" role="alert">{{ error() }}</p>
+          }
+          <div class="tracking__actions">
+            <button
+              type="button"
+              class="button button--danger"
+              [disabled]="saving()"
+              (click)="cancel()"
+            >
+              {{ saving() ? 'Annulation…' : 'Oui, annuler' }}
+            </button>
+            <button type="button" class="button button--ghost" (click)="confirming.set(false)">
+              Non, garder
+            </button>
+          </div>
+        } @else {
+          <button type="button" class="button button--secondary" (click)="confirming.set(true)">
+            {{ 'accepted' === current.status ? 'Annuler ma réservation' : 'Retirer ma demande' }}
+          </button>
+        }
+      </section>
+    }
+
+    @if ('declined' === current.status || 'expired' === current.status) {
+      <a
+        class="button"
+        routerLink="/recherche"
+        [queryParams]="{ arrivee: current.start, depart: current.end }"
+        >Voir les logements libres à ces dates</a
+      >
+    }
+  } @else {
+    <div class="tracking__skeleton" aria-hidden="true"></div>
+  }
+</div>

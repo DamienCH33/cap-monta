@@ -98,6 +98,11 @@
     color: var(--text-muted);
     white-space: nowrap;
   }
+
+  &__saturday {
+    display: block;
+    color: var(--amber-text);
+  }
 }
 
 .description {

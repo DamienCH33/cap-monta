@@ -2,6 +2,7 @@ import { DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, input, linkedSignal, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { BookingRequest } from '../../../core/models/booking-request';
 import { Guests, NO_GUESTS, travellerCount } from '../../../core/models/guests';
@@ -11,7 +12,7 @@ import { GuestPicker } from '../../../shared/guest-picker/guest-picker';
 
 @Component({
   selector: 'cm-booking-form',
-  imports: [FormsModule, DecimalPipe, GuestPicker],
+  imports: [FormsModule, DecimalPipe, GuestPicker, RouterLink],
   templateUrl: './booking-form.html',
   styleUrl: './booking-form.scss',
 })

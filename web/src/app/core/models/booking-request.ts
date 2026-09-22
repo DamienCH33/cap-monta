@@ -17,4 +17,6 @@ export interface BookingRequest extends NewBookingRequest {
   status: string;
   estimatedPrice: number | null;
   expiresAt: string;
+  /** Clé privée du lien de suivi : /demande/{trackingToken}. */
+  trackingToken: string;
 }

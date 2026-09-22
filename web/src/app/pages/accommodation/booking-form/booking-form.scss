@@ -168,3 +168,20 @@
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
 }
+
+// Préférence du propriétaire (arrivée le samedi) : une information, pas un refus.
+.preference {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--amber-text);
+  background: var(--amber-bg);
+  border-radius: var(--radius);
+}
+
+.box__link {
+  display: inline-block;
+  margin: 0.25rem 0 0.75rem;
+  font-weight: 600;
+  color: var(--blue);
+}

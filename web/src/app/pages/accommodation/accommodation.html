@@ -88,7 +88,12 @@
                         —
                       }
                     </td>
-                    <td class="rates__min">min. {{ period.minimumNights }} nuits</td>
+                    <td class="rates__min">
+                      min. {{ period.minimumNights }} nuits
+                      @if (period.saturdayArrival) {
+                        <span class="rates__saturday">arrivée le samedi de préférence</span>
+                      }
+                    </td>
                   </tr>
                 }
               </tbody>

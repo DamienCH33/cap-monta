@@ -47,6 +47,8 @@ export interface PricePeriod {
   weeklyPrice: number | null;
   nightlyPrice: number | null;
   minimumNights: number;
+  /** Le propriétaire préfère les arrivées le samedi sur cette période. */
+  saturdayArrival: boolean;
 }
 
 const TYPE_LABELS: Record<string, string> = {

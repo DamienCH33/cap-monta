@@ -11,4 +11,6 @@ export interface Quote {
   available: boolean;
   total: number | null;
   refusal: RefusalReason | null;
+  /** Arrivée hors de la préférence du propriétaire (le samedi) : dit, jamais bloquant. */
+  outsideRules: boolean;
 }
