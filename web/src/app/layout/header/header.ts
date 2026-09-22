@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth';
+import { GuestRequests } from '../../core/services/guest-requests';
 import { Icon } from '../../shared/icon/icon';
 
 @Component({
@@ -16,6 +17,8 @@ export class Header {
 
   readonly owner = this.auth.currentOwner;
   readonly sessionChecked = this.auth.sessionChecked;
+  /** Demandes envoyées depuis ce navigateur : le lien « Mes demandes » apparaît. */
+  readonly guestRequests = inject(GuestRequests).list;
 
   constructor() {
     this.auth.restore().subscribe();

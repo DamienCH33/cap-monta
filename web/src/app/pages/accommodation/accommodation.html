@@ -125,6 +125,9 @@
           </div>
         } @else {
           <cm-booking-form
+            [title]="
+              typeLabel(logement.type) + (logement.district ? ' · ' + logement.district : '')
+            "
             [slug]="logement.slug"
             [initialArrival]="initialArrival()"
             [initialDeparture]="initialDeparture()"

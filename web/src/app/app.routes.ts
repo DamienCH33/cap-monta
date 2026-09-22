@@ -75,6 +75,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/owner-rates/owner-rates').then((m) => m.OwnerRates),
   },
   {
+    path: 'mes-demandes',
+    loadComponent: () => import('./pages/my-requests/my-requests').then((m) => m.MyRequests),
+  },
+  {
     path: 'demande/:token',
     loadComponent: () =>
       import('./pages/booking-tracking/booking-tracking').then((m) => m.BookingTracking),

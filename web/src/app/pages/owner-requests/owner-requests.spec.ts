@@ -58,10 +58,11 @@ describe('OwnerRequests', () => {
 
   afterEach(() => http.verify());
 
-  it('keeps the estimate to the cent when the owner does not change the price', () => {
+  it('never sends a price when the rates set it', () => {
     const [first] = page.visible();
     page.start(first, 'accept');
-    expect(page.price()).toBe(722);
+    // Even if something typed one: the rates price is the one the guest saw.
+    page.price.set(500);
 
     page.confirm(first, 'accept');
 

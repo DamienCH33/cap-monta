@@ -130,20 +130,32 @@
           @if ('pending' === request.status && !request.started) {
             @if (isOpen(request, 'accept')) {
               <div class="answer">
-                <label class="answer__label" for="price-{{ request.id }}">
-                  Prix du séjour (€){{ null === request.estimatedPrice ? '' : ' — modifiable' }}
-                </label>
-                <input
-                  id="price-{{ request.id }}"
-                  class="answer__input answer__input--price"
-                  type="number"
-                  min="1"
-                  step="1"
-                  inputmode="numeric"
-                  [ngModel]="price()"
-                  (ngModelChange)="price.set($event)"
-                  [required]="null === request.estimatedPrice"
-                />
+                @if (null === request.estimatedPrice) {
+                  <label class="answer__label" for="price-{{ request.id }}">
+                    Prix du séjour (€) — aucun tarif ne couvre ces dates, à vous de le fixer
+                  </label>
+                  <input
+                    id="price-{{ request.id }}"
+                    class="answer__input answer__input--price"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputmode="numeric"
+                    required
+                    [ngModel]="price()"
+                    (ngModelChange)="price.set($event)"
+                  />
+                } @else {
+                  <p class="answer__price">
+                    Prix : <strong>{{ request.estimatedPrice / 100 | number: '1.0-0' }} €</strong>,
+                    celui de votre grille tarifaire, que le voyageur a vu en faisant sa demande.
+                    <a
+                      [routerLink]="['/mon-espace/logements', request.accommodation.slug, 'tarifs']"
+                      >Modifier mes tarifs</a
+                    >
+                    (pour les prochaines demandes).
+                  </p>
+                }
                 <label class="answer__label" for="accept-message-{{ request.id }}">
                   Un mot pour le voyageur (facultatif)
                 </label>

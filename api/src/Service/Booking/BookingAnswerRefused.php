@@ -39,6 +39,11 @@ final class BookingAnswerRefused extends \DomainException
         return new self('Indiquez le prix du séjour : aucun tarif ne couvre ces dates.', 'price', 422);
     }
 
+    public static function priceFromRates(): self
+    {
+        return new self('Le prix vient de votre grille tarifaire : pour le changer, modifiez vos tarifs.', 'price', 422);
+    }
+
     public static function invalidPrice(): self
     {
         return new self('Le prix doit être compris entre 1 € et 100 000 €.', 'price', 422);

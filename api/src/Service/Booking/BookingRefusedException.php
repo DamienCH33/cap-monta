@@ -21,14 +21,14 @@ final class BookingRefusedException extends \RuntimeException
 
     public static function unavailable(): self
     {
-        return new self(BookingRefusalReason::Unavailable, 'The accommodation is already booked for these dates.');
+        return new self(BookingRefusalReason::Unavailable, 'Ces dates viennent d’être prises. Choisissez-en d’autres.');
     }
 
     public static function tooManyGuests(int $guests, int $maxCapacity): self
     {
         return new self(
             BookingRefusalReason::TooManyGuests,
-            sprintf('The accommodation sleeps %d guests, %d were requested.', $maxCapacity, $guests),
+            sprintf('Ce logement accueille %d personnes au maximum (%d demandées).', $maxCapacity, $guests),
         );
     }
 
@@ -36,7 +36,7 @@ final class BookingRefusedException extends \RuntimeException
     {
         return new self(
             BookingRefusalReason::StayTooShort,
-            sprintf('The stay lasts %d nights, the owner requires at least %d.', $nights, $minimumNights),
+            sprintf('Le séjour dure %d nuits : le propriétaire en demande au moins %d sur cette période.', $nights, $minimumNights),
         );
     }
 

@@ -28,6 +28,13 @@ framework:
             limit: 5
             interval: "1 hour"
 
+        # « Retrouver mes demandes » envoie un email à l'adresse saisie : même garde-fou
+        # que le mot de passe oublié, pour que le formulaire ne serve pas à spammer.
+        booking_recoveries:
+            policy: "sliding_window"
+            limit: 5
+            interval: "1 hour"
+
 # Un test ne doit jamais échouer parce qu'un compteur partagé est plein.
 when@test:
     framework:
@@ -40,6 +47,8 @@ when@test:
                 limit: 1000
             password_resets:
                 limit: 1000
+            booking_recoveries:
+                limit: 1000
 
 # Assez large pour travailler, assez bas pour croiser le 429 de temps en temps
 # et se souvenir qu'il existe.
@@ -51,4 +60,6 @@ when@dev:
             registrations:
                 limit: 20
             password_resets:
+                limit: 20
+            booking_recoveries:
                 limit: 20

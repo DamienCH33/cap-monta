@@ -1,0 +1,76 @@
+<div class="container mine">
+  <h1 class="mine__title">Mes demandes</h1>
+  <p class="mine__lead">
+    Pas besoin de compte : chaque demande a son lien personnel, envoyé par email au moment de la
+    demande.
+  </p>
+
+  @if (remembered.list().length) {
+    <section class="mine__box">
+      <h2 class="mine__subtitle">Sur cet appareil</h2>
+      <ul class="mine__list">
+        @for (item of remembered.list(); track item.token) {
+          <li class="mine__item">
+            <a class="mine__link" [routerLink]="['/demande', item.token]">
+              <strong>{{ item.title }}</strong>
+              <span
+                >Du {{ item.start | date: 'd MMM' }} au {{ item.end | date: 'd MMM yyyy' }}</span
+              >
+            </a>
+            <span
+              class="mine__status"
+              [class]="'mine__status mine__status--' + (statuses()[item.token] ?? 'loading')"
+              >{{ label(item) }}</span
+            >
+            <button type="button" class="mine__forget" (click)="remembered.forget(item.token)">
+              Oublier
+            </button>
+          </li>
+        }
+      </ul>
+      <p class="mine__hint">
+        Gardée dans ce navigateur seulement. Sur un ordinateur partagé,
+        <button type="button" class="mine__inline" (click)="remembered.forgetAll()">
+          oubliez tout
+        </button>
+        en partant.
+      </p>
+    </section>
+  }
+
+  <section class="mine__box">
+    <h2 class="mine__subtitle">Retrouver mes demandes par email</h2>
+
+    @if (sent()) {
+      <p class="mine__sent" role="status">
+        Si des demandes existent pour cette adresse, un email vient de partir avec leurs liens.
+        Pensez à regarder dans les indésirables.
+      </p>
+    } @else {
+      <p class="mine__text">
+        Email perdu, autre appareil ? Indiquez l'adresse utilisée pour la demande : nous y renvoyons
+        les liens de vos demandes en cours.
+      </p>
+      <form class="mine__form" (ngSubmit)="recover()">
+        <label class="mine__label" for="recover-email">Adresse email</label>
+        <div class="mine__row">
+          <input
+            id="recover-email"
+            type="email"
+            name="email"
+            required
+            autocomplete="email"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
+          />
+          <button type="submit" class="mine__button" [disabled]="sending() || !email().trim()">
+            {{ sending() ? 'Envoi…' : 'Recevoir mes liens' }}
+          </button>
+        </div>
+        @if (error()) {
+          <p class="mine__error" role="alert">{{ error() }}</p>
+        }
+      </form>
+    }
+  </section>
+</div>

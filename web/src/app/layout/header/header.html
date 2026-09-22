@@ -8,6 +8,10 @@
     <nav class="header__nav">
       <a routerLink="/recherche">Rechercher</a>
 
+      @if (guestRequests().length && null === owner()) {
+        <a routerLink="/mes-demandes">Mes demandes</a>
+      }
+
       @if (null !== owner()) {
         <a routerLink="/mon-espace">Mon espace</a>
       } @else {

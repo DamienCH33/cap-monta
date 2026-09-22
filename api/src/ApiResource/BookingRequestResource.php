@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
 use App\Entity\BookingRequest;
 use App\Service\Booking\BookingRefusedException;
+use App\Service\Booking\DuplicateBookingRequestException;
 use App\State\CreateBookingRequestProcessor;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -30,7 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             uriTemplate: '/booking-requests',
             processor: CreateBookingRequestProcessor::class,
             denormalizationContext: [AbstractNormalizer::ALLOW_EXTRA_ATTRIBUTES => false],
-            exceptionToStatus: [BookingRefusedException::class => 409],
+            exceptionToStatus: [BookingRefusedException::class => 409, DuplicateBookingRequestException::class => 409],
         ),
     ],
 )]

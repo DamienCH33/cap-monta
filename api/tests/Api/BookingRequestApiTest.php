@@ -132,6 +132,59 @@ final class BookingRequestApiTest extends ApiTestCase
         self::assertNull($tracked['ownerContact'], 'The owner\'s contact comes with the acceptance only.');
     }
 
+    public function testTheSameRequestTwiceIsRefusedWithAClearMessage(): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+        $body = [
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
+            'adults' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+        ];
+
+        $this->post($body);
+        self::assertResponseStatusCodeSame(201);
+
+        $again = $this->post([...$body, 'guestEmail' => 'Damien@Example.com']);
+        self::assertResponseStatusCodeSame(409);
+        self::assertStringContainsString('déjà envoyé une demande', (string) ($again['detail'] ?? ''));
+
+        // Other dates: a new request, not a duplicate.
+        $this->post([...$body, 'arrival' => '2027-07-08', 'departure' => '2027-07-15']);
+        self::assertResponseStatusCodeSame(201);
+    }
+
+    public function testTheGuestGetsHisLinksBackByEmailWithoutRevealingAnything(): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+        $created = $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
+            'adults' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+        ]);
+
+        $this->recover('DAMIEN@example.com');
+        self::assertResponseStatusCodeSame(202);
+        self::assertEmailCount(1);
+        $mail = self::getMailerMessage(0) ?? self::fail('No email.');
+        self::assertEmailAddressContains($mail, 'To', 'damien@example.com');
+        self::assertEmailTextBodyContains($mail, '/demande/'.$created['trackingToken']);
+
+        // Unknown address: exactly the same answer; only that mailbox learns there is nothing.
+        $this->recover('personne@example.com');
+        self::assertResponseStatusCodeSame(202);
+        self::assertSame('{}', (string) $this->client->getResponse()->getContent());
+        self::assertEmailTextBodyContains(self::getMailerMessage(0) ?? self::fail(), "Aucune n'est en cours");
+
+        $this->recover('pas-une-adresse');
+        self::assertResponseStatusCodeSame(422);
+    }
+
     public function testAnArrivalInThePastIsRefused(): void
     {
         $this->createAccommodation('bungalow-ocean');
@@ -185,6 +238,16 @@ final class BookingRequestApiTest extends ApiTestCase
         self::assertCount(1, $sent);
         self::assertInstanceOf(\App\Message\ExpireBookingRequest::class, $sent[0]->getMessage());
         self::assertNotNull($sent[0]->last(\Symfony\Component\Messenger\Stamp\DelayStamp::class));
+    }
+
+    private function recover(string $email): void
+    {
+        $this->client->request(
+            'POST',
+            '/api/booking-requests/recover',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['email' => $email], \JSON_THROW_ON_ERROR),
+        );
     }
 
     /**

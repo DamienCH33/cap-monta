@@ -272,14 +272,67 @@ final readonly class BookingMailer
         return $this->frontUrl.'/demande/'.$request->getTrackingToken();
     }
 
+    /** The same search again: dates and travellers, so the results fit at once. */
     private function searchUrl(BookingRequest $request): string
     {
-        return sprintf(
-            '%s/recherche?arrivee=%s&depart=%s',
-            $this->frontUrl,
-            $request->getStartDate()->format('Y-m-d'),
-            $request->getEndDate()->format('Y-m-d'),
-        );
+        return $this->frontUrl.'/recherche?'.http_build_query(array_filter([
+            'arrivee' => $request->getStartDate()->format('Y-m-d'),
+            'depart' => $request->getEndDate()->format('Y-m-d'),
+            'adultes' => $request->getAdults(),
+            'enfants' => $request->getChildren(),
+            'bebes' => $request->getInfants(),
+            'animaux' => $request->getPets(),
+        ]));
+    }
+
+    /**
+     * "Retrouver mes demandes": the tracking links of every request still in play. Sent to the
+     * address typed, whether or not it has requests: only its mailbox learns the answer.
+     *
+     * @param list<BookingRequest> $requests
+     */
+    public function recovery(string $email, array $requests): void
+    {
+        if ([] === $requests) {
+            $this->send($email, 'Vos demandes de réservation', <<<TXT
+                Bonjour,
+
+                Quelqu'un (vous, sans doute) a demandé à retrouver les demandes de réservation
+                envoyées depuis cette adresse. Aucune n'est en cours.
+
+                Si vous pensez en avoir envoyé une, elle a peut-être été faite avec une autre
+                adresse email. Pour chercher un logement :
+                {$this->frontUrl}/recherche
+
+                Cap Monta
+                TXT);
+
+            return;
+        }
+
+        $lines = implode("\n\n", array_map(
+            fn (BookingRequest $request): string => sprintf(
+                "%s — du %s (%s)\n%s",
+                $request->getAccommodation()->title(),
+                $this->stay($request),
+                $request->isAccepted() ? 'acceptée' : 'en attente de réponse',
+                $this->trackingUrl($request),
+            ),
+            $requests,
+        ));
+
+        $this->send($email, 'Vos demandes de réservation', <<<TXT
+            Bonjour,
+
+            Voici vos demandes de réservation en cours. Chaque lien permet de suivre la
+            demande et, si besoin, de l'annuler.
+
+            {$lines}
+
+            Ces liens sont personnels : ne les transférez pas.
+
+            Cap Monta
+            TXT);
     }
 
     private function send(string $to, string $subject, string $text): void

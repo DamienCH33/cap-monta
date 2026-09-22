@@ -7,6 +7,7 @@ namespace App\Service\Booking;
 use App\Entity\Accommodation;
 use App\Entity\BookingRequest;
 use App\Message\ExpireBookingRequest;
+use App\Repository\BookingRequestRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
@@ -25,14 +26,20 @@ final class BookingRequestCreator
         private readonly QuoteCalculator $quotes,
         private readonly MessageBusInterface $bus,
         private readonly BookingMailer $mailer,
+        private readonly BookingRequestRepository $requests,
     ) {
     }
 
     /**
      * @throws BookingRefusedException
+     * @throws DuplicateBookingRequestException
      */
     public function create(Accommodation $accommodation, NewBookingRequest $input): BookingRequest
     {
+        if ($this->requests->hasPendingDuplicate($accommodation, $input->guestEmail, $input->arrival, $input->departure)) {
+            throw new DuplicateBookingRequestException();
+        }
+
         $quote = $this->quotes->assert(
             $accommodation,
             $input->arrival,

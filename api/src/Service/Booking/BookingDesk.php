@@ -44,7 +44,8 @@ final readonly class BookingDesk
     }
 
     /**
-     * @param int|null $price in cents; required when the request had no estimate ("à convenir")
+     * @param int|null $price in cents; required when the request had no estimate ("à convenir"),
+     *                        and then only: otherwise the rates set it
      *
      * @throws BookingAnswerRefused
      */
@@ -58,6 +59,12 @@ final readonly class BookingDesk
 
         if (null === $price && null === $request->getEstimatedPrice()) {
             throw BookingAnswerRefused::priceRequired();
+        }
+
+        // Covered by the rates: the guest was shown this price, it is not negotiated here.
+        // The owner sets a price only for a stay "à convenir".
+        if (null !== $price && null !== $request->getEstimatedPrice() && $price !== $request->getEstimatedPrice()) {
+            throw BookingAnswerRefused::priceFromRates();
         }
 
         $accommodation = $request->getAccommodation();

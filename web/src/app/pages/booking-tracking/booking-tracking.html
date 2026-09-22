@@ -3,7 +3,8 @@
     <div class="tracking__box">
       <h1 class="tracking__title">Demande introuvable</h1>
       <p>Ce lien n'est pas valide. Vérifiez qu'il a été copié en entier depuis l'email reçu.</p>
-      <a class="button" routerLink="/recherche">Voir les logements</a>
+      <p>Vous pouvez aussi recevoir à nouveau les liens de vos demandes par email.</p>
+      <a class="button" routerLink="/mes-demandes">Retrouver mes demandes</a>
     </div>
   } @else if (request(); as current) {
     <h1 class="tracking__title">Votre demande</h1>
@@ -127,7 +128,14 @@
       <a
         class="button"
         routerLink="/recherche"
-        [queryParams]="{ arrivee: current.start, depart: current.end }"
+        [queryParams]="{
+          arrivee: current.start,
+          depart: current.end,
+          adultes: current.adults || null,
+          enfants: current.children || null,
+          bebes: current.infants || null,
+          animaux: current.pets || null,
+        }"
         >Voir les logements libres à ces dates</a
       >
     }

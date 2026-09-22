@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Accommodation;
 use App\Entity\BookingRequest;
 use App\Entity\User;
 use App\Enum\BookingRequestStatus;
@@ -81,6 +82,48 @@ class BookingRequestRepository extends ServiceEntityRepository
             ->setParameter('pending', BookingRequestStatus::Pending)
             ->setParameter('now', $now)
             ->setParameter('today', $now->setTime(0, 0), 'date_immutable')
+            ->getQuery()
+            ->getResult();
+
+        return $result;
+    }
+
+    public function hasPendingDuplicate(Accommodation $accommodation, string $email, \DateTimeImmutable $arrival, \DateTimeImmutable $departure): bool
+    {
+        return (int) $this->createQueryBuilder('b')
+            ->select('COUNT(b.id)')
+            ->andWhere('b.accommodation = :accommodation')
+            ->andWhere('b.status = :pending')
+            ->andWhere('LOWER(b.guestEmail) = :email')
+            ->andWhere('b.startDate = :arrival')
+            ->andWhere('b.endDate = :departure')
+            ->setParameter('accommodation', $accommodation)
+            ->setParameter('pending', BookingRequestStatus::Pending)
+            ->setParameter('email', mb_strtolower(trim($email)))
+            ->setParameter('arrival', $arrival, 'date_immutable')
+            ->setParameter('departure', $departure, 'date_immutable')
+            ->getQuery()
+            ->getSingleScalarResult() > 0;
+    }
+
+    /**
+     * The guest's requests still in play: waiting for an answer, or accepted and not over yet.
+     *
+     * @return list<BookingRequest>
+     */
+    public function findOngoingForGuest(string $email, \DateTimeImmutable $today): array
+    {
+        /** @var list<BookingRequest> $result */
+        $result = $this->createQueryBuilder('b')
+            ->addSelect('a')
+            ->join('b.accommodation', 'a')
+            ->andWhere('LOWER(b.guestEmail) = :email')
+            ->andWhere('b.status = :pending OR (b.status = :accepted AND b.endDate > :today)')
+            ->orderBy('b.startDate', 'ASC')
+            ->setParameter('email', mb_strtolower(trim($email)))
+            ->setParameter('pending', BookingRequestStatus::Pending)
+            ->setParameter('accepted', BookingRequestStatus::Accepted)
+            ->setParameter('today', $today, 'date_immutable')
             ->getQuery()
             ->getResult();
 

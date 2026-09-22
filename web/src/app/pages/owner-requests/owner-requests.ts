@@ -150,10 +150,8 @@ export class OwnerRequests {
     this.message.set('');
     this.error.set(null);
     this.notice.set(null);
-    // Prix pré-rempli en euros avec l'estimation ; vide quand c'était « à convenir ».
-    this.price.set(
-      null === request.estimatedPrice ? null : Math.round(request.estimatedPrice / 100),
-    );
+    // Le prix ne se saisit que pour un séjour « à convenir » : sinon, c'est celui des tarifs.
+    this.price.set(null);
   }
 
   close(): void {
@@ -170,10 +168,9 @@ export class OwnerRequests {
       return;
     }
 
-    // Prix inchangé : on laisse l'API reprendre l'estimation, au centime près.
-    const unchanged =
-      null !== request.estimatedPrice && euros === Math.round(request.estimatedPrice / 100);
-    const cents = null === euros || unchanged ? null : Math.round(euros * 100);
+    // Couvert par les tarifs : on n'envoie pas de prix, l'API reprend celui de la grille.
+    const cents =
+      null === request.estimatedPrice && null !== euros ? Math.round(euros * 100) : null;
 
     const call =
       'accept' === action

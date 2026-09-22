@@ -8,6 +8,7 @@ import { BookingRequest } from '../../../core/models/booking-request';
 import { Guests, NO_GUESTS, travellerCount } from '../../../core/models/guests';
 import { Quote } from '../../../core/models/quote';
 import { BookingService } from '../../../core/services/booking';
+import { GuestRequests } from '../../../core/services/guest-requests';
 import { GuestPicker } from '../../../shared/guest-picker/guest-picker';
 import { departureAfter, plusDays, today } from '../../../core/models/stay-dates';
 
@@ -19,6 +20,10 @@ import { departureAfter, plusDays, today } from '../../../core/models/stay-dates
 })
 export class BookingForm implements OnInit {
   private readonly booking = inject(BookingService);
+  private readonly guestRequests = inject(GuestRequests);
+
+  /** « Bungalow · Hawaï », pour retrouver la demande dans « Mes demandes ». */
+  readonly title = input('');
 
   readonly slug = input.required<string>();
   readonly initialArrival = input('');
@@ -113,6 +118,12 @@ export class BookingForm implements OnInit {
       })
       .subscribe({
         next: (created) => {
+          this.guestRequests.remember({
+            token: created.trackingToken,
+            title: this.title() || 'Logement',
+            start: arrival,
+            end: departure,
+          });
           this.sent.set(created);
           this.sending.set(false);
         },
@@ -155,8 +166,12 @@ export class BookingForm implements OnInit {
       return "Plusieurs demandes viennent d'être envoyées depuis votre connexion. Réessayez dans un quart d'heure.";
     }
 
+    // L'API explique le refus en français : dates prises, demande déjà envoyée…
     if (409 === response.status) {
-      return "Ces dates viennent d'être prises. Choisissez-en d'autres.";
+      return (
+        (response.error as { detail?: string } | null)?.detail ??
+        "Ces dates viennent d'être prises. Choisissez-en d'autres."
+      );
     }
 
     if (422 === response.status) {

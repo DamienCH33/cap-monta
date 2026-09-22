@@ -11,6 +11,7 @@ import {
   travellers,
 } from '../../core/models/booking-answer';
 import { BookingService } from '../../core/services/booking';
+import { GuestRequests } from '../../core/services/guest-requests';
 import { SeoService } from '../../core/services/seo';
 
 /**
@@ -38,6 +39,8 @@ export class BookingTracking {
   readonly bookingPrice = bookingPrice;
 
   constructor() {
+    const guestRequests = inject(GuestRequests);
+
     inject(SeoService).apply({
       title: 'Votre demande de réservation',
       description: 'Suivez votre demande de réservation.',
@@ -46,7 +49,16 @@ export class BookingTracking {
     });
 
     this.booking.track(this.token).subscribe({
-      next: (request) => this.request.set(request),
+      next: (request) => {
+        this.request.set(request);
+        // Ouvert depuis l'email sur un autre appareil : on le retient ici aussi.
+        guestRequests.remember({
+          token: this.token,
+          title: request.accommodation.title,
+          start: request.start,
+          end: request.end,
+        });
+      },
       error: () => this.notFound.set(true),
     });
   }

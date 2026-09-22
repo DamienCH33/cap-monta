@@ -11,6 +11,8 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'mon-espace/**', renderMode: RenderMode.Client },
   // Lien privé du voyageur : rien à indexer, et la clé n'a pas à passer par le serveur de rendu.
   { path: 'demande/**', renderMode: RenderMode.Client },
+  // Liste lue dans le navigateur (demandes retenues sur cet appareil) : rien à rendre côté serveur.
+  { path: 'mes-demandes', renderMode: RenderMode.Client },
 
   // Tout le reste est rendu côté serveur : c'est ce qui rend le site indexable.
   { path: '**', renderMode: RenderMode.Server },

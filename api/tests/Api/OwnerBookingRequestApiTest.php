@@ -118,6 +118,21 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         self::assertSame(45000, $this->json()[0]['agreedPrice']);
     }
 
+    public function testAPriceSetByTheRatesCannotBeChangedAtAcceptance(): void
+    {
+        $request = $this->request($this->home, 10, 17, 'Jeanne Martin', estimated: 53000);
+        $this->login();
+        $url = '/api/owner/booking-requests/'.$request->getId()->toRfc4122().'/accept';
+
+        $this->client->request('POST', $url, content: '{"price":40000}');
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame('price', $this->json()['violations'][0]['propertyPath']);
+
+        $this->client->request('POST', $url);
+        self::assertResponseIsSuccessful();
+        self::assertSame(53000, $this->json()[0]['agreedPrice']);
+    }
+
     public function testDatesTakenMeanwhileAreFlaggedAndCannotBeAccepted(): void
     {
         $request = $this->request($this->home, 10, 17, 'Jeanne Martin', estimated: 50000);
@@ -144,6 +159,8 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         self::assertSame('declined', $this->json()[0]['status']);
         self::assertEmailCount(1);
         self::assertEmailTextBodyContains(self::getMailerMessage(0) ?? self::fail(), 'Nous y serons nous-mêmes.');
+        // The search link keeps the travellers, so the results fit the group at once.
+        self::assertEmailTextBodyContains(self::getMailerMessage(0) ?? self::fail(), '&adultes=2');
 
         // Answered once: a second answer is refused.
         $this->client->request('POST', '/api/owner/booking-requests/'.$request->getId()->toRfc4122().'/accept', content: '{"price":45000}');
