@@ -173,3 +173,19 @@ Tests : `tests/Unit/Service/RedisOutageTest.php`.
 ## 018 — Équipements : liste fermée, par rubriques (22/09/2026)
 
 **Décision.** 19 équipements en 4 rubriques (confort, cuisine, extérieur, pratique), définis dans `web/src/app/core/models/search-filters.ts`. Pas de texte libre : « clim », « climatisation » et « Clim réversible » casseraient le filtre de recherche. Ce qui manque va dans la description. Le filtre de la recherche ne propose que les 8 plus demandés (`filter: true`) ; les clés ne changent jamais, elles sont en base et dans les liens partagés.
+
+---
+
+## 019 — Prix d'un séjour : semaines entières, puis prorata (22/09/2026)
+
+**Contexte.** Avec un prix à la semaine seul, un séjour de 4 nuits coûtait une semaine entière (arrondi à la semaine supérieure), alors que le propriétaire acceptait 2 nuits minimum.
+
+**Décision.** Par période tarifaire : chaque semaine entière au prix semaine ; les nuits restantes à **1/7 du prix semaine** (arrondi à l'euro) si le séjour fait une semaine ou plus, sinon au prix à la nuit (ou 1/7 de la semaine s'il n'y en a pas) ; jamais plus cher qu'une semaine. Une semaine à cheval sur deux périodes est partagée au prorata. La fiche affiche « ≈ 93 € / nuit » quand seul le prix semaine existe, et la règle en une phrase.
+
+---
+
+## 020 — Réponses concurrentes et délai de réponse (22/09/2026)
+
+- **Verrouillage optimiste** (`BookingRequest.version`) : deux changements d'état lus en même temps (le propriétaire accepte pendant que le voyageur annule, ou le worker fait expirer) ne s'écrivent plus l'un sur l'autre ; le second reçoit un 409 « rechargez la page ». Indépendant de Redis.
+- **Délai de réponse** : 48 h, mais jamais au-delà de minuit la veille de l'arrivée ; relance à mi-délai. Arrivée au plus tôt **demain** (le propriétaire doit pouvoir répondre). Airbnb, Abritel et Booking.com donnent 24 h : 48 h est déjà large pour des particuliers, on n'allonge pas (le voyageur attend et ses autres options partent).
+- **Fuseau** : toute l'API raisonne en heure de Paris (`Kernel::boot`), le serveur Railway étant en UTC.
