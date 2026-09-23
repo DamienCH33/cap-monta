@@ -30,11 +30,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 #[AsCommand(name: 'app:listing-import:eval', description: 'Évalue l\'import d\'annonce sur le jeu de cas réels')]
 final readonly class EvaluateListingImportCommand
 {
-    /**
-     * Seconds to wait before each new attempt after a rate limit. The free plan allows about
-     * 20 000 tokens a minute, some 4 listings: the wait must let a minute go by.
-     */
-    private const array RATE_LIMIT_WAITS_S = [20, 40, 60];
+    /** Seconds to wait before each new attempt after a rate limit (free plan, per-minute quotas). */
+    private const array RATE_LIMIT_WAITS_S = [10, 30, 60];
 
     public function __construct(
         private EvalCaseLoader $loader,

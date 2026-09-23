@@ -9,6 +9,9 @@ use App\Service\ListingImport\ListingImporter;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Symfony\AI\Platform\Bridge\Mistral\Factory;
+use Symfony\AI\Platform\Bridge\Mistral\Mistral;
+use Symfony\AI\Platform\Bridge\Mistral\ModelCatalog;
+use Symfony\AI\Platform\Capability;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -46,7 +49,13 @@ final class ListingImporterMistralTest extends TestCase
         });
 
         $importer = new ListingImporter(
-            Factory::createPlatform('cle-de-test', $http),
+            // The same declaration as config/packages/ai.yaml.
+            Factory::createPlatform('cle-de-test', $http, new ModelCatalog([
+                ListingImporter::DEFAULT_MODEL => [
+                    'class' => Mistral::class,
+                    'capabilities' => [Capability::INPUT_MESSAGES, Capability::OUTPUT_TEXT, Capability::OUTPUT_STRUCTURED],
+                ],
+            ])),
             new ContactDetector(),
             new NullLogger(),
             __DIR__.'/../../../../config/prompts/listing-import.md',

@@ -1,4 +1,15 @@
 # Symfony AI. Le fournisseur (Mistral, formule gratuite) est déclaré dans ai_mistral_platform.yaml,
 # la clé dans api/.env.local (MISTRAL_API_KEY). Pas d'agent ni de stockage : l'import d'annonce
 # fait un seul appel (ADR 025).
-ai: ~
+ai:
+    # Modèles du niveau gratuit (admin.mistral.ai/plateforme/limits) que symfony/ai 0.13 ne
+    # connaît pas encore sous ce nom daté. ministral-8b-2512 : vérifié le 23/09, 625 000 tokens
+    # et 188 requêtes par minute. ministral-14b-2512 : pour comparer avec --model.
+    model:
+        mistral:
+            ministral-8b-2512:
+                class: 'Symfony\AI\Platform\Bridge\Mistral\Mistral'
+                capabilities: [input-messages, output-text, output-streaming, output-structured, tool-calling]
+            ministral-14b-2512:
+                class: 'Symfony\AI\Platform\Bridge\Mistral\Mistral'
+                capabilities: [input-messages, output-text, output-streaming, output-structured, tool-calling]

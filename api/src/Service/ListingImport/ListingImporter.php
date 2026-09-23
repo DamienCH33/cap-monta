@@ -35,10 +35,11 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpException;
 final readonly class ListingImporter
 {
     /**
-     * A dated model, not "mistral-small-latest": the free plan only serves the models listed on
-     * its limits page (admin.mistral.ai/plateforme/limits), and the "-latest" alias is not one.
+     * A model the free plan actually serves (admin.mistral.ai/plateforme/limits): checked on
+     * 23/09, "mistral-small-latest" and "mistral-small-2603" were refused (429), this one
+     * answered. Declared in config/packages/ai.yaml, symfony/ai 0.13 does not know it yet.
      */
-    public const string DEFAULT_MODEL = 'mistral-small-2603';
+    public const string DEFAULT_MODEL = 'ministral-8b-2512';
     private const int MAX_TEXT_LENGTH = 12000;
 
     public function __construct(
