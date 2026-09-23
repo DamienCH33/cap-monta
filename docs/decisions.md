@@ -224,3 +224,30 @@ Corrigé :
 **Signaler une annonce** (fin du lot 3) : `POST /api/accommodations/{slug}/reports`, entité `ListingReport` gardée (preuve de traitement, LCEN/DSA), email à `APP_MODERATION_EMAIL` (« URGENT » si une personne est reconnaissable), commande `app:accommodation:suspend <slug> --reason=…` qui retire l'annonce et prévient le propriétaire. Vrai code **404** (et 503 si l'API ne répond pas) pour un logement ou un quartier inexistant, via `RESPONSE_INIT`.
 
 **À régler au déploiement** : `APP_ENV=prod` et `APP_DEBUG=0` (sinon traces complètes dans les erreurs), `TRUSTED_PROXIES`, `NG_ALLOWED_HOSTS` (sinon le serveur Angular répond 400), `HEALTH_TOKEN`, `APP_MODERATION_EMAIL`, type MIME et `nosniff` sur les photos (stockage objet).
+
+---
+
+## 023 — Import d'annonce : on mesure avant de construire (23/09/2026)
+
+**Contexte.** L'agent du lot 4 lit une annonce en texte libre et propose des périodes tarifaires. Un agent qui « a l'air de marcher » sur trois exemples ne prouve rien ; un tarif inventé publié au nom d'un propriétaire, c'est grave.
+
+**Décision.** Le jeu d'évaluation existe avant l'agent : 20 annonces réelles de location au CHM avec la réponse attendue, écrite à la main, et une commande `app:listing-import:eval` qui note n'importe quelle série de réponses. Règles principales (détail dans `api/evals/listing-import/README.md`) :
+- **Aucun montant absent du texte.** Mesuré automatiquement : chaque montant renvoyé est cherché parmi les nombres de l'annonce.
+- Un prix sans dates garde son prix et laisse les dates vides ; un prix sans unité est marqué `unknown`. Le propriétaire complète, il n'a jamais à corriger une valeur devinée.
+- Le modèle **ne calcule pas** : « 1200 € pour 2 semaines » reste un prix de séjour, la conversion est faite en PHP.
+- Notation stricte : une période « presque juste » est fausse.
+- Le même objet `ListingExtraction` valide la sortie de l'agent et les réponses attendues.
+- **Formulaire de l'annonce** (type, capacité, chambres, surface, quartier, équipements, animaux) : ce que renvoie le modèle est trié par le PHP en quatre cases — équipement de la liste (pré-coché), hors liste (`otherFeatures`, montré au propriétaire, laissé dans sa description), règle de la maison (son champ), valeur inventée ou impossible (refusée, jamais enregistrée). Rien n'est coché s'il n'est pas écrit ; une photo ne pourra que suggérer. Les éléments hors liste seront journalisés : la liste grandira d'après ce que les propriétaires écrivent (ADR 018).
+- Téléphones et emails du texte : repérés par expression régulière (`ContactDetector`), pas par l'IA.
+
+**Coût.** Les annonces réelles sont des textes de tiers : elles restent hors du dépôt public (`evals/listing-import/cases/` ignoré par git). La CI ne vérifie que trois exemples inventés ; le score réel se mesure en local.
+
+---
+
+## 024 — La liste des équipements est vérifiée par l'API (23/09/2026)
+
+**Contexte.** L'ADR 018 fermait la liste des équipements, mais seul le front la connaissait : l'API acceptait n'importe quelle chaîne de 40 caractères. Une requête forgée pouvait enregistrer « jacuzzi », et l'agent du lot 4 aurait pu en faire autant.
+
+**Décision.** Enum `App\Enum\Amenity` (19 clés, les mêmes que le front) et `Assert\Choice` sur la création et la modification d'un logement : une clé inconnue → 422 « Équipement inconnu ». `AmenityListSyncTest` compare l'enum à `web/src/app/core/models/search-filters.ts` et casse si l'une des deux listes change seule.
+
+**Coût.** Ajouter un équipement = deux fichiers (l'enum et le fichier du front, qui porte le libellé et la rubrique). Les logements déjà en base ne sont pas revérifiés : en développement, les fixtures n'utilisent que des clés de la liste.
