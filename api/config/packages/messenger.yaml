@@ -21,6 +21,9 @@ framework:
         routing:
             App\Message\ExpireBookingRequest: async
             App\Message\RemindOwnerOfBookingRequest: async
+            # La lecture d'une annonce par l'IA ne se fait jamais pendant la requête du
+            # propriétaire (ADR 027). Ses nouveaux essais sont gérés par le handler lui-même.
+            App\Message\RunListingImport: async
             # Les emails partent par le worker : une panne SMTP ne fait plus échouer la requête
             # HTTP (la demande était enregistrée mais le voyageur voyait une erreur), et un envoi
             # raté est retenté.

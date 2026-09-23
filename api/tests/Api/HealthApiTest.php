@@ -31,6 +31,6 @@ final class HealthApiTest extends WebTestCase
         self::assertIsArray($body);
         self::assertContains($body['status'], ['ok', 'degraded']);
         self::assertSame('ok', $body['checks']['database']);
-        self::assertSame(['database', 'cache', 'worker'], array_keys($body['checks']));
+        self::assertSame(['database', 'cache', 'worker', 'assistant'], array_keys($body['checks']));
     }
 }

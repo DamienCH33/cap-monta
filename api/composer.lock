@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "19251d872aed4776cae03948f075cf1a",
+    "content-hash": "1a14a7d25eeb2b1db88b08a033a844a7",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -3322,22 +3322,21 @@
             "time": "2026-08-30T01:03:45+00:00"
         },
         {
-            "name": "symfony/ai-open-ai-platform",
+            "name": "symfony/ai-generic-platform",
             "version": "v0.13.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/ai-open-ai-platform.git",
-                "reference": "65d0dda5fb5ada2da633db7259981ca0127cbdf8"
+                "url": "https://github.com/symfony/ai-generic-platform.git",
+                "reference": "6346887947678df84c67d1d8139aff7b8a5dda4a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/ai-open-ai-platform/zipball/65d0dda5fb5ada2da633db7259981ca0127cbdf8",
-                "reference": "65d0dda5fb5ada2da633db7259981ca0127cbdf8",
+                "url": "https://api.github.com/repos/symfony/ai-generic-platform/zipball/6346887947678df84c67d1d8139aff7b8a5dda4a",
+                "reference": "6346887947678df84c67d1d8139aff7b8a5dda4a",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
-                "symfony/ai-open-responses-platform": "^0.13",
                 "symfony/ai-platform": "^0.13",
                 "symfony/http-client": "^7.3|^8.0"
             },
@@ -3356,7 +3355,7 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Symfony\\AI\\Platform\\Bridge\\OpenAi\\": ""
+                    "Symfony\\AI\\Platform\\Bridge\\Generic\\": ""
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -3377,21 +3376,15 @@
                     "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "OpenAI platform bridge for Symfony AI",
+            "description": "Generic platform bridge for Symfony AI",
             "keywords": [
                 "Bridge",
-                "ChatGpt",
                 "ai",
-                "dall-e",
-                "embeddings",
-                "gpt",
-                "openai",
-                "platform",
-                "text-to-speech",
-                "whisper"
+                "generic",
+                "platform"
             ],
             "support": {
-                "source": "https://github.com/symfony/ai-open-ai-platform/tree/v0.13.0"
+                "source": "https://github.com/symfony/ai-generic-platform/tree/v0.13.0"
             },
             "funding": [
                 {
@@ -3414,21 +3407,22 @@
             "time": "2026-08-30T01:03:45+00:00"
         },
         {
-            "name": "symfony/ai-open-responses-platform",
+            "name": "symfony/ai-mistral-platform",
             "version": "v0.13.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/ai-open-responses-platform.git",
-                "reference": "a9c6f7d4daaa5a71890fadafc2341592d5784244"
+                "url": "https://github.com/symfony/ai-mistral-platform.git",
+                "reference": "1136015dc36b8bc77143453c729e2f13f326abc2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/ai-open-responses-platform/zipball/a9c6f7d4daaa5a71890fadafc2341592d5784244",
-                "reference": "a9c6f7d4daaa5a71890fadafc2341592d5784244",
+                "url": "https://api.github.com/repos/symfony/ai-mistral-platform/zipball/1136015dc36b8bc77143453c729e2f13f326abc2",
+                "reference": "1136015dc36b8bc77143453c729e2f13f326abc2",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.2",
+                "symfony/ai-generic-platform": "^0.13",
                 "symfony/ai-platform": "^0.13",
                 "symfony/http-client": "^7.3|^8.0"
             },
@@ -3447,7 +3441,7 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Symfony\\AI\\Platform\\Bridge\\OpenResponses\\": ""
+                    "Symfony\\AI\\Platform\\Bridge\\Mistral\\": ""
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -3468,15 +3462,15 @@
                     "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "Open Responses platform bridge for Symfony AI",
+            "description": "Mistral platform bridge for Symfony AI",
             "keywords": [
                 "Bridge",
                 "ai",
-                "open-responses",
+                "mistral",
                 "platform"
             ],
             "support": {
-                "source": "https://github.com/symfony/ai-open-responses-platform/tree/v0.13.0"
+                "source": "https://github.com/symfony/ai-mistral-platform/tree/v0.13.0"
             },
             "funding": [
                 {

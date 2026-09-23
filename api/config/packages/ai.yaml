@@ -1,27 +1,4 @@
-ai:
-    platform:
-        # Inference Platform configuration
-        # see https://github.com/symfony/ai/tree/main/src/platform#platform-bridges
-
-        # openai:
-        #    api_key: '%env(OPENAI_API_KEY)%'
-
-    agent:
-        # Agent configuration
-        # see https://symfony.com/doc/current/ai/bundles/ai-bundle.html
-
-        # default:
-        #    platform: 'ai.platform.openai'
-        #    model: 'gpt-5-mini'
-        #    prompt: |
-        #        You are a pirate and you write funny.
-        #    tools:
-        #        - 'Symfony\AI\Agent\Bridge\Clock\Clock'
-
-    store:
-        # Store configuration
-
-        # chromadb:
-        #    default:
-        #        client: 'client.service.id'
-        #        collection: 'my_collection'
+# Symfony AI. Le fournisseur (Mistral, formule gratuite) est déclaré dans ai_mistral_platform.yaml,
+# la clé dans api/.env.local (MISTRAL_API_KEY). Pas d'agent ni de stockage : l'import d'annonce
+# fait un seul appel (ADR 025).
+ai: ~

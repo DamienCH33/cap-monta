@@ -17,6 +17,10 @@ framework:
             # par minute à cette échelle, PostgreSQL ne les sent pas.
             rate_limiter.cache:
                 adapter: cache.adapter.doctrine_dbal
+            # Pause de l'assistant de lecture d'annonce (ADR 027) : partagée par tous les
+            # processus (serveur web et worker), donc en base, comme les limiteurs.
+            assistant.cache:
+                adapter: cache.adapter.doctrine_dbal
             # Calendrier public d'un logement (ADR 004, usage 1). Lu à chaque affichage de
             # fiche, modifié quelques fois par mois : invalidé par étiquette à chaque
             # blocage créé ou supprimé, et de toute façon oublié au bout d'un jour.

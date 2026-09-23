@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Service\ListingImport\AssistantAvailability;
 use Doctrine\DBAL\Connection;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -16,7 +17,8 @@ use Symfony\Component\Routing\Attribute\Route;
  * GET /api/health: what the host's health check and a monitoring service call every minute.
  *
  * 503 only when the database is down: without it nothing works, the host must restart us.
- * Redis down or a late worker give 200 "degraded": the site works, someone should look.
+ * Redis down, a late worker or a paused reading assistant give 200 "degraded": the site works,
+ * someone should look. An assistant switched off on purpose (no key) is "off", not degraded.
  * Anonymous callers get the overall state only; the detail per component (database, cache,
  * worker) needs the X-Health-Token header, equal to HEALTH_TOKEN (empty: never shown).
  */
@@ -30,6 +32,7 @@ final readonly class HealthController
         #[Autowire(service: 'app.redis')]
         private \Redis $redis,
         private ClockInterface $clock,
+        private AssistantAvailability $assistant,
         #[Autowire(env: 'HEALTH_TOKEN')]
         private string $token,
     ) {
@@ -43,9 +46,11 @@ final readonly class HealthController
             'database' => $database ? 'ok' : 'down',
             'cache' => $this->cache() ? 'ok' : 'down',
             'worker' => $database ? ($this->workerLate() ? 'late' : 'ok') : 'unknown',
+            'assistant' => $database ? $this->assistant() : 'unknown',
         ];
 
-        $status = !$database ? 'down' : (['ok'] === array_values(array_unique($checks)) ? 'ok' : 'degraded');
+        $healthy = array_diff(array_values($checks), ['ok', 'off']);
+        $status = !$database ? 'down' : ([] === $healthy ? 'ok' : 'degraded');
 
         $given = (string) $request->headers->get('X-Health-Token', '');
         $body = '' !== $this->token && hash_equals($this->token, $given)
@@ -56,6 +61,15 @@ final readonly class HealthController
         $response->headers->set('Cache-Control', 'no-store');
 
         return $response;
+    }
+
+    private function assistant(): string
+    {
+        return match (true) {
+            !$this->assistant->isEnabled() => 'off',
+            null !== $this->assistant->pausedUntil() => 'paused',
+            default => 'ok',
+        };
     }
 
     private function database(): bool
