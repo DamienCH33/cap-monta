@@ -50,7 +50,8 @@ final readonly class ExtractedListing
      */
     public static function fromArray(array $data): self
     {
-        $rejected = [];
+        // Kept when a saved extraction is read back (evaluation runs).
+        $rejected = self::strings($data['rejected'] ?? []);
 
         $enum = static function (string $field, string $enumClass) use ($data, &$rejected): mixed {
             $value = $data[$field] ?? null;
@@ -106,6 +107,51 @@ final readonly class ExtractedListing
             self::strings($data['otherFeatures'] ?? []),
             $rejected,
         );
+    }
+
+    /**
+     * The district must be one the site knows: matched without case or accents ("hawai" →
+     * "Hawaï"), dropped and reported otherwise.
+     *
+     * @param list<string> $known
+     */
+    public function keepingOnlyDistricts(array $known): self
+    {
+        if (null === $this->district) {
+            return $this;
+        }
+
+        $fold = static fn (string $name): string => mb_strtolower((string) transliterator_transliterate('Any-Latin; Latin-ASCII', $name));
+        $match = null;
+        foreach ($known as $name) {
+            if ($fold($name) === $fold($this->district)) {
+                $match = $name;
+            }
+        }
+
+        return new self(
+            $this->type, $this->capacity, $this->bedrooms, $this->surface, $match,
+            $this->amenities, $this->petsPolicy, $this->otherFeatures,
+            null === $match ? [...$this->rejected, 'quartier inconnu : '.$this->district] : $this->rejected,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'type' => $this->type?->value,
+            'capacity' => $this->capacity,
+            'bedrooms' => $this->bedrooms,
+            'surface' => $this->surface,
+            'district' => $this->district,
+            'amenities' => array_map(static fn (Amenity $amenity): string => $amenity->value, $this->amenities),
+            'petsPolicy' => $this->petsPolicy?->value,
+            'otherFeatures' => $this->otherFeatures,
+            'rejected' => $this->rejected,
+        ];
     }
 
     /**

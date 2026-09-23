@@ -36,6 +36,14 @@ final readonly class ExtractedPrice
         return new self($amount, $unit);
     }
 
+    /**
+     * @return array{amount: int, unit: string}
+     */
+    public function toArray(): array
+    {
+        return ['amount' => $this->amount, 'unit' => $this->unit->value];
+    }
+
     public function key(): string
     {
         return $this->amount.'/'.$this->unit->value;

@@ -29,6 +29,14 @@ final readonly class ExtractedUnavailability
         return new self($start, $end);
     }
 
+    /**
+     * @return array{start: string, end: string}
+     */
+    public function toArray(): array
+    {
+        return ['start' => $this->start->format('Y-m-d'), 'end' => $this->end->format('Y-m-d')];
+    }
+
     public function key(): string
     {
         return $this->start->format('Y-m-d').'→'.$this->end->format('Y-m-d');

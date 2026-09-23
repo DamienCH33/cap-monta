@@ -8,6 +8,7 @@ use App\Service\ListingImport\Evaluation\EvalCase;
 use App\Service\ListingImport\Evaluation\EvalCaseLoader;
 use App\Service\ListingImport\Evaluation\ExtractionScorer;
 use App\Service\ListingImport\Evaluation\SourceAmounts;
+use App\Service\ListingImport\ExtractionRules;
 use App\Service\ListingImport\ListingExtraction;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -40,6 +41,10 @@ final class EvalSetIntegrityTest extends TestCase
             );
 
             self::assertSame([], $case->expected->listing->rejected ?? [], $case->id.' : expected listing values are valid');
+
+            if ([] !== ExtractionRules::questions($case->expected)) {
+                self::assertTrue($case->needsClarification, $case->id.' : the PHP rules will ask a question, the answer must expect one');
+            }
 
             $asItself = new ListingExtraction(
                 $case->expected->periods,

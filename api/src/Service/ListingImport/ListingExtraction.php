@@ -46,6 +46,37 @@ final readonly class ListingExtraction
         );
     }
 
+    public function withListing(?ExtractedListing $listing): self
+    {
+        return new self($this->periods, $this->unavailable, $this->questions, $listing);
+    }
+
+    /**
+     * @param list<string> $questions added to the model's own, without duplicates
+     */
+    public function withQuestions(array $questions): self
+    {
+        return new self(
+            $this->periods,
+            $this->unavailable,
+            array_values(array_unique([...$this->questions, ...$questions])),
+            $this->listing,
+        );
+    }
+
+    /**
+     * @return array<string, mixed> the same shape fromArray() reads
+     */
+    public function toArray(): array
+    {
+        return [
+            'periods' => array_map(static fn (ExtractedPeriod $period): array => $period->toArray(), $this->periods),
+            'unavailable' => array_map(static fn (ExtractedUnavailability $range): array => $range->toArray(), $this->unavailable),
+            'questions' => $this->questions,
+            'listing' => $this->listing?->toArray(),
+        ];
+    }
+
     /**
      * Every amount the extraction mentions, to check each one against the source text.
      *

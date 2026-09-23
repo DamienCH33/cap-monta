@@ -4,22 +4,28 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\District;
+use App\Repository\DistrictRepository;
 use App\Service\ListingImport\Evaluation\CaseScore;
+use App\Service\ListingImport\Evaluation\EvalCase;
 use App\Service\ListingImport\Evaluation\EvalCaseLoader;
 use App\Service\ListingImport\Evaluation\ExtractionScorer;
 use App\Service\ListingImport\InvalidExtractionException;
 use App\Service\ListingImport\ListingExtraction;
+use App\Service\ListingImport\ListingImporter;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * Scores the import agent against the evaluation set. For now it reads the agent's answers from
- * a folder (one <case-id>.json per listing); lot 4b will add an option that calls the agent.
+ * Scores the listing import against the evaluation set.
  *
- * Checking the set itself: --predictions=expected scores every case against its own answer and
- * must give 100 %. A lower score means a hand-written answer is inconsistent.
+ * - no option: the set against its own answers, must give 100 % (checks the hand-written answers);
+ * - --predictions=DIR: answers already on disk, one <case-id>.json per listing;
+ * - --run: calls the model on every case, saves the answers in evals/listing-import/runs/, then
+ *   scores them. Costs a few cents; --case limits it to the cases whose id contains a string.
  */
 #[AsCommand(name: 'app:listing-import:eval', description: 'Évalue l\'import d\'annonce sur le jeu de cas réels')]
 final readonly class EvaluateListingImportCommand
@@ -27,8 +33,13 @@ final readonly class EvaluateListingImportCommand
     public function __construct(
         private EvalCaseLoader $loader,
         private ExtractionScorer $scorer,
-        #[Autowire('%kernel.project_dir%/evals/listing-import/cases')]
-        private string $defaultCases,
+        private ListingImporter $importer,
+        private DistrictRepository $districts,
+        private ClockInterface $clock,
+        #[Autowire('%kernel.project_dir%/evals/listing-import')]
+        private string $evalDir,
+        #[Autowire('%env(OPENAI_API_KEY)%')]
+        private string $apiKey,
     ) {
     }
 
@@ -38,8 +49,14 @@ final readonly class EvaluateListingImportCommand
         string $predictions = 'expected',
         #[Option('Dossier des cas')]
         ?string $cases = null,
+        #[Option('Appelle le modèle sur chaque cas (payant, quelques centimes)')]
+        bool $run = false,
+        #[Option('Modèle à utiliser avec --run')]
+        string $model = ListingImporter::DEFAULT_MODEL,
+        #[Option('Ne garde que les cas dont l\'identifiant contient ce texte')]
+        ?string $case = null,
     ): int {
-        $cases ??= $this->defaultCases;
+        $cases ??= $this->evalDir.'/cases';
 
         if (!is_dir($cases)) {
             $io->error(\sprintf('Dossier des cas introuvable : %s. Voir evals/listing-import/README.md.', $cases));
@@ -47,27 +64,41 @@ final readonly class EvaluateListingImportCommand
             return 1;
         }
 
+        $selected = array_values(array_filter(
+            $this->loader->load($cases),
+            static fn (EvalCase $c): bool => null === $case || str_contains($c->id, $case),
+        ));
+
+        if ($run) {
+            if ('' === trim($this->apiKey)) {
+                $io->error('OPENAI_API_KEY est vide : ajoute ta clé dans api/.env.local (jamais dans .env).');
+
+                return 1;
+            }
+            $predictions = $this->runModel($io, $selected, $model);
+        }
+
         $scores = [];
         $rows = [];
         $expectedPeriods = 0;
 
-        foreach ($this->loader->load($cases) as $case) {
-            $expectedPeriods += \count($case->expected->periods);
+        foreach ($selected as $evalCase) {
+            $expectedPeriods += \count($evalCase->expected->periods);
 
             try {
                 $actual = 'expected' === $predictions
-                    ? new ListingExtraction($case->expected->periods, $case->expected->unavailable, $case->needsClarification ? ['?'] : [], $case->expected->listing)
-                    : $this->prediction($predictions, $case->id);
+                    ? new ListingExtraction($evalCase->expected->periods, $evalCase->expected->unavailable, $evalCase->needsClarification ? ['?'] : [], $evalCase->expected->listing)
+                    : $this->prediction($predictions, $evalCase->id);
             } catch (InvalidExtractionException $e) {
-                $rows[] = [$case->id, '<error>ÉCHEC</error>', 'réponse invalide : '.$e->getMessage()];
+                $rows[] = [$evalCase->id, '<error>ÉCHEC</error>', 'réponse invalide : '.$e->getMessage()];
                 $scores[] = null;
                 continue;
             }
 
-            $score = $this->scorer->score($case, $actual);
+            $score = $this->scorer->score($evalCase, $actual);
             $scores[] = $score;
             $rows[] = [
-                $case->id,
+                $evalCase->id,
                 $score->passed() ? '<info>OK</info>' : '<error>ÉCHEC</error>',
                 implode("\n", $score->problems()),
             ];
@@ -79,6 +110,50 @@ final readonly class EvaluateListingImportCommand
         return 0;
     }
 
+    /**
+     * @param list<EvalCase> $cases
+     *
+     * @return string the folder the answers were written to
+     */
+    private function runModel(SymfonyStyle $io, array $cases, string $model): string
+    {
+        $districts = array_map(
+            static fn (District $d): string => $d->getName(),
+            $this->districts->findBy([], ['resort' => 'ASC', 'position' => 'ASC']),
+        );
+        $directory = \sprintf('%s/runs/%s-%s', $this->evalDir, $this->clock->now()->format('Ymd-His'), preg_replace('/[^a-z0-9.-]+/i', '-', $model));
+        if (!is_dir($directory) && !mkdir($directory, 0o775, true)) {
+            throw new \RuntimeException('Impossible de créer '.$directory);
+        }
+
+        $tokensIn = $tokensOut = $durationMs = 0;
+        $io->progressStart(\count($cases));
+
+        foreach ($cases as $evalCase) {
+            $result = $this->importer->import($evalCase->text, $evalCase->publishedAt, $districts, $model);
+            $tokensIn += $result->inputTokens ?? 0;
+            $tokensOut += $result->outputTokens ?? 0;
+            $durationMs += $result->durationMs;
+
+            // A failed call leaves the error in the file: the scoring reports it as unreadable.
+            $answer = $result->extraction?->toArray() ?? ['error' => $result->error, 'raw' => $result->rawOutput];
+            file_put_contents(
+                $directory.'/'.$evalCase->id.'.json',
+                json_encode($answer, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR)."\n",
+            );
+            $io->progressAdvance();
+        }
+
+        $io->progressFinish();
+        $io->text(\sprintf(
+            'Modèle %s — %d cas, %s tokens envoyés, %s reçus, %.1f s en tout. Réponses : %s',
+            $model, \count($cases), number_format($tokensIn, 0, ',', ' '), number_format($tokensOut, 0, ',', ' '),
+            $durationMs / 1000, $directory,
+        ));
+
+        return $directory;
+    }
+
     private function prediction(string $directory, string $caseId): ListingExtraction
     {
         $file = rtrim($directory, '/').'/'.$caseId.'.json';
@@ -87,7 +162,12 @@ final readonly class EvaluateListingImportCommand
             throw new InvalidExtractionException('pas de fichier '.$caseId.'.json');
         }
 
-        return ListingExtraction::fromArray($this->loader->decode($file));
+        $data = $this->loader->decode($file);
+        if (\is_string($data['error'] ?? null)) {
+            throw new InvalidExtractionException('appel en échec : '.$data['error']);
+        }
+
+        return ListingExtraction::fromArray($data);
     }
 
     /**
@@ -97,16 +177,12 @@ final readonly class EvaluateListingImportCommand
     {
         $valid = array_values(array_filter($scores));
         $count = static fn (callable $test): int => \count(array_filter($valid, $test));
-
-        $found = array_sum(array_map(static fn (CaseScore $s): int => $s->foundPeriods(), $valid));
-        $extra = array_sum(array_map(static fn (CaseScore $s): int => \count($s->extraPeriods), $valid));
-        $invented = array_sum(array_map(static fn (CaseScore $s): int => \count($s->inventedAmounts), $valid));
         $sum = static fn (callable $size): int => array_sum(array_map($size, $valid));
 
         $io->definitionList(
             ['Annonces réussies' => \sprintf('%d / %d', $count(static fn (CaseScore $s): bool => $s->passed()), \count($scores))],
-            ['Périodes retrouvées' => \sprintf('%d / %d (%d en trop)', $found, $expected, $extra)],
-            ['Prix inventés' => (string) $invented],
+            ['Périodes retrouvées' => \sprintf('%d / %d (%d en trop)', $sum(static fn (CaseScore $s): int => $s->foundPeriods()), $expected, $sum(static fn (CaseScore $s): int => \count($s->extraPeriods)))],
+            ['Prix inventés' => (string) $sum(static fn (CaseScore $s): int => \count($s->inventedAmounts))],
             ['Équipements inventés' => (string) $sum(static fn (CaseScore $s): int => \count($s->inventedAmenities))],
             ['Équipements oubliés' => (string) $sum(static fn (CaseScore $s): int => \count($s->missedAmenities))],
             ['Hors liste perdus' => (string) $sum(static fn (CaseScore $s): int => \count($s->lostFeatures))],

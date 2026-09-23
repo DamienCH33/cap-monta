@@ -60,6 +60,21 @@ final readonly class ExtractedPeriod
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'label' => $this->label,
+            'start' => $this->start?->format('Y-m-d'),
+            'end' => $this->end?->format('Y-m-d'),
+            'prices' => array_map(static fn (ExtractedPrice $price): array => $price->toArray(), $this->prices),
+            'minimumNights' => $this->minimumNights,
+            'saturdayArrival' => $this->saturdayArrival,
+        ];
+    }
+
+    /**
      * Everything that matters for a comparison; the label is only there to help a human.
      */
     public function key(): string
