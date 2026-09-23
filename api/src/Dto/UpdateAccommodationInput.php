@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dto;
 
 use App\Enum\AccommodationType;
+use App\Enum\Amenity;
 use App\Enum\PetsPolicy;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -34,7 +35,7 @@ final class UpdateAccommodationInput
     #[Assert\Count(max: 20, maxMessage: 'Pas plus de {{ limit }} équipements.')]
     #[Assert\All([
         new Assert\NotBlank(message: 'Un équipement ne peut pas être vide.'),
-        new Assert\Length(max: 40, maxMessage: 'Un équipement ne peut pas dépasser {{ limit }} caractères.'),
+        new Assert\Choice(callback: [Amenity::class, 'values'], message: 'Équipement inconnu : {{ value }}.'),
     ])]
     public array $amenities;
 

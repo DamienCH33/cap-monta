@@ -243,6 +243,21 @@ final class OwnerAccommodationApiTest extends WebTestCase
         self::assertSame(['capacity'], array_column($this->json()['violations'], 'propertyPath'));
     }
 
+    public function testAnAmenityOutsideTheListIsRejected(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-draft', $alice, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->patch('alice-draft', ['amenities' => ['wifi', 'jacuzzi']]);
+
+        self::assertResponseStatusCodeSame(422);
+        $violations = $this->json()['violations'];
+        self::assertSame(['amenities[1]'], array_column($violations, 'propertyPath'));
+        self::assertSame('Équipement inconnu : "jacuzzi".', $violations[0]['message']);
+    }
+
     /**
      * @param array<string, mixed> $payload
      */
