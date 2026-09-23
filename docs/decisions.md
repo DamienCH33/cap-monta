@@ -254,16 +254,51 @@ Corrigé :
 
 ---
 
-## 025 — L'import d'annonce : un appel, un schéma strict, et le PHP qui vérifie (23/09/2026)
+## 025 — L'import d'annonce : Mistral gratuit, un appel, un schéma strict, et le PHP qui vérifie (23/09/2026)
 
-**Contexte.** Lot 4b : brancher un modèle sur le jeu d'évaluation de l'ADR 023. Damien a laissé le choix du fournisseur (« GPT est pas mal ? ») et des trois questions de métier restées ouvertes.
+**Contexte.** Lot 4b : brancher un modèle sur le jeu d'évaluation de l'ADR 023. Contrainte posée par Damien : **ne rien payer**, ni pour le développement ni plus tard.
 
 **Décision.**
-- **OpenAI, modèle `gpt-5.6-luna`** par défaut (le moins cher des modèles récents que connaît `symfony/ai` 0.13, d'après la grille publique d'OpenAI de septembre 2026 ; sorties structurées gérées). Changer de modèle = `--model=` sur la commande d'évaluation : on compare sur les mêmes 20 annonces avant de changer le défaut. Coût attendu : de l'ordre de 0,2 centime par annonce (environ 3 500 tokens envoyés, 800 reçus).
-- **`symfony/ai-bundle` + `symfony/ai-open-ai-platform`**, sans `symfony/ai-agent` pour l'instant : c'est **un seul appel** au modèle, pas une boucle d'agent avec des outils. Les vérifications prévues comme « outils » (chevauchement, question au propriétaire) sont sûres et gratuites en PHP : `ExtractionRules` ajoute la question quel que soit l'avis du modèle (périodes qui se chevauchent, prix sans dates ou sans unité, aucun tarif). Un outil ne sera ajouté que si l'évaluation montre qu'il améliore le score.
+- **Mistral, formule gratuite « Experiment »** : un numéro de téléphone, pas de carte bancaire. Modèle `mistral-small-latest` par défaut, sorties structurées gérées par `symfony/ai`. Société et hébergement européens, bon niveau en français. Contrepartie écrite par Mistral : les requêtes de cette formule peuvent servir à entraîner ses modèles. D'où la règle suivante.
+- **Les coordonnées ne partent jamais** : `ContactDetector::mask()` remplace téléphones et emails par `[téléphone]` / `[email]` avant l'envoi. Le reste du texte est l'annonce que le propriétaire publie déjà en public.
+- **`symfony/ai-bundle` + `symfony/ai-mistral-platform`**, sans `symfony/ai-agent` : **un seul appel** au modèle, pas une boucle d'agent. Les vérifications prévues comme « outils » (chevauchement, question au propriétaire) sont sûres et gratuites en PHP : `ExtractionRules` ajoute la question quel que soit l'avis du modèle. Un outil ne sera ajouté que si l'évaluation montre qu'il améliore le score.
+- **Changer de fournisseur** (un autre fournisseur, ou un modèle local avec Ollama) = installer le pont `symfony/ai-*-platform` voulu et changer le service injecté dans `ListingImporter`. Le code métier ne bouge pas ; l'évaluation compare sur les mêmes 20 annonces.
 - **Schéma JSON strict** (`ListingImportSchema`) : toutes les clés, rien d'autre, listes fermées en `enum` (équipements, type, animaux, unités, quartiers connus). Le PHP revérifie tout (`ListingExtraction::fromArray()`, quartier ramené à un nom connu) : le schéma est une première barrière, pas la seule.
 - **La consigne** (`config/prompts/listing-import.md`) ne reprend **aucun exemple du jeu d'évaluation** : sinon le score mesurerait la mémoire du modèle, pas sa lecture.
-- **Une panne n'est pas une exception** : `ListingImportResult` sans extraction et avec l'erreur ; l'écran retombera sur le formulaire vide (ADR 008).
+- **Une panne n'est pas une exception** : `ListingImportResult` sans extraction et avec l'erreur (ADR 008).
 - **Questions de métier tranchées** : un prix sans unité reste `unknown` (l'écran d'import proposera « semaine », usage du CHM, confirmé d'un clic) ; « septembre (disponible à partir du 29 août) » commence le 29 août (location du samedi au samedi, le 29/08/2026 est un samedi) ; des lignes barrées perdues au copier-coller donnent des périodes qui se chevauchent → question, jamais de choix à la place du propriétaire.
 
-**Coût.** Une clé OpenAI et une dépendance de plus (`symfony/ai` est en 0.x : une montée de version peut casser, d'où `ListingImporterOpenAiTest` qui fait passer une vraie requête par le pont OpenAI avec une réponse simulée).
+**Coût.** Zéro euro, mais une formule gratuite a des plafonds de débit que Mistral ne publie pas (visibles dans son espace d'administration) et peut changer. Si elle disparaît, le site continue sans import (ADR 008) et on bascule sur un autre fournisseur. `symfony/ai` est en 0.x : `ListingImporterMistralTest` fait passer une vraie requête par le pont Mistral avec une réponse simulée pour détecter une rupture à la montée de version.
+
+---
+
+## 026 — Types de logement : chalet et studio, pas de tente ni d'emplacement (23/09/2026)
+
+**Contexte.** Damien a relevé que le CHM propose aussi des tentes, des studios, des hébergements insolites et des emplacements. Vérification le 23/09 sur les sites du CHM, d'Euronat et de CôtéMonta.
+
+**Décision.** Deux types de plus : **`chalet`** et **`studio`**, ce que les particuliers louent à Euronat (annonces CôtéMonta Euronat : studios, chalet bois, « chalet-appartement »). **Pas** de tente, d'hébergement insolite ni d'emplacement : au CHM comme à Euronat, ce sont les locations de l'exploitant du camping, pas des biens de propriétaires, et Cap Monta met en relation des particuliers. Une villa pourra s'ajouter le jour où un propriétaire d'Euronat en propose une.
+
+**Coût.** Front et API à tenir d'accord (`AccommodationType`, `ACCOMMODATION_TYPES`). Le type est une chaîne en base : aucune migration. Les fixtures restent sur les trois types du CHM.
+
+---
+
+## 027 — L'assistant de lecture tourne à part, et échoue proprement (23/09/2026)
+
+**Contexte.** Première version : un appel au fournisseur d'IA, et en cas de panne « échec » et un formulaire vide. Damien : « fais quelque chose de plus propre ». Deux autres contraintes : ne rien payer (formule gratuite à plafonds, ADR 025) et qu'un robot ne puisse pas épuiser ces plafonds.
+
+**Décision.**
+- **Jamais pendant la requête du propriétaire.** `POST /api/owner/listing-imports` enregistre le texte (entité `ListingImport`) et répond 202 tout de suite ; le worker Messenger fait la lecture (`RunListingImport`) ; le front interroge `GET /api/owner/listing-imports/{id}`. Un fournisseur lent ne fige aucune page.
+- **Le texte n'est jamais perdu** : il est en base dès le POST et revient dans chaque réponse, même en échec. Le propriétaire peut quitter la page et revenir.
+- **Chaque panne a sa conduite** (`ListingImportFailure`, `ListingImporter::classify()`) :
+  | Cause | Nouveaux essais | Pause de l'assistant pour tous |
+  |---|---|---|
+  | fournisseur injoignable, erreur 5xx | 3 essais en tout (15 s, puis 1 min) | 5 min après le dernier échec |
+  | plafond du fournisseur (429) | idem, en respectant le délai qu'il demande (2 min au plus) | 30 min |
+  | réponse illisible | 1 essai de plus | aucune |
+  | mauvaise clé, modèle inconnu | aucun, l'erreur est journalisée | 1 h |
+  Les nouveaux essais sont programmés par le handler lui-même (`DelayStamp`), pas par la stratégie de Messenger (1 min à 4 h, faite pour les emails).
+- **Pause partagée** (`AssistantAvailability`, pool `assistant.cache` dans PostgreSQL : le serveur web et le worker voient la même) : pendant une pause, `GET …/assistant` dit `available: false` et le front ne propose pas un bouton qui ne mènerait qu'à une erreur. Sans clé configurée, l'assistant est simplement `disabled`. `/api/health` affiche `assistant: ok | paused | off` ; `paused` rend l'état `degraded`.
+- **Messages pour le propriétaire**, en clair, qui disent toujours que son texte est gardé et que le formulaire marche sans l'assistant.
+- **Protection du quota gratuit** : adresse email confirmée ; 10 lectures par propriétaire et par jour ; 300 pour tout le site ; le même texte (à la casse et aux espaces près) collé à nouveau dans les 30 jours renvoie la lecture précédente sans rappeler le fournisseur ; texte de 30 à 12 000 caractères.
+
+**Coût.** Une table de plus, un message Messenger de plus (le worker tourne déjà), et un écran qui interroge l'API toutes les deux ou trois secondes au lieu d'attendre une seule réponse. Les textes collés restent en base : à purger après quelques mois (tâche à prévoir avant la mise en ligne).
