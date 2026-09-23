@@ -53,7 +53,7 @@ final class FixturePhotoLibrary
     public function attachTo(Accommodation $accommodation, int $seed): void
     {
         $pools = $this->pools();
-        $own = $pools[$accommodation->getType()->value];
+        $own = $pools[$accommodation->getType()->value] ?? [];
 
         if ([] === $own) {
             $own = [] !== $pools['spare'] ? $pools['spare'] : array_merge(...array_values($pools));

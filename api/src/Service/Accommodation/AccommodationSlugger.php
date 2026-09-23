@@ -32,6 +32,8 @@ final readonly class AccommodationSlugger
             AccommodationType::Caravan => 'caravane',
             AccommodationType::MobileHome => 'mobil-home',
             AccommodationType::Bungalow => 'bungalow',
+            AccommodationType::Chalet => 'chalet',
+            AccommodationType::Studio => 'studio',
         };
 
         $base = $this->slugger->slug(sprintf('%s %s %d personnes', $label, $place, $capacity))->lower()->toString();

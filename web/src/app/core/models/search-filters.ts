@@ -1,6 +1,6 @@
 import { ParamMap, Params } from '@angular/router';
 
-export type AccommodationTypeKey = 'caravan' | 'mobile_home' | 'bungalow';
+export type AccommodationTypeKey = 'caravan' | 'mobile_home' | 'bungalow' | 'chalet' | 'studio';
 export type SortOrder = 'price_asc' | 'price_desc';
 
 export interface SearchFilters {
@@ -36,6 +36,8 @@ export const ACCOMMODATION_TYPES: readonly {
   { key: 'caravan', slug: 'caravane', label: 'Caravane', hint: '1 chambre' },
   { key: 'mobile_home', slug: 'mobil-home', label: 'Mobil-home', hint: '2 à 3 chambres' },
   { key: 'bungalow', slug: 'bungalow', label: 'Bungalow', hint: '3 chambres' },
+  { key: 'chalet', slug: 'chalet', label: 'Chalet', hint: 'surtout à Euronat' },
+  { key: 'studio', slug: 'studio', label: 'Studio', hint: '1 pièce ou 2 pièces' },
 ];
 
 export type AmenityGroup = 'confort' | 'cuisine' | 'exterieur' | 'pratique';

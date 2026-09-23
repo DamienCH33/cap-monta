@@ -32,7 +32,8 @@ final class AccommodationFactory extends PersistentObjectFactory
     protected function defaults(): array|callable
     {
         return static function (): array {
-            $types = AccommodationType::cases();
+            // The three CHM types only: the fixtures fill the CHM, and their photos exist for these.
+            $types = [AccommodationType::Caravan, AccommodationType::MobileHome, AccommodationType::Bungalow];
             $type = $types[array_rand($types)];
 
             // La capacité découle du type : une caravane n'accueille pas huit personnes.

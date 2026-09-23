@@ -16,7 +16,7 @@ export class OwnerLanding {
     seo.apply({
       title: 'Louer son mobil-home au CHM Montalivet ou à Euronat',
       description:
-        'Publiez gratuitement votre bungalow, mobil-home ou caravane. Aucune commission, ' +
+        'Publiez gratuitement votre bungalow, mobil-home, caravane, chalet ou studio. Aucune commission, ' +
         'un calendrier à jour, et vous gardez la main sur vos tarifs et vos réponses.',
       path: '/proprietaire',
     });

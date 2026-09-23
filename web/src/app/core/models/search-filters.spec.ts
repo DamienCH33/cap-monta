@@ -31,6 +31,13 @@ describe('search filters', () => {
     });
   });
 
+  it('connaît les chalets et les studios, que louent les propriétaires à Euronat', () => {
+    const filters = filtersFromQuery(convertToParamMap({ type: ['chalet', 'studio', 'tente'] }));
+
+    expect(filters.types).toEqual(['chalet', 'studio']);
+    expect(filtersToQuery({ ...NO_FILTERS, types: ['studio'] })['type']).toEqual(['studio']);
+  });
+
   it("écrit une URL qui se relit à l'identique", () => {
     const filters: SearchFilters = {
       types: ['mobile_home', 'bungalow'],

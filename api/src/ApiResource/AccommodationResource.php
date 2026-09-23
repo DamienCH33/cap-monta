@@ -52,7 +52,7 @@ use App\State\AccommodationItemProvider;
                 ),
                 'type' => new QueryParameter(
                     description: 'Un ou plusieurs types : type[]=caravan&type[]=bungalow',
-                    schema: ['type' => 'array', 'items' => ['type' => 'string', 'enum' => ['caravan', 'mobile_home', 'bungalow']]],
+                    schema: ['type' => 'array', 'items' => ['type' => 'string', 'enum' => ['caravan', 'mobile_home', 'bungalow', 'chalet', 'studio']]],
                     castToArray: true,
                 ),
                 'bedrooms' => new QueryParameter(

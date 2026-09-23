@@ -64,6 +64,8 @@ const TYPE_LABELS: Record<string, string> = {
   mobile_home: 'Mobil-home',
   bungalow: 'Bungalow',
   caravan: 'Caravane',
+  chalet: 'Chalet',
+  studio: 'Studio',
 };
 
 export function typeLabel(type: string): string {

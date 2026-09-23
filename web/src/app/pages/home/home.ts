@@ -28,7 +28,7 @@ export class Home implements OnInit {
     this.seo.apply({
       title: 'Location de mobil-homes et bungalows au CHM Montalivet et à Euronat',
       description:
-        'Louez un bungalow, un mobil-home ou une caravane au CHM Montalivet et à Euronat. ' +
+        'Louez un bungalow, un mobil-home, une caravane, un chalet ou un studio au CHM Montalivet et à Euronat. ' +
         'Calendriers tenus à jour par les propriétaires, réponse sous 48 h, aucune commission.',
       path: '/',
     });
@@ -50,8 +50,8 @@ export class Home implements OnInit {
           name: 'Cap Monta',
           url: environment.siteUrl,
           description:
-            'Mise en relation entre propriétaires et locataires de bungalows, mobil-homes et ' +
-            'caravanes au CHM Montalivet et à Euronat. Sans commission.',
+            'Mise en relation entre propriétaires et locataires de bungalows, mobil-homes, ' +
+            'caravanes, chalets et studios au CHM Montalivet et à Euronat. Sans commission.',
           areaServed: [
             { '@type': 'Place', name: 'CHM Montalivet' },
             { '@type': 'Place', name: 'Euronat' },

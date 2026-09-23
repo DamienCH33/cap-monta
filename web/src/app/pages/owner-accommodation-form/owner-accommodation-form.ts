@@ -109,6 +109,8 @@ export class OwnerAccommodationForm {
     { value: 'mobile_home', label: 'Mobil-home' },
     { value: 'bungalow', label: 'Bungalow' },
     { value: 'caravan', label: 'Caravane' },
+    { value: 'chalet', label: 'Chalet' },
+    { value: 'studio', label: 'Studio' },
   ];
 
   /** La même liste que le filtre de la recherche : une annonce doit être trouvée par ce filtre. */
