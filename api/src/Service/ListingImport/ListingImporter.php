@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace App\Service\ListingImport;
 
+use App\Enum\ListingImportFailure;
 use Psr\Log\LoggerInterface;
+use Symfony\AI\Platform\Exception\AuthenticationException;
+use Symfony\AI\Platform\Exception\BadRequestException;
+use Symfony\AI\Platform\Exception\ExceedContextSizeException;
 use Symfony\AI\Platform\Exception\ExceptionInterface as PlatformException;
+use Symfony\AI\Platform\Exception\MissingModelSupportException;
+use Symfony\AI\Platform\Exception\ModelNotFoundException;
+use Symfony\AI\Platform\Exception\RateLimitExceededException;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\PlatformInterface;
@@ -20,17 +27,18 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpException;
  * - the answer goes through ListingExtraction::fromArray(): shape, dates, closed lists;
  * - overlapping periods, prices without dates or unit, no rate at all → a question is added,
  *   whether or not the model thought of it;
- * - contact details in the text are found by ContactDetector, not by the model.
+ * - contact details in the text are found by ContactDetector, not by the model, and masked
+ *   before the text leaves the server.
  *
  * Nothing is saved here: the owner reviews the result first.
  */
 final readonly class ListingImporter
 {
-    public const string DEFAULT_MODEL = 'gpt-5.6-luna';
+    public const string DEFAULT_MODEL = 'mistral-small-latest';
     private const int MAX_TEXT_LENGTH = 12000;
 
     public function __construct(
-        #[Autowire(service: 'ai.platform.openai')]
+        #[Autowire(service: 'ai.platform.mistral')]
         private PlatformInterface $platform,
         private ContactDetector $contacts,
         private LoggerInterface $logger,
@@ -55,7 +63,7 @@ final readonly class ListingImporter
         $usage = null;
 
         try {
-            $result = $this->platform->invoke($model, $this->messages($text, $publishedAt, $districts), [
+            $result = $this->platform->invoke($model, $this->messages($this->contacts->mask($text), $publishedAt, $districts), [
                 'response_format' => ListingImportSchema::responseFormat($districts),
             ])->getResult();
 
@@ -64,13 +72,19 @@ final readonly class ListingImporter
             $extraction = ListingExtraction::fromArray($this->decode($raw));
             $extraction = $extraction->withListing($extraction->listing?->keepingOnlyDistricts($districts));
         } catch (PlatformException|HttpException|InvalidExtractionException|\JsonException $e) {
-            $this->logger->warning('Import d\'annonce en échec : {message}', ['message' => $e->getMessage(), 'model' => $model]);
+            $failure = self::classify($e);
+            $this->logger->log(
+                ListingImportFailure::Configuration === $failure ? 'error' : 'warning',
+                'Import d\'annonce en échec ({failure}) : {message}',
+                ['failure' => $failure->value, 'message' => $e->getMessage(), 'model' => $model],
+            );
 
             return new ListingImportResult(
                 $model, null, $contacts, $this->elapsed($started),
                 $usage instanceof TokenUsageInterface ? $usage->getPromptTokens() : null,
                 $usage instanceof TokenUsageInterface ? $usage->getCompletionTokens() : null,
-                $e->getMessage(), $raw,
+                $e->getMessage(), $raw, $failure,
+                $e instanceof RateLimitExceededException ? $e->getRetryAfter() : null,
             );
         }
 
@@ -83,6 +97,24 @@ final readonly class ListingImporter
             $usage instanceof TokenUsageInterface ? $usage->getCompletionTokens() : null,
             rawOutput: $raw,
         );
+    }
+
+    /**
+     * What a failure means for the next attempt (see ListingImportFailure).
+     */
+    public static function classify(\Throwable $e): ListingImportFailure
+    {
+        return match (true) {
+            $e instanceof RateLimitExceededException => ListingImportFailure::ProviderLimit,
+            $e instanceof AuthenticationException,
+            $e instanceof ModelNotFoundException,
+            $e instanceof MissingModelSupportException,
+            $e instanceof BadRequestException => ListingImportFailure::Configuration,
+            $e instanceof InvalidExtractionException,
+            $e instanceof \JsonException,
+            $e instanceof ExceedContextSizeException => ListingImportFailure::Unreadable,
+            default => ListingImportFailure::Unavailable,
+        };
     }
 
     /**

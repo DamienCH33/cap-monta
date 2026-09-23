@@ -21,6 +21,20 @@ class DistrictRepository extends ServiceEntityRepository
     }
 
     /**
+     * Names of every district, CHM first then Euronat, in plan order: the only ones the
+     * listing import may pick.
+     *
+     * @return list<string>
+     */
+    public function names(): array
+    {
+        return array_map(
+            static fn (District $district): string => $district->getName(),
+            $this->findBy([], ['resort' => 'ASC', 'position' => 'ASC']),
+        );
+    }
+
+    /**
      * Every district, including those without any accommodation yet.
      *
      * @return list<array{district: District, accommodationCount: int}>

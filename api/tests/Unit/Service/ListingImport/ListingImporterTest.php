@@ -15,7 +15,7 @@ use Symfony\AI\Platform\Model;
 use Symfony\AI\Platform\Test\InMemoryPlatform;
 
 /**
- * No network here: InMemoryPlatform stands in for OpenAI and returns what the test scripts.
+ * No network here: InMemoryPlatform stands in for Mistral and returns what the test scripts.
  */
 final class ListingImporterTest extends TestCase
 {
@@ -46,13 +46,15 @@ final class ListingImporterTest extends TestCase
             ], \JSON_THROW_ON_ERROR);
         });
 
-        $result = $this->importer($platform)->import(self::TEXT, new \DateTimeImmutable('2026-03-01'), ['Europa', 'Hawaï'], 'gpt-test');
+        $result = $this->importer($platform)->import(self::TEXT, new \DateTimeImmutable('2026-03-01'), ['Europa', 'Hawaï'], 'modele-test');
 
         self::assertTrue($result->succeeded());
-        self::assertSame('gpt-test', $modelName);
+        self::assertSame('modele-test', $modelName);
         self::assertTrue($options['response_format']['json_schema']['strict'], 'strict schema sent');
         self::assertInstanceOf(MessageBag::class, $input);
         self::assertStringContainsString('Date de publication de l\'annonce : 2026-03-01', (string) $input->getUserMessage()?->asText());
+        self::assertStringContainsString('Tél [téléphone]', (string) $input->getUserMessage()?->asText(), 'the phone never leaves the server');
+        self::assertStringNotContainsString('06 11 22 33 44', (string) $input->getUserMessage()?->asText());
         self::assertStringContainsString('Tu LIS, tu ne devines rien', (string) $input->getSystemMessage()?->getContent());
 
         $extraction = $result->extraction;
@@ -66,12 +68,12 @@ final class ListingImporterTest extends TestCase
 
     public function testAPlatformFailureIsAResultNotACrash(): void
     {
-        $platform = new InMemoryPlatform(static fn (): never => throw new RuntimeException('OpenAI ne répond pas'));
+        $platform = new InMemoryPlatform(static fn (): never => throw new RuntimeException('Mistral ne répond pas'));
 
         $result = $this->importer($platform)->import(self::TEXT, new \DateTimeImmutable('2026-03-01'), []);
 
         self::assertFalse($result->succeeded());
-        self::assertSame('OpenAI ne répond pas', $result->error);
+        self::assertSame('Mistral ne répond pas', $result->error);
         self::assertSame(ListingImporter::DEFAULT_MODEL, $result->model);
         self::assertSame(['06 11 22 33 44'], $result->contacts, 'the contact check does not need the model');
     }

@@ -8,18 +8,18 @@ use App\Service\ListingImport\ContactDetector;
 use App\Service\ListingImport\ListingImporter;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
-use Symfony\AI\Platform\Bridge\OpenAi\Factory;
+use Symfony\AI\Platform\Bridge\Mistral\Factory;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 /**
- * Goes through the real OpenAI bridge with a fake HTTP answer: checks what is sent to
- * api.openai.com and that the answer, token counts included, comes back. Breaks if an upgrade
+ * Goes through the real Mistral bridge with a fake HTTP answer: checks what is sent to
+ * api.mistral.ai and that the answer, token counts included, comes back. Breaks if an upgrade
  * of symfony/ai changes either.
  */
-final class ListingImporterOpenAiTest extends TestCase
+final class ListingImporterMistralTest extends TestCase
 {
-    public function testTheRequestAndTheAnswerOfTheResponsesApi(): void
+    public function testTheRequestAndTheAnswerOfTheChatCompletionsApi(): void
     {
         $sent = [];
         $answer = [
@@ -33,20 +33,20 @@ final class ListingImporterOpenAiTest extends TestCase
             $sent = ['url' => $url, 'body' => json_decode((string) $options['body'], true, flags: \JSON_THROW_ON_ERROR)];
 
             return new MockResponse((string) json_encode([
-                'id' => 'resp_1',
-                'object' => 'response',
-                'status' => 'completed',
+                'id' => 'cmpl-1',
+                'object' => 'chat.completion',
                 'model' => ListingImporter::DEFAULT_MODEL,
-                'output' => [[
-                    'type' => 'message', 'id' => 'msg_1', 'role' => 'assistant', 'status' => 'completed',
-                    'content' => [['type' => 'output_text', 'text' => json_encode($answer), 'annotations' => []]],
+                'choices' => [[
+                    'index' => 0,
+                    'message' => ['role' => 'assistant', 'content' => json_encode($answer)],
+                    'finish_reason' => 'stop',
                 ]],
-                'usage' => ['input_tokens' => 2100, 'output_tokens' => 310, 'total_tokens' => 2410],
+                'usage' => ['prompt_tokens' => 2100, 'completion_tokens' => 310, 'total_tokens' => 2410],
             ]), ['http_code' => 200, 'response_headers' => ['content-type' => 'application/json']]);
         });
 
         $importer = new ListingImporter(
-            Factory::createPlatform('sk-test', $http),
+            Factory::createPlatform('cle-de-test', $http),
             new ContactDetector(),
             new NullLogger(),
             __DIR__.'/../../../../config/prompts/listing-import.md',
@@ -54,11 +54,11 @@ final class ListingImporterOpenAiTest extends TestCase
 
         $result = $importer->import('Bungalow 3 chambres, septembre 450 € la semaine.', new \DateTimeImmutable('2026-09-05'), ['Médoc']);
 
-        self::assertSame('https://api.openai.com/v1/responses', $sent['url']);
+        self::assertSame('https://api.mistral.ai/v1/chat/completions', $sent['url']);
         self::assertSame(ListingImporter::DEFAULT_MODEL, $sent['body']['model']);
-        self::assertSame('json_schema', $sent['body']['text']['format']['type']);
-        self::assertTrue($sent['body']['text']['format']['strict']);
-        self::assertSame(['Médoc', null], $sent['body']['text']['format']['schema']['properties']['listing']['properties']['district']['enum']);
+        self::assertSame('json_schema', $sent['body']['response_format']['type']);
+        self::assertTrue($sent['body']['response_format']['json_schema']['strict']);
+        self::assertSame(['Médoc', null], $sent['body']['response_format']['json_schema']['schema']['properties']['listing']['properties']['district']['enum']);
 
         self::assertTrue($result->succeeded(), (string) $result->error);
         self::assertSame(2100, $result->inputTokens);

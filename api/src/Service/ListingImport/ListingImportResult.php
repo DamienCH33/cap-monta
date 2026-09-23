@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service\ListingImport;
 
+use App\Enum\ListingImportFailure;
+
 /**
  * The outcome of one import. A failure is a normal result, not an exception: the owner's screen
  * falls back to the empty form (ADR 008, the AI assists, the site works without it).
@@ -22,6 +24,9 @@ final readonly class ListingImportResult
         public ?int $outputTokens = null,
         public ?string $error = null,
         public mixed $rawOutput = null,
+        public ?ListingImportFailure $failure = null,
+        /** Seconds the provider asked to wait (rate limit), if it said so. */
+        public ?int $retryAfter = null,
     ) {
     }
 

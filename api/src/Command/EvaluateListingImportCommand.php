@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Entity\District;
+use App\Enum\ListingImportFailure;
 use App\Repository\DistrictRepository;
 use App\Service\ListingImport\Evaluation\CaseScore;
 use App\Service\ListingImport\Evaluation\EvalCase;
@@ -30,6 +30,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 #[AsCommand(name: 'app:listing-import:eval', description: 'Évalue l\'import d\'annonce sur le jeu de cas réels')]
 final readonly class EvaluateListingImportCommand
 {
+    /** Seconds to wait before each new attempt after a rate limit (free plan). */
+    private const array RATE_LIMIT_WAITS_S = [2, 5, 10];
+
     public function __construct(
         private EvalCaseLoader $loader,
         private ExtractionScorer $scorer,
@@ -38,7 +41,7 @@ final readonly class EvaluateListingImportCommand
         private ClockInterface $clock,
         #[Autowire('%kernel.project_dir%/evals/listing-import')]
         private string $evalDir,
-        #[Autowire('%env(OPENAI_API_KEY)%')]
+        #[Autowire('%env(MISTRAL_API_KEY)%')]
         private string $apiKey,
     ) {
     }
@@ -71,7 +74,7 @@ final readonly class EvaluateListingImportCommand
 
         if ($run) {
             if ('' === trim($this->apiKey)) {
-                $io->error('OPENAI_API_KEY est vide : ajoute ta clé dans api/.env.local (jamais dans .env).');
+                $io->error('MISTRAL_API_KEY est vide : ajoute ta clé dans api/.env.local (jamais dans .env). Voir evals/listing-import/README.md.');
 
                 return 1;
             }
@@ -117,10 +120,7 @@ final readonly class EvaluateListingImportCommand
      */
     private function runModel(SymfonyStyle $io, array $cases, string $model): string
     {
-        $districts = array_map(
-            static fn (District $d): string => $d->getName(),
-            $this->districts->findBy([], ['resort' => 'ASC', 'position' => 'ASC']),
-        );
+        $districts = $this->districts->names();
         $directory = \sprintf('%s/runs/%s-%s', $this->evalDir, $this->clock->now()->format('Ymd-His'), preg_replace('/[^a-z0-9.-]+/i', '-', $model));
         if (!is_dir($directory) && !mkdir($directory, 0o775, true)) {
             throw new \RuntimeException('Impossible de créer '.$directory);
@@ -130,7 +130,15 @@ final readonly class EvaluateListingImportCommand
         $io->progressStart(\count($cases));
 
         foreach ($cases as $evalCase) {
+            // The free plan limits the pace: on a rate limit, wait and try again (3 times at most).
             $result = $this->importer->import($evalCase->text, $evalCase->publishedAt, $districts, $model);
+            foreach (self::RATE_LIMIT_WAITS_S as $wait) {
+                if (ListingImportFailure::ProviderLimit !== $result->failure) {
+                    break;
+                }
+                sleep(min($result->retryAfter ?? $wait, 60));
+                $result = $this->importer->import($evalCase->text, $evalCase->publishedAt, $districts, $model);
+            }
             $tokensIn += $result->inputTokens ?? 0;
             $tokensOut += $result->outputTokens ?? 0;
             $durationMs += $result->durationMs;

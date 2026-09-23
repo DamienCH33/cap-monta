@@ -15,6 +15,15 @@ final class ContactDetector
     private const string EMAIL = '/[\p{L}0-9._%+\-]+@[\p{L}0-9.\-]+\.[a-z]{2,}/iu';
 
     /**
+     * The text with every phone number and email replaced by a neutral marker: what is sent to
+     * the AI provider. Extracting rates never needs them, and the free plan may keep the text.
+     */
+    public function mask(string $text): string
+    {
+        return (string) preg_replace([self::PHONE, self::EMAIL], ['[téléphone]', '[email]'], $text);
+    }
+
+    /**
      * @return list<string> what was found, as written
      */
     public function find(string $text): array

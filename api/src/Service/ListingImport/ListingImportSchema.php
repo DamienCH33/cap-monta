@@ -10,7 +10,7 @@ use App\Enum\PetsPolicy;
 use App\Enum\PriceUnit;
 
 /**
- * The JSON schema the model must answer with (OpenAI "structured outputs", strict mode): every
+ * The JSON schema the model must answer with (JSON Schema, strict mode): every
  * key present, nothing extra, closed lists as enums. The model cannot even write "jacuzzi" in
  * the equipment list. The PHP checks everything again anyway: the schema is a first fence, not
  * the only one.

@@ -21,7 +21,7 @@ Seulement des dates écrites comme prises, avec deux bornes (« réservé du 3 a
 # Formulaire (`listing`)
 
 - `null` = pas écrit. Ne mets jamais de valeur par défaut.
-- `type` : `bungalow` (aussi « chalet »), `mobile_home` (« mobil-home », « mobilhome », « cottage » s'il est dit mobil-home), `caravan`.
+- `type` : `bungalow`, `mobile_home` (« mobil-home », « mobilhome », « cottage » s'il est dit mobil-home), `caravan`, `chalet`, `studio` (aussi « appartement », « 2 pièces »). Au CHM, un logement que l'annonce appelle à la fois « chalet » et « bungalow » est un `bungalow`. Une tente, un emplacement nu ou un logement du camping lui-même n'est pas une location de particulier : `type` null et une question.
 - `capacity` : seulement si écrit (« 4 personnes », « 7 couchages ») ; une fourchette « 2 à 4 » → null.
 - `bedrooms` : le nombre de chambres écrit ou listé. Un salon, une mezzanine, un coin qui « peut servir de chambre » ne sont pas des chambres.
 - `surface` : surface habitable seulement ; la surface d'une terrasse ou d'une parcelle n'en est pas une.

@@ -17,13 +17,14 @@ runs/       sorties de l'agent, ignorées par git
 symfony console app:listing-import:eval                          # le jeu contre lui-même : doit donner 20/20
 symfony console app:listing-import:eval --run --case=03           # l'IA sur un seul cas (moins d'un centime)
 symfony console app:listing-import:eval --run                     # l'IA sur les 20 cas (quelques centimes)
-symfony console app:listing-import:eval --run --model=gpt-5.6-sol # un autre modèle, pour comparer
+symfony console app:listing-import:eval --run --model=mistral-medium-latest # un autre modèle, pour comparer
 symfony console app:listing-import:eval --predictions=evals/listing-import/runs/<dossier>   # renoter un essai
 symfony console app:listing-import:eval --cases=evals/listing-import/examples --predictions=evals/listing-import/demo
 ```
 
-`--run` exige une clé OpenAI dans `api/.env.local` (jamais dans `.env`, qui est versionné) :
-`OPENAI_API_KEY=sk-...`. Chaque essai est gardé dans `runs/<date>-<modèle>/`, ce qui permet de
+`--run` exige une clé **Mistral** (formule gratuite « Experiment » : un numéro de téléphone,
+pas de carte bancaire) dans `api/.env.local`, jamais dans `.env` qui est versionné :
+`MISTRAL_API_KEY=...`. Chaque essai est gardé dans `runs/<date>-<modèle>/`, ce qui permet de
 comparer deux consignes ou deux modèles sur les mêmes annonces.
 
 La dernière ligne montre à quoi ressemble un échec : un équipement coché sans être écrit, un

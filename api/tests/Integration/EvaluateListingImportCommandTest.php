@@ -7,6 +7,7 @@ namespace App\Tests\Integration;
 use App\Service\ListingImport\ContactDetector;
 use App\Service\ListingImport\ListingImporter;
 use Psr\Log\NullLogger;
+use Symfony\AI\Platform\Exception\RateLimitExceededException;
 use Symfony\AI\Platform\Message\MessageBag;
 use Symfony\AI\Platform\Model;
 use Symfony\AI\Platform\Test\InMemoryPlatform;
@@ -16,7 +17,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * The --run mode end to end, with a scripted model instead of OpenAI: every example gets an
+ * The --run mode end to end, with a scripted model instead of Mistral: every example gets an
  * answer, the answers land in runs/, the report scores them.
  */
 final class EvaluateListingImportCommandTest extends KernelTestCase
@@ -54,18 +55,43 @@ final class EvaluateListingImportCommandTest extends KernelTestCase
         ));
 
         $tester = new CommandTester(new Application($kernel)->find('app:listing-import:eval'));
-        $tester->execute(['--run' => true, '--cases' => self::EVALS.'/examples', '--model' => 'gpt-test']);
+        $tester->execute(['--run' => true, '--cases' => self::EVALS.'/examples', '--model' => 'modele-test']);
 
         $tester->assertCommandIsSuccessful();
         self::assertSame(3, $calls);
 
         $runs = array_values(array_diff(glob(self::EVALS.'/runs/*') ?: [], $this->runsBefore));
         self::assertCount(1, $runs);
-        self::assertStringEndsWith('-gpt-test', $runs[0]);
+        self::assertStringEndsWith('-modele-test', $runs[0]);
         self::assertCount(3, glob($runs[0].'/*.json') ?: []);
 
         $display = $tester->getDisplay();
-        self::assertStringContainsString('Modèle gpt-test — 3 cas', $display);
+        self::assertStringContainsString('Modèle modele-test — 3 cas', $display);
         self::assertMatchesRegularExpression('/Annonces réussies\s+1 \/ 3/', $display);
+    }
+
+    public function testARateLimitIsWaitedOutInsteadOfCountedAsAFailure(): void
+    {
+        $kernel = self::bootKernel();
+        $calls = 0;
+
+        // The free plan refuses the first call of each listing, then answers.
+        $platform = new InMemoryPlatform(static function () use (&$calls): string {
+            if (1 === ++$calls % 2) {
+                throw new RateLimitExceededException(0);
+            }
+
+            return '{"periods": [], "unavailable": [], "questions": ["Quels sont vos tarifs ?"], "listing": null}';
+        });
+        self::getContainer()->set(ListingImporter::class, new ListingImporter(
+            $platform, new ContactDetector(), new NullLogger(), __DIR__.'/../../config/prompts/listing-import.md',
+        ));
+
+        $tester = new CommandTester(new Application($kernel)->find('app:listing-import:eval'));
+        $tester->execute(['--run' => true, '--cases' => self::EVALS.'/examples', '--case' => '03']);
+
+        $tester->assertCommandIsSuccessful();
+        self::assertSame(2, $calls);
+        self::assertMatchesRegularExpression('/Annonces réussies\s+1 \/ 1/', $tester->getDisplay());
     }
 }
