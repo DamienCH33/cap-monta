@@ -60,7 +60,6 @@ final class ListingImportSchema
                 'schema' => self::object([
                     'periods' => ['type' => 'array', 'items' => $period],
                     'unavailable' => ['type' => 'array', 'items' => self::object(['start' => ['type' => 'string'], 'end' => ['type' => 'string']])],
-                    'questions' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'listing' => $listing,
                 ]),
             ],

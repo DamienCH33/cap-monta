@@ -25,8 +25,10 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpException;
  * every rule it can check for sure (ADR 025):
  *
  * - the answer goes through ListingExtraction::fromArray(): shape, dates, closed lists;
- * - overlapping periods, prices without dates or unit, no rate at all → a question is added,
- *   whether or not the model thought of it;
+ * - ExtractionReview proofreads it: dates of month labels, units and equipment not written in
+ *   the text, duplicates;
+ * - the questions come from the PHP only (ExtractionRules): overlapping periods, prices without
+ *   dates or unit, no rate at all. The model's own questions were mostly noise (23/09);
  * - contact details in the text are found by ContactDetector, not by the model, and masked
  *   before the text leaves the server.
  *
@@ -35,11 +37,12 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpException;
 final readonly class ListingImporter
 {
     /**
-     * A model the free plan actually serves (admin.mistral.ai/plateforme/limits): checked on
-     * 23/09, "mistral-small-latest" and "mistral-small-2603" were refused (429), this one
-     * answered. Declared in config/packages/ai.yaml, symfony/ai 0.13 does not know it yet.
+     * A model the free plan actually serves (admin.mistral.ai/plateforme/limits): on 23/09,
+     * "mistral-small-*" were refused (429). Of the two served, the 14b read the 20 real listings
+     * best (3/20 against 0/20 before the PHP proofreading). Declared in config/packages/ai.yaml,
+     * symfony/ai 0.13 does not know it yet.
      */
-    public const string DEFAULT_MODEL = 'ministral-8b-2512';
+    public const string DEFAULT_MODEL = 'ministral-14b-2512';
     private const int MAX_TEXT_LENGTH = 12000;
 
     public function __construct(
@@ -74,8 +77,9 @@ final readonly class ListingImporter
 
             $raw = $result->getContent();
             $usage = $result->getMetadata()->get('token_usage');
-            $extraction = ListingExtraction::fromArray($this->decode($raw));
+            $extraction = ListingExtraction::fromArray(ExtractionReview::repairDates($this->decode($raw), $publishedAt));
             $extraction = $extraction->withListing($extraction->listing?->keepingOnlyDistricts($districts));
+            $extraction = ExtractionReview::apply($extraction, $text, $publishedAt);
         } catch (PlatformException|HttpException|InvalidExtractionException|\JsonException $e) {
             $failure = self::classify($e);
             $this->logger->log(
