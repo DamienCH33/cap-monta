@@ -251,3 +251,19 @@ Corrigé :
 **Décision.** Enum `App\Enum\Amenity` (19 clés, les mêmes que le front) et `Assert\Choice` sur la création et la modification d'un logement : une clé inconnue → 422 « Équipement inconnu ». `AmenityListSyncTest` compare l'enum à `web/src/app/core/models/search-filters.ts` et casse si l'une des deux listes change seule.
 
 **Coût.** Ajouter un équipement = deux fichiers (l'enum et le fichier du front, qui porte le libellé et la rubrique). Les logements déjà en base ne sont pas revérifiés : en développement, les fixtures n'utilisent que des clés de la liste.
+
+---
+
+## 025 — L'import d'annonce : un appel, un schéma strict, et le PHP qui vérifie (23/09/2026)
+
+**Contexte.** Lot 4b : brancher un modèle sur le jeu d'évaluation de l'ADR 023. Damien a laissé le choix du fournisseur (« GPT est pas mal ? ») et des trois questions de métier restées ouvertes.
+
+**Décision.**
+- **OpenAI, modèle `gpt-5.6-luna`** par défaut (le moins cher des modèles récents que connaît `symfony/ai` 0.13, d'après la grille publique d'OpenAI de septembre 2026 ; sorties structurées gérées). Changer de modèle = `--model=` sur la commande d'évaluation : on compare sur les mêmes 20 annonces avant de changer le défaut. Coût attendu : de l'ordre de 0,2 centime par annonce (environ 3 500 tokens envoyés, 800 reçus).
+- **`symfony/ai-bundle` + `symfony/ai-open-ai-platform`**, sans `symfony/ai-agent` pour l'instant : c'est **un seul appel** au modèle, pas une boucle d'agent avec des outils. Les vérifications prévues comme « outils » (chevauchement, question au propriétaire) sont sûres et gratuites en PHP : `ExtractionRules` ajoute la question quel que soit l'avis du modèle (périodes qui se chevauchent, prix sans dates ou sans unité, aucun tarif). Un outil ne sera ajouté que si l'évaluation montre qu'il améliore le score.
+- **Schéma JSON strict** (`ListingImportSchema`) : toutes les clés, rien d'autre, listes fermées en `enum` (équipements, type, animaux, unités, quartiers connus). Le PHP revérifie tout (`ListingExtraction::fromArray()`, quartier ramené à un nom connu) : le schéma est une première barrière, pas la seule.
+- **La consigne** (`config/prompts/listing-import.md`) ne reprend **aucun exemple du jeu d'évaluation** : sinon le score mesurerait la mémoire du modèle, pas sa lecture.
+- **Une panne n'est pas une exception** : `ListingImportResult` sans extraction et avec l'erreur ; l'écran retombera sur le formulaire vide (ADR 008).
+- **Questions de métier tranchées** : un prix sans unité reste `unknown` (l'écran d'import proposera « semaine », usage du CHM, confirmé d'un clic) ; « septembre (disponible à partir du 29 août) » commence le 29 août (location du samedi au samedi, le 29/08/2026 est un samedi) ; des lignes barrées perdues au copier-coller donnent des périodes qui se chevauchent → question, jamais de choix à la place du propriétaire.
+
+**Coût.** Une clé OpenAI et une dépendance de plus (`symfony/ai` est en 0.x : une montée de version peut casser, d'où `ListingImporterOpenAiTest` qui fait passer une vraie requête par le pont OpenAI avec une réponse simulée).
