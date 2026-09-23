@@ -20,7 +20,11 @@ use App\Enum\PriceUnit;
  *   price ("Disponibilités : du 18 au 25 juillet") are not a rate: dropped;
  * - an equipment the text does not name is unticked (AmenityEvidence); one the model filed
  *   under "other features" although it is in the list ("grande terrasse") is ticked;
- * - a covered terrace is a terrace.
+ * - a covered terrace is a terrace;
+ * - a price the text only gives as a floor, a range or a discount ("à partir de 350 €",
+ *   "560-840 €", "dégressif : 2 950 € les 3 semaines") is not a rate, and a price with neither dates nor unit cannot
+ *   become one: both dropped;
+ * - the capacity is the number written before "personnes" or "couchages", never a guess.
  */
 final class ExtractionReview
 {
@@ -64,20 +68,23 @@ final class ExtractionReview
     public static function apply(ListingExtraction $extraction, string $text, \DateTimeImmutable $publishedAt): ListingExtraction
     {
         $words = AmenityEvidence::words($text);
+        $amounts = self::amountWords($text);
         $periods = [];
         foreach ($extraction->periods as $period) {
-            $period = new ExtractedPeriod(
-                $period->label, $period->start, $period->end,
+            $prices = array_values(array_filter(
                 array_map(static fn (ExtractedPrice $price): ExtractedPrice => self::checkedUnit($price, $words), $period->prices),
-                $period->minimumNights, $period->saturdayArrival,
-            );
-            foreach (self::datedFromLabel($period, (int) $publishedAt->format('Y')) as $dated) {
+                static fn (ExtractedPrice $price): bool => !self::isOnlyFloorOrDiscount($price->amount, $amounts),
+            ));
+            $period = new ExtractedPeriod($period->label, $period->start, $period->end, $prices, $period->minimumNights, $period->saturdayArrival);
+            // A label without a year takes the one the model read ("Disponibilités 2027 : juin").
+            $year = (int) ($period->start ?? $period->end ?? $publishedAt)->format('Y');
+            foreach (self::datedFromLabel($period, $year) as $dated) {
                 $periods[] = $dated;
             }
         }
 
         return new ListingExtraction(
-            self::withoutDuplicates($periods),
+            self::withoutDuplicates($periods, $amounts),
             $extraction->unavailable,
             [], // the questions are the PHP's (ExtractionRules), asked after this review
             null === $extraction->listing ? null : self::checkedListing($extraction->listing, $text),
@@ -111,13 +118,14 @@ final class ExtractionReview
 
     /**
      * A period without a price is not a rate; one that repeats another (the same prices, without
-     * dates) adds nothing.
+     * dates) adds nothing; a price only found in the site's "Prix :" field, without dates or
+     * unit, cannot be placed anywhere.
      *
      * @param list<ExtractedPeriod> $periods
      *
      * @return list<ExtractedPeriod>
      */
-    private static function withoutDuplicates(array $periods): array
+    private static function withoutDuplicates(array $periods, string $amounts): array
     {
         $prices = static function (ExtractedPeriod $period): string {
             $keys = array_map(static fn (ExtractedPrice $price): string => $price->key(), $period->prices);
@@ -130,7 +138,12 @@ final class ExtractionReview
         $seen = [];
 
         foreach ($periods as $i => $period) {
-            if ([] === $period->prices || isset($seen[$period->key()])) {
+            // "Prix : 630 €" and nothing else: no dates, no unit, not even a line of the text.
+            $priceFieldOnly = [] === array_filter(
+                $period->prices,
+                static fn (ExtractedPrice $price): bool => PriceUnit::Unknown !== $price->unit || !self::onlyInPriceField($price->amount, $amounts),
+            );
+            if ([] === $period->prices || isset($seen[$period->key()]) || (!$dated($period) && $priceFieldOnly)) {
                 continue;
             }
             foreach ($periods as $j => $other) {
@@ -143,6 +156,59 @@ final class ExtractionReview
         }
 
         return $kept;
+    }
+
+    /** Words just before an amount that make it a floor or a discount, not a rate. */
+    private const string FLOOR_OR_DISCOUNT = '/(?:\\ba partir de(?: \\w+)?|\\bdes(?: \\w+)?|\\b(?:degressi\\w*|remises?|reductions?)(?: \\w+){0,5})$/';
+
+    /**
+     * The text for amounts: lower case, no accents, "2 950" and "1.000" glued back together.
+     */
+    private static function amountWords(string $text): string
+    {
+        $text = (string) preg_replace('/(\d)[ .\x{202F}\x{A0}](\d{3})\b/u', '$1$2', MonthLabel::fold($text));
+
+        return ' '.trim((string) preg_replace('/[^a-z0-9]+/', ' ', $text)).' ';
+    }
+
+    /**
+     * True when every time the amount is written it is a floor or a discount. "Prix : 350 €"
+     * (the price field of the site, a copy of the lowest price) counts for nothing either way.
+     */
+    private static function isOnlyFloorOrDiscount(int $amount, string $amounts): bool
+    {
+        $marked = false;
+        preg_match_all('/(?<= )'.$amount.'(?= )/', $amounts, $found, \PREG_OFFSET_CAPTURE);
+
+        foreach ($found[0] as [, $offset]) {
+            $before = implode(' ', \array_slice(explode(' ', trim(substr($amounts, 0, $offset))), -6));
+            $after = strtok(substr($amounts, $offset + \strlen((string) $amount)), ' ');
+            if (1 === preg_match(self::FLOOR_OR_DISCOUNT, $before)
+                || self::isOtherBound(strrchr(' '.$before, ' '), $amount)
+                || self::isOtherBound(false === $after ? '' : $after, $amount)) {
+                $marked = true;
+            } elseif (!str_ends_with($before, 'prix')) {
+                return false;
+            }
+        }
+
+        return $marked;
+    }
+
+    /**
+     * "560-840 €": a number right next to the amount, of the same kind (not a year, not a day),
+     * makes it one bound of a range.
+     */
+    private static function isOtherBound(string|false $word, int $amount): bool
+    {
+        $word = trim((string) $word);
+
+        return 1 === preg_match('/^\d+$/', $word) && (int) $word >= 50 && (int) $word < 2000 && (int) $word !== $amount;
+    }
+
+    private static function onlyInPriceField(int $amount, string $amounts): bool
+    {
+        return 0 === preg_match('/(?<!prix )(?<= )'.$amount.'(?= )/', $amounts);
     }
 
     private static function checkedUnit(ExtractedPrice $price, string $words): ExtractedPrice
@@ -177,8 +243,24 @@ final class ExtractionReview
         }
 
         return new ExtractedListing(
-            $listing->type, $listing->capacity, $listing->bedrooms, $listing->surface, $listing->district,
+            $listing->type, self::writtenCapacity($listing->capacity, $text), $listing->bedrooms, $listing->surface, $listing->district,
             $amenities, $listing->petsPolicy, $listing->otherFeatures, $listing->rejected,
         );
+    }
+
+    /**
+     * "6 personnes", "5 couchages": one number written, it is the capacity; none, it stays
+     * empty; several, the model's pick if it is one of them. A range ("4-6 personnes") is none.
+     */
+    private static function writtenCapacity(?int $capacity, string $text): ?int
+    {
+        preg_match_all('/(?<! a)(?<!\d) (\d{1,2}) (?:personnes?|pers|couchages?|places|voyageurs)\b/', self::amountWords($text), $found);
+        $written = array_values(array_unique(array_map(intval(...), $found[1])));
+
+        return match (true) {
+            1 === \count($written) => $written[0],
+            \in_array($capacity, $written, true) => $capacity,
+            default => null,
+        };
     }
 }
