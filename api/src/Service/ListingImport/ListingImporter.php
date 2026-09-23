@@ -34,7 +34,11 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpException;
  */
 final readonly class ListingImporter
 {
-    public const string DEFAULT_MODEL = 'mistral-small-latest';
+    /**
+     * A dated model, not "mistral-small-latest": the free plan only serves the models listed on
+     * its limits page (admin.mistral.ai/plateforme/limits), and the "-latest" alias is not one.
+     */
+    public const string DEFAULT_MODEL = 'mistral-small-2603';
     private const int MAX_TEXT_LENGTH = 12000;
 
     public function __construct(

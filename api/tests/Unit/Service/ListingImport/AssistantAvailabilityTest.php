@@ -28,7 +28,8 @@ final class AssistantAvailabilityTest extends TestCase
 
     public function testAPauseEndsOnItsOwnAndIsNeverShortened(): void
     {
-        $clock = new MockClock('2026-09-23 10:00:00');
+        // The real present: the cache pool expires items on the real clock, not on the mock one.
+        $clock = new MockClock();
         $availability = new AssistantAvailability(new ArrayAdapter(), $clock, 'cle');
 
         $availability->pauseAfter(ListingImportFailure::Configuration); // 1 hour
