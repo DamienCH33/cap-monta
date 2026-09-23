@@ -84,4 +84,38 @@ final class ExtractionReviewTest extends TestCase
         self::assertSame([], $reviewed->questions, 'the model\'s questions are not kept');
         self::assertSame([Amenity::Heating, Amenity::CoveredTerrace, Amenity::Terrace], $reviewed->listing?->amenities);
     }
+
+    public function testFloorsRangesDiscountsAndTheBarePriceFieldAreNotRates(): void
+    {
+        $text = "Bungalow 4-6 personnes. Loue 560-840 euros. Juillet : 1050 € / semaine. Dégressif : 2 950 € les 3 semaines. Hors saison à partir de 350 € la semaine.\nPrix : 630€";
+        $period = static fn (string $label, ?string $start, ?string $end, int $amount, string $unit): array => [
+            'label' => $label, 'start' => $start, 'end' => $end, 'prices' => [['amount' => $amount, 'unit' => $unit]], 'minimumNights' => null, 'saturdayArrival' => false,
+        ];
+
+        $reviewed = ExtractionReview::apply(ListingExtraction::fromArray([
+            'periods' => [
+                $period('juillet', '2026-07-01', '2026-08-01', 1050, 'week'),
+                $period('juillet', '2026-07-01', '2026-08-01', 2950, 'stay'),
+                $period('hors saison', null, null, 350, 'week'),
+                $period('été', null, null, 560, 'unknown'),
+                $period('annonce', null, null, 630, 'unknown'),
+            ],
+            'unavailable' => [],
+            'listing' => ['capacity' => 6, 'amenities' => []],
+        ]), $text, new \DateTimeImmutable('2026-05-10'));
+
+        self::assertSame(['2026-07-01→2026-08-01 [1050/week] min=-'], array_map(static fn ($p): string => $p->key(), $reviewed->periods));
+        self::assertNull($reviewed->listing?->capacity, '"4-6 personnes" is a range, 6 was a guess');
+    }
+
+    public function testTheCapacityIsTheNumberWritten(): void
+    {
+        $reviewed = ExtractionReview::apply(
+            ListingExtraction::fromArray(['periods' => [], 'unavailable' => [], 'listing' => ['capacity' => null, 'amenities' => []]]),
+            '6 couchages (3 adultes maximum)',
+            new \DateTimeImmutable('2026-05-10'),
+        );
+
+        self::assertSame(6, $reviewed->listing?->capacity);
+    }
 }

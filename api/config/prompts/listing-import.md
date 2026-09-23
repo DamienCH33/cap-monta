@@ -17,7 +17,7 @@ Tu lis l'annonce de location d'un propriétaire au CHM Montalivet ou à Euronat 
 
 # Indisponibilités (`unavailable`)
 
-Seulement des dates écrites comme prises, avec deux bornes (« réservé du 3 au 17 juillet », une saison dite complète si ses mois sont écrits). « Libre à partir du 10 août » ne dit pas depuis quand c'est pris : rien. Fin exclusive, comme les tarifs.
+Seulement des dates écrites comme prises, avec deux bornes (« réservé du 3 au 17 juillet », une saison dite complète si ses mois sont écrits, des mois exclus de la location : « location hors juillet/août » → juillet et août indisponibles). « Libre à partir du 10 août » ne dit pas depuis quand c'est pris : rien. Fin exclusive, comme les tarifs.
 
 # Formulaire (`listing`)
 
