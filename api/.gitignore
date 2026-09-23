@@ -28,3 +28,9 @@ phpstan.neon
 # Photos envoyées en local par les propriétaires.
 /public/media/
 ###< photos ###
+
+###> evals ###
+# Annonces réelles (textes de tiers) : jamais dans le dépôt public. Voir evals/listing-import/README.md.
+/evals/listing-import/cases/
+/evals/listing-import/runs/
+###< evals ###

@@ -1,0 +1,60 @@
+{
+  "id": "01-exemple-simple",
+  "source": "exemple inventé",
+  "publishedAt": "2026-03-10",
+  "text": "Mobil-home 4 personnes quartier Pins, 2 chambres.\n\nJuillet : 650 € la semaine, arrivée le samedi.\nDu 1er au 22 août : 720 €/semaine, 2 semaines minimum.\nDéjà loué du 08/08/2026 au 15/08/2026.\nClimatisation, terrasse couverte, hamac. Pas de télévision. Animaux acceptés.\nCaution 400 €.\n",
+  "expected": {
+    "periods": [
+      {
+        "label": "juillet",
+        "start": "2026-07-01",
+        "end": "2026-08-01",
+        "prices": [
+          {
+            "amount": 650,
+            "unit": "week"
+          }
+        ],
+        "minimumNights": null,
+        "saturdayArrival": true
+      },
+      {
+        "label": "du 1er au 22 août",
+        "start": "2026-08-01",
+        "end": "2026-08-22",
+        "prices": [
+          {
+            "amount": 720,
+            "unit": "week"
+          }
+        ],
+        "minimumNights": 14,
+        "saturdayArrival": false
+      }
+    ],
+    "unavailable": [
+      {
+        "start": "2026-08-08",
+        "end": "2026-08-15"
+      }
+    ],
+    "needsClarification": false,
+    "listing": {
+      "type": "mobile_home",
+      "capacity": 4,
+      "bedrooms": 2,
+      "surface": null,
+      "district": "Pins",
+      "amenities": [
+        "climatisation",
+        "terrasse",
+        "terrasse-couverte"
+      ],
+      "petsPolicy": "allowed",
+      "otherFeatures": [
+        "hamac"
+      ]
+    }
+  },
+  "notes": "Exemple inventé pour les tests : le mois sans année prend l'année de publication ; « pas de télévision » ne coche rien ; le hamac, hors liste, doit être signalé."
+}

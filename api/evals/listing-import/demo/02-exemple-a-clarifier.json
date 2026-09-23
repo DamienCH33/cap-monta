@@ -1,0 +1,35 @@
+{
+  "periods": [
+    {
+      "label": "hors saison",
+      "start": null,
+      "end": null,
+      "prices": [
+        {
+          "amount": 380,
+          "unit": "week"
+        },
+        {
+          "amount": 60,
+          "unit": "night"
+        }
+      ]
+    },
+    {
+      "label": "septembre",
+      "start": "2026-09-01",
+      "end": "2026-10-01",
+      "prices": [
+        {
+          "amount": 420,
+          "unit": "unknown"
+        }
+      ]
+    }
+  ],
+  "unavailable": [],
+  "questions": [
+    "À quelles dates correspond « hors saison » ?",
+    "Le prix de septembre est-il à la semaine ?"
+  ]
+}

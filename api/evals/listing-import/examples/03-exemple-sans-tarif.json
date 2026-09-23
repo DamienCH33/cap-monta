@@ -1,0 +1,8 @@
+{
+  "id": "03-exemple-sans-tarif",
+  "source": "exemple inventé",
+  "publishedAt": "2026-03-10",
+  "text": "Bungalow à louer, à partir de 300 € selon la période. Taxe de séjour 18 € par jour.\n",
+  "expected": {"periods": [], "unavailable": [], "needsClarification": true},
+  "notes": "Exemple inventé : un plancher et une taxe ne sont pas des tarifs."
+}

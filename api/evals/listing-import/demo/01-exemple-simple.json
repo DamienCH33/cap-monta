@@ -1,0 +1,52 @@
+{
+  "periods": [
+    {
+      "label": "juillet",
+      "start": "2026-07-01",
+      "end": "2026-08-01",
+      "prices": [
+        {
+          "amount": 650,
+          "unit": "week"
+        }
+      ],
+      "minimumNights": null,
+      "saturdayArrival": true
+    },
+    {
+      "label": "août",
+      "start": "2026-08-01",
+      "end": "2026-08-22",
+      "prices": [
+        {
+          "amount": 720,
+          "unit": "week"
+        }
+      ],
+      "minimumNights": null,
+      "saturdayArrival": false
+    }
+  ],
+  "unavailable": [
+    {
+      "start": "2026-08-08",
+      "end": "2026-08-15"
+    }
+  ],
+  "questions": [],
+  "listing": {
+    "type": "mobile_home",
+    "capacity": 4,
+    "bedrooms": 2,
+    "district": "Pins",
+    "amenities": [
+      "climatisation",
+      "terrasse",
+      "terrasse-couverte",
+      "television",
+      "jacuzzi"
+    ],
+    "petsPolicy": "allowed",
+    "otherFeatures": []
+  }
+}

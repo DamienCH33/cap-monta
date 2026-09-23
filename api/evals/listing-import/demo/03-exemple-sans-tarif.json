@@ -1,0 +1,28 @@
+{
+  "periods": [
+    {
+      "label": "toute l'année",
+      "start": "2026-04-01",
+      "end": "2026-11-01",
+      "prices": [
+        {
+          "amount": 300,
+          "unit": "week"
+        }
+      ]
+    },
+    {
+      "label": "taxe",
+      "start": null,
+      "end": null,
+      "prices": [
+        {
+          "amount": 126,
+          "unit": "week"
+        }
+      ]
+    }
+  ],
+  "unavailable": [],
+  "questions": []
+}

@@ -1,0 +1,15 @@
+{
+  "id": "02-exemple-a-clarifier",
+  "source": "exemple inventé",
+  "publishedAt": "2026-03-10",
+  "text": "Bungalow calme.\n\nHors saison 380 € la semaine, 60 € la nuit.\nSeptembre : 420 €.\n",
+  "expected": {
+    "periods": [
+      {"label": "hors saison", "start": null, "end": null, "prices": [{"amount": 380, "unit": "week"}, {"amount": 60, "unit": "night"}], "minimumNights": null, "saturdayArrival": false},
+      {"label": "septembre", "start": "2026-09-01", "end": "2026-10-01", "prices": [{"amount": 420, "unit": "unknown"}], "minimumNights": null, "saturdayArrival": false}
+    ],
+    "unavailable": [],
+    "needsClarification": true
+  },
+  "notes": "Exemple inventé : dates inconnues et unité inconnue, le prix est gardé, rien n'est deviné."
+}
