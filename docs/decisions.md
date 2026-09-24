@@ -302,3 +302,20 @@ Corrigé :
 - **Protection du quota gratuit** : adresse email confirmée ; 10 lectures par propriétaire et par jour ; 300 pour tout le site ; le même texte (à la casse et aux espaces près) collé à nouveau dans les 30 jours renvoie la lecture précédente sans rappeler le fournisseur ; texte de 30 à 12 000 caractères.
 
 **Coût.** Une table de plus, un message Messenger de plus (le worker tourne déjà), et un écran qui interroge l'API toutes les deux ou trois secondes au lieu d'attendre une seule réponse. Les textes collés restent en base : à purger après quelques mois (tâche à prévoir avant la mise en ligne).
+
+---
+
+## 028 — Importer son annonce : on vérifie tout, on enregistre tout ou rien (24/09/2026)
+
+**Contexte.** Lot 4c : la lecture de l'assistant (ADR 025, 027) devient un vrai logement. Un tarif mal lu publié au nom d'un propriétaire est la faute à éviter ; une saisie refaite à la main parce qu'une ligne coince, l'autre.
+
+**Décision.**
+- **Un écran de vérification avant tout enregistrement** (`/mon-espace/importer`). L'API prépare les lignes (`ImportProposal`) : centimes, deux bornes, un prix semaine et un prix nuit. Ce qui demande une décision est signalé et, si la ligne ne peut pas être enregistrée telle quelle, **proposé décoché** : dates manquantes, période passée (tarifs d'une autre année), au-delà de deux ans. Un prix sans unité est proposé **à la semaine**, l'usage du CHM, et signalé. Un prix du séjour (« 1200 € les 2 semaines ») est ramené à la semaine (ou à la nuit sous 7 nuits) en PHP, seulement si ses dates sont connues.
+- **Tout ou rien** : `POST /api/owner/listing-imports/{id}/apply` revérifie chaque ligne avec les règles de la page Tarifs (`RateRules`, mêmes messages) et renvoie les refus par ligne (`periods[2].end`) ; une seule ligne refusée et rien n'est écrit. Le navigateur n'est pas cru sur parole.
+- **Nouveau logement → brouillon**, jamais publié d'office : il lui manque au moins les photos (et la case « aucune personne »). Le propriétaire arrive sur le formulaire habituel pour finir.
+- **Logement existant** (`?logement=slug`) : seulement tarifs et dates prises. Un tarif qui chevauche les siens est refusé (à lui de choisir) ; des dates prises qui recouvrent son calendrier sont ajoutées **autour** de ce qu'il a déjà, jamais par-dessus.
+- **Une lecture s'utilise une fois** (`ListingImport.accommodation`, `appliedAt`) : un double clic ne crée pas deux brouillons.
+- **Les coordonnées sortent de la description** proposée : sur Cap Monta, le voyageur les reçoit à l'acceptation (ADR 013).
+- **Jeu de contrôle** : `evals/listing-import/holdout/`, 10 annonces jamais regardées pendant les réglages. On ne corrige rien en regardant ses échecs ; s'il faut le faire, on en relève un autre.
+
+**Coût.** Une migration, un écran long sur mobile quand l'annonce détaille chaque semaine. Les dates « libres » d'une annonce ne deviennent rien : le propriétaire bloque le reste dans son calendrier.
