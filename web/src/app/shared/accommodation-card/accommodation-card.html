@@ -1,10 +1,5 @@
 <article class="card">
-  <div
-    class="card__photo"
-    [class.card__photo--central]="area()?.key === 'central'"
-    [class.card__photo--roadside]="area()?.key === 'roadside'"
-    [class.card__photo--unknown]="!area()"
-  >
+  <div class="card__photo">
     @if (accommodation().cover; as cover) {
       <img
         class="card__img"
@@ -15,66 +10,69 @@
         loading="lazy"
         decoding="async"
       />
+    } @else {
+      <cm-scene class="card__img" [kind]="accommodation().type" />
     }
     @if (accommodation().calendarUpToDate) {
-      <span class="card__badge">Calendrier à jour</span>
+      <span class="card__badge"><i aria-hidden="true"></i>Calendrier à jour</span>
     }
     @if (area(); as zone) {
       <span class="card__side"><cm-icon [name]="areaIcons[zone.key]" />{{ zone.label }}</span>
     }
   </div>
 
-  <div class="card__body">
-    <h2 class="card__title">
-      {{ typeLabel(accommodation().type) }}
-      @if (accommodation().district) {
-        {{ accommodation().district }}
-      }
-    </h2>
-
-    <p class="card__facts">
-      {{ accommodation().bedrooms }} {{ accommodation().bedrooms > 1 ? 'chambres' : 'chambre' }} ·
-      {{ accommodation().maxCapacity }} pers.
-      @if (accommodation().surface) {
-        · {{ accommodation().surface }} m²
-      }
-    </p>
-
-    <div class="strip" role="img" [attr.aria-label]="stripLabel()">
-      @for (week of accommodation().availability; track week.start) {
-        <span
-          class="strip__week"
-          [class.strip__week--taken]="!week.free"
-          [title]="(week.start | date: 'd MMMM') + (week.free ? ' — libre' : ' — indisponible')"
-        ></span>
-      }
+  <div class="card__head">
+    <div>
+      <h2 class="card__title">
+        <a
+          class="card__link"
+          [routerLink]="['/logement', accommodation().slug]"
+          queryParamsHandling="preserve"
+          >{{ typeLabel(accommodation().type) }}
+          @if (accommodation().district) {
+            · {{ accommodation().district }}
+          }
+        </a>
+      </h2>
+      <p class="card__facts">
+        {{ accommodation().bedrooms }} {{ accommodation().bedrooms > 1 ? 'chambres' : 'chambre' }} ·
+        {{ accommodation().maxCapacity }} pers.
+        @if (accommodation().surface) {
+          · {{ accommodation().surface }} m²
+        }
+      </p>
     </div>
 
-    @if (accommodation().availability.length) {
+    @if (accommodation().priceFrom) {
+      <p class="card__price">
+        <b>{{ accommodation().priceFrom! / 100 }} €</b>
+        <span>/ semaine</span>
+      </p>
+    } @else {
+      <p class="card__price"><span>Nous consulter</span></p>
+    }
+  </div>
+
+  @if (accommodation().availability.length) {
+    <div class="strip" role="img" [attr.aria-label]="stripLabel()">
+      <div class="strip__weeks">
+        @for (week of accommodation().availability; track week.start) {
+          <span
+            class="strip__week"
+            [class.strip__week--taken]="!week.free"
+            [title]="(week.start | date: 'd MMMM') + (week.free ? ' : libre' : ' : indisponible')"
+          ></span>
+        }
+      </div>
       <div class="strip__months">
-        <span>{{ accommodation().availability[0].start | date: 'MMM' }}</span>
+        <span>{{ accommodation().availability[0].start | date: 'MMMM' }}</span>
         <span>{{
-          accommodation().availability[accommodation().availability.length - 1].start | date: 'MMM'
+          accommodation().availability[accommodation().availability.length - 1].start | date: 'MMMM'
         }}</span>
       </div>
-    }
-
-    <footer class="card__footer">
-      @if (accommodation().priceFrom) {
-        <span class="card__price">
-          {{ accommodation().priceFrom! / 100 }} €
-          <span class="card__price-unit">/ semaine</span>
-        </span>
-      } @else {
-        <span class="card__price card__price--unknown">Nous consulter</span>
-      }
-
-      <a
-        class="card__link"
-        [routerLink]="['/logement', accommodation().slug]"
-        queryParamsHandling="preserve"
-        >Voir les dispos</a
-      >
-    </footer>
-  </div>
+    </div>
+    <p class="card__free">
+      {{ freeLabel() }}
+    </p>
+  }
 </article>

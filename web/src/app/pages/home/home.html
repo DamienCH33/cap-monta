@@ -1,48 +1,88 @@
+<section class="hero">
+  <picture>
+    <source media="(max-width: 640px)" srcset="/hero-mobile.png" />
+    <img src="/hero-desktop.png" alt="La plage et la dune de Montalivet" fetchpriority="high" />
+  </picture>
+  <div class="hero__veil"></div>
+
+  <div class="container hero__text">
+    <p class="hero__kicker">CHM Montalivet · Euronat</p>
+    <h1 class="hero__title">Louez entre l'océan et les pins</h1>
+    <p class="hero__subtitle">
+      Bungalows, mobil-homes et chalets de particuliers, avec un calendrier tenu à jour et une
+      réponse du propriétaire sous 48 heures.
+    </p>
+  </div>
+</section>
+
 <div class="container">
-  <section class="hero">
-    <picture>
-      <source media="(max-width: 640px)" srcset="/hero-mobile.png" />
-      <img src="/hero-desktop.png" alt="La plage et la dune de Montalivet" />
-    </picture>
-
-    <div class="hero__veil"></div>
-
-    <div class="hero__text">
-      <h1 class="hero__title">Louez au CHM Montalivet et à Euronat</h1>
-      <p class="hero__subtitle">
-        Des calendriers tenus à jour, une réponse du propriétaire sous 48 h.
-      </p>
-    </div>
-  </section>
-
   <div class="home__search">
     <cm-search-bar />
   </div>
 
-  <section class="section">
-    <h2 class="section__title">Chercher par quartier</h2>
-    <p class="section__lead">Chacun a son ambiance, sa distance à la plage et ses tarifs.</p>
+  <ul class="promises">
+    <li>
+      <cm-icon name="calendar-check" />
+      <p><b>Calendriers tenus à jour</b>Chaque fiche dit quand le propriétaire l'a vérifié.</p>
+    </li>
+    <li>
+      <cm-icon name="clock" />
+      <p><b>Réponse sous 48 heures</b>Sinon la demande expire et vous êtes prévenu.</p>
+    </li>
+    <li>
+      <cm-icon name="receipt-off" />
+      <p><b>Sans commission</b>Vous réglez le propriétaire, comme d'habitude.</p>
+    </li>
+  </ul>
 
-    <div class="tiles">
-      @for (district of districts(); track district.slug) {
-        <a
-          class="tile"
-          [class.tile--forest]="district.area === 'central'"
-          [routerLink]="['/quartier', district.slug]"
-        >
-          <span class="tile__name">{{ district.name }}</span>
-          <span class="tile__count">
-            {{ district.accommodationCount }}
-            {{ district.accommodationCount > 1 ? 'logements' : 'logement' }}
-          </span>
-        </a>
+  <section class="section">
+    <div class="section__head">
+      <div>
+        <h2 class="section__title">Trois façons de vivre le domaine</h2>
+        <p class="section__lead">Chaque quartier a sa distance à la plage et son ambiance.</p>
+      </div>
+    </div>
+
+    <div class="zones">
+      @for (zone of zones(); track zone.key) {
+        <article class="zone">
+          <cm-scene class="zone__scene" [kind]="zone.key" />
+          <div class="zone__body">
+            <h3 class="zone__title">{{ zone.title }}</h3>
+            <p class="zone__meta">
+              {{ zone.hint }} · {{ zone.count }} {{ zone.count > 1 ? 'logements' : 'logement' }}
+            </p>
+            <ul class="zone__districts">
+              @for (district of zone.districts; track district.slug) {
+                <li>
+                  <a [routerLink]="['/quartier', district.slug]">{{ district.name }}</a>
+                </li>
+              }
+            </ul>
+          </div>
+        </article>
       }
     </div>
+
+    @if (unplaced().length) {
+      <p class="zones__more">
+        Aussi :
+        @for (district of unplaced(); track district.slug; let last = $last) {
+          <a [routerLink]="['/quartier', district.slug]">{{ district.name }}</a
+          >{{ last ? '' : ' · ' }}
+        }
+      </p>
+    }
   </section>
 
   <section class="section">
     <div class="section__head">
-      <h2 class="section__title">Encore libre cet été</h2>
+      <div>
+        <h2 class="section__title">Encore libre</h2>
+        <p class="section__lead">
+          Les semaines à venir d'un coup d'œil : plein = libre, hachuré = déjà pris.
+        </p>
+      </div>
       <a class="section__link" routerLink="/recherche">Tout voir</a>
     </div>
 
@@ -54,14 +94,29 @@
       }
     </div>
   </section>
-
-  <section class="owner">
-    <h2 class="owner__title">Vous louez votre bungalow au CHM ?</h2>
-    <p class="owner__text">
-      Collez le texte de votre annonce actuelle : périodes, tarifs et disponibilités sont remplis
-      pour vous. Vous relisez, vous publiez.
-    </p>
-    <!-- Pas connecté : la garde envoie sur la connexion et revient ici ensuite. -->
-    <a class="owner__button" routerLink="/mon-espace/importer">Publier gratuitement</a>
-  </section>
 </div>
+
+<section class="owner">
+  <div class="container owner__inner">
+    <cm-scene class="owner__scene" kind="owner" />
+    <div>
+      <h2 class="owner__title">Vous louez votre logement au CHM ou à Euronat ?</h2>
+      <ol class="owner__steps">
+        <li>
+          <b>Collez le texte de votre annonce actuelle</b>
+          <span>Le logement, les tarifs et les dates prises sont lus pour vous.</span>
+        </li>
+        <li>
+          <b>Vérifiez et complétez</b>
+          <span>Votre texte reste à côté, rien n'est enregistré sans vous.</span>
+        </li>
+        <li>
+          <b>Ajoutez vos photos et publiez</b>
+          <span>Gratuit, sans commission.</span>
+        </li>
+      </ol>
+      <!-- Pas connecté : la garde envoie sur la connexion et revient ici ensuite. -->
+      <a class="owner__button" routerLink="/mon-espace/importer">Publier gratuitement</a>
+    </div>
+  </div>
+</section>

@@ -1,18 +1,26 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { Accommodation } from '../../core/models/accommodation';
-import { District } from '../../core/models/district';
+import { District, DistrictArea } from '../../core/models/district';
 import { AccommodationService } from '../../core/services/accommodation';
 import { DistrictService } from '../../core/services/district';
 import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
 import { SearchBar } from '../../shared/search-bar/search-bar';
+import { Icon } from '../../shared/icon/icon';
+import { Scene } from '../../shared/scene/scene';
 import { SeoService } from '../../core/services/seo';
 import { environment } from '../../../environments/environment';
 
+const ZONES: readonly { key: DistrictArea; title: string; hint: string }[] = [
+  { key: 'dunes', title: 'Côté océan', hint: 'Dunes et plage à pied' },
+  { key: 'central', title: 'Au cœur du domaine', hint: 'Commerces, piscines, thermes' },
+  { key: 'roadside', title: 'Côté avenue', hint: 'Au calme, sous les pins' },
+];
+
 @Component({
   selector: 'cm-home',
-  imports: [RouterLink, SearchBar, AccommodationCard],
+  imports: [RouterLink, SearchBar, AccommodationCard, Icon, Scene],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -23,6 +31,22 @@ export class Home implements OnInit {
 
   readonly highlights = signal<Accommodation[]>([]);
   readonly districts = signal<District[]>([]);
+
+  /** Les quartiers regroupés par zone, de la plage vers l'avenue. */
+  readonly zones = computed(() =>
+    ZONES.map((zone) => {
+      const districts = this.districts().filter((district) => district.area === zone.key);
+
+      return {
+        ...zone,
+        districts,
+        count: districts.reduce((sum, district) => sum + district.accommodationCount, 0),
+      };
+    }).filter((zone) => zone.districts.length > 0),
+  );
+
+  /** Les quartiers dont la zone n'est pas encore relevée sur le plan. */
+  readonly unplaced = computed(() => this.districts().filter((district) => null === district.area));
 
   ngOnInit(): void {
     this.seo.apply({
