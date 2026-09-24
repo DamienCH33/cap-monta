@@ -229,6 +229,19 @@ final class ExtractionReviewTest extends TestCase
         self::assertSame(6, $reviewed->listing?->capacity);
     }
 
+    public function testAPlaceNumberBeforeTheCapacityIsNotARange(): void
+    {
+        $capacity = static fn (string $text): ?int => ExtractionReview::apply(
+            ListingExtraction::fromArray(['periods' => [], 'unavailable' => [], 'listing' => ['capacity' => null, 'amenities' => []]]),
+            $text,
+            new \DateTimeImmutable('2026-05-10'),
+        )->listing?->capacity;
+
+        self::assertSame(3, $capacity('Bungalow FLORIDE 32 – 3 couchages (2 adultes maximum)'));
+        self::assertNull($capacity('Bungalow 4-6 personnes'));
+        self::assertNull($capacity('Nombre de couchages : 2 adultes et 2 enfants'));
+    }
+
     /**
      * @param list<array<string, mixed>> $periods
      */

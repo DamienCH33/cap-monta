@@ -321,3 +321,14 @@ Corrigé :
 **Coût.** Une migration, un écran long sur mobile quand l'annonce détaille chaque semaine. Les dates « libres » d'une annonce ne deviennent rien : le propriétaire bloque le reste dans son calendrier.
 
 **Mise à jour du 24/09 (tour 2).** Premier score sur 10 annonces jamais vues : 1/10 (26/38 périodes, 0 prix inventé), contre 14/20 sur les annonces de réglage. Les règles avaient appris les 20 premières annonces. Tour 2 : uniquement des corrections générales (une ligne invalide est écartée au lieu de faire échouer toute la lecture, mois abrégés, prix conditionnels « si 2 semaines », unité lue à côté du montant, surface ≠ parcelle, « chauffe-eau », quelques synonymes d'équipements cochés d'office quand ils ne laissent aucun doute, question sur des tarifs d'une année passée, règle de fin de mois écrite). Le jeu de contrôle v1 rejoint le jeu de réglage (`cases/`) et un jeu v2 de 10 annonces neuves le remplace.
+
+**Mesures du 24/09 après le tour 3** (température 0, ministral-14b-2512, gratuit) :
+
+| Jeu | Réussies | Périodes | Prix inventés | Équipements inventés |
+|---|---|---|---|---|
+| 30 annonces de réglage | 15/30 | 66/70 (7 en trop) | 0 | 0 |
+| **Contrôle v2, 10 annonces jamais vues** | **2/10** | **11/17 (5 en trop)** | **0** | 1 |
+
+C'est le score de référence de l'import, et il reste la référence : deux défauts du PHP trouvés en lisant ces échecs (« FLORIDE 32 – 3 couchages » pris pour une fourchette, « couchages 2 adultes ») sont corrigés, mais le jeu v2 est désormais « vu » et ne mesure plus rien. Un nouveau score demanderait un jeu v3.
+
+**Décision : on arrête de régler la lecture.** Chaque tour consomme un jeu de contrôle (10 à 12 annonces sur les ~180 de CôtéMonta) pour un gain qui s'amenuise ; le plafond est celui d'un petit modèle gratuit. La règle dure tient sur tous les passages (0 prix inventé), et l'écran de vérification fait le reste : le propriétaire corrige, le texte d'origine sous les yeux, rien n'est enregistré sans lui. L'import est une aide à la saisie, pas une saisie automatique. Pistes si on y revient : un plus gros modèle quand un budget existera, ou mesurer « champs à corriger par le propriétaire » plutôt que « annonce parfaite ».
