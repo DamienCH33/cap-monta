@@ -58,12 +58,74 @@ final class ExtractionReview
         return $data;
     }
 
-    /** Words that must be somewhere in the text for a unit to be believed. */
+    /** A heading that gives the unit of the whole list below it. */
+    private const array UNIT_HEADINGS = [
+        'week' => '/ (?:tarifs?|prix|location|loyers?) (?:\\w+ ){0,2}(?:a la|par|a|en) semaines? /',
+        'night' => '/ (?:tarifs?|prix|location|loyers?) (?:\\w+ ){0,2}(?:a la|par|a|en) nuits? /',
+    ];
+
+    /** Words that must be written next to the amount for a unit to be believed. */
     private const array UNIT_WORDS = [
         'week' => '/ (?:semaines?|sem|hebdo\w*) /',
         'night' => '/ (?:nuits?|nuitees?) /',
         'stay' => '/ (?:(?:pour|les) \d+ (?:semaines|nuits|jours)|quinzaine|au total|par sejour|le sejour complet|tout le sejour) /',
     ];
+
+    /**
+     * Before ListingExtraction::fromArray(), which refuses any wrong item: one wrong line must not
+     * throw away the whole reading (24/09, a real listing: one price "0" and the owner got
+     * nothing at all). A price that is not a positive whole number is dropped (0 is never a
+     * price); a period or a date range that cannot exist (end before start, unreadable date) is
+     * dropped and returned, so that the owner is told a line was not understood.
+     *
+     * @param array<mixed> $data
+     *
+     * @return array{0: array<mixed>, 1: list<string>} the data kept, and the labels dropped
+     */
+    public static function dropInvalid(array $data): array
+    {
+        $dropped = [];
+
+        if (\is_array($data['periods'] ?? null)) {
+            $periods = [];
+            foreach ($data['periods'] as $period) {
+                if (!\is_array($period)) {
+                    continue;
+                }
+                if (\is_array($period['prices'] ?? null)) {
+                    $period['prices'] = array_values(array_filter(
+                        $period['prices'],
+                        static fn (mixed $price): bool => \is_array($price) && \is_int($price['amount'] ?? null) && $price['amount'] > 0,
+                    ));
+                }
+                if (\is_int($period['minimumNights'] ?? null) && $period['minimumNights'] < 1) {
+                    $period['minimumNights'] = null;
+                }
+                try {
+                    ExtractedPeriod::fromArray($period);
+                    $periods[] = $period;
+                } catch (InvalidExtractionException) {
+                    $dropped[] = \is_string($period['label'] ?? null) && '' !== trim($period['label']) ? trim($period['label']) : 'une période';
+                }
+            }
+            $data['periods'] = $periods;
+        }
+
+        if (\is_array($data['unavailable'] ?? null)) {
+            $ranges = [];
+            foreach ($data['unavailable'] as $range) {
+                try {
+                    ExtractedUnavailability::fromArray(\is_array($range) ? $range : []);
+                    $ranges[] = $range;
+                } catch (InvalidExtractionException) {
+                    $dropped[] = 'des dates indisponibles';
+                }
+            }
+            $data['unavailable'] = $ranges;
+        }
+
+        return [$data, array_values(array_unique($dropped))];
+    }
 
     public static function apply(ListingExtraction $extraction, string $text, \DateTimeImmutable $publishedAt): ListingExtraction
     {
@@ -72,7 +134,7 @@ final class ExtractionReview
         $periods = [];
         foreach ($extraction->periods as $period) {
             $prices = array_values(array_filter(
-                array_map(static fn (ExtractedPrice $price): ExtractedPrice => self::checkedUnit($price, $words), $period->prices),
+                array_map(static fn (ExtractedPrice $price): ExtractedPrice => self::checkedUnit($price, $words, $amounts), $period->prices),
                 static fn (ExtractedPrice $price): bool => !self::isOnlyFloorOrDiscount($price->amount, $amounts),
             ));
             $period = new ExtractedPeriod($period->label, $period->start, $period->end, $prices, $period->minimumNights, $period->saturdayArrival);
@@ -158,6 +220,13 @@ final class ExtractionReview
         return $kept;
     }
 
+    /**
+     * Words just after an amount that make it a conditional price, not a rate: "400 € si 2
+     * semaines", "850 € à partir de 15 jours", "au-delà de 3 semaines". Not "à partir du 15
+     * juin" (a date: the rate starts then) nor "pour 2 semaines" (a stay price).
+     */
+    private const string CONDITIONAL_AFTER = '/^ (?:(?:euros?|eur) )?(?:si \\d|a partir de \\d+ (?:jours?|nuits?|semaines?)|au dela d)/';
+
     /** Words just before an amount that make it a floor or a discount, not a rate. */
     private const string FLOOR_OR_DISCOUNT = '/(?:\\ba partir de(?: \\w+)?|\\bdes(?: \\w+)?|\\b(?:degressi\\w*|remises?|reductions?)(?: \\w+){0,5})$/';
 
@@ -183,10 +252,12 @@ final class ExtractionReview
 
         foreach ($found[0] as [, $offset]) {
             $before = implode(' ', \array_slice(explode(' ', trim(substr($amounts, 0, $offset))), -6));
-            $after = strtok(substr($amounts, $offset + \strlen((string) $amount)), ' ');
+            $rest = substr($amounts, $offset + \strlen((string) $amount));
+            $after = strtok($rest, ' ');
             if (1 === preg_match(self::FLOOR_OR_DISCOUNT, $before)
-                || self::isOtherBound(strrchr(' '.$before, ' '), $amount)
-                || self::isOtherBound(false === $after ? '' : $after, $amount)) {
+                || 1 === preg_match(self::CONDITIONAL_AFTER, $rest)
+                || self::isOtherBound(strrchr(' '.$before, ' '), $amount, lower: true)
+                || self::isOtherBound(false === $after ? '' : $after, $amount, lower: false)) {
                 $marked = true;
             } elseif (!str_ends_with($before, 'prix')) {
                 return false;
@@ -200,11 +271,16 @@ final class ExtractionReview
      * "560-840 €": a number right next to the amount, of the same kind (not a year, not a day),
      * makes it one bound of a range.
      */
-    private static function isOtherBound(string|false $word, int $amount): bool
+    private static function isOtherBound(string|false $word, int $amount, bool $lower): bool
     {
         $word = trim((string) $word);
+        if (1 !== preg_match('/^\d+$/', $word) || (int) $word < 50 || (int) $word >= 2000 || (int) $word === $amount) {
+            return false;
+        }
 
-        return 1 === preg_match('/^\d+$/', $word) && (int) $word >= 50 && (int) $word < 2000 && (int) $word !== $amount;
+        // A range is written low to high ("560-840 €"). "900 € (850 € au-delà de 15 jours)" is
+        // a rate followed by a cheaper one, not a range.
+        return $lower ? (int) $word < $amount : (int) $word > $amount;
     }
 
     private static function onlyInPriceField(int $amount, string $amounts): bool
@@ -212,11 +288,54 @@ final class ExtractionReview
         return 0 === preg_match('/(?<!prix )(?<= )'.$amount.'(?= )/', $amounts);
     }
 
-    private static function checkedUnit(ExtractedPrice $price, string $words): ExtractedPrice
+    /**
+     * A unit is believed when it is written next to the amount: in the four words after it
+     * ("650 € la semaine", "375 €/sem"), or just before it without another price in between
+     * ("la semaine : 650 €"), or in a heading that sets it for the whole list ("Tarifs à la
+     * semaine :"). Written somewhere else in the text is not enough: in "800 € la semaine et du
+     * 20 au 31 août (1200 €)", 1200 has no unit.
+     */
+    private static function checkedUnit(ExtractedPrice $price, string $words, string $amounts): ExtractedPrice
     {
         $pattern = self::UNIT_WORDS[$price->unit->value] ?? null;
+        if (null === $pattern) {
+            return $price;
+        }
 
-        return null === $pattern || 1 === preg_match($pattern, $words) ? $price : new ExtractedPrice($price->amount, PriceUnit::Unknown);
+        $unknown = new ExtractedPrice($price->amount, PriceUnit::Unknown);
+        if (1 !== preg_match($pattern, $words)) {
+            return $unknown;
+        }
+        if (1 === preg_match(self::UNIT_HEADINGS[$price->unit->value] ?? '/(?!)/', $words)) {
+            return $price;
+        }
+
+        preg_match_all('/(?<= )'.$price->amount.'(?= )/', $amounts, $found, \PREG_OFFSET_CAPTURE);
+        if ([] === $found[0]) {
+            return $price; // not found as such (glued to something): no local check possible
+        }
+
+        foreach ($found[0] as [, $offset]) {
+            $after = \array_slice(explode(' ', trim(substr($amounts, $offset + \strlen((string) $price->amount)))), 0, 4);
+            $before = [];
+            foreach (array_reverse(\array_slice(explode(' ', trim(substr($amounts, 0, $offset))), -6)) as $word) {
+                if (self::isOtherPrice($word)) {
+                    break;
+                }
+                array_unshift($before, $word);
+            }
+            if (1 === preg_match($pattern, ' '.implode(' ', $after).' ') || 1 === preg_match($pattern, ' '.implode(' ', $before).' ')) {
+                return $price;
+            }
+        }
+
+        return $unknown;
+    }
+
+    /** A number that looks like another price (not a day, not a year): the unit before it is its own. */
+    private static function isOtherPrice(string $word): bool
+    {
+        return 1 === preg_match('/^\d+$/', $word) && (int) $word >= 50 && !((int) $word >= 2000 && (int) $word <= 2100);
     }
 
     private static function checkedListing(ExtractedListing $listing, string $text): ExtractedListing
@@ -239,14 +358,44 @@ final class ExtractionReview
             }
         }
 
+        // Written without any doubt but forgotten by the model: ticked (AmenityEvidence::STRONG).
+        foreach (AmenityEvidence::STRONG as $amenity) {
+            if (!\in_array($amenity, $amenities, true) && AmenityEvidence::isWritten($amenity, $text)) {
+                $amenities[] = $amenity;
+            }
+        }
+
         if (\in_array(Amenity::CoveredTerrace, $amenities, true) && !\in_array(Amenity::Terrace, $amenities, true)) {
             $amenities[] = Amenity::Terrace;
         }
 
         return new ExtractedListing(
-            $listing->type, self::writtenCapacity($listing->capacity, $text), $listing->bedrooms, $listing->surface, $listing->district,
+            $listing->type, self::writtenCapacity($listing->capacity, $text), $listing->bedrooms, self::writtenSurface($listing->surface, $text), $listing->district,
             $amenities, $listing->petsPolicy, $listing->otherFeatures, $listing->rejected,
         );
+    }
+
+    /**
+     * The living area only: the number must be written with "m²" and not right after
+     * "parcelle", "terrasse", "terrain"… ("parcelle privative de 100 m2" is not a surface).
+     */
+    private static function writtenSurface(?int $surface, string $text): ?int
+    {
+        if (null === $surface) {
+            return null;
+        }
+
+        $words = self::amountWords($text);
+        preg_match_all('/(?<= )'.$surface.' (?:m ?2|m²|metres? carres?)(?= )/u', $words, $found, \PREG_OFFSET_CAPTURE);
+
+        foreach ($found[0] as [, $offset]) {
+            $before = \array_slice(explode(' ', trim(substr($words, 0, $offset))), -5);
+            if ([] === array_intersect($before, ['parcelle', 'parcelles', 'terrain', 'terrasse', 'terrasses', 'emplacement', 'jardin', 'deck', 'parking'])) {
+                return $surface;
+            }
+        }
+
+        return null;
     }
 
     /**

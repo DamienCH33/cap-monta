@@ -17,6 +17,8 @@ final class MonthLabel
     private const array MONTHS = [
         'janvier' => 1, 'fevrier' => 2, 'mars' => 3, 'avril' => 4, 'mai' => 5, 'juin' => 6,
         'juillet' => 7, 'aout' => 8, 'septembre' => 9, 'octobre' => 10, 'novembre' => 11, 'decembre' => 12,
+        // Abbreviations owners write ("Avril/Oct", "Mai/Juin/Sept").
+        'janv' => 1, 'fev' => 2, 'fevr' => 2, 'avr' => 4, 'juil' => 7, 'sept' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12,
     ];
 
     private const array NAMES = [
@@ -44,7 +46,7 @@ final class MonthLabel
         // "septembre (disponible à partir du 29 août)": the period starts on that earlier day.
         $earlyStart = null;
         $monthNames = implode('|', array_keys(self::MONTHS));
-        if (1 === preg_match('/\(?\s*(?:dispo\w*\s+)?(?:a partir du|des le|du)\s+(\d{1,2})(?:er)?\s+('.$monthNames.')\s*\)?/', $text, $early)) {
+        if (1 === preg_match('/\(?\s*(?:dispo\w*\s+)?(?:a partir du|des le|du)\s+(\d{1,2})(?:er)?\s+('.$monthNames.')\b\s*\)?/', $text, $early)) {
             $earlyStart = [(int) $early[1], self::MONTHS[$early[2]]];
             $text = str_replace($early[0], ' ', $text);
         }

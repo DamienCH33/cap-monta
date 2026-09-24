@@ -10,34 +10,43 @@ use App\Enum\Amenity;
  * Is an equipment really written in the listing? The model ticks boxes from impressions
  * ("tout confort" → wifi, television, parking: 20 ticks out of nowhere in the first evaluation,
  * 23/09). The PHP looks for the words themselves and unticks what it cannot find.
- *
- * It only ever unticks. A word list misses synonyms ("Dolce Gusto"), so it never ticks on its
- * own: the model finds, the PHP checks. An untick is cheap, the owner ticks it back; a box
- * ticked for nothing ends up promised to a tenant.
+ * It ticks on its own only the few equipments whose words
+ * leave no doubt (STRONG): the model finds, the PHP checks. An untick is cheap, the owner ticks
+ * it back; a box ticked for nothing ends up promised to a tenant.
  */
 final class AmenityEvidence
 {
     /** Regular expressions on the folded text (lower case, no accents, words separated by one space). */
     private const array TERMS = [
-        'climatisation' => ['clim\w*', 'air conditionne\w*', 'reversible'],
-        'chauffage' => ['chauff\w*', 'radiateurs?', 'poele'],
+        'climatisation' => ['clim', 'climatis\w*', 'air conditionne\w*'],
+        'chauffage' => ['chauffage', 'chauffes?(?! eau)', 'chauffants?', 'radiateurs?', 'poele'],
         'television' => ['tv', 'tele', 'televiseurs?', 'televisions?', 'ecran plat'],
         'wifi' => ['wi ?fi', 'internet', 'box'],
-        'lave-vaisselle' => ['lave ?vaisselle'],
+        'lave-vaisselle' => ['lave ?vaisselle', 'machine a laver la vaisselle'],
         'micro-ondes' => ['micro ?ondes?'],
         'four' => ['fours?'],
         'cafetiere' => ['cafetieres?', 'cafe', 'nespresso', 'senseo', 'dolce ?gusto', 'tassimo', 'expresso', 'percolateur'],
         'terrasse' => ['terrasses?', 'deck'],
-        'terrasse-couverte' => ['terrasses?(?: \w+){0,4} (?:couverte|fermee|abritee)s?', 'auvent', 'pergola'],
-        'salon-de-jardin' => ['salons? de jardin', 'mobilier (?:de jardin|d exterieur|exterieur)', 'salons? (?:d )?exterieurs?', 'salle a manger d exterieure?', 'tables? de jardin'],
+        'terrasse-couverte' => ['terrasses?(?: \w+){0,4} (?:couverte|fermee|abritee)s?', 'terrasses?(?: \w+){0,6} (?:une )?partie couverte', 'auvent', 'pergola'],
+        'salon-de-jardin' => ['salons? de jardin', 'mobilier (?:de jardin|d exterieur|exterieur|de salon)', 'canapes? exterieurs?', 'salons? (?:d )?exterieurs?', 'salle a manger d exterieure?', 'tables? de jardin'],
         'plancha' => ['planchas?'],
         'barbecue' => ['barbe?c\w*', 'bbq'],
         'douche-exterieure' => ['douches?(?: \w+){0,3} exterieure?s?', 'douches? solaires?'],
-        'lave-linge' => ['lave ?linge', 'machine a laver'],
+        'lave-linge' => ['lave ?linge', 'machine a laver(?! la vaisselle)', 'machine a laver la vaisselle et (?:le )?linge'],
         'parking' => ['parking', 'stationnement', 'places? (?:de |pour (?:la |une )?)?(?:voiture|parking)', 'garer'],
-        'linge-fourni' => ['(?:linge|draps)(?: \w+){0,5} fournis?'],
+        'linge-fourni' => ['(?:linge|draps|serviettes)(?: \w+){0,3} (?:fournis?|inclus)'],
         'lit-bebe' => ['lits? (?:de )?bebes?', 'lits? parapluies?', 'berceau'],
         'velos' => ['velos?'],
+    ];
+
+    /**
+     * Equipment whose words leave no doubt: when the listing writes them and the model forgot
+     * them, the PHP ticks them itself. Not the others: "café" may be the one down the road,
+     * "internet" the booking channel, "vélos" a rental shop.
+     */
+    public const array STRONG = [
+        Amenity::AirConditioning, Amenity::Dishwasher, Amenity::Microwave, Amenity::WashingMachine,
+        Amenity::OutdoorShower, Amenity::Plancha, Amenity::Barbecue, Amenity::CoveredTerrace,
     ];
 
     /** A word just before the match that cancels it ("pas de télé", "sans wifi"). */
