@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 
 import { apiErrorMessage } from '../../core/http/api-error';
 import { typeLabel } from '../../core/models/accommodation';
@@ -15,6 +15,7 @@ import {
   statusLabel,
   summarize,
 } from '../../core/models/owner-accommodation';
+import { ListingImportService } from '../../core/services/listing-import';
 import { NavigationOrigin } from '../../core/services/navigation-origin';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { OwnerFlash } from '../../core/services/owner-flash';
@@ -122,6 +123,17 @@ export class OwnerAccommodations {
 
   /** « Voir l'annonce » le note : le lien de retour de la fiche ramènera ici. */
   readonly origin = inject(NavigationOrigin);
+
+  /** Le lien d'import n'apparaît que si l'assistant peut lire tout de suite (ADR 027). */
+  readonly assistantAvailable = toSignal(
+    inject(ListingImportService)
+      .assistant()
+      .pipe(
+        map((status) => status.available),
+        catchError(() => of(false)),
+      ),
+    { initialValue: false },
+  );
 
   constructor() {
     inject(SeoService).apply({

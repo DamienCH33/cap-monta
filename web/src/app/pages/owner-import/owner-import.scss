@@ -1,0 +1,244 @@
+// Mêmes couleurs que le formulaire du logement. À relier aux variables globales de la charte.
+:host {
+  --im-sea: #0b5f8a;
+  --im-sea-soft: #eef5f9;
+  --im-ink: #1c2530;
+  --im-muted: #5b6672;
+  --im-line: rgb(0 0 0 / 12%);
+  --im-error: #a3261d;
+  --im-warn: #fff6e5;
+}
+
+.import {
+  max-width: 52rem;
+  padding-block: 1.5rem 3rem;
+  color: var(--im-ink);
+
+  a {
+    color: var(--im-sea);
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--im-line);
+    border-radius: 0.45rem;
+    font: inherit;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+.import__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--im-muted);
+  font-size: 0.875rem;
+}
+
+.import__heading {
+  margin: 0;
+}
+
+.import__intro,
+.import__muted {
+  margin: 0.5rem 0 0;
+  color: var(--im-muted);
+}
+
+.import__muted {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.import__alert,
+.import__notice {
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.6rem;
+  white-space: pre-line;
+}
+
+.import__alert {
+  background: #fbeceb;
+  color: var(--im-error);
+
+  &--flat {
+    margin: 0;
+  }
+}
+
+.import__notice {
+  border: 1px solid rgb(11 95 138 / 25%);
+  background: var(--im-sea-soft);
+}
+
+.import__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.import__card {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border: 1px solid rgb(0 0 0 / 9%);
+  border-radius: 0.875rem;
+  background: #fff;
+
+  &--warn {
+    border-color: #e8c98b;
+    background: var(--im-warn);
+  }
+}
+
+.import__title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.import__label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.import__list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.import__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.9rem;
+}
+
+.import__amenities {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.import__check {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+
+  input {
+    width: auto;
+  }
+}
+
+.import__row,
+.import__range {
+  margin: 0;
+  padding: 0.9rem;
+  border: 1px solid var(--im-line);
+  border-radius: 0.6rem;
+}
+
+.import__row--off {
+  opacity: 0.6;
+}
+
+.import__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 0.6rem;
+  align-items: end;
+  font-size: 0.9rem;
+}
+
+.import__range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  align-items: center;
+
+  label:not(.import__check) {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+}
+
+.import__hint {
+  flex-basis: 100%;
+  margin: 0.5rem 0 0;
+  color: #7a5a2e;
+  font-size: 0.875rem;
+}
+
+.import__error {
+  flex-basis: 100%;
+  margin: 0.4rem 0 0;
+  color: var(--im-error);
+  font-size: 0.875rem;
+}
+
+.import__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+}
+
+.import__primary,
+.import__secondary {
+  padding: 0.7rem 1.2rem;
+  border: 1px solid var(--im-sea);
+  border-radius: 0.6rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.import__primary {
+  background: var(--im-sea);
+  color: #fff;
+}
+
+.import__secondary {
+  background: #fff;
+  color: var(--im-sea);
+}
+
+.import__waiting {
+  justify-items: center;
+  text-align: center;
+}
+
+.import__spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--im-sea-soft);
+  border-top-color: var(--im-sea);
+  border-radius: 50%;
+  animation: import-spin 0.9s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes import-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
