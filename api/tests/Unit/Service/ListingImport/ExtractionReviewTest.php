@@ -192,6 +192,43 @@ final class ExtractionReviewTest extends TestCase
         self::assertStringContainsString('2024', ExtractionRules::questions($extraction, new \DateTimeImmutable('2026-05-04'))[0]);
     }
 
+    public function testTheUnitMayOpenTheSentenceAndThePriceFieldIsNotARateOfItsOwn(): void
+    {
+        $text = "Location semaine Hors saison ( fin été / automne 2026) : 500 euros\nJuin et septembre : 700€ / semaine\nPrix : 700€";
+        $reviewed = $this->review($text, [
+            self::period('hors saison', null, null, 500, 'week'),
+            ['label' => 'juin et septembre', 'start' => null, 'end' => null, 'prices' => [['amount' => 700, 'unit' => 'week']], 'minimumNights' => null, 'saturdayArrival' => false],
+            self::period('prix', null, null, 700, 'unknown'),
+        ]);
+
+        self::assertSame(['500/week', '700/week', '700/week'], $this->prices($reviewed), 'hors saison, then June and September; the bare "Prix" is dropped');
+    }
+
+    public function testAMonthEndIsTheWholeMonthAndATakenDayMustBeWritten(): void
+    {
+        $reviewed = ExtractionReview::apply(ListingExtraction::fromArray([
+            'periods' => [self::period('du 1er juillet au 31 août', '2026-07-01', '2026-08-31', 900, 'week')],
+            'unavailable' => [
+                ['start' => '2026-07-01', 'end' => '2026-08-31'],
+                ['start' => '2026-01-01', 'end' => '2026-08-21'],
+            ],
+        ]), 'Juillet et août : 900 € la semaine, complet. Libre à partir du 21 août.', new \DateTimeImmutable('2026-05-10'));
+
+        self::assertSame('2026-09-01', $reviewed->periods[0]->end?->format('Y-m-d'));
+        self::assertSame(['2026-07-01→2026-09-01'], array_map(static fn ($u): string => $u->key(), $reviewed->unavailable), 'the 1 January start is written nowhere');
+    }
+
+    public function testTheCapacityMayFollowItsLabel(): void
+    {
+        $reviewed = ExtractionReview::apply(
+            ListingExtraction::fromArray(['periods' => [], 'unavailable' => [], 'listing' => ['capacity' => 6, 'amenities' => []]]),
+            "Grand bungalow, 3 chambres.\nNombre de couchages\t6",
+            new \DateTimeImmutable('2026-05-10'),
+        );
+
+        self::assertSame(6, $reviewed->listing?->capacity);
+    }
+
     /**
      * @param list<array<string, mixed>> $periods
      */

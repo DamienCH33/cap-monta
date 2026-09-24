@@ -51,6 +51,7 @@ final class ListingImporterTest extends TestCase
         self::assertTrue($result->succeeded());
         self::assertSame('modele-test', $modelName);
         self::assertTrue($options['response_format']['json_schema']['strict'], 'strict schema sent');
+        self::assertSame(0.0, $options['temperature'], 'the same text gives the same reading');
         self::assertInstanceOf(MessageBag::class, $input);
         self::assertStringContainsString('Date de publication de l\'annonce : 2026-03-01', (string) $input->getUserMessage()?->asText());
         self::assertStringContainsString('Tél [téléphone]', (string) $input->getUserMessage()?->asText(), 'the phone never leaves the server');

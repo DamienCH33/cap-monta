@@ -28,7 +28,7 @@ final class AmenityEvidence
         'cafetiere' => ['cafetieres?', 'cafe', 'nespresso', 'senseo', 'dolce ?gusto', 'tassimo', 'expresso', 'percolateur'],
         'terrasse' => ['terrasses?', 'deck'],
         'terrasse-couverte' => ['terrasses?(?: \w+){0,4} (?:couverte|fermee|abritee)s?', 'terrasses?(?: \w+){0,6} (?:une )?partie couverte', 'auvent', 'pergola'],
-        'salon-de-jardin' => ['salons? de jardin', 'mobilier (?:de jardin|d exterieur|exterieur|de salon)', 'canapes? exterieurs?', 'salons? (?:d )?exterieurs?', 'salle a manger d exterieure?', 'tables? de jardin'],
+        'salon-de-jardin' => ['salons? de jardin', 'mobilier (?:de jardin|d exterieur|exterieur|de salon)', 'salons? (?:d )?exterieurs?', 'salle a manger d exterieure?', 'tables? de jardin'],
         'plancha' => ['planchas?'],
         'barbecue' => ['barbe?c\w*', 'bbq'],
         'douche-exterieure' => ['douches?(?: \w+){0,3} exterieure?s?', 'douches? solaires?'],

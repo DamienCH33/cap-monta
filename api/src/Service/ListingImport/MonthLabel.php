@@ -138,6 +138,16 @@ final class MonthLabel
         return $periods;
     }
 
+    /**
+     * Every way of writing a month (full name and abbreviations), folded.
+     *
+     * @return list<string>
+     */
+    public static function namesOf(int $month): array
+    {
+        return array_keys(array_filter(self::MONTHS, static fn (int $number): bool => $number === $month));
+    }
+
     public static function fold(string $text): string
     {
         return mb_strtolower((string) transliterator_transliterate('Any-Latin; Latin-ASCII', $text));

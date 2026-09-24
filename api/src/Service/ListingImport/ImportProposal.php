@@ -49,7 +49,7 @@ final class ImportProposal
         $district = null === $listing->district ? null : ($districts[$listing->district] ?? null);
 
         return [
-            'resort' => $district['resort'] ?? null,
+            'resort' => $district['resort'] ?? self::resortIn($text),
             'type' => $listing->type?->value,
             'capacity' => $listing->capacity,
             'bedrooms' => $listing->bedrooms,
@@ -57,9 +57,45 @@ final class ImportProposal
             'district' => $district['slug'] ?? null,
             'amenities' => array_map(static fn ($amenity): string => $amenity->value, $listing->amenities),
             'petsPolicy' => $listing->petsPolicy?->value,
-            'otherFeatures' => $listing->otherFeatures,
+            'otherFeatures' => self::otherFeatures($listing),
             'description' => self::description($text, $contacts),
         ];
+    }
+
+    /**
+     * The domain named in the text, when the district did not say it: Euronat, or the CHM
+     * (Montalivet, Hélio-Marin). Both named, or neither: the owner chooses.
+     */
+    private static function resortIn(string $text): ?string
+    {
+        $words = AmenityEvidence::words($text);
+        $euronat = str_contains($words, ' euronat ');
+        $chm = 1 === preg_match('/ (?:chm|montalivet|helio ?marin) /', $words);
+
+        return match (true) {
+            $euronat && !$chm => 'euronat',
+            $chm && !$euronat => 'chm',
+            default => null,
+        };
+    }
+
+    /**
+     * What the owner is shown as "also found": not an equipment he already sees ticked ("machine
+     * à laver" is the washing machine box), short entries only.
+     *
+     * @return list<string>
+     */
+    private static function otherFeatures(ExtractedListing $listing): array
+    {
+        return array_values(array_filter($listing->otherFeatures, static function (string $feature) use ($listing): bool {
+            foreach ($listing->amenities as $amenity) {
+                if (AmenityEvidence::isWritten($amenity, $feature) && str_word_count(MonthLabel::fold($feature)) <= 4) {
+                    return false;
+                }
+            }
+
+            return true;
+        }));
     }
 
     /**
