@@ -87,12 +87,19 @@ class ListingImport
         $this->createdAt = $now;
     }
 
-    /** Case, accents and spacing do not make a different listing. */
+    /**
+     * Raised whenever the reading changes (prompt, model, PHP review): a text pasted again after
+     * that is read again instead of getting an older, worse reading back (24/09: the Californie
+     * listing kept its tour-2 reading after tour 3).
+     */
+    public const int READER_VERSION = 3;
+
+    /** Case, accents and spacing do not make a different listing; a new reader does. */
     public static function hash(string $text): string
     {
         $normalized = mb_strtolower((string) preg_replace('/\s+/u', ' ', trim($text)));
 
-        return hash('sha256', $normalized);
+        return hash('sha256', self::READER_VERSION.'|'.$normalized);
     }
 
     public function recordAttempt(?string $model, ?int $inputTokens, ?int $outputTokens): void

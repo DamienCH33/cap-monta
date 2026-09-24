@@ -453,9 +453,10 @@ final class ExtractionReview
     private static function writtenCapacity(?int $capacity, string $text): ?int
     {
         $words = self::amountWords($text);
-        preg_match_all('/(?<! a)(?<!\d) (\d{1,2}) (?:personnes?|pers|couchages?|places|voyageurs)\b/', $words, $found);
+        // On the folded text, not the amount words: "32 – 3 couchages" is 3, "4-6 personnes" a range.
+        preg_match_all('/(?<![\d.,])(?<!\d-)(?<!\d -)(?<!\d a )(?<!\d à )(\d{1,2}) ?(?:personnes?|pers\b|couchages?|places\b|voyageurs)/', MonthLabel::fold($text), $found);
         // "Nombre de couchages : 6", "Capacité : 7" (the order of the form fields of listing sites).
-        preg_match_all('/ (?:couchages?|capacite(?: d accueil)?) (\d{1,2})(?= )(?! (?:chambres?|lits?|m ?2|m²))/', $words, $reversed);
+        preg_match_all('/ (?:couchages?|capacite(?: d accueil)?) (\d{1,2})(?= )(?! (?:chambres?|lits?|m ?2|m²|adultes?|enfants?|pers\w*|bebes?))/', $words, $reversed);
         // The label first only when no number comes before a noun: "6 couchages (3 adultes)" is 6.
         $written = array_values(array_unique(array_map(intval(...), [] !== $found[1] ? $found[1] : $reversed[1])));
 
