@@ -64,6 +64,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'mon-espace/importer',
+    canActivate: [ownerGuard],
+    loadComponent: () => import('./pages/owner-import/owner-import').then((m) => m.OwnerImport),
+  },
+  {
     path: 'mon-espace/demandes',
     canActivate: [ownerGuard],
     loadComponent: () =>

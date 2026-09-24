@@ -3,7 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Observable } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { catchError, map, Observable, of } from 'rxjs';
 
 import { apiErrorMessage } from '../../core/http/api-error';
 import { typeLabel } from '../../core/models/accommodation';
@@ -15,7 +16,9 @@ import {
   toCents,
   toEuros,
 } from '../../core/models/owner-rates';
+import { ListingImportService } from '../../core/services/listing-import';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
+import { OwnerFlash } from '../../core/services/owner-flash';
 import { OwnerRatesService } from '../../core/services/owner-rates';
 import { SeoService } from '../../core/services/seo';
 
@@ -65,6 +68,17 @@ export class OwnerRates {
 
   readonly toEuros = toEuros;
 
+  /** « Importer depuis mon annonce » : seulement si l'assistant peut lire tout de suite. */
+  readonly assistantAvailable = toSignal(
+    inject(ListingImportService)
+      .assistant()
+      .pipe(
+        map((status) => status.available),
+        catchError(() => of(false)),
+      ),
+    { initialValue: false },
+  );
+
   constructor() {
     inject(SeoService).apply({
       title: 'Tarifs',
@@ -82,6 +96,12 @@ export class OwnerRates {
           ),
         error: () => undefined,
       });
+
+    // Arrivée depuis l'import d'annonce : « tarifs ajoutés ».
+    const flash = inject(OwnerFlash).take();
+    if (flash?.slug === this.slug) {
+      this.notice.set(flash.message);
+    }
 
     this.service.get(this.slug).subscribe({
       next: (rates) => this.rates.set(rates),

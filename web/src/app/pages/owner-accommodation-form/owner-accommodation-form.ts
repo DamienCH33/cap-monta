@@ -408,7 +408,8 @@ export class OwnerAccommodationForm {
 
         const flash = this.flash.take();
         if (flash?.slug === item.slug) {
-          this.generalError.set(flash.message);
+          // Un succès (brouillon créé par l'import) s'affiche en bleu, pas comme une erreur.
+          (flash.tone === 'ok' ? this.notice : this.generalError).set(flash.message);
         }
       },
       error: () => {

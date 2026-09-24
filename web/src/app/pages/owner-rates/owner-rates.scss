@@ -348,3 +348,10 @@
     color: var(--text-secondary);
   }
 }
+
+.rates-page__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+}

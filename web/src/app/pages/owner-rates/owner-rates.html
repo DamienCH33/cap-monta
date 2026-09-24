@@ -12,9 +12,16 @@
       <h1 class="rates-page__heading">Tarifs</h1>
       <p class="rates-page__subtitle">{{ title() }}</p>
     </div>
-    <a class="rates-page__calendar" [routerLink]="['/mon-espace/logements', slug, 'calendrier']">
-      Voir le calendrier
-    </a>
+    <div class="rates-page__links">
+      @if (assistantAvailable()) {
+        <a routerLink="/mon-espace/importer" [queryParams]="{ logement: slug }">
+          Importer depuis mon annonce
+        </a>
+      }
+      <a class="rates-page__calendar" [routerLink]="['/mon-espace/logements', slug, 'calendrier']">
+        Voir le calendrier
+      </a>
+    </div>
   </header>
 
   @if (loadFailed()) {
