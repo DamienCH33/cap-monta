@@ -1,4 +1,4 @@
-<div class="container import">
+<div class="container import" [class.import--wide]="'check' === step()">
   <nav class="import__breadcrumb" aria-label="Fil d'Ariane">
     <a routerLink="/mon-espace">Mon espace</a>
     <span aria-hidden="true">›</span>
@@ -97,330 +97,415 @@
       }
 
       @if (proposal(); as found) {
-        @if (found.questions.length) {
-          <section class="import__card import__card--warn" aria-labelledby="questions-title">
-            <h2 id="questions-title" class="import__title">
-              {{ found.questions.length }} point{{ found.questions.length > 1 ? 's' : '' }} à
-              vérifier
-            </h2>
-            <ul class="import__list">
-              @for (question of found.questions; track $index) {
-                <li>{{ question }}</li>
-              }
-            </ul>
-          </section>
-        }
-        @if (found.contacts.length) {
-          <p class="import__notice">
-            Vos coordonnées ({{ found.contacts.join(', ') }}) ont été retirées de la description :
-            sur Cap Monta, le voyageur les reçoit quand vous acceptez sa demande.
-          </p>
-        }
+        <div class="import__layout">
+          <details class="import__source" [open]="wide()">
+            <summary>Le texte de votre annonce</summary>
+            <p>{{ text() }}</p>
+          </details>
+          <form class="import__form" (ngSubmit)="save()">
+            @if (found.questions.length) {
+              <section class="import__card import__card--warn" aria-labelledby="questions-title">
+                <h2 id="questions-title" class="import__title">
+                  {{ found.questions.length }} point{{ found.questions.length > 1 ? 's' : '' }} à
+                  vérifier
+                </h2>
+                <ul class="import__list">
+                  @for (question of found.questions; track $index) {
+                    <li>
+                      {{ question }}
+                      <button type="button" class="import__link" (click)="goTo(question)">
+                        Voir
+                      </button>
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+            @if (found.contacts.length) {
+              <p class="import__notice">
+                Vos coordonnées ({{ found.contacts.join(', ') }}) ont été retirées de la description
+                : sur Cap Monta, le voyageur les reçoit quand vous acceptez sa demande.
+              </p>
+            }
 
-        <form class="import__form" (ngSubmit)="save()">
-          @if (null === target && listing(); as draft) {
-            <section class="import__card" aria-labelledby="listing-title">
-              <h2 id="listing-title" class="import__title">Le logement</h2>
-              <div class="import__grid">
-                <label>
-                  <span class="import__label">Domaine</span>
-                  <select
-                    name="resort"
-                    [ngModel]="draft.resort"
-                    (ngModelChange)="patchListing({ resort: $event, district: '' })"
-                  >
-                    <option value="">À choisir</option>
-                    <option value="chm">CHM Montalivet</option>
-                    <option value="euronat">Euronat</option>
-                  </select>
-                </label>
-                <label>
-                  <span class="import__label">Type</span>
-                  <select
-                    name="type"
-                    [ngModel]="draft.type"
-                    (ngModelChange)="patchListing({ type: $event })"
-                  >
-                    <option value="">À choisir</option>
-                    @for (option of types; track option.value) {
-                      <option [value]="option.value">{{ option.label }}</option>
-                    }
-                  </select>
-                </label>
-                <label>
-                  <span class="import__label">Capacité (personnes)</span>
-                  <input
-                    type="number"
-                    name="capacity"
-                    min="1"
-                    max="12"
-                    [ngModel]="draft.capacity"
-                    (ngModelChange)="patchListing({ capacity: $event })"
-                  />
-                </label>
-                <label>
-                  <span class="import__label">Chambres</span>
-                  <input
-                    type="number"
-                    name="bedrooms"
-                    min="0"
-                    max="6"
-                    [ngModel]="draft.bedrooms"
-                    (ngModelChange)="patchListing({ bedrooms: $event })"
-                  />
-                </label>
-                <label>
-                  <span class="import__label">Surface (m², facultatif)</span>
-                  <input
-                    type="number"
-                    name="surface"
-                    min="5"
-                    max="200"
-                    [ngModel]="draft.surface"
-                    (ngModelChange)="patchListing({ surface: $event })"
-                  />
-                </label>
-                @if ('chm' === draft.resort) {
-                  <label>
-                    <span class="import__label">Quartier</span>
-                    <select
-                      name="district"
-                      [ngModel]="draft.district"
-                      (ngModelChange)="patchListing({ district: $event })"
-                    >
-                      <option value="">Je le préciserai plus tard</option>
-                      @for (district of resortDistricts(); track district.slug) {
-                        <option [value]="district.slug">{{ district.name }}</option>
-                      }
-                    </select>
-                  </label>
-                }
-                <label>
-                  <span class="import__label">Animaux</span>
-                  <select
-                    name="petsPolicy"
-                    [ngModel]="draft.petsPolicy"
-                    (ngModelChange)="patchListing({ petsPolicy: $event })"
-                  >
-                    @for (policy of petsPolicies; track policy.value) {
-                      <option [value]="policy.value">{{ policy.label }}</option>
-                    }
-                  </select>
-                </label>
-              </div>
-              @if (null === found.listing.capacity || null === found.listing.bedrooms) {
-                <p class="import__muted">
-                  Ce qui est vide n'était pas écrit dans votre annonce : à vous de le remplir.
-                </p>
-              }
+            @if (null === target && listing(); as draft) {
+              <section class="import__card" aria-labelledby="listing-title">
+                <h2 id="listing-title" class="import__title">Le logement</h2>
 
-              <fieldset class="import__amenities">
-                <legend class="import__label">Équipements repérés</legend>
-                @for (group of amenityGroups; track group.key) {
-                  <div>
-                    <span class="import__muted">{{ group.label }}</span>
-                    @for (amenity of group.options; track amenity.key) {
-                      <label class="import__check">
+                <fieldset
+                  class="import__field"
+                  [class.import__field--missing]="'' === draft.resort"
+                >
+                  <legend class="import__label">Domaine</legend>
+                  <div class="import__tiles">
+                    @for (option of resorts; track option.value) {
+                      <label class="import__tile">
                         <input
-                          type="checkbox"
-                          [name]="'amenity-' + amenity.key"
-                          [ngModel]="draft.amenities.includes(amenity.key)"
-                          (ngModelChange)="toggleAmenity(amenity.key, $event)"
+                          type="radio"
+                          name="resort"
+                          [value]="option.value"
+                          [checked]="draft.resort === option.value"
+                          (change)="patchListing({ resort: option.value, district: '' })"
                         />
-                        {{ amenity.label }}
+                        {{ option.label }}
                       </label>
                     }
                   </div>
-                }
-              </fieldset>
-              @if (found.listing.otherFeatures.length) {
+                </fieldset>
+
+                <fieldset class="import__field" [class.import__field--missing]="'' === draft.type">
+                  <legend class="import__label">Type de logement</legend>
+                  <div class="import__tiles">
+                    @for (option of types; track option.value) {
+                      <label class="import__tile">
+                        <input
+                          type="radio"
+                          name="type"
+                          [value]="option.value"
+                          [checked]="draft.type === option.value"
+                          (change)="patchListing({ type: option.value })"
+                        />
+                        {{ option.label }}
+                      </label>
+                    }
+                  </div>
+                </fieldset>
+
+                <div class="import__grid">
+                  <div
+                    class="import__field"
+                    [class.import__field--missing]="null === draft.capacity"
+                  >
+                    <span class="import__label" id="capacity-label">Capacité</span>
+                    <div class="import__stepper" role="group" aria-labelledby="capacity-label">
+                      <button
+                        type="button"
+                        aria-label="Une personne de moins"
+                        [disabled]="(draft.capacity ?? 1) <= 1"
+                        (click)="nudge('capacity', -1)"
+                      >
+                        −
+                      </button>
+                      <output aria-live="polite">{{
+                        null === draft.capacity ? 'À compléter' : draft.capacity + ' pers.'
+                      }}</output>
+                      <button
+                        type="button"
+                        aria-label="Une personne de plus"
+                        [disabled]="(draft.capacity ?? 0) >= 12"
+                        (click)="nudge('capacity', 1)"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="import__field"
+                    [class.import__field--missing]="null === draft.bedrooms"
+                  >
+                    <span class="import__label" id="bedrooms-label">Chambres</span>
+                    <div class="import__stepper" role="group" aria-labelledby="bedrooms-label">
+                      <button
+                        type="button"
+                        aria-label="Une chambre de moins"
+                        [disabled]="(draft.bedrooms ?? 0) <= 0"
+                        (click)="nudge('bedrooms', -1)"
+                      >
+                        −
+                      </button>
+                      <output aria-live="polite">{{
+                        null === draft.bedrooms ? 'À compléter' : draft.bedrooms + ' ch.'
+                      }}</output>
+                      <button
+                        type="button"
+                        aria-label="Une chambre de plus"
+                        [disabled]="(draft.bedrooms ?? 0) >= 6"
+                        (click)="nudge('bedrooms', 1)"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <label class="import__field">
+                    <span class="import__label"
+                      >Surface <span class="import__muted">(facultatif)</span></span
+                    >
+                    <input
+                      type="number"
+                      name="surface"
+                      min="5"
+                      max="200"
+                      placeholder="m²"
+                      [ngModel]="draft.surface"
+                      (ngModelChange)="patchListing({ surface: $event })"
+                    />
+                  </label>
+                  @if ('chm' === draft.resort) {
+                    <label class="import__field">
+                      <span class="import__label">Quartier</span>
+                      <select
+                        name="district"
+                        [ngModel]="draft.district"
+                        (ngModelChange)="patchListing({ district: $event })"
+                      >
+                        <option value="">Je le préciserai plus tard</option>
+                        @for (district of resortDistricts(); track district.slug) {
+                          <option [value]="district.slug">{{ district.name }}</option>
+                        }
+                      </select>
+                    </label>
+                  }
+                </div>
+
+                <fieldset class="import__field">
+                  <legend class="import__label">Animaux</legend>
+                  <div class="import__tiles">
+                    @for (policy of petsPolicies; track policy.value) {
+                      <label class="import__tile">
+                        <input
+                          type="radio"
+                          name="petsPolicy"
+                          [value]="policy.value"
+                          [checked]="draft.petsPolicy === policy.value"
+                          (change)="patchListing({ petsPolicy: policy.value })"
+                        />
+                        {{ policy.label }}
+                      </label>
+                    }
+                  </div>
+                  @if (null === found.listing.petsPolicy) {
+                    <p class="import__muted">
+                      Votre annonce n'en parle pas : « sur demande » par défaut.
+                    </p>
+                  }
+                </fieldset>
+
+                <fieldset class="import__field">
+                  <legend class="import__label">Équipements repérés</legend>
+                  @for (group of amenityGroups; track group.key) {
+                    <p class="import__muted">{{ group.label }}</p>
+                    <div class="import__pills">
+                      @for (amenity of group.options; track amenity.key) {
+                        <label class="import__pill">
+                          <input
+                            type="checkbox"
+                            [checked]="draft.amenities.includes(amenity.key)"
+                            (change)="toggleAmenity(amenity.key, $any($event.target).checked)"
+                          />
+                          {{ amenity.label }}
+                        </label>
+                      }
+                    </div>
+                  }
+                  @if (found.listing.otherFeatures.length) {
+                    <p class="import__muted">
+                      Repéré aussi, à garder dans votre description :
+                      {{ found.listing.otherFeatures.join(' · ') }}
+                    </p>
+                  }
+                </fieldset>
+
+                <label class="import__field">
+                  <span class="import__label">Description</span>
+                  <textarea
+                    name="description"
+                    rows="8"
+                    maxlength="5000"
+                    [ngModel]="draft.description"
+                    (ngModelChange)="patchListing({ description: $event })"
+                  ></textarea>
+                </label>
+              </section>
+            }
+
+            <section class="import__card" aria-labelledby="rates-title">
+              <h2 id="rates-title" class="import__title">
+                Vos tarifs
+                <span class="import__muted"
+                  >({{ keptRates() }} gardé{{ keptRates() > 1 ? 's' : '' }})</span
+                >
+              </h2>
+              @if (0 === rates().length) {
                 <p class="import__muted">
-                  Repéré aussi, gardé dans votre description :
-                  {{ found.listing.otherFeatures.join(', ') }}.
+                  Aucun tarif trouvé dans votre annonce : ajoutez-les ici, ou plus tard sur la page
+                  Tarifs.
                 </p>
               }
-
-              <label>
-                <span class="import__label">Description</span>
-                <textarea
-                  name="description"
-                  rows="8"
-                  maxlength="5000"
-                  [ngModel]="draft.description"
-                  (ngModelChange)="patchListing({ description: $event })"
-                ></textarea>
-              </label>
+              @for (row of rates(); track $index; let i = $index) {
+                <fieldset
+                  class="import__row"
+                  [id]="'rate-' + i"
+                  [class.import__row--off]="!row.keep"
+                >
+                  <legend>
+                    <label class="import__check">
+                      <input
+                        type="checkbox"
+                        [name]="'keep-rate-' + i"
+                        [ngModel]="row.keep"
+                        (ngModelChange)="patchRate(i, { keep: $event })"
+                      />
+                      <strong>« {{ row.label }} »</strong>
+                    </label>
+                  </legend>
+                  <div class="import__fields">
+                    <label>
+                      Arrivée
+                      <input
+                        type="date"
+                        [name]="'start-' + i"
+                        [ngModel]="row.start"
+                        (ngModelChange)="patchRate(i, { start: $event })"
+                      />
+                    </label>
+                    <label>
+                      Départ
+                      <input
+                        type="date"
+                        [name]="'end-' + i"
+                        [ngModel]="row.end"
+                        (ngModelChange)="patchRate(i, { end: $event })"
+                      />
+                    </label>
+                    <label>
+                      € / semaine
+                      <input
+                        type="number"
+                        min="1"
+                        [name]="'weekly-' + i"
+                        [ngModel]="row.weekly"
+                        (ngModelChange)="patchRate(i, { weekly: $event })"
+                      />
+                    </label>
+                    <label>
+                      € / nuit
+                      <input
+                        type="number"
+                        min="1"
+                        [name]="'nightly-' + i"
+                        [ngModel]="row.nightly"
+                        (ngModelChange)="patchRate(i, { nightly: $event })"
+                      />
+                    </label>
+                    <label>
+                      Nuits min.
+                      <input
+                        type="number"
+                        min="1"
+                        max="28"
+                        [name]="'min-' + i"
+                        [ngModel]="row.minimumNights"
+                        (ngModelChange)="patchRate(i, { minimumNights: $event })"
+                      />
+                    </label>
+                    <label class="import__check">
+                      <input
+                        type="checkbox"
+                        [name]="'saturday-' + i"
+                        [ngModel]="row.saturdayArrival"
+                        (ngModelChange)="patchRate(i, { saturdayArrival: $event })"
+                      />
+                      Arrivée le samedi de préférence
+                    </label>
+                  </div>
+                  @for (hint of row.hints; track hint) {
+                    <p class="import__hint">{{ hint }}</p>
+                  }
+                  @for (message of rateErrors().get(i) ?? []; track message) {
+                    <p class="import__error" role="alert">{{ message }}</p>
+                  }
+                </fieldset>
+              }
+              <button type="button" class="import__add" (click)="addRate()">
+                + Ajouter une période
+              </button>
             </section>
-          }
 
-          <section class="import__card" aria-labelledby="rates-title">
-            <h2 id="rates-title" class="import__title">
-              Vos tarifs
-              <span class="import__muted"
-                >({{ keptRates() }} gardé{{ keptRates() > 1 ? 's' : '' }})</span
-              >
-            </h2>
-            @if (0 === rates().length) {
-              <p class="import__muted">
-                Aucun tarif trouvé dans votre annonce. Vous les saisirez sur la page Tarifs.
-              </p>
-            }
-            @for (row of rates(); track $index; let i = $index) {
-              <fieldset class="import__row" [class.import__row--off]="!row.keep">
-                <legend>
+            <section class="import__card" aria-labelledby="ranges-title">
+              <h2 id="ranges-title" class="import__title">Dates déjà prises</h2>
+              @if (0 === ranges().length) {
+                <p class="import__muted">
+                  Aucune date à venir écrite comme prise. Des dates « libres » ne suffisent pas :
+                  ajoutez ici celles qui sont louées, ou bloquez-les plus tard sur votre calendrier.
+                </p>
+              }
+              @for (row of ranges(); track $index; let i = $index) {
+                <div class="import__range" [class.import__row--off]="!row.keep">
                   <label class="import__check">
                     <input
                       type="checkbox"
-                      [name]="'keep-rate-' + i"
+                      [name]="'keep-range-' + i"
                       [ngModel]="row.keep"
-                      (ngModelChange)="patchRate(i, { keep: $event })"
+                      (ngModelChange)="patchRange(i, { keep: $event })"
                     />
-                    <strong>« {{ row.label }} »</strong>
+                    Indisponible
                   </label>
-                </legend>
-                <div class="import__fields">
                   <label>
-                    Du
+                    du
                     <input
                       type="date"
-                      [name]="'start-' + i"
+                      [name]="'range-start-' + i"
                       [ngModel]="row.start"
-                      (ngModelChange)="patchRate(i, { start: $event })"
+                      (ngModelChange)="patchRange(i, { start: $event })"
                     />
                   </label>
                   <label>
-                    au (départ)
+                    au
                     <input
                       type="date"
-                      [name]="'end-' + i"
+                      [name]="'range-end-' + i"
                       [ngModel]="row.end"
-                      (ngModelChange)="patchRate(i, { end: $event })"
+                      (ngModelChange)="patchRange(i, { end: $event })"
                     />
                   </label>
-                  <label>
-                    € / semaine
-                    <input
-                      type="number"
-                      min="1"
-                      [name]="'weekly-' + i"
-                      [ngModel]="row.weekly"
-                      (ngModelChange)="patchRate(i, { weekly: $event })"
-                    />
-                  </label>
-                  <label>
-                    € / nuit
-                    <input
-                      type="number"
-                      min="1"
-                      [name]="'nightly-' + i"
-                      [ngModel]="row.nightly"
-                      (ngModelChange)="patchRate(i, { nightly: $event })"
-                    />
-                  </label>
-                  <label>
-                    Nuits minimum
-                    <input
-                      type="number"
-                      min="1"
-                      max="28"
-                      [name]="'min-' + i"
-                      [ngModel]="row.minimumNights"
-                      (ngModelChange)="patchRate(i, { minimumNights: $event })"
-                    />
-                  </label>
-                  <label class="import__check">
-                    <input
-                      type="checkbox"
-                      [name]="'saturday-' + i"
-                      [ngModel]="row.saturdayArrival"
-                      (ngModelChange)="patchRate(i, { saturdayArrival: $event })"
-                    />
-                    Arrivée le samedi de préférence
-                  </label>
+                  @if (row.hint) {
+                    <p class="import__hint">{{ row.hint }}</p>
+                  }
+                  @for (message of rangeErrors().get(i) ?? []; track message) {
+                    <p class="import__error" role="alert">{{ message }}</p>
+                  }
                 </div>
-                @for (hint of row.hints; track hint) {
-                  <p class="import__hint">{{ hint }}</p>
-                }
-                @for (message of rateErrors().get(i) ?? []; track message) {
-                  <p class="import__error" role="alert">{{ message }}</p>
-                }
-              </fieldset>
-            }
-          </section>
+              }
+              <button type="button" class="import__add" (click)="addRange()">
+                + Ajouter des dates prises
+              </button>
+            </section>
 
-          <section class="import__card" aria-labelledby="ranges-title">
-            <h2 id="ranges-title" class="import__title">Dates déjà prises</h2>
-            @if (0 === ranges().length) {
-              <p class="import__muted">
-                Aucune date à venir écrite comme prise. Des dates « libres » ne suffisent pas : vous
-                bloquerez le reste sur votre calendrier.
+            @for (violation of generalErrors(); track violation.propertyPath) {
+              <p class="import__error" role="alert">{{ violation.message }}</p>
+            }
+
+            <div class="import__actions">
+              <button
+                type="submit"
+                class="import__primary"
+                [disabled]="saving() || !!appliedTo() || missing().length > 0"
+              >
+                {{
+                  saving()
+                    ? 'Enregistrement…'
+                    : null === target
+                      ? 'Créer le brouillon'
+                      : 'Ajouter à mon logement'
+                }}
+              </button>
+              <button type="button" class="import__secondary" (click)="restart()">
+                Coller un autre texte
+              </button>
+              <p class="import__muted import__summary">
+                @if (missing().length) {
+                  Il manque {{ missing().join(', ') }}.
+                } @else {
+                  {{ keptRates() }} tarif{{ keptRates() > 1 ? 's' : '' }} et
+                  {{ keptRanges() }} période{{ keptRanges() > 1 ? 's' : '' }} indisponible{{
+                    keptRanges() > 1 ? 's' : ''
+                  }}
+                  seront enregistrés. Rien n'est publié.
+                }
               </p>
-            }
-            @for (row of ranges(); track $index; let i = $index) {
-              <div class="import__range" [class.import__row--off]="!row.keep">
-                <label class="import__check">
-                  <input
-                    type="checkbox"
-                    [name]="'keep-range-' + i"
-                    [ngModel]="row.keep"
-                    (ngModelChange)="patchRange(i, { keep: $event })"
-                  />
-                  Indisponible
-                </label>
-                <label>
-                  du
-                  <input
-                    type="date"
-                    [name]="'range-start-' + i"
-                    [ngModel]="row.start"
-                    (ngModelChange)="patchRange(i, { start: $event })"
-                  />
-                </label>
-                <label>
-                  au
-                  <input
-                    type="date"
-                    [name]="'range-end-' + i"
-                    [ngModel]="row.end"
-                    (ngModelChange)="patchRange(i, { end: $event })"
-                  />
-                </label>
-                @if (row.hint) {
-                  <p class="import__hint">{{ row.hint }}</p>
-                }
-                @for (message of rangeErrors().get(i) ?? []; track message) {
-                  <p class="import__error" role="alert">{{ message }}</p>
-                }
-              </div>
-            }
-          </section>
-
-          @for (violation of generalErrors(); track violation.propertyPath) {
-            <p class="import__error" role="alert">{{ violation.message }}</p>
-          }
-
-          <div class="import__actions">
-            <button type="submit" class="import__primary" [disabled]="saving() || !!appliedTo()">
-              {{
-                saving()
-                  ? 'Enregistrement…'
-                  : null === target
-                    ? 'Créer le brouillon'
-                    : 'Ajouter à mon logement'
-              }}
-            </button>
-            <button type="button" class="import__secondary" (click)="restart()">
-              Coller un autre texte
-            </button>
-          </div>
-          <p class="import__muted">
-            {{ keptRates() }} tarif{{ keptRates() > 1 ? 's' : '' }} et {{ keptRanges() }} période{{
-              keptRanges() > 1 ? 's' : ''
-            }}
-            indisponible{{ keptRanges() > 1 ? 's' : '' }}
-            seront enregistrés. Les lignes décochées sont ignorées.
-          </p>
-        </form>
+            </div>
+          </form>
+        </div>
       }
     }
   }
