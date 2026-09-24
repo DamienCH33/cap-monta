@@ -24,7 +24,7 @@ final class EvalSetIntegrityTest extends TestCase
     #[DataProvider('sets')]
     public function testEveryExpectedAnswerIsConsistent(string $directory): void
     {
-        if (!is_dir($directory)) {
+        if ([] === (glob($directory.'/*.json') ?: [])) {
             self::markTestSkipped('Jeu absent sur cette machine : '.$directory);
         }
 

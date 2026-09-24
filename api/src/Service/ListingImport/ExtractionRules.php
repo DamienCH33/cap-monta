@@ -20,10 +20,22 @@ final class ExtractionRules
      *
      * @return list<string>
      */
-    public static function questions(ListingExtraction $extraction): array
+    public static function questions(ListingExtraction $extraction, ?\DateTimeImmutable $publishedAt = null): array
     {
         $questions = [];
         $periods = $extraction->periods;
+
+        // Rates of a season already over when the listing was published: a year left unchanged.
+        $past = null === $publishedAt ? [] : array_filter(
+            $periods,
+            static fn (ExtractedPeriod $period): bool => null !== $period->end && $period->end <= $publishedAt,
+        );
+        if ([] !== $past) {
+            $questions[] = \sprintf(
+                'Votre annonce donne des tarifs de %s, déjà passés : quels sont vos tarifs actuels ?',
+                implode(', ', array_unique(array_map(static fn (ExtractedPeriod $period): string => (string) ($period->start ?? $period->end)?->format('Y'), $past))),
+            );
+        }
 
         if ([] === $periods) {
             $questions[] = 'Aucun tarif n\'a été trouvé dans votre annonce : indiquez vos prix et leurs dates.';

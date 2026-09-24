@@ -77,7 +77,11 @@ final readonly class ListingImporter
 
             $raw = $result->getContent();
             $usage = $result->getMetadata()->get('token_usage');
-            $extraction = ListingExtraction::fromArray(ExtractionReview::repairDates($this->decode($raw), $publishedAt));
+            [$data, $dropped] = ExtractionReview::dropInvalid(ExtractionReview::repairDates($this->decode($raw), $publishedAt));
+            if ([] !== $dropped) {
+                $this->logger->warning('Import d\'annonce : lignes écartées ({dropped})', ['dropped' => implode(', ', $dropped), 'model' => $model]);
+            }
+            $extraction = ListingExtraction::fromArray($data);
             $extraction = $extraction->withListing($extraction->listing?->keepingOnlyDistricts($districts));
             $extraction = ExtractionReview::apply($extraction, $text, $publishedAt);
         } catch (PlatformException|HttpException|InvalidExtractionException|\JsonException $e) {
@@ -99,7 +103,10 @@ final readonly class ListingImporter
 
         return new ListingImportResult(
             $model,
-            $extraction->withQuestions(ExtractionRules::questions($extraction)),
+            $extraction->withQuestions([
+                ...ExtractionRules::questions($extraction, $publishedAt),
+                ...array_map(static fn (string $label): string => \sprintf('« %s » n\'a pas pu être lu : vérifiez cette partie de votre annonce.', $label), $dropped),
+            ]),
             $contacts,
             $this->elapsed($started),
             $usage instanceof TokenUsageInterface ? $usage->getPromptTokens() : null,

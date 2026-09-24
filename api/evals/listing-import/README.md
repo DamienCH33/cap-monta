@@ -8,7 +8,7 @@ Ce dossier mesure s'il le fait **juste**.
 examples/   3 annonces inventées, versionnées, utilisées par les tests
 demo/       des réponses volontairement fausses aux 3 exemples, pour voir un rapport d'échec
 cases/      20 annonces réelles, IGNORÉES PAR GIT (voir plus bas)
-holdout/    10 autres annonces réelles, jamais vues pendant les réglages, IGNORÉES PAR GIT
+holdout/    12 autres annonces réelles, jamais vues pendant les réglages, IGNORÉES PAR GIT
 runs/       sorties de l'agent, ignorées par git
 ```
 
@@ -26,11 +26,15 @@ symfony console app:listing-import:eval --cases=evals/listing-import/examples --
 ### Le jeu de contrôle (`holdout/`)
 
 Les règles du PHP et la consigne ont été réglées en regardant les échecs des 20 cas de `cases/`.
-Un score sur ces 20 cas mesure donc aussi ce réglage. Les 10 annonces de `holdout/` n'ont servi à
+Un score sur ces cas mesure donc aussi ce réglage. Les annonces de `holdout/` n'ont servi à
 rien pendant les réglages : c'est leur score qui dit ce que vaut l'import sur une annonce neuve.
 
+Historique : le premier jeu de contrôle (h01 à h10, 24/09) a donné 1/10 contre 14/20 sur les
+annonces de réglage. Ses échecs ont servi aux corrections du tour 2 : il est passé dans `cases/`
+(30 annonces de réglage) et un second jeu (v01 à v12) l'a remplacé.
+
 ```bash
-symfony console app:listing-import:eval --cases=evals/listing-import/holdout            # 10/10 attendu
+symfony console app:listing-import:eval --cases=evals/listing-import/holdout            # 12/12 attendu
 symfony console app:listing-import:eval --cases=evals/listing-import/holdout --run      # le vrai score
 ```
 
@@ -94,8 +98,10 @@ Les textes ont été relevés le 23/09/2026. Relis-les contre l'annonce en ligne
 3. **Unité** : `week`, `night`, `stay` (prix du séjour entier, « 1200 € pour 2 semaines »),
    `unknown` si le texte ne la dit pas (« septembre : 400 € »). Le modèle ne calcule jamais :
    convertir 1200 € les 2 semaines en 600 €/semaine sera fait en PHP.
-4. **Fin exclusive**, comme partout dans l'application : « du 4 au 11 juillet » →
-   `2026-07-04` / `2026-07-11`. Un mois entier : du 1er au 1er du mois suivant.
+4. **Fin exclusive**, comme partout dans l'application : une date écrite est le jour du
+   départ. « du 4 au 11 juillet » → `2026-07-04` / `2026-07-11` ; « du 1er juillet au 31 août »
+   → fin `2026-08-31`. Un mois écrit sans jour va jusqu'au 1er du mois suivant : « juillet et
+   août », « fin août » → fin `2026-09-01`.
 5. **Année** : celle écrite, sinon celle de publication de l'annonce.
 6. **Indisponible** seulement avec deux bornes. « Libre à partir du 22 août » ne dit pas depuis
    quand c'est pris : rien.

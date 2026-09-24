@@ -8,6 +8,7 @@ use App\Enum\Amenity;
 use App\Enum\PriceUnit;
 use App\Service\ListingImport\AmenityEvidence;
 use App\Service\ListingImport\ExtractionReview;
+use App\Service\ListingImport\ExtractionRules;
 use App\Service\ListingImport\ListingExtraction;
 use App\Service\ListingImport\MonthLabel;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -31,6 +32,7 @@ final class ExtractionReviewTest extends TestCase
         yield 'a two-digit year' => ['septembre 26', '2026-09-01→2026-10-01'];
         yield 'an earlier availability' => ['Septembre 2026 (disponible à partir du 29 août)', '2026-08-29→2026-10-01'];
         yield 'over new year' => ['novembre à février', '2026-11-01→2027-03-01'];
+        yield 'abbreviations' => ['Mai/Juin/Sept 2024', '2024-05-01→2024-07-01 | 2024-09-01→2024-10-01'];
         yield 'vague' => ['Mi-juin / 11 juillet 2026', null];
         yield 'a season' => ['hors saison', null];
         yield 'days' => ['du 4 au 11 juillet', null];
@@ -117,5 +119,115 @@ final class ExtractionReviewTest extends TestCase
         );
 
         self::assertSame(6, $reviewed->listing?->capacity);
+    }
+
+    public function testAUnitMustBeWrittenNextToItsAmount(): void
+    {
+        $text = 'Juillet : 800 € la semaine et du 20 au 31 août (1200 €). Caution 300 €.';
+        $reviewed = $this->review($text, [
+            self::period('juillet', '2026-07-01', '2026-08-01', 800, 'week'),
+            self::period('du 20 au 31 août', '2026-08-20', '2026-08-31', 1200, 'week'),
+        ]);
+
+        self::assertSame(['800/week', '1200/unknown'], $this->prices($reviewed));
+
+        $heading = $this->review("Tarifs à la semaine :\nJuin : 450 €\nJuillet : 650 €", [
+            self::period('juin', null, null, 450, 'week'),
+        ]);
+        self::assertSame(['450/week'], $this->prices($heading), 'a heading gives the unit to the list below');
+    }
+
+    public function testAConditionalPriceIsNotARate(): void
+    {
+        $text = "Mai : 65 €/nuit ou 450 €/semaine ou 400 €/si 2 semaines.\nÉté : 900 € la semaine (850 € à partir de 15 jours).\nJuin : 500 € la semaine à partir du 15 juin.";
+        $reviewed = $this->review($text, [
+            ['label' => 'mai', 'start' => null, 'end' => null, 'prices' => [['amount' => 65, 'unit' => 'night'], ['amount' => 450, 'unit' => 'week'], ['amount' => 400, 'unit' => 'unknown']], 'minimumNights' => null, 'saturdayArrival' => false],
+            ['label' => 'été', 'start' => null, 'end' => null, 'prices' => [['amount' => 900, 'unit' => 'week'], ['amount' => 850, 'unit' => 'week']], 'minimumNights' => null, 'saturdayArrival' => false],
+            self::period('juin', null, null, 500, 'week'),
+        ]);
+
+        self::assertSame(['65/night', '450/week', '900/week', '500/week'], $this->prices($reviewed));
+    }
+
+    public function testTheSurfaceIsTheLivingAreaAndBoilersDoNotHeat(): void
+    {
+        $text = 'Mobil-home de 32 m2 sur une parcelle de 100 m2. Chauffe-eau gaz. Machine à laver la vaisselle et linge. Douche extérieure.';
+        $parcel = $this->reviewListing($text, ['surface' => 100, 'amenities' => ['chauffage']]);
+        $living = $this->reviewListing($text, ['surface' => 32, 'amenities' => []]);
+        self::assertNotNull($parcel);
+        self::assertNotNull($living);
+
+        self::assertNull($parcel->surface);
+        self::assertSame(32, $living->surface);
+        self::assertNotContains(Amenity::Heating, $parcel->amenities);
+        self::assertSame(
+            [Amenity::Dishwasher, Amenity::WashingMachine, Amenity::OutdoorShower],
+            array_values(array_filter($living->amenities, static fn (Amenity $a): bool => \in_array($a, [Amenity::Dishwasher, Amenity::WashingMachine, Amenity::OutdoorShower], true))),
+            'written without doubt: ticked even when the model forgot them',
+        );
+    }
+
+    public function testOneWrongLineIsDroppedNotTheWholeReading(): void
+    {
+        [$data, $dropped] = ExtractionReview::dropInvalid([
+            'periods' => [
+                ['label' => 'hors juillet/août', 'start' => '2026-09-01', 'end' => '2026-06-30', 'prices' => [['amount' => 600, 'unit' => 'week']], 'minimumNights' => 7, 'saturdayArrival' => false],
+                ['label' => 'semaine', 'start' => null, 'end' => null, 'prices' => [['amount' => 0, 'unit' => 'week'], ['amount' => 600, 'unit' => 'week']], 'minimumNights' => 0, 'saturdayArrival' => false],
+            ],
+            'unavailable' => [['start' => '2026-07-01', 'end' => null]],
+        ]);
+
+        self::assertSame(['hors juillet/août', 'des dates indisponibles'], $dropped);
+        self::assertSame([['amount' => 600, 'unit' => 'week']], $data['periods'][0]['prices']);
+        self::assertNull($data['periods'][0]['minimumNights']);
+        self::assertSame([], $data['unavailable']);
+        ListingExtraction::fromArray($data); // readable now
+    }
+
+    public function testRatesOfASeasonAlreadyOverAskAQuestion(): void
+    {
+        $extraction = ListingExtraction::fromArray(['periods' => [self::period('avril 2024', '2024-04-01', '2024-05-01', 375, 'week')], 'unavailable' => []]);
+
+        self::assertSame([], ExtractionRules::questions($extraction));
+        self::assertStringContainsString('2024', ExtractionRules::questions($extraction, new \DateTimeImmutable('2026-05-04'))[0]);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $periods
+     */
+    private function review(string $text, array $periods): ListingExtraction
+    {
+        return ExtractionReview::apply(ListingExtraction::fromArray(['periods' => $periods, 'unavailable' => []]), $text, new \DateTimeImmutable('2026-05-10'));
+    }
+
+    /**
+     * @param array<string, mixed> $listing
+     */
+    private function reviewListing(string $text, array $listing): ?\App\Service\ListingImport\ExtractedListing
+    {
+        return ExtractionReview::apply(ListingExtraction::fromArray(['periods' => [], 'unavailable' => [], 'listing' => $listing]), $text, new \DateTimeImmutable('2026-05-10'))->listing;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function prices(ListingExtraction $extraction): array
+    {
+        $keys = [];
+        foreach ($extraction->periods as $period) {
+            foreach ($period->prices as $price) {
+                $keys[] = $price->key();
+            }
+        }
+
+        return $keys;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function period(string $label, ?string $start, ?string $end, int $amount, string $unit): array
+    {
+        return ['label' => $label, 'start' => $start, 'end' => $end, 'prices' => [['amount' => $amount, 'unit' => $unit]], 'minimumNights' => null, 'saturdayArrival' => false];
     }
 }

@@ -101,6 +101,28 @@ final class ListingImporterTest extends TestCase
         self::assertSame(['quartier inconnu : Tahiti'], $listing?->rejected);
     }
 
+    public function testAWrongLineIsReportedAndTheRestKept(): void
+    {
+        // 24/09, a real listing: "Location à la semaine hors Juillet/Août", and a price of 0.
+        $platform = new InMemoryPlatform((string) json_encode([
+            'periods' => [
+                ['label' => 'hors juillet/août', 'start' => '2026-09-01', 'end' => '2026-06-30', 'prices' => [['amount' => 0, 'unit' => 'week']], 'minimumNights' => null, 'saturdayArrival' => false],
+            ],
+            'unavailable' => [['start' => '2026-07-01', 'end' => '2026-09-01']],
+            'listing' => ['type' => 'bungalow', 'amenities' => ['lave-vaisselle']],
+        ]));
+
+        $result = $this->importer($platform)->import('Grand bungalow, lave vaisselle. Location à la semaine hors Juillet/Août.', new \DateTimeImmutable('2026-06-01'), []);
+
+        self::assertNull($result->failure);
+        $extraction = $result->extraction;
+        self::assertNotNull($extraction);
+        self::assertSame([], $extraction->periods);
+        self::assertCount(1, $extraction->unavailable);
+        self::assertSame('bungalow', $extraction->listing?->type?->value);
+        self::assertContains('« hors juillet/août » n\'a pas pu être lu : vérifiez cette partie de votre annonce.', $extraction->questions);
+    }
+
     private function importer(InMemoryPlatform $platform): ListingImporter
     {
         return new ListingImporter($platform, new ContactDetector(), new NullLogger(), self::PROMPT);
