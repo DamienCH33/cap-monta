@@ -8,8 +8,15 @@ use App\Entity\ListingImport;
 use App\Entity\User;
 use App\Enum\ListingImportStatus;
 use App\Message\RunListingImport;
+use App\Repository\AccommodationRepository;
+use App\Repository\DistrictRepository;
 use App\Repository\ListingImportRepository;
+use App\Security\Voter\AccommodationVoter;
 use App\Service\ListingImport\AssistantAvailability;
+use App\Service\ListingImport\ImportApplier;
+use App\Service\ListingImport\ImportProposal;
+use App\Service\ListingImport\InvalidExtractionException;
+use App\Service\ListingImport\ListingExtraction;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -50,6 +57,9 @@ final readonly class OwnerListingImportController
         private RateLimiterFactoryInterface $ownerLimiter,
         #[Autowire(service: 'limiter.listing_imports_all')]
         private RateLimiterFactoryInterface $siteLimiter,
+        private DistrictRepository $districts,
+        private AccommodationRepository $accommodations,
+        private ImportApplier $applier,
     ) {
     }
 
@@ -108,6 +118,56 @@ final readonly class OwnerListingImportController
     #[Route('/{id}', name: 'api_owner_listing_import_show', requirements: ['id' => Requirement::UUID], methods: ['GET'])]
     public function show(string $id): JsonResponse
     {
+        return new JsonResponse($this->view($this->ownedImport($id)));
+    }
+
+    /**
+     * The owner validated the check screen (lot 4c): a new draft, or one of his accommodations
+     * ({"slug": …}), gets the rates and taken dates he kept. All or nothing.
+     */
+    #[Route('/{id}/apply', name: 'api_owner_listing_import_apply', requirements: ['id' => Requirement::UUID], methods: ['POST'])]
+    public function apply(string $id, Request $request): JsonResponse
+    {
+        $import = $this->ownedImport($id);
+
+        if (ListingImportStatus::Done !== $import->getStatus()) {
+            return $this->refuse(Response::HTTP_CONFLICT, 'La lecture de votre annonce n\'est pas terminée.');
+        }
+        if ($import->isApplied()) {
+            return new JsonResponse([
+                'message' => 'Cette lecture a déjà été enregistrée.',
+                'slug' => $import->getAccommodation()?->getSlug(),
+            ], Response::HTTP_CONFLICT);
+        }
+
+        $payload = json_decode($request->getContent(), true);
+        if (!\is_array($payload)) {
+            return $this->refuse(Response::HTTP_BAD_REQUEST, 'Requête illisible.');
+        }
+
+        $target = null;
+        if (\is_string($payload['slug'] ?? null)) {
+            $target = $this->accommodations->findOneBy(['slug' => $payload['slug']]);
+            // Someone else's accommodation: 404, its slug must not leak (same as everywhere).
+            if (null === $target || !$this->security->isGranted(AccommodationVoter::EDIT, $target)) {
+                throw new NotFoundHttpException();
+            }
+        }
+
+        $result = $this->applier->apply($import, $this->owner(), $target, $payload);
+
+        if (\is_array($result)) {
+            return new JsonResponse([
+                'message' => 'Certaines lignes sont à corriger : rien n\'a été enregistré.',
+                'violations' => $result,
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return new JsonResponse(['slug' => $result->getSlug(), 'created' => null === $target], Response::HTTP_CREATED);
+    }
+
+    private function ownedImport(string $id): ListingImport
+    {
         $import = $this->imports->find(Uuid::fromString($id));
 
         // Someone else's import is a 404, not a 403: its existence is not confirmed.
@@ -115,7 +175,35 @@ final readonly class OwnerListingImportController
             throw new NotFoundHttpException();
         }
 
-        return new JsonResponse($this->view($import));
+        return $import;
+    }
+
+    /**
+     * The reading, made ready for the check screen. Null while pending or failed, or if a stored
+     * result can no longer be read (older format): the screen then offers the plain form.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function proposal(ListingImport $import): ?array
+    {
+        $result = $import->getResult();
+        if (ListingImportStatus::Done !== $import->getStatus() || null === $result) {
+            return null;
+        }
+
+        try {
+            $extraction = ListingExtraction::fromArray($result);
+        } catch (InvalidExtractionException) {
+            return null;
+        }
+
+        $districts = [];
+        foreach ($this->districts->findAll() as $district) {
+            $districts[$district->getName()] = ['resort' => $district->getResort()->value, 'slug' => $district->getSlug()];
+        }
+        $contacts = array_values(array_filter(\is_array($result['contacts'] ?? null) ? $result['contacts'] : [], \is_string(...)));
+
+        return ImportProposal::build($extraction, $contacts, $import->getSourceText(), $districts, $this->clock->now()->setTime(0, 0));
     }
 
     /**
@@ -139,6 +227,8 @@ final readonly class OwnerListingImportController
             'attempts' => $import->getAttempts(),
             'text' => $import->getSourceText(),
             'result' => $import->getResult(),
+            'proposal' => $this->proposal($import),
+            'appliedTo' => $import->getAccommodation()?->getSlug(),
             'createdAt' => $import->getCreatedAt()->format(\DATE_ATOM),
         ];
     }
