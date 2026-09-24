@@ -1,40 +1,50 @@
 :root {
-  --surface-0: #f5f4ef;
-  --surface-1: #faf9f5;
+  // Palette « océan et pins » (maquette validée le 24/09) : l'océan porte les actions,
+  // le pin ne dit que « libre » ou « à jour », le sable reste en aplats rares.
+  --ocean: #0f3b55;
+  --sand: #ece3d2;
+  --pine: #2e5b45;
+
+  --surface-0: #f3f6f6;
+  --surface-1: #f8fafa;
   --surface-2: #ffffff;
 
-  --text-primary: #1a1a18;
-  --text-secondary: #5f5e5a;
-  --text-muted: #8a8983;
+  --text-primary: #14232c;
+  --text-secondary: #4b5b63;
+  --text-muted: #5d6d75;
 
-  --border: rgba(0, 0, 0, 0.12);
-  --border-strong: rgba(0, 0, 0, 0.22);
+  --border: rgba(15, 59, 85, 0.13);
+  --border-strong: rgba(15, 59, 85, 0.26);
   --radius: 8px;
-  --radius-lg: 12px;
+  --radius-lg: 14px;
 
-  --blue: #185fa5;
-  --blue-dark: #042c53;
-  --blue-soft: #e6f1fb;
+  --blue: #1d6f97;
+  --blue-dark: #0f3b55;
+  --blue-soft: #e3eff5;
   --tile-sea: #b5d4f4;
   --tile-forest: #c0dd97;
 
-  --free: #1d9e75;
+  --free: #2e5b45;
   --taken: #d3d1c7;
-  --taken-pattern: repeating-linear-gradient(135deg, #b4b2a9 0 2px, #eceae3 2px 5px);
+  --taken-pattern: repeating-linear-gradient(135deg, #9aa7ad 0 1.5px, #e6ebec 1.5px 4.5px);
 
   --amber-bg: #faeeda;
   --amber-text: #854f0b;
-  --success-bg: #e1f5ee;
-  --success-text: #04342c;
+  --success-bg: #e4eee8;
+  --success-text: #1f3f30;
 
-  --green-bg: #e1f5ee;
-  --green-text: #0f6e56;
-  --green-dark: #04342c;
+  --green-bg: #e4eee8;
+  --green-text: #2e5b45;
+  --green-dark: #1f3f30;
 
   --danger-bg: #fbe9e7;
   --danger-text: #8c1d18;
 
-  --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --shadow-float: 0 16px 40px -18px rgba(8, 30, 44, 0.55), 0 0 0 1px rgba(8, 30, 44, 0.06);
+
+  // Polices hébergées par le site (paquets @fontsource) : pas d'appel à Google au chargement.
+  --font-sans: 'Figtree Variable', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
 }
 
 * {
@@ -46,6 +56,7 @@ body {
   background: var(--surface-0);
   color: var(--text-primary);
   font-family: var(--font-sans);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -54,6 +65,14 @@ h2,
 h3 {
   margin: 0;
   font-weight: 500;
+  text-wrap: balance;
+}
+
+// Titres de page et de section en Newsreader ; les petits titres (h3) restent en Figtree.
+h1,
+h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
 }
 .container {
   width: 100%;

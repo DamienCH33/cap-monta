@@ -7,14 +7,15 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    height: 56px;
+    height: 64px;
   }
 
   &__brand {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 16px;
+    font-family: var(--font-display);
+    font-size: 21px;
     font-weight: 500;
     color: var(--text-primary);
     text-decoration: none;
@@ -28,19 +29,60 @@
   &__nav {
     display: flex;
     align-items: center;
-    gap: 14px;
-    font-size: 13px;
+    gap: 22px;
+    font-size: 14px;
+    font-weight: 500;
 
     a {
       color: var(--text-secondary);
       text-decoration: none;
+
+      &:hover,
+      &:focus-visible {
+        color: var(--blue-dark);
+      }
     }
   }
 
   &__cta {
-    border-radius: var(--radius);
-    padding: 6px 12px;
+    padding: 7px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
     color: var(--text-primary) !important;
+  }
+}
+
+// Accueil : la barre flotte sur la photo, en blanc. Le menu déplié (téléphone) garde son fond.
+.header--over {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  border-bottom: 0;
+  background: transparent;
+
+  .header__brand,
+  .header__brand .brand-icon,
+  .header__toggle {
+    color: #fff;
+  }
+
+  .header__toggle {
+    border-color: rgb(255 255 255 / 60%);
+  }
+
+  @media (min-width: 561px) {
+    .header__nav a,
+    .header__who,
+    .header__logout {
+      color: #fff;
+    }
+
+    .header__cta {
+      border-color: rgb(255 255 255 / 70%);
+      color: #fff !important;
+    }
   }
 }
 
@@ -116,6 +158,11 @@
     position: relative;
   }
 
+  // Sur l'accueil, la barre reste posée sur la photo.
+  .header--over {
+    position: absolute;
+  }
+
   .header__toggle {
     display: inline-flex;
   }
@@ -124,7 +171,7 @@
   .header__nav {
     display: none;
     position: absolute;
-    top: 56px;
+    top: 64px;
     left: 0;
     right: 0;
     z-index: 20;
@@ -151,6 +198,9 @@
 
   .header__cta {
     padding: 12px 0;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
   }
 
   .header__account {

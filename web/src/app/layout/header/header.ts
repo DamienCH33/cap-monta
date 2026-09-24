@@ -26,6 +26,9 @@ export class Header {
   /** Sur téléphone, les liens sont repliés derrière le bouton « Menu ». */
   readonly menuOpen = signal(false);
 
+  /** Sur l'accueil, la barre se pose sur la photo d'ouverture, en blanc et sans fond. */
+  readonly overHero = signal(this.isHome(this.router.url));
+
   constructor() {
     this.auth.restore().subscribe();
 
@@ -35,7 +38,14 @@ export class Header {
         filter((event) => event instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe(() => this.menuOpen.set(false));
+      .subscribe((event) => {
+        this.menuOpen.set(false);
+        this.overHero.set(this.isHome((event as NavigationEnd).urlAfterRedirects));
+      });
+  }
+
+  private isHome(url: string): boolean {
+    return '/' === url.split(/[?#]/)[0];
   }
 
   toggleMenu(): void {
