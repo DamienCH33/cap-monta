@@ -123,6 +123,11 @@
     color: var(--green-bg);
     background: var(--green-text);
     border-radius: var(--radius);
+    text-decoration: none;
+
+    &:hover {
+      background: var(--green-dark);
+    }
   }
 }
 
