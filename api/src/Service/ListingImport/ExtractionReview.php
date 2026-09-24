@@ -166,7 +166,8 @@ final class ExtractionReview
      */
     private static function amountWords(string $text): string
     {
-        $text = (string) preg_replace('/(\d)[ .\x{202F}\x{A0}](\d{3})\b/u', '$1$2', MonthLabel::fold($text));
+        // Not after a date: "11/07 700 €" is the 11th of July, then 700 €.
+        $text = (string) preg_replace('/(?<![\d\/])(\d{1,3})[ .\x{202F}\x{A0}](\d{3})\b/u', '$1$2', MonthLabel::fold($text));
 
         return ' '.trim((string) preg_replace('/[^a-z0-9]+/', ' ', $text)).' ';
     }

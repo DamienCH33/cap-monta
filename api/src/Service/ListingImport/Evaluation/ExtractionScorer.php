@@ -20,8 +20,8 @@ final class ExtractionScorer
     {
         $expectedPeriods = $this->periodKeys($case->expected->periods);
         $actualPeriods = $this->periodKeys($actual->periods);
-        $expectedRanges = $this->rangeKeys($case->expected->unavailable);
-        $actualRanges = $this->rangeKeys($actual->unavailable);
+        $expectedRanges = $this->rangeKeys(ExtractedUnavailability::merged($case->expected->unavailable));
+        $actualRanges = $this->rangeKeys(ExtractedUnavailability::merged($actual->unavailable));
 
         $listing = null === $case->expected->listing
             ? null

@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Service\ListingImport;
 
 use App\Service\ListingImport\Evaluation\EvalCase;
 use App\Service\ListingImport\Evaluation\ExtractionScorer;
+use App\Service\ListingImport\Evaluation\SourceAmounts;
 use App\Service\ListingImport\ListingExtraction;
 use PHPUnit\Framework\TestCase;
 
@@ -77,6 +78,23 @@ final class ExtractionScorerTest extends TestCase
         ]);
 
         self::assertCount(1, $this->scorer->score($this->case(), $actual)->extraPeriods);
+    }
+
+    public function testTakenWeeksThatFollowEachOtherAreTheSameDays(): void
+    {
+        $weekByWeek = $this->extraction(unavailable: [
+            ['start' => '2026-07-11', 'end' => '2026-07-15'],
+            ['start' => '2026-07-08', 'end' => '2026-07-11'],
+        ]);
+
+        self::assertTrue($this->scorer->score($this->case(), $weekByWeek)->passed());
+    }
+
+    public function testADateJustBeforeAnAmountIsNotAThousandsGroup(): void
+    {
+        self::assertContains(700, SourceAmounts::in('11/07 au 18/07 700€/semaine'));
+        self::assertNotContains(7700, SourceAmounts::in('11/07 au 18/07 700€/semaine'));
+        self::assertContains(2950, SourceAmounts::in('Août : 2 950 € la quinzaine'));
     }
 
     private function case(bool $needsClarification = false): EvalCase
