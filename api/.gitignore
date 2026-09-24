@@ -32,5 +32,6 @@ phpstan.neon
 ###> evals ###
 # Annonces réelles (textes de tiers) : jamais dans le dépôt public. Voir evals/listing-import/README.md.
 /evals/listing-import/cases/
+/evals/listing-import/holdout/
 /evals/listing-import/runs/
 ###< evals ###

@@ -15,8 +15,9 @@ final class SourceAmounts
      */
     public static function in(string $text): array
     {
-        // A space or a dot followed by exactly three digits is a thousands separator.
-        preg_match_all('/\d{1,3}(?:[ .\x{202F}\x{00A0}]\d{3})+(?!\d)|\d+/u', $text, $matches);
+        // A space or a dot followed by exactly three digits is a thousands separator, unless the
+        // first group ends a date: "11/07 700 €" is the 11th of July, then 700 €, not 7 700.
+        preg_match_all('/(?<![\d\/])\d{1,3}(?:[ .\x{202F}\x{00A0}]\d{3})+(?!\d)|\d+/u', $text, $matches);
 
         return array_values(array_unique(array_map(
             static fn (string $number): int => (int) preg_replace('/\D/u', '', $number),

@@ -37,6 +37,31 @@ final readonly class ExtractedUnavailability
         return ['start' => $this->start->format('Y-m-d'), 'end' => $this->end->format('Y-m-d')];
     }
 
+    /**
+     * The same days, whatever the cutting: ranges that overlap or touch become one ("déjà loué"
+     * week after week gives a single stretch). The calendar stores them this way anyway.
+     *
+     * @param list<self> $ranges
+     *
+     * @return list<self>
+     */
+    public static function merged(array $ranges): array
+    {
+        usort($ranges, static fn (self $a, self $b): int => $a->start <=> $b->start);
+        $merged = [];
+
+        foreach ($ranges as $range) {
+            $last = array_key_last($merged);
+            if (null !== $last && $range->start <= $merged[$last]->end) {
+                $merged[$last] = new self($merged[$last]->start, max($merged[$last]->end, $range->end));
+            } else {
+                $merged[] = $range;
+            }
+        }
+
+        return $merged;
+    }
+
     public function key(): string
     {
         return $this->start->format('Y-m-d').'→'.$this->end->format('Y-m-d');

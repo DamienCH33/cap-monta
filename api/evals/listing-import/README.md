@@ -8,6 +8,7 @@ Ce dossier mesure s'il le fait **juste**.
 examples/   3 annonces inventées, versionnées, utilisées par les tests
 demo/       des réponses volontairement fausses aux 3 exemples, pour voir un rapport d'échec
 cases/      20 annonces réelles, IGNORÉES PAR GIT (voir plus bas)
+holdout/    10 autres annonces réelles, jamais vues pendant les réglages, IGNORÉES PAR GIT
 runs/       sorties de l'agent, ignorées par git
 ```
 
@@ -15,12 +16,28 @@ runs/       sorties de l'agent, ignorées par git
 
 ```bash
 symfony console app:listing-import:eval                          # le jeu contre lui-même : doit donner 20/20
-symfony console app:listing-import:eval --run --case=03           # l'IA sur un seul cas (moins d'un centime)
-symfony console app:listing-import:eval --run                     # l'IA sur les 20 cas (quelques centimes)
+symfony console app:listing-import:eval --run --case=03           # l'IA sur un seul cas
+symfony console app:listing-import:eval --run                     # l'IA sur les 20 cas (quota gratuit du jour)
 symfony console app:listing-import:eval --run --model=mistral-medium-latest # un autre modèle, pour comparer
 symfony console app:listing-import:eval --predictions=evals/listing-import/runs/<dossier>   # renoter un essai
 symfony console app:listing-import:eval --cases=evals/listing-import/examples --predictions=evals/listing-import/demo
 ```
+
+### Le jeu de contrôle (`holdout/`)
+
+Les règles du PHP et la consigne ont été réglées en regardant les échecs des 20 cas de `cases/`.
+Un score sur ces 20 cas mesure donc aussi ce réglage. Les 10 annonces de `holdout/` n'ont servi à
+rien pendant les réglages : c'est leur score qui dit ce que vaut l'import sur une annonce neuve.
+
+```bash
+symfony console app:listing-import:eval --cases=evals/listing-import/holdout            # 10/10 attendu
+symfony console app:listing-import:eval --cases=evals/listing-import/holdout --run      # le vrai score
+```
+
+Règle : **on ne corrige rien en regardant les échecs du jeu de contrôle.** Si on le fait, il
+devient un second jeu de réglage et il faut en relever un nouveau. La commande refuse de
+tourner si une annonce de `holdout/` est aussi dans `cases/` (même adresse ou même texte).
+Les essais sont rangés dans `runs/<date>-holdout-<modèle>/`.
 
 `--run` exige une clé **Mistral** (formule gratuite « Experiment » : un numéro de téléphone,
 pas de carte bancaire) dans `api/.env.local`, jamais dans `.env` qui est versionné :

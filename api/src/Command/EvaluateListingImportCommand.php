@@ -52,7 +52,7 @@ final readonly class EvaluateListingImportCommand
         string $predictions = 'expected',
         #[Option('Dossier des cas')]
         ?string $cases = null,
-        #[Option('Appelle le modèle sur chaque cas (payant, quelques centimes)')]
+        #[Option('Appelle le modèle sur chaque cas (formule gratuite de Mistral : compte dans le quota du jour)')]
         bool $run = false,
         #[Option('Modèle à utiliser avec --run')]
         string $model = ListingImporter::DEFAULT_MODEL,
@@ -63,6 +63,13 @@ final readonly class EvaluateListingImportCommand
 
         if (!is_dir($cases)) {
             $io->error(\sprintf('Dossier des cas introuvable : %s. Voir evals/listing-import/README.md.', $cases));
+
+            return 1;
+        }
+
+        $duplicates = $this->sharedWithTheMainSet($cases);
+        if ([] !== $duplicates) {
+            $io->error(['Ces annonces sont déjà dans evals/listing-import/cases : un jeu de contrôle ne doit contenir que des annonces jamais vues.', ...$duplicates]);
 
             return 1;
         }
@@ -78,7 +85,7 @@ final readonly class EvaluateListingImportCommand
 
                 return 1;
             }
-            $predictions = $this->runModel($io, $selected, $model);
+            $predictions = $this->runModel($io, $selected, $model, basename(rtrim($cases, '/')));
         }
 
         $scores = [];
@@ -114,14 +121,59 @@ final readonly class EvaluateListingImportCommand
     }
 
     /**
+     * The listings of a control set (holdout) that are also in the main set, by source address or
+     * by text. The main set is the one the rules were tuned on: a listing seen there proves nothing.
+     *
+     * @return list<string>
+     */
+    private function sharedWithTheMainSet(string $cases): array
+    {
+        $main = $this->evalDir.'/cases';
+        if (!is_dir($main) || realpath($main) === realpath($cases)) {
+            return [];
+        }
+
+        $fingerprints = static function (string $directory): array {
+            $found = [];
+            foreach (glob($directory.'/*.json') ?: [] as $file) {
+                $data = json_decode((string) file_get_contents($file), true);
+                if (!\is_array($data)) {
+                    continue;
+                }
+                foreach (['source', 'text'] as $key) {
+                    $value = $data[$key] ?? null;
+                    if (!\is_string($value) || ('source' === $key && !str_starts_with($value, 'http'))) {
+                        continue; // "exemple inventé" is not an address
+                    }
+                    $found[$key.':'.preg_replace('/\s+/', ' ', mb_strtolower(trim($value)))] = basename($file);
+                }
+            }
+
+            return $found;
+        };
+
+        $inMain = $fingerprints($main);
+        $shared = [];
+        foreach ($fingerprints($cases) as $fingerprint => $file) {
+            if (isset($inMain[$fingerprint])) {
+                $shared[$file] = \sprintf('%s = %s', $file, $inMain[$fingerprint]);
+            }
+        }
+
+        return array_values($shared);
+    }
+
+    /**
      * @param list<EvalCase> $cases
      *
      * @return string the folder the answers were written to
      */
-    private function runModel(SymfonyStyle $io, array $cases, string $model): string
+    private function runModel(SymfonyStyle $io, array $cases, string $model, string $set): string
     {
         $districts = $this->districts->names();
-        $directory = \sprintf('%s/runs/%s-%s', $this->evalDir, $this->clock->now()->format('Ymd-His'), preg_replace('/[^a-z0-9.-]+/i', '-', $model));
+        // "20260924-101500-holdout-ministral-14b-2512": the set is in the name, the scores of the
+        // two sets are never mixed up.
+        $directory = \sprintf('%s/runs/%s-%s-%s', $this->evalDir, $this->clock->now()->format('Ymd-His'), $set, preg_replace('/[^a-z0-9.-]+/i', '-', $model));
         if (!is_dir($directory) && !mkdir($directory, 0o775, true)) {
             throw new \RuntimeException('Impossible de créer '.$directory);
         }

@@ -63,11 +63,12 @@ final class EvalSetIntegrityTest extends TestCase
     {
         yield 'committed examples' => [self::ROOT.'examples'];
         yield 'real listings' => [self::ROOT.'cases'];
+        yield 'control set' => [self::ROOT.'holdout'];
     }
 
     public function testEachCaseFileIsNamedAfterItsId(): void
     {
-        foreach (glob(self::ROOT.'{examples,cases}/*.json', \GLOB_BRACE) ?: [] as $file) {
+        foreach (glob(self::ROOT.'{examples,cases,holdout}/*.json', \GLOB_BRACE) ?: [] as $file) {
             $data = new EvalCaseLoader()->decode($file);
             self::assertSame(basename($file, '.json'), $data['id'] ?? null, $file);
         }
