@@ -1,43 +1,33 @@
 <form class="searchbar" (ngSubmit)="submit()">
-  <label class="searchbar__field">
-    <span class="searchbar__label">Arrivée</span>
-    <input
-      type="date"
-      name="arrival"
-      [min]="today"
-      [ngModel]="arrival()"
-      (ngModelChange)="onArrivalChange($event)"
+  <div class="searchbar__field">
+    <span class="searchbar__label" id="searchbar-dates">Dates</span>
+    <cm-date-range
+      aria-labelledby="searchbar-dates"
+      [arrival]="arrival()"
+      (arrivalChange)="onArrivalChange($event)"
+      [(departure)]="departure"
     />
-  </label>
-
-  <label class="searchbar__field">
-    <span class="searchbar__label">Départ</span>
-    <input
-      type="date"
-      name="departure"
-      [min]="arrival() ? plusDays(arrival(), 1) : today"
-      [ngModel]="departure()"
-      (ngModelChange)="departure.set($event)"
-    />
-  </label>
+  </div>
 
   <div class="searchbar__field searchbar__field--guests">
     <span class="searchbar__label">Voyageurs</span>
     <cm-guest-picker [(value)]="guests" />
   </div>
 
-  <button class="searchbar__submit" type="submit" aria-label="Rechercher">
+  <button class="searchbar__submit" type="submit">
     <svg
       viewBox="0 0 24 24"
-      width="16"
-      height="16"
+      width="18"
+      height="18"
       fill="none"
       stroke="currentColor"
-      stroke-width="2"
+      stroke-width="2.4"
       stroke-linecap="round"
+      aria-hidden="true"
     >
       <circle cx="11" cy="11" r="7" />
       <path d="m20 20-3.5-3.5" />
     </svg>
+    <span>Rechercher</span>
   </button>
 </form>

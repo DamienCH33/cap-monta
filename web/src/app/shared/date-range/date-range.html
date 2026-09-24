@@ -1,0 +1,78 @@
+<button
+  type="button"
+  class="range__toggle"
+  [attr.aria-expanded]="open()"
+  aria-haspopup="dialog"
+  (click)="toggle()"
+>
+  @if (label(); as text) {
+    {{ text }}
+  } @else {
+    <span class="range__placeholder">Ajouter des dates</span>
+  }
+</button>
+
+@if (open()) {
+  <div class="range__panel" role="dialog" aria-label="Choisir les dates du séjour">
+    <div class="range__nav">
+      <button
+        type="button"
+        [disabled]="!canGoBack()"
+        aria-label="Mois précédents"
+        (click)="move(-1)"
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        [disabled]="!canGoForward()"
+        aria-label="Mois suivants"
+        (click)="move(1)"
+      >
+        ›
+      </button>
+    </div>
+
+    <div class="range__months">
+      @for (month of months(); track month.key) {
+        <section class="range__month">
+          <h3 class="range__title">{{ month.title }}</h3>
+          <div class="range__grid">
+            @for (weekday of weekdays; track $index) {
+              <span class="range__weekday" [class.range__weekday--sat]="5 === $index">{{
+                weekday
+              }}</span>
+            }
+            @for (blank of month.blanks; track blank) {
+              <span></span>
+            }
+            @for (day of month.days; track day.iso) {
+              <button
+                type="button"
+                class="range__day"
+                [class.range__day--sat]="day.saturday"
+                [class.range__day--end]="isEnd(day.iso)"
+                [class.range__day--in]="isInside(day.iso)"
+                [disabled]="day.past"
+                [attr.aria-pressed]="isEnd(day.iso)"
+                [attr.aria-label]="day.name"
+                (click)="pick(day)"
+              >
+                {{ day.label }}
+              </button>
+            }
+          </div>
+        </section>
+      }
+    </div>
+
+    <div class="range__foot">
+      <span aria-live="polite">{{ summary() }}</span>
+      <span class="range__actions">
+        <button type="button" class="range__clear" (click)="clear()">Effacer</button>
+        <button type="button" class="range__done" (click)="close()">OK</button>
+      </span>
+    </div>
+    <p class="range__hint">Samedis en gras : la plupart des locations vont du samedi au samedi.</p>
+  </div>
+}
