@@ -70,6 +70,14 @@ class ListingImport
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $finishedAt = null;
 
+    /** The accommodation the owner filled with this reading, once he validated it (lot 4c). */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Accommodation $accommodation = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $appliedAt = null;
+
     public function __construct(User $owner, string $sourceText, \DateTimeImmutable $now)
     {
         $this->id = Uuid::v7();
@@ -118,6 +126,32 @@ class ListingImport
         $this->noteFailure($failure, $error);
         $this->status = ListingImportStatus::Failed;
         $this->finishedAt = $now;
+    }
+
+    /** Once only: a second click must not create a second draft or copy the rates twice. */
+    public function markApplied(Accommodation $accommodation, \DateTimeImmutable $now): void
+    {
+        if (null !== $this->appliedAt) {
+            throw new \LogicException('Cette lecture a déjà été utilisée.');
+        }
+
+        $this->accommodation = $accommodation;
+        $this->appliedAt = $now;
+    }
+
+    public function isApplied(): bool
+    {
+        return null !== $this->appliedAt;
+    }
+
+    public function getAccommodation(): ?Accommodation
+    {
+        return $this->accommodation;
+    }
+
+    public function getAppliedAt(): ?\DateTimeImmutable
+    {
+        return $this->appliedAt;
     }
 
     public function getId(): Uuid
