@@ -1,174 +1,165 @@
-:host {
-  display: block;
-}
-
+// Carte d'un logement (maquette du 24/09) : photo 4:3, titre et prix, bande des dispos.
+// Le titre porte le lien, étendu à toute la carte par &__link::after.
 .card {
-  // Le lien « Voir les dispos » s'étend sur toute la carte (voir &__link::after).
   position: relative;
-  overflow: hidden;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  transition:
-    box-shadow 0.15s,
-    border-color 0.15s;
+  display: grid;
+  gap: 12px;
+  align-content: start;
 
-  &:hover {
-    border-color: var(--border-strong);
-    box-shadow: 0 6px 18px rgb(0 0 0 / 8%);
-  }
-
-  // Focus clavier sur le lien : c'est toute la carte qui s'entoure.
-  &:has(.card__link:focus-visible) {
-    outline: 2px solid var(--blue);
-    outline-offset: 2px;
-  }
-
-  &__photo {
-    position: relative;
-    height: 150px;
-    background: var(--tile-sea);
-  }
-
-  // La miniature remplit le bandeau ; sans photo, l'aplat de couleur de la zone reste.
-  &__img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  &__badge {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    padding: 3px 8px;
-    font-size: 11px;
-    color: var(--success-text);
-    background: var(--success-bg);
-    border-radius: 20px;
-  }
-
-  &__body {
-    padding: 12px;
-  }
-
-  &__title {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  &__facts {
-    margin: 2px 0 10px;
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-
-  &__footer {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-  }
-
-  &__price {
-    font-size: 15px;
-    font-weight: 500;
-
-    &--unknown {
-      font-size: 13px;
-      font-weight: 400;
-      color: var(--text-secondary);
-    }
-  }
-
-  &__price-unit {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--text-secondary);
-  }
-
-  &__link {
-    font-size: 12px;
-    color: var(--blue);
-    text-decoration: none;
-
-    // Un seul lien, mais toute la carte est cliquable : lecteurs d'écran et moteurs de
-    // recherche voient un lien, pas dix.
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-    }
-
-    &:focus-visible {
-      outline: none;
-    }
-  }
-
-  &:hover &__link {
-    text-decoration: underline;
-  }
-}
-
-.strip {
-  display: flex;
-  gap: 2px;
-  margin-bottom: 5px;
-
-  &__week {
-    flex: 1;
-    height: 7px;
-    background: var(--free);
-    border-radius: 2px;
-
-    &--taken {
-      background: var(--taken-pattern);
-    }
-  }
-
-  &__months {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 11px;
-    color: var(--text-muted);
+  &:has(.card__link:focus-visible) .card__photo {
+    outline: 3px solid rgb(29 111 151 / 45%);
+    outline-offset: 3px;
   }
 }
 
 .card__photo {
   position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--blue-soft);
+}
 
-  &--central {
-    background: #c0dd97;
-  }
+.card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
 
-  &--roadside {
-    background: #f1efe8;
-  }
+.card:hover .card__img {
+  transform: scale(1.04);
+}
 
-  &--unknown {
-    background: var(--surface-1);
+.card__badge,
+.card__side {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 94%);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.card__badge {
+  top: 12px;
+  left: 12px;
+
+  i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--pine);
   }
 }
 
 .card__side {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  font-size: 11px;
-  color: var(--text-primary);
-  background: rgb(255 255 255 / 85%);
-  border-radius: 20px;
+  bottom: 12px;
+  left: 12px;
+  font-weight: 500;
 }
 
-.card__side cm-icon {
+.card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.card__link {
+  color: var(--text-primary);
+  text-decoration: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.card__facts {
+  margin: 2px 0 0;
   font-size: 14px;
+  color: var(--text-muted);
+}
+
+.card__price {
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+
+  b {
+    display: block;
+    font-size: 17px;
+  }
+
+  span {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+}
+
+// Libre en plein, pris en hachuré : lisible sans distinguer les couleurs.
+.strip {
+  display: grid;
+  gap: 5px;
+}
+
+.strip__weeks {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: 3px;
+}
+
+.strip__week {
+  height: 8px;
+  border-radius: 3px;
+  background: var(--free);
+
+  &--taken {
+    background: var(--taken-pattern);
+  }
+}
+
+.strip__months {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.card__free {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+
+  span {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card__img {
+    transition: none;
+  }
 }
