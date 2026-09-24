@@ -86,6 +86,23 @@ final class ImportProposalTest extends TestCase
         self::assertSame("Mobil home La Lande, TV, transats.\nAppelez le !", $proposal['listing']['description']);
     }
 
+    public function testTheDomainComesFromTheTextAndTickedEquipmentIsNotRepeated(): void
+    {
+        $proposal = ImportProposal::build(
+            ListingExtraction::fromArray(['periods' => [], 'unavailable' => [], 'listing' => [
+                'type' => 'bungalow', 'district' => 'Tahiti', 'amenities' => ['lave-linge'],
+                'otherFeatures' => ['machine à laver', 'kayak de mer'],
+            ]]),
+            [],
+            'Bungalow au CHM Montalivet, machine à laver, kayak de mer.',
+            self::DISTRICTS,
+            new \DateTimeImmutable('2026-09-24'),
+        );
+
+        self::assertSame('chm', $proposal['listing']['resort']);
+        self::assertSame(['kayak de mer'], $proposal['listing']['otherFeatures']);
+    }
+
     /**
      * @param list<array<string, mixed>>              $periods
      * @param list<array{start: string, end: string}> $unavailable

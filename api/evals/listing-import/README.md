@@ -99,9 +99,10 @@ Les textes ont été relevés le 23/09/2026. Relis-les contre l'annonce en ligne
    `unknown` si le texte ne la dit pas (« septembre : 400 € »). Le modèle ne calcule jamais :
    convertir 1200 € les 2 semaines en 600 €/semaine sera fait en PHP.
 4. **Fin exclusive**, comme partout dans l'application : une date écrite est le jour du
-   départ. « du 4 au 11 juillet » → `2026-07-04` / `2026-07-11` ; « du 1er juillet au 31 août »
-   → fin `2026-08-31`. Un mois écrit sans jour va jusqu'au 1er du mois suivant : « juillet et
-   août », « fin août » → fin `2026-09-01`.
+   départ. « du 4 au 11 juillet » → `2026-07-04` / `2026-07-11`. **Une fin au dernier jour d'un
+   mois veut dire le mois entier** et s'écrit au 1er du mois suivant : « juillet et août », « fin
+   août », « du 1er juillet au 31 août » → fin `2026-09-01` (le PHP applique la même règle,
+   `ExtractionReview::monthEnd()`).
 5. **Année** : celle écrite, sinon celle de publication de l'annonce.
 6. **Indisponible** seulement avec deux bornes. « Libre à partir du 22 août » ne dit pas depuis
    quand c'est pris : rien.

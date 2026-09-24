@@ -73,6 +73,10 @@ final readonly class ListingImporter
         try {
             $result = $this->platform->invoke($model, $this->messages($this->contacts->mask($text), $publishedAt, $districts), [
                 'response_format' => ListingImportSchema::responseFormat($districts),
+                // The same text must give the same reading: measured, and fair to the owner who
+                // pastes his listing twice (24/09: runs differed from one try to the next).
+                'temperature' => 0.0,
+                'random_seed' => 7,
             ])->getResult();
 
             $raw = $result->getContent();

@@ -60,8 +60,8 @@ final class ExtractionReview
 
     /** A heading that gives the unit of the whole list below it. */
     private const array UNIT_HEADINGS = [
-        'week' => '/ (?:tarifs?|prix|location|loyers?) (?:\\w+ ){0,2}(?:a la|par|a|en) semaines? /',
-        'night' => '/ (?:tarifs?|prix|location|loyers?) (?:\\w+ ){0,2}(?:a la|par|a|en) nuits? /',
+        'week' => '/ (?:tarifs?|prix|location|loyers?) (?:\\w+ ){0,2}(?:(?:a la|par|a|en) )?semaines? /',
+        'night' => '/ (?:tarifs?|prix|location|loyers?) (?:\\w+ ){0,2}(?:(?:a la|par|a|en) )?nuits? /',
     ];
 
     /** Words that must be written next to the amount for a unit to be believed. */
@@ -146,11 +146,49 @@ final class ExtractionReview
         }
 
         return new ListingExtraction(
-            self::withoutDuplicates($periods, $amounts),
-            $extraction->unavailable,
+            array_map(self::wholeMonth(...), self::withoutDuplicates($periods, $amounts)),
+            array_values(array_map(
+                static fn (ExtractedUnavailability $range): ExtractedUnavailability => new ExtractedUnavailability($range->start, self::monthEnd($range->end)),
+                array_filter($extraction->unavailable, static fn (ExtractedUnavailability $range): bool => self::isWrittenDay($range->start, $text)),
+            )),
             [], // the questions are the PHP's (ExtractionRules), asked after this review
             null === $extraction->listing ? null : self::checkedListing($extraction->listing, $text),
         );
+    }
+
+    /**
+     * An end on the last day of a month means the whole month: "au 31 août", "fin août",
+     * "juillet et août" all end on 1 September. Owners and the model write it both ways; the one
+     * night of difference is not worth a wrong reading (evaluation of 24/09: 6 failures out of 30
+     * on this day alone).
+     */
+    public static function monthEnd(\DateTimeImmutable $end): \DateTimeImmutable
+    {
+        return $end->format('j') === $end->format('t') ? $end->modify('+1 day') : $end;
+    }
+
+    public static function wholeMonth(ExtractedPeriod $period): ExtractedPeriod
+    {
+        return null === $period->end ? $period : new ExtractedPeriod(
+            $period->label, $period->start, self::monthEnd($period->end), $period->prices, $period->minimumNights, $period->saturdayArrival,
+        );
+    }
+
+    /**
+     * The first day of a taken range must be written: "18/07", "18 juillet", or the month itself
+     * for the 1st ("juillet complet"). The model sometimes makes one up for "pas de dispo
+     * jusqu'au 22 août" or "libre à partir du 21 août" (24/09: from 1 January). Dropped then.
+     */
+    private static function isWrittenDay(\DateTimeImmutable $day, string $text): bool
+    {
+        $words = MonthLabel::fold($text);
+        $d = (int) $day->format('j');
+        $m = (int) $day->format('n');
+        $names = implode('|', MonthLabel::namesOf($m));
+
+        return 1 === preg_match(\sprintf('~(?<!\\d)0?%d\\s*[/.-]\\s*0?%d(?!\\d)~', $d, $m), $words)
+            || 1 === preg_match(\sprintf('~(?<!\\d)0?%d(?:er)?\\s+(?:%s)\\b~', $d, $names), $words)
+            || (1 === $d && 1 === preg_match(\sprintf('~\\b(?:%s)\\b~', $names), $words));
     }
 
     /**
@@ -189,13 +227,22 @@ final class ExtractionReview
      */
     private static function withoutDuplicates(array $periods, string $amounts): array
     {
+        $dated = static fn (ExtractedPeriod $period): bool => null !== $period->start || null !== $period->end;
         $prices = static function (ExtractedPeriod $period): string {
             $keys = array_map(static fn (ExtractedPrice $price): string => $price->key(), $period->prices);
             sort($keys);
 
             return implode(',', $keys);
         };
-        $dated = static fn (ExtractedPeriod $period): bool => null !== $period->start || null !== $period->end;
+        // "Prix : 700 €" (no unit) repeats "Juin : 700 € / semaine": the same amounts. Not when the
+        // undated one has its own unit ("hors saison 400 € la semaine" is a rate of its own).
+        $unitless = static fn (ExtractedPeriod $period): bool => [] === array_filter($period->prices, static fn (ExtractedPrice $price): bool => PriceUnit::Unknown !== $price->unit);
+        $amountsOf = static function (ExtractedPeriod $period): string {
+            $amounts = array_map(static fn (ExtractedPrice $price): int => $price->amount, $period->prices);
+            sort($amounts);
+
+            return implode(',', $amounts);
+        };
         $kept = [];
         $seen = [];
 
@@ -209,7 +256,8 @@ final class ExtractionReview
                 continue;
             }
             foreach ($periods as $j => $other) {
-                if ($i !== $j && !$dated($period) && $dated($other) && $prices($period) === $prices($other)) {
+                if ($i !== $j && !$dated($period) && $dated($other)
+                    && ($prices($period) === $prices($other) || ($unitless($period) && $amountsOf($period) === $amountsOf($other)))) {
                     continue 2;
                 }
             }
@@ -290,7 +338,7 @@ final class ExtractionReview
 
     /**
      * A unit is believed when it is written next to the amount: in the four words after it
-     * ("650 € la semaine", "375 €/sem"), or just before it without another price in between
+     * ("650 € la semaine", "375 €/sem"), or in the six before it without another price in between
      * ("la semaine : 650 €"), or in a heading that sets it for the whole list ("Tarifs à la
      * semaine :"). Written somewhere else in the text is not enough: in "800 € la semaine et du
      * 20 au 31 août (1200 €)", 1200 has no unit.
@@ -404,8 +452,12 @@ final class ExtractionReview
      */
     private static function writtenCapacity(?int $capacity, string $text): ?int
     {
-        preg_match_all('/(?<! a)(?<!\d) (\d{1,2}) (?:personnes?|pers|couchages?|places|voyageurs)\b/', self::amountWords($text), $found);
-        $written = array_values(array_unique(array_map(intval(...), $found[1])));
+        $words = self::amountWords($text);
+        preg_match_all('/(?<! a)(?<!\d) (\d{1,2}) (?:personnes?|pers|couchages?|places|voyageurs)\b/', $words, $found);
+        // "Nombre de couchages : 6", "Capacité : 7" (the order of the form fields of listing sites).
+        preg_match_all('/ (?:couchages?|capacite(?: d accueil)?) (\d{1,2})(?= )(?! (?:chambres?|lits?|m ?2|m²))/', $words, $reversed);
+        // The label first only when no number comes before a noun: "6 couchages (3 adultes)" is 6.
+        $written = array_values(array_unique(array_map(intval(...), [] !== $found[1] ? $found[1] : $reversed[1])));
 
         return match (true) {
             1 === \count($written) => $written[0],

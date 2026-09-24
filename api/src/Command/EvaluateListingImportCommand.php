@@ -9,6 +9,7 @@ use App\Repository\DistrictRepository;
 use App\Service\ListingImport\Evaluation\CaseScore;
 use App\Service\ListingImport\Evaluation\EvalCase;
 use App\Service\ListingImport\Evaluation\EvalCaseLoader;
+use App\Service\ListingImport\Evaluation\EvalSetOverlap;
 use App\Service\ListingImport\Evaluation\ExtractionScorer;
 use App\Service\ListingImport\InvalidExtractionException;
 use App\Service\ListingImport\ListingExtraction;
@@ -58,6 +59,8 @@ final readonly class EvaluateListingImportCommand
         string $model = ListingImporter::DEFAULT_MODEL,
         #[Option('Ne garde que les cas dont l\'identifiant contient ce texte')]
         ?string $case = null,
+        #[Option('Supprime du jeu de contrôle les annonces déjà présentes dans cases/, au lieu de refuser')]
+        bool $removeShared = false,
     ): int {
         $cases ??= $this->evalDir.'/cases';
 
@@ -68,8 +71,15 @@ final readonly class EvaluateListingImportCommand
         }
 
         $duplicates = $this->sharedWithTheMainSet($cases);
+        if ([] !== $duplicates && $removeShared) {
+            foreach (array_keys($duplicates) as $file) {
+                unlink($cases.'/'.$file);
+            }
+            $io->warning(['Retirées du jeu de contrôle (déjà dans cases/) :', ...array_values($duplicates)]);
+            $duplicates = [];
+        }
         if ([] !== $duplicates) {
-            $io->error(['Ces annonces sont déjà dans evals/listing-import/cases : un jeu de contrôle ne doit contenir que des annonces jamais vues.', ...$duplicates]);
+            $io->error(['Ces annonces sont déjà dans evals/listing-import/cases : un jeu de contrôle ne doit contenir que des annonces jamais vues (--remove-shared pour les retirer).', ...array_values($duplicates)]);
 
             return 1;
         }
@@ -121,46 +131,13 @@ final readonly class EvaluateListingImportCommand
     }
 
     /**
-     * The listings of a control set (holdout) that are also in the main set, by source address or
-     * by text. The main set is the one the rules were tuned on: a listing seen there proves nothing.
-     *
-     * @return list<string>
+     * @return array<string, string> file of the control set => explanation
      */
     private function sharedWithTheMainSet(string $cases): array
     {
         $main = $this->evalDir.'/cases';
-        if (!is_dir($main) || realpath($main) === realpath($cases)) {
-            return [];
-        }
 
-        $fingerprints = static function (string $directory): array {
-            $found = [];
-            foreach (glob($directory.'/*.json') ?: [] as $file) {
-                $data = json_decode((string) file_get_contents($file), true);
-                if (!\is_array($data)) {
-                    continue;
-                }
-                foreach (['source', 'text'] as $key) {
-                    $value = $data[$key] ?? null;
-                    if (!\is_string($value) || ('source' === $key && !str_starts_with($value, 'http'))) {
-                        continue; // "exemple inventé" is not an address
-                    }
-                    $found[$key.':'.preg_replace('/\s+/', ' ', mb_strtolower(trim($value)))] = basename($file);
-                }
-            }
-
-            return $found;
-        };
-
-        $inMain = $fingerprints($main);
-        $shared = [];
-        foreach ($fingerprints($cases) as $fingerprint => $file) {
-            if (isset($inMain[$fingerprint])) {
-                $shared[$file] = \sprintf('%s = %s', $file, $inMain[$fingerprint]);
-            }
-        }
-
-        return array_values($shared);
+        return !is_dir($main) || realpath($main) === realpath($cases) ? [] : EvalSetOverlap::shared($cases, $main);
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Enum\Amenity;
 use App\Service\ListingImport\ExtractedListing;
 use App\Service\ListingImport\ExtractedPeriod;
 use App\Service\ListingImport\ExtractedUnavailability;
+use App\Service\ListingImport\ExtractionReview;
 use App\Service\ListingImport\ListingExtraction;
 
 /**
@@ -127,7 +128,9 @@ final class ExtractionScorer
      */
     private function periodKeys(array $periods): array
     {
-        return array_map(static fn (ExtractedPeriod $period): string => $period->key(), $periods);
+        // The month-end rule (ExtractionReview::monthEnd) on both sides: "au 31 août" written in an
+        // expected answer and 1 September returned by the review are the same end.
+        return array_map(static fn (ExtractedPeriod $period): string => ExtractionReview::wholeMonth($period)->key(), $periods);
     }
 
     /**
@@ -137,7 +140,10 @@ final class ExtractionScorer
      */
     private function rangeKeys(array $ranges): array
     {
-        return array_map(static fn (ExtractedUnavailability $range): string => $range->key(), $ranges);
+        return array_map(
+            static fn (ExtractedUnavailability $range): string => new ExtractedUnavailability($range->start, ExtractionReview::monthEnd($range->end))->key(),
+            $ranges,
+        );
     }
 
     /**
