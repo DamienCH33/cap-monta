@@ -9,6 +9,7 @@ use App\Entity\PricePeriod;
 use App\Repository\AccommodationRepository;
 use App\Repository\PricePeriodRepository;
 use App\Security\Voter\AccommodationVoter;
+use App\Service\Pricing\RateRules;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -31,10 +32,8 @@ use Symfony\Component\Routing\Requirement\Requirement;
 #[Route('/api/owner/accommodations/{slug}/rates')]
 final class OwnerRatesController
 {
-    public const HORIZON = '+24 months';
-    public const MAX_MINIMUM_NIGHTS = 28;
-    private const MIN_PRICE = 100;
-    private const MAX_PRICE = 10_000_000;
+    public const HORIZON = RateRules::HORIZON;
+    public const MAX_MINIMUM_NIGHTS = RateRules::MAX_MINIMUM_NIGHTS;
 
     public function __construct(
         private readonly AccommodationRepository $accommodations,
@@ -136,32 +135,22 @@ final class OwnerRatesController
     private function save(Accommodation $accommodation, ?PricePeriod $period, Request $request, int $status): JsonResponse
     {
         $payload = '' === $request->getContent() ? [] : $request->toArray();
-        $start = self::date($payload['start'] ?? null);
-        $end = self::date($payload['end'] ?? null);
+        $start = RateRules::date($payload['start'] ?? null);
+        $end = RateRules::date($payload['end'] ?? null);
         $weekly = $payload['weeklyPrice'] ?? null;
         $nightly = $payload['nightlyPrice'] ?? null;
         $minimum = $payload['minimumNights'] ?? 1;
         $saturday = $payload['saturdayArrival'] ?? false;
         $today = $this->today();
 
-        $refusal = match (true) {
-            null === $start => ['start', 'Choisissez le premier jour de la période.'],
-            null === $end => ['end', 'Choisissez le jour où la période se termine.'],
-            $end <= $start => ['end', 'La fin doit venir après le début.'],
-            $end <= $today => ['end', 'Cette période est entièrement passée.'],
-            $end > $today->modify(self::HORIZON) => ['end', 'Les tarifs se saisissent sur deux ans au plus.'],
-            !self::validPrice($weekly) => ['weeklyPrice', 'Le prix à la semaine doit être compris entre 1 € et 100 000 €.'],
-            !self::validPrice($nightly) => ['nightlyPrice', 'Le prix à la nuit doit être compris entre 1 € et 100 000 €.'],
-            null === $weekly && null === $nightly => ['weeklyPrice', 'Indiquez au moins un prix : à la semaine ou à la nuit.'],
-            !\is_int($minimum) || $minimum < 1 || $minimum > self::MAX_MINIMUM_NIGHTS => ['minimumNights', sprintf('Le minimum de nuits va de 1 à %d.', self::MAX_MINIMUM_NIGHTS)],
-            !\is_bool($saturday) => ['saturdayArrival', 'Réponse attendue : oui ou non.'],
-            default => null,
-        };
+        $refusal = RateRules::refusal($start, $end, $weekly, $nightly, $minimum, $saturday, $today);
 
         if (null !== $refusal) {
             return self::refuse(...$refusal);
         }
 
+        \assert(null !== $start && null !== $end);
+        \assert(\is_int($minimum) && \is_bool($saturday));
         \assert((null === $weekly || \is_int($weekly)) && (null === $nightly || \is_int($nightly)));
 
         // The exclusion constraint guarantees it in any case; checking first gives a clear message.
@@ -255,23 +244,6 @@ final class OwnerRatesController
     private function today(): \DateTimeImmutable
     {
         return $this->clock->now()->setTime(0, 0);
-    }
-
-    private static function validPrice(mixed $price): bool
-    {
-        return null === $price || (\is_int($price) && $price >= self::MIN_PRICE && $price <= self::MAX_PRICE);
-    }
-
-    /** A YYYY-MM-DD date, or null if absent or malformed (2026-02-30 included). */
-    private static function date(mixed $value): ?\DateTimeImmutable
-    {
-        if (!\is_string($value)) {
-            return null;
-        }
-
-        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value);
-
-        return false !== $date && $date->format('Y-m-d') === $value ? $date : null;
     }
 
     private static function refuse(string $field, string $message, int $status = Response::HTTP_UNPROCESSABLE_ENTITY): JsonResponse
