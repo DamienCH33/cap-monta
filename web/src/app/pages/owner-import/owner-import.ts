@@ -118,6 +118,34 @@ export class OwnerImport {
   readonly keptRates = computed(() => this.rates().filter((row) => row.keep).length);
   readonly keptRanges = computed(() => this.ranges().filter((row) => row.keep).length);
 
+  readonly resorts = [
+    { value: 'chm', label: 'CHM Montalivet' },
+    { value: 'euronat', label: 'Euronat' },
+  ];
+
+  /**
+   * Ce qu'il faut encore remplir pour créer le brouillon : les champs obligatoires du formulaire
+   * du logement. Vide quand on complète un logement existant (seuls tarifs et dates partent).
+   */
+  readonly missing = computed(() => {
+    const draft = this.listing();
+    if (null !== this.target || null === draft) {
+      return [];
+    }
+
+    return [
+      '' === draft.resort ? 'le domaine' : null,
+      '' === draft.type ? 'le type' : null,
+      null === draft.capacity ? 'la capacité' : null,
+      null === draft.bedrooms ? 'le nombre de chambres' : null,
+    ].filter((label): label is string => null !== label);
+  });
+
+  /** Sur grand écran, le texte d'origine reste ouvert à côté du formulaire. */
+  readonly wide = signal(
+    'undefined' !== typeof window && window.matchMedia?.('(min-width: 64rem)').matches === true,
+  );
+
   constructor() {
     inject(SeoService).apply({
       title: 'Importer mon annonce',
@@ -204,7 +232,59 @@ export class OwnerImport {
   }
 
   patchRate(index: number, changes: Partial<RateRow>): void {
-    this.rates.update((rows) => rows.map((row, i) => (i === index ? { ...row, ...changes } : row)));
+    this.rates.update((rows) =>
+      rows.map((row, i) => {
+        if (i !== index) {
+          return row;
+        }
+        const next = { ...row, ...changes };
+        // Une ligne proposée décochée faute de dates se coche d'elle-même une fois complétée.
+        const completed =
+          ('start' in changes || 'end' in changes) &&
+          '' !== next.start &&
+          '' !== next.end &&
+          (null !== next.weekly || null !== next.nightly);
+
+        return completed && !row.keep ? { ...next, keep: true } : next;
+      }),
+    );
+  }
+
+  /** Un stepper − / + comme sur le formulaire du logement ; vide → la valeur de départ. */
+  nudge(field: 'capacity' | 'bedrooms', delta: number): void {
+    const limits = { capacity: [1, 12], bedrooms: [0, 6] }[field];
+    const current = this.listing()?.[field] ?? null;
+    const value = null === current ? ('capacity' === field ? 4 : 2) : current + delta;
+    this.patchListing({ [field]: Math.min(limits[1], Math.max(limits[0], value)) });
+  }
+
+  addRate(): void {
+    this.rates.update((rows) => [
+      ...rows,
+      {
+        label: 'Nouvelle période',
+        keep: true,
+        start: '',
+        end: '',
+        weekly: null,
+        nightly: null,
+        minimumNights: 1,
+        saturdayArrival: false,
+        hints: [],
+      },
+    ]);
+  }
+
+  addRange(): void {
+    this.ranges.update((rows) => [...rows, { keep: true, start: '', end: '', hint: null }]);
+  }
+
+  /** Le point à vérifier mène à la ligne dont il parle, sinon à la section des tarifs. */
+  goTo(question: string): void {
+    const row = this.rates().findIndex((rate) => question.includes(`« ${rate.label} »`));
+    document
+      .getElementById(row >= 0 ? `rate-${row}` : 'rates-title')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   patchRange(index: number, changes: Partial<RangeRow>): void {

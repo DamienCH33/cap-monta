@@ -164,4 +164,30 @@ describe('OwnerImport', () => {
     expect(page.rateErrors().get(1)).toEqual(['Cette période est entièrement passée.']);
     expect(page.error()).toContain('rien n’a été enregistré');
   });
+  it('keeps the button off while a required field is missing, and says which', () => {
+    const page = create();
+    page.text.set(done.text);
+    page.read();
+
+    expect(page.missing()).toEqual(['la capacité']);
+
+    page.nudge('capacity', 1);
+    expect(page.listing()?.capacity).toBe(4);
+    expect(page.missing()).toEqual([]);
+  });
+
+  it('ticks a row once its missing dates are filled in, and lets the owner add one', () => {
+    const page = create();
+    page.text.set(done.text);
+    page.read();
+    page.addRate();
+    const added = page.rates().length - 1;
+
+    page.patchRate(added, { keep: false, weekly: 500 });
+    page.patchRate(added, { start: '2027-06-05' });
+    expect(page.rates()[added].keep).toBe(false);
+
+    page.patchRate(added, { end: '2027-06-12' });
+    expect(page.rates()[added].keep).toBe(true);
+  });
 });
