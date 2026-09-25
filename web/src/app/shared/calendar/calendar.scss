@@ -50,23 +50,24 @@
     gap: 16px;
     margin-top: 14px;
     padding-top: 12px;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--text-secondary);
     border-top: 1px solid var(--border);
   }
 
   &__swatch {
     display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin-right: 4px;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    vertical-align: -2px;
     background: var(--surface-2);
     border: 1px solid var(--border-strong);
-    border-radius: 50%;
+    border-radius: 3px;
 
+    // Pris = hachuré, comme la bande des cartes : lisible sans distinguer les couleurs.
     &--busy {
-      background: var(--taken);
-      border-color: var(--taken);
+      background: var(--taken-pattern);
     }
   }
 }
@@ -98,17 +99,20 @@
     align-items: center;
     justify-content: center;
     aspect-ratio: 1;
-    font-size: 12px;
-    border-radius: 50%;
+    font-size: 13px;
+    border-radius: 6px;
+    font-variant-numeric: tabular-nums;
 
+    // Pris : hachures + chiffre barré. Deux signes qui ne passent pas par la couleur.
     &--busy {
-      color: #2c2c2a;
-      background: var(--taken);
+      color: var(--text-secondary);
+      text-decoration: line-through;
+      background: var(--taken-pattern);
     }
 
+    // Passé : simplement estompé (le barré est réservé aux jours pris).
     &--past {
-      color: var(--text-muted);
-      text-decoration: line-through;
+      opacity: 0.4;
     }
   }
 }

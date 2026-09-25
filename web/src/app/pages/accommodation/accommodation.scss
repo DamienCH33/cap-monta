@@ -1,27 +1,43 @@
+// Fiche logement (maquette du 24/09) : photos, titre, pastilles, puis deux colonnes —
+// disponibilités, tarifs et description à gauche, demande à droite (collée en défilant).
 :host {
   display: block;
-  padding: 1rem 0 2rem;
-  background: var(--surface-1);
+  padding: 24px 0 64px;
+  background: var(--surface-0);
 }
 
+// Sans photo (brouillon vu par son propriétaire) : un aplat, pas un dessin.
 .photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   height: 220px;
-  background: var(--tile-sea);
-  border-radius: var(--radius-lg);
+  font-size: 14px;
+  color: var(--text-muted);
+  background: var(--sand);
+  border-radius: 18px;
+
+  cm-icon {
+    font-size: 30px;
+  }
 }
 
 .head {
-  margin: 16px 0 12px;
+  margin: 28px 0 14px;
 
   &__title {
     margin: 0;
-    font-size: 20px;
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3.6vw, 2.5rem);
     font-weight: 500;
+    line-height: 1.08;
   }
 
   &__facts {
-    margin: 4px 0 0;
-    font-size: 13px;
+    margin: 8px 0 0;
+    font-size: 16px;
     color: var(--text-secondary);
   }
 }
@@ -29,48 +45,50 @@
 .amenities {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 0 0 16px;
+  gap: 8px;
+  margin: 0 0 28px;
   padding: 0;
   list-style: none;
 
   &__item {
-    padding: 4px 10px;
-    font-size: 12px;
+    padding: 6px 12px;
+    font-size: 14px;
     color: var(--green-dark);
     background: var(--green-bg);
-    border-radius: 20px;
+    border-radius: 999px;
   }
 
   &__item--pets {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
   }
 
+  // Refus : pastille vide et texte explicite, pas seulement une autre couleur.
   &__item--no {
     color: var(--text-secondary);
     background: none;
-    border: 1px solid var(--border);
+    box-shadow: inset 0 0 0 1px var(--border-strong);
   }
 }
 
 .block {
-  margin-bottom: 16px;
-  padding: 14px;
+  margin-bottom: 18px;
+  padding: 22px 22px 20px;
   background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: 18px;
+  box-shadow: 0 0 0 1px var(--border);
 
   &__title {
-    margin: 0 0 10px;
-    font-size: 15px;
+    margin: 0 0 14px;
+    font-family: var(--font-display);
+    font-size: 24px;
     font-weight: 500;
   }
 
   &__empty {
     margin: 0;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1.6;
     color: var(--text-secondary);
   }
@@ -79,11 +97,13 @@
 .rates {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
 
   &__row td {
-    padding: 8px 0;
+    padding: 12px 0;
     border-top: 1px solid var(--border);
+    vertical-align: top;
   }
 
   &__row:first-child td {
@@ -91,22 +111,27 @@
   }
 
   &__period {
+    padding-right: 12px;
     color: var(--text-secondary);
   }
 
   &__price {
+    padding-left: 12px;
+    font-weight: 600;
     text-align: right;
     white-space: nowrap;
   }
 
   &__unit {
-    font-size: 11px;
+    font-size: 13px;
+    font-weight: 400;
     color: var(--text-secondary);
   }
 
   &__min {
+    padding-left: 12px;
+    font-size: 13px;
     text-align: right;
-    font-size: 11px;
     color: var(--text-muted);
     white-space: nowrap;
   }
@@ -117,15 +142,16 @@
   }
 
   &__note {
-    margin: 10px 0 0;
-    font-size: 12px;
+    margin: 14px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
     color: var(--text-muted);
   }
 }
 
 .description {
   margin: 0;
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1.7;
   white-space: pre-line;
 }
@@ -133,103 +159,122 @@
 .missing,
 .loading {
   padding: 3rem 0;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-secondary);
   text-align: center;
+
+  a {
+    color: var(--blue);
+  }
 }
 
 .back {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 14px;
-  padding: 6px 14px 6px 11px;
-  font-size: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--text-secondary);
   text-decoration: none;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  transition:
-    color 0.15s,
-    border-color 0.15s;
 
-  .ti {
-    font-size: 15px;
+  cm-icon {
     transition: transform 0.15s;
   }
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     color: var(--blue);
-    border-color: var(--blue);
 
-    .ti {
+    cm-icon {
       transform: translateX(-2px);
     }
-  }
-}
-.photo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 160px;
-  color: var(--blue);
-  background: var(--tile-sea);
-  border-radius: var(--radius-lg);
-
-  .ti {
-    font-size: 28px;
-    opacity: 0.6;
   }
 }
 
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
+  gap: 24px;
 }
 
 @media (min-width: 900px) {
   .layout {
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 32px;
     align-items: start;
   }
 
   .layout__aside {
     position: sticky;
-    top: 16px;
+    top: 88px; // sous l'en-tête de 64 px
+  }
+}
+
+@media (max-width: 599px) {
+  .rates__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+
+  .rates__row td {
+    padding: 4px 0;
+    border: 0;
+  }
+
+  .rates__period {
+    grid-column: 1 / -1;
+    padding-top: 12px !important;
+    border-top: 1px solid var(--border) !important;
+  }
+
+  .rates__row:first-child .rates__period {
+    border-top: 0 !important;
+  }
+
+  .rates__min {
+    grid-column: 1 / -1;
+    text-align: left;
+    padding-left: 0;
+  }
+
+  .rates__price {
+    text-align: left;
+    padding-left: 0;
   }
 }
 
 // Fiche ouverte par son propriétaire depuis « Voir l'annonce » : aperçu, pas de réservation.
 .owner-preview {
-  padding: 1.5rem;
-  border: 1px solid rgb(11 95 138 / 25%);
-  border-radius: 0.875rem;
-  background: #eef5f9;
+  padding: 22px 20px;
+  border-radius: 18px;
+  background: var(--blue-soft);
 }
 
 .owner-preview__title {
-  margin: 0 0 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
 }
 
 .owner-preview__text {
-  margin: 0 0 1rem;
-  color: #5b6672;
+  margin: 0 0 16px;
+  font-size: 15px;
+  color: var(--text-secondary);
 }
 
 .owner-preview__link {
   display: inline-block;
-  padding: 0.6rem 1.1rem;
-  border-radius: 0.6rem;
-  background: #0b5f8a;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: var(--ocean);
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
 
-  &:hover {
-    background: #084a6b;
+  &:hover,
+  &:focus-visible {
+    background: var(--blue);
   }
 }

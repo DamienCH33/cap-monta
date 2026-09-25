@@ -14,11 +14,35 @@
       <span>{{ quartier.name }}</span>
     </nav>
 
-    <h1 class="district__title">Louer dans le quartier {{ quartier.name }}</h1>
+    <header class="intro" [class.intro--photo]="areaPhoto()">
+      <div>
+        @if (area(); as zone) {
+          <p class="district__area">{{ zone.label }}</p>
+        }
+        <h1 class="district__title">Louer dans le quartier {{ quartier.name }}</h1>
 
-    @if (area(); as zone) {
-      <p class="district__area">{{ zone.label }}</p>
-    }
+        @if (quartier.intro) {
+          <p class="district__intro">{{ quartier.intro }}</p>
+        }
+
+        @if (quartier.highlights && quartier.highlights.length > 0) {
+          <ul class="points">
+            @for (point of quartier.highlights; track point) {
+              <li>{{ point }}</li>
+            }
+          </ul>
+        }
+      </div>
+
+      @if (areaPhoto(); as slot) {
+        <cm-site-photo
+          class="intro__photo"
+          [slot]="slot"
+          sizes="(max-width: 719px) 100vw, 480px"
+          [decorative]="true"
+        />
+      }
+    </header>
 
     <div class="stats">
       <div class="stat">
@@ -41,18 +65,6 @@
         <span class="stat__label">domaine</span>
       </div>
     </div>
-
-    @if (quartier.intro) {
-      <p class="district__intro">{{ quartier.intro }}</p>
-    }
-
-    @if (quartier.highlights && quartier.highlights.length > 0) {
-      <ul class="points">
-        @for (point of quartier.highlights; track point) {
-          <li>{{ point }}</li>
-        }
-      </ul>
-    }
 
     <div class="results">
       @for (accommodation of results(); track accommodation.slug) {
