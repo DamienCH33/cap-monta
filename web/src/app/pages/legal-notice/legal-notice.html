@@ -63,6 +63,31 @@
     </p>
   </section>
 
+  @if (photoCredits.length) {
+    <section class="static-page__section" id="credits-photos">
+      <h2>Crédits photos</h2>
+      <ul>
+        @for (photo of photoCredits; track photo.slot) {
+          <li>
+            {{ photo.alt }} :
+            @if (photo.source) {
+              <a [href]="photo.source" target="_blank" rel="noopener">{{ photo.credit }}</a>
+            } @else {
+              {{ photo.credit }}
+            }
+            @if (photo.license) {
+              ({{ photo.license }})
+            }
+          </li>
+        }
+      </ul>
+      <p>
+        Les photos des annonces appartiennent à leurs propriétaires, qui les publient sous leur
+        responsabilité.
+      </p>
+    </section>
+  }
+
   <section class="static-page__section">
     <h2>Signalement d'un contenu</h2>
     <p>

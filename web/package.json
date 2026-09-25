@@ -6,6 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "icons": "node scripts/build-icons.cjs",
+    "photos": "node scripts/build-site-photos.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:web": "node dist/web/server/server.mjs"
@@ -36,6 +37,7 @@
     "@types/node": "^20.17.19",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
+    "sharp": "^0.34.5",
     "typescript": "~6.0.2",
     "vitest": "^4.0.8"
   }

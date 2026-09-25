@@ -8,7 +8,8 @@ import { DistrictService } from '../../core/services/district';
 import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
 import { SearchBar } from '../../shared/search-bar/search-bar';
 import { Icon } from '../../shared/icon/icon';
-import { Scene } from '../../shared/scene/scene';
+import { SitePhoto } from '../../shared/site-photo/site-photo';
+import { SITE_PHOTOS } from '../../core/site-photos';
 import { SeoService } from '../../core/services/seo';
 import { environment } from '../../../environments/environment';
 
@@ -20,7 +21,7 @@ const ZONES: readonly { key: DistrictArea; title: string; hint: string }[] = [
 
 @Component({
   selector: 'cm-home',
-  imports: [RouterLink, SearchBar, AccommodationCard, Icon, Scene],
+  imports: [RouterLink, SearchBar, AccommodationCard, Icon, SitePhoto],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -28,6 +29,9 @@ export class Home implements OnInit {
   private readonly accommodations = inject(AccommodationService);
   private readonly districtApi = inject(DistrictService);
   private readonly seo = inject(SeoService);
+
+  readonly heroPhoto = SITE_PHOTOS.hero ?? null;
+  readonly ownerPhoto = SITE_PHOTOS.owner ?? null;
 
   readonly highlights = signal<Accommodation[]>([]);
   readonly districts = signal<District[]>([]);
