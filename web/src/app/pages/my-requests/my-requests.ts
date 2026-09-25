@@ -38,8 +38,8 @@ export class MyRequests implements OnInit {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Mes demandes de réservation',
-      description: 'Retrouvez vos demandes de réservation.',
+      title: $localize`:@@seo.mine.title:Mes demandes de réservation`,
+      description: $localize`:@@seo.mine.description:Retrouvez vos demandes de réservation.`,
       path: '/mes-demandes',
       noindex: true,
     });
@@ -63,7 +63,7 @@ export class MyRequests implements OnInit {
       return '…';
     }
 
-    return 'gone' === status ? 'Introuvable' : this.statusLabel(status);
+    return 'gone' === status ? $localize`:@@mine.gone:Introuvable` : this.statusLabel(status);
   }
 
   recover(): void {
@@ -79,7 +79,7 @@ export class MyRequests implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           this.sending.set(false);
-          this.error.set(apiErrorMessage(error, 'L’envoi a échoué. Réessayez dans un instant.'));
+          this.error.set(apiErrorMessage(error, $localize`:@@common.send-failed:L'envoi a échoué. Réessayez dans un instant.`));
         },
       });
   }

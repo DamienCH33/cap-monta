@@ -2,6 +2,7 @@ import { Component, computed, ElementRef, inject, input, model, signal } from '@
 
 import { BusyPeriod } from '../../core/models/availability';
 import { plusDays, today } from '../../core/models/stay-dates';
+import { currentLang, currentLangOption } from '../../core/i18n/lang';
 
 interface Day {
   iso: string;
@@ -62,8 +63,20 @@ function parts(iso: string): [number, number, number] {
   return [year, month, day];
 }
 
+/** Dans les autres langues que le français, le navigateur sait écrire les dates. */
+function intl(iso: string, options: Intl.DateTimeFormatOptions): string {
+  const [year, month, day] = parts(iso);
+
+  return new Intl.DateTimeFormat(currentLangOption().tag, options).format(
+    new Date(year, month - 1, day),
+  );
+}
+
 /** « sam. 4 juil. » */
 export function shortDate(iso: string): string {
+  if ('fr' !== currentLang()) {
+    return intl(iso, { weekday: 'short', day: 'numeric', month: 'short' });
+  }
   const [year, month, day] = parts(iso);
   const weekday = new Date(year, month - 1, day).getDay();
 
@@ -104,8 +117,15 @@ export class DateRange {
   /** Un seul mois, panneau étroit : pour une colonne comme le formulaire de demande. */
   readonly compact = input(false);
   readonly open = signal(false);
+  readonly takenSuffix = $localize`:@@dates.taken-suffix:, déjà pris`;
 
-  readonly weekdays = ['lu', 'ma', 'me', 'je', 've', 'sa', 'di'];
+  // Du lundi au dimanche ; 2026-01-05 est un lundi.
+  readonly weekdays =
+    'fr' === currentLang()
+      ? ['lu', 'ma', 'me', 'je', 've', 'sa', 'di']
+      : Array.from({ length: 7 }, (_, i) =>
+          intl(`2026-01-${String(5 + i).padStart(2, '0')}`, { weekday: 'short' }).slice(0, 2),
+        );
   private readonly today = today();
 
   /** Premier mois affiché, en mois depuis le mois courant. */
@@ -128,14 +148,19 @@ export class DateRange {
     const arrival = this.arrival();
     const departure = this.departure();
     if ('' === arrival) {
-      return 'Choisissez le jour d’arrivée.';
+      return $localize`:@@dates.pick-arrival:Choisissez le jour d’arrivée.`;
     }
     if ('' === departure) {
-      return 'Choisissez le jour de départ.';
+      return $localize`:@@dates.pick-departure:Choisissez le jour de départ.`;
     }
     const count = nights(arrival, departure);
 
-    return `${shortDate(arrival)} → ${shortDate(departure)} · ${count} nuit${count > 1 ? 's' : ''}`;
+    const nightsLabel =
+      1 === count
+        ? $localize`:@@dates.night.one:1 nuit`
+        : $localize`:@@dates.night.other:${count}:count: nuits`;
+
+    return `${shortDate(arrival)} → ${shortDate(departure)} · ${nightsLabel}`;
   });
 
   readonly months = computed<Month[]>(() =>
@@ -244,7 +269,10 @@ export class DateRange {
       days.push({
         iso,
         label: n + 1,
-        name: `${DAYS[weekday]} ${n + 1} ${MONTHS[first.getMonth()]} ${first.getFullYear()}`,
+        name:
+          'fr' === currentLang()
+            ? `${DAYS[weekday]} ${n + 1} ${MONTHS[first.getMonth()]} ${first.getFullYear()}`
+            : intl(iso, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
         saturday: 6 === weekday,
         past: iso < min,
         taken: busy.some((period) => period.start <= iso && iso < period.end),
@@ -253,7 +281,10 @@ export class DateRange {
 
     return {
       key: firstIso,
-      title: `${MONTHS[first.getMonth()]} ${first.getFullYear()}`,
+      title:
+        'fr' === currentLang()
+          ? `${MONTHS[first.getMonth()]} ${first.getFullYear()}`
+          : intl(firstIso, { month: 'long', year: 'numeric' }),
       // La semaine commence le lundi.
       blanks: Array.from({ length: (first.getDay() + 6) % 7 }, (_, i) => i),
       days,

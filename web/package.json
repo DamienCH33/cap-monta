@@ -9,6 +9,10 @@
     "photos": "node scripts/build-site-photos.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "i18n:extract": "ng extract-i18n --format=json --output-path src/locale",
+    "start:en": "ng serve --configuration=en",
+    "start:nl": "ng serve --configuration=nl",
+    "start:de": "ng serve --configuration=de",
     "serve:ssr:web": "node dist/web/server/server.mjs"
   },
   "private": true,
@@ -18,6 +22,7 @@
     "@angular/compiler": "^22.1.0",
     "@angular/core": "^22.1.0",
     "@angular/forms": "^22.1.0",
+    "@angular/localize": "^22.1.6",
     "@angular/platform-browser": "^22.1.0",
     "@angular/platform-server": "^22.1.0",
     "@angular/router": "^22.1.0",

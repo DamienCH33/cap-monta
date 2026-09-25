@@ -45,11 +45,11 @@ export interface TrackedBookingRequest extends BookingCommon {
 export type InboxTab = 'pending' | 'accepted' | 'history';
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
-  pending: 'En attente',
-  accepted: 'Acceptée',
-  declined: 'Refusée',
-  cancelled: 'Annulée',
-  expired: 'Expirée',
+  pending: $localize`:@@booking-status.pending:En attente`,
+  accepted: $localize`:@@booking-status.accepted:Acceptée`,
+  declined: $localize`:@@booking-status.declined:Refusée`,
+  cancelled: $localize`:@@booking-status.cancelled:Annulée`,
+  expired: $localize`:@@booking-status.expired:Expirée`,
 };
 
 export function bookingStatusLabel(status: BookingStatus): string {
@@ -67,18 +67,34 @@ export function inboxTab(request: OwnerBookingRequest, today: string): InboxTab 
 
 /** « 2 adultes, 2 enfants, 1 bébé, 1 animal ». */
 export function travellers(request: BookingCommon): string {
-  const parts = [plural(request.adults, 'adulte', 'adultes')];
+  const parts = [
+    1 === request.adults
+      ? $localize`:@@people.adult.one:1 adulte`
+      : $localize`:@@people.adult.other:${request.adults}:count: adultes`,
+  ];
 
   if (request.children) {
-    parts.push(plural(request.children, 'enfant', 'enfants'));
+    parts.push(
+      1 === request.children
+        ? $localize`:@@people.child.one:1 enfant`
+        : $localize`:@@people.child.other:${request.children}:count: enfants`,
+    );
   }
 
   if (request.infants) {
-    parts.push(plural(request.infants, 'bébé', 'bébés'));
+    parts.push(
+      1 === request.infants
+        ? $localize`:@@guests.infant.one:1 bébé`
+        : $localize`:@@guests.infant.other:${request.infants}:count: bébés`,
+    );
   }
 
   if (request.pets) {
-    parts.push(plural(request.pets, 'animal', 'animaux'));
+    parts.push(
+      1 === request.pets
+        ? $localize`:@@guests.pet.one:1 animal`
+        : $localize`:@@guests.pet.other:${request.pets}:count: animaux`,
+    );
   }
 
   return parts.join(', ');

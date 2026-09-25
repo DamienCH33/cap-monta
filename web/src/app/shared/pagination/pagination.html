@@ -1,5 +1,5 @@
 @if (totalPages() > 1) {
-  <nav class="pager" aria-label="Pages de résultats">
+  <nav class="pager" aria-label="Pages de résultats" i18n-aria-label="@@pager.nav">
     @if (page() > 1) {
       <a
         class="pager__step"
@@ -7,11 +7,11 @@
         [routerLink]="[]"
         [queryParams]="paramsFor(page() - 1)"
         queryParamsHandling="merge"
-        ><cm-icon name="chevron-left" /><span class="pager__label">Précédent</span></a
+        ><cm-icon name="chevron-left" /><span class="pager__label" i18n="@@pager.prev">Précédent</span></a
       >
     } @else {
       <span class="pager__step pager__step--off"
-        ><cm-icon name="chevron-left" /><span class="pager__label">Précédent</span></span
+        ><cm-icon name="chevron-left" /><span class="pager__label" i18n="@@pager.prev">Précédent</span></span
       >
     }
 
@@ -26,7 +26,7 @@
           [routerLink]="[]"
           [queryParams]="paramsFor(item)"
           queryParamsHandling="merge"
-          [attr.aria-label]="'Page ' + item"
+          [attr.aria-label]="pageLabel + item"
           >{{ item }}</a
         >
       }
@@ -39,11 +39,11 @@
         [routerLink]="[]"
         [queryParams]="paramsFor(page() + 1)"
         queryParamsHandling="merge"
-        ><span class="pager__label">Suivant</span><cm-icon name="chevron-right"
+        ><span class="pager__label" i18n="@@pager.next">Suivant</span><cm-icon name="chevron-right"
       /></a>
     } @else {
       <span class="pager__step pager__step--off"
-        ><span class="pager__label">Suivant</span><cm-icon name="chevron-right"
+        ><span class="pager__label" i18n="@@pager.next">Suivant</span><cm-icon name="chevron-right"
       /></span>
     }
   </nav>

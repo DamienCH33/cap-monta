@@ -4,8 +4,8 @@
 
   <div class="container hero__text">
     <p class="hero__kicker">CHM Montalivet · Euronat</p>
-    <h1 class="hero__title">Louez entre l'océan et les pins</h1>
-    <p class="hero__subtitle">
+    <h1 class="hero__title" i18n="@@home.title">Louez entre l'océan et les pins</h1>
+    <p class="hero__subtitle" i18n="@@home.subtitle">
       Bungalows, mobil-homes et chalets de particuliers, avec un calendrier tenu à jour et une
       réponse du propriétaire sous 48 heures.
     </p>
@@ -20,23 +20,23 @@
   <ul class="promises">
     <li>
       <cm-icon name="calendar-check" />
-      <p><b>Calendriers tenus à jour</b>Chaque fiche dit quand le propriétaire l'a vérifié.</p>
+      <p i18n="@@home.promise-calendar"><b>Calendriers tenus à jour</b>Chaque fiche dit quand le propriétaire l'a vérifié.</p>
     </li>
     <li>
       <cm-icon name="clock" />
-      <p><b>Réponse sous 48 heures</b>Sinon la demande expire et vous êtes prévenu.</p>
+      <p i18n="@@home.promise-48h"><b>Réponse sous 48 heures</b>Sinon la demande expire et vous êtes prévenu.</p>
     </li>
     <li>
       <cm-icon name="receipt-off" />
-      <p><b>Sans commission</b>Vous réglez le propriétaire, comme d'habitude.</p>
+      <p i18n="@@home.promise-fees"><b>Sans commission</b>Vous réglez le propriétaire, comme d'habitude.</p>
     </li>
   </ul>
 
   <section class="section">
     <div class="section__head">
       <div>
-        <h2 class="section__title">Trois façons de vivre le domaine</h2>
-        <p class="section__lead">Chaque quartier a sa distance à la plage et son ambiance.</p>
+        <h2 class="section__title" i18n="@@home.zones-title">Trois façons de vivre le domaine</h2>
+        <p class="section__lead" i18n="@@home.zones-lead">Chaque quartier a sa distance à la plage et son ambiance.</p>
       </div>
     </div>
 
@@ -52,7 +52,10 @@
           <div class="zone__body">
             <h3 class="zone__title">{{ zone.title }}</h3>
             <p class="zone__meta">
-              {{ zone.hint }} · {{ zone.count }} {{ zone.count > 1 ? 'logements' : 'logement' }}
+              {{ zone.hint }} ·
+              <ng-container i18n="@@count.listings"
+                >{zone.count, plural, =1 {1 logement} other {{{ zone.count }} logements}}</ng-container
+              >
             </p>
             <ul class="zone__districts">
               @for (district of zone.districts; track district.slug) {
@@ -68,7 +71,7 @@
 
     @if (unplaced().length) {
       <p class="zones__more">
-        Aussi :
+        <span i18n="@@home.also">Aussi :</span>
         @for (district of unplaced(); track district.slug; let last = $last) {
           <a [routerLink]="['/quartier', district.slug]">{{ district.name }}</a
           >{{ last ? '' : ' · ' }}
@@ -80,19 +83,19 @@
   <section class="section">
     <div class="section__head">
       <div>
-        <h2 class="section__title">Encore libre</h2>
-        <p class="section__lead">
+        <h2 class="section__title" i18n="@@home.free-title">Encore libre</h2>
+        <p class="section__lead" i18n="@@home.free-lead">
           Les semaines à venir d'un coup d'œil : plein = libre, hachuré = déjà pris.
         </p>
       </div>
-      <a class="section__link" routerLink="/recherche">Tout voir</a>
+      <a class="section__link" routerLink="/recherche" i18n="@@home.see-all">Tout voir</a>
     </div>
 
     <div class="section__grid">
       @for (accommodation of highlights(); track accommodation.slug) {
         <cm-accommodation-card [accommodation]="accommodation" />
       } @empty {
-        <p class="section__empty">Aucune annonce publiée pour le moment.</p>
+        <p class="section__empty" i18n="@@home.none">Aucune annonce publiée pour le moment.</p>
       }
     </div>
   </section>
@@ -107,23 +110,29 @@
       [decorative]="true"
     />
     <div>
-      <h2 class="owner__title">Vous louez votre logement au CHM ou à Euronat ?</h2>
+      <h2 class="owner__title" i18n="@@home.owner-title">Vous louez votre logement au CHM ou à Euronat ?</h2>
       <ol class="owner__steps">
         <li>
-          <b>Collez le texte de votre annonce actuelle</b>
-          <span>Le logement, les tarifs et les dates prises sont lus pour vous.</span>
+          <b i18n="@@home.owner-step1">Collez le texte de votre annonce actuelle</b>
+          <span i18n="@@home.owner-step1-text">Le logement, les tarifs et les dates prises sont lus pour vous.</span>
         </li>
         <li>
-          <b>Vérifiez et complétez</b>
-          <span>Votre texte reste à côté, rien n'est enregistré sans vous.</span>
+          <b i18n="@@home.owner-step2">Vérifiez et complétez</b>
+          <span i18n="@@home.owner-step2-text">Votre texte reste à côté, rien n'est enregistré sans vous.</span>
         </li>
         <li>
-          <b>Ajoutez vos photos et publiez</b>
-          <span>Gratuit, sans commission.</span>
+          <b i18n="@@home.owner-step3">Ajoutez vos photos et publiez</b>
+          <span i18n="@@home.owner-step3-text">Gratuit, sans commission.</span>
         </li>
       </ol>
       <!-- Pas connecté : la garde envoie sur la connexion et revient ici ensuite. -->
-      <a class="owner__button" routerLink="/mon-espace/importer">Publier gratuitement</a>
+      @if (french) {
+        <a class="owner__button" routerLink="/mon-espace/importer">Publier gratuitement</a>
+      } @else {
+        <a class="owner__button" href="/mon-espace/importer" hreflang="fr" i18n="@@home.owner-cta"
+          >Publier gratuitement (en français)</a
+        >
+      }
     </div>
   </div>
 </section>

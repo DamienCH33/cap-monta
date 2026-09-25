@@ -13,6 +13,8 @@ import { Icon } from '../icon/icon';
   styleUrl: './pagination.scss',
 })
 export class Pagination {
+  readonly pageLabel = $localize`:@@pager.page:Page `;
+
   readonly page = input.required<number>();
   readonly totalPages = input.required<number>();
 

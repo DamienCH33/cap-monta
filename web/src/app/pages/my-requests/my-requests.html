@@ -1,19 +1,19 @@
 <div class="container mine">
-  <h1 class="mine__title">Mes demandes</h1>
-  <p class="mine__lead">
+  <h1 class="mine__title" i18n="@@header.my-requests">Mes demandes</h1>
+  <p class="mine__lead" i18n="@@mine.lead">
     Pas besoin de compte : chaque demande a son lien personnel, envoyé par email au moment de la
     demande.
   </p>
 
   @if (remembered.list().length) {
     <section class="mine__box">
-      <h2 class="mine__subtitle">Sur cet appareil</h2>
+      <h2 class="mine__subtitle" i18n="@@mine.device">Sur cet appareil</h2>
       <ul class="mine__list">
         @for (item of remembered.list(); track item.token) {
           <li class="mine__item">
             <a class="mine__link" [routerLink]="['/demande', item.token]">
               <strong>{{ item.title }}</strong>
-              <span
+              <span i18n="@@mine.dates"
                 >Du {{ item.start | date: 'd MMM' }} au {{ item.end | date: 'd MMM yyyy' }}</span
               >
             </a>
@@ -22,37 +22,44 @@
               [class]="'mine__status mine__status--' + (statuses()[item.token] ?? 'loading')"
               >{{ label(item) }}</span
             >
-            <button type="button" class="mine__forget" (click)="remembered.forget(item.token)">
+            <button type="button" class="mine__forget" (click)="remembered.forget(item.token)" i18n="@@mine.forget">
               Oublier
             </button>
           </li>
         }
       </ul>
       <p class="mine__hint">
-        Gardée dans ce navigateur seulement. Sur un ordinateur partagé,
-        <button type="button" class="mine__inline" (click)="remembered.forgetAll()">
+        <ng-container i18n="@@mine.hint-start"
+          >Gardée dans ce navigateur seulement. Sur un ordinateur partagé,</ng-container
+        >
+        <button
+          type="button"
+          class="mine__inline"
+          (click)="remembered.forgetAll()"
+          i18n="@@mine.forget-all"
+        >
           oubliez tout
         </button>
-        en partant.
+        <ng-container i18n="@@mine.hint-end">en partant.</ng-container>
       </p>
     </section>
   }
 
   <section class="mine__box">
-    <h2 class="mine__subtitle">Retrouver mes demandes par email</h2>
+    <h2 class="mine__subtitle" i18n="@@mine.recover-title">Retrouver mes demandes par email</h2>
 
     @if (sent()) {
-      <p class="mine__sent" role="status">
+      <p class="mine__sent" role="status" i18n="@@mine.sent">
         Si des demandes existent pour cette adresse, un email vient de partir avec leurs liens.
         Pensez à regarder dans les indésirables.
       </p>
     } @else {
-      <p class="mine__text">
+      <p class="mine__text" i18n="@@mine.text">
         Email perdu, autre appareil ? Indiquez l'adresse utilisée pour la demande : nous y renvoyons
         les liens de vos demandes en cours.
       </p>
       <form class="mine__form" (ngSubmit)="recover()">
-        <label class="mine__label" for="recover-email">Adresse email</label>
+        <label class="mine__label" for="recover-email" i18n="@@mine.email">Adresse email</label>
         <div class="mine__row">
           <input
             id="recover-email"
@@ -64,7 +71,11 @@
             (ngModelChange)="email.set($event)"
           />
           <button type="submit" class="mine__button" [disabled]="sending() || !email().trim()">
-            {{ sending() ? 'Envoi…' : 'Recevoir mes liens' }}
+            @if (sending()) {
+              <ng-container i18n="@@common.sending">Envoi…</ng-container>
+            } @else {
+              <ng-container i18n="@@mine.submit">Recevoir mes liens</ng-container>
+            }
           </button>
         </div>
         @if (error()) {

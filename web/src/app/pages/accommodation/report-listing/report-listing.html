@@ -1,15 +1,15 @@
 <details class="report">
-  <summary class="report__toggle">Signaler cette annonce</summary>
+  <summary class="report__toggle" i18n="@@report.toggle">Signaler cette annonce</summary>
 
   @if (sent()) {
-    <p class="report__done" role="status">
+    <p class="report__done" role="status" i18n="@@report.done">
       Merci. Votre signalement est enregistré et sera examiné rapidement. Une photo où une personne
       est reconnaissable est traitée en priorité.
     </p>
   } @else {
     <form class="report__form" (ngSubmit)="submit()" novalidate>
       <fieldset class="report__reasons">
-        <legend class="report__label">Pourquoi ?</legend>
+        <legend class="report__label" i18n="@@report.why">Pourquoi ?</legend>
         @for (option of reasons; track option.value) {
           <label class="report__reason">
             <input
@@ -25,7 +25,7 @@
       </fieldset>
 
       <label class="report__field">
-        <span class="report__label">Précisions (facultatif)</span>
+        <span class="report__label" i18n="@@report.details">Précisions (facultatif)</span>
         <textarea
           name="message"
           rows="3"
@@ -36,7 +36,7 @@
       </label>
 
       <label class="report__field">
-        <span class="report__label">Votre email (facultatif, pour vous répondre)</span>
+        <span class="report__label" i18n="@@report.email">Votre email (facultatif, pour vous répondre)</span>
         <input
           type="email"
           name="email"
@@ -51,7 +51,11 @@
       }
 
       <button type="submit" class="report__submit" [disabled]="sending()">
-        {{ sending() ? 'Envoi…' : 'Envoyer le signalement' }}
+        @if (sending()) {
+          <ng-container i18n="@@common.sending">Envoi…</ng-container>
+        } @else {
+          <ng-container i18n="@@report.submit">Envoyer le signalement</ng-container>
+        }
       </button>
     </form>
   }

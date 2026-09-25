@@ -7,7 +7,8 @@
 >
   <div class="sheet__inner">
     <header class="sheet__top">
-      <button type="button" class="sheet__icon" aria-label="Fermer les filtres" (click)="close()">
+      <button type="button" class="sheet__icon" aria-label="Fermer les filtres"
+        i18n-aria-label="@@filters.close" (click)="close()">
         <svg
           viewBox="0 0 24 24"
           width="16"
@@ -21,14 +22,14 @@
           <path d="M6 6l12 12M18 6 6 18" />
         </svg>
       </button>
-      <h2 id="filter-sheet-title" class="sheet__title">Filtres</h2>
+      <h2 id="filter-sheet-title" class="sheet__title" i18n="@@filters.title">Filtres</h2>
       <span class="sheet__spacer"></span>
     </header>
 
     <div class="sheet__body">
       <section class="sec">
-        <h3 class="sec__title">Type de logement</h3>
-        <p class="sec__hint">Plusieurs choix possibles.</p>
+        <h3 class="sec__title" i18n="@@filters.type">Type de logement</h3>
+        <p class="sec__hint" i18n="@@filters.type-hint">Plusieurs choix possibles.</p>
         <div class="types">
           @for (type of types; track type.key) {
             <button
@@ -142,8 +143,8 @@
       </section>
 
       <section class="sec">
-        <h3 class="sec__title">Quartier</h3>
-        <p class="sec__hint">Du plus près au plus loin de la plage.</p>
+        <h3 class="sec__title" i18n="@@filters.district">Quartier</h3>
+        <p class="sec__hint" i18n="@@filters.district-hint">Du plus près au plus loin de la plage.</p>
         <div class="zones">
           @for (zone of zones(); track zone.key) {
             <div class="zone">
@@ -170,9 +171,10 @@
       </section>
 
       <section class="sec">
-        <h3 class="sec__title">Chambres</h3>
-        <p class="sec__hint">Nombre minimum.</p>
-        <div class="seg" role="group" aria-label="Nombre minimum de chambres">
+        <h3 class="sec__title" i18n="@@filters.bedrooms">Chambres</h3>
+        <p class="sec__hint" i18n="@@filters.bedrooms-hint">Nombre minimum.</p>
+        <div class="seg" role="group" aria-label="Nombre minimum de chambres"
+          i18n-aria-label="@@filters.bedrooms-label">
           @for (option of bedroomOptions; track option.value) {
             <button
               type="button"
@@ -186,8 +188,8 @@
       </section>
 
       <section class="sec">
-        <h3 class="sec__title">Équipements</h3>
-        <p class="sec__hint">Le logement doit tous les avoir.</p>
+        <h3 class="sec__title" i18n="@@filters.amenities">Équipements</h3>
+        <p class="sec__hint" i18n="@@filters.amenities-hint">Le logement doit tous les avoir.</p>
         <div class="amenities">
           @for (amenity of amenities; track amenity.key) {
             <button
@@ -204,13 +206,11 @@
     </div>
 
     <footer class="sheet__foot">
-      <button type="button" class="sheet__clear" (click)="clear()">Tout effacer</button>
+      <button type="button" class="sheet__clear" (click)="clear()" i18n="@@filters.clear">Tout effacer</button>
       <button type="button" class="sheet__show" (click)="close()">
-        @if (count() === 0) {
-          Aucun logement
-        } @else {
-          Afficher {{ count() }} {{ count() > 1 ? 'logements' : 'logement' }}
-        }
+        <ng-container i18n="@@filters.show"
+          >{count(), plural, =0 {Aucun logement} =1 {Afficher 1 logement} other {Afficher {{ count() }} logements}}</ng-container
+        >
       </button>
     </footer>
   </div>

@@ -33,11 +33,11 @@ export const ACCOMMODATION_TYPES: readonly {
   label: string;
   hint: string;
 }[] = [
-  { key: 'caravan', slug: 'caravane', label: 'Caravane', hint: '1 chambre' },
-  { key: 'mobile_home', slug: 'mobil-home', label: 'Mobil-home', hint: '2 à 3 chambres' },
-  { key: 'bungalow', slug: 'bungalow', label: 'Bungalow', hint: '3 chambres' },
-  { key: 'chalet', slug: 'chalet', label: 'Chalet', hint: 'surtout à Euronat' },
-  { key: 'studio', slug: 'studio', label: 'Studio', hint: '1 pièce ou 2 pièces' },
+  { key: 'caravan', slug: 'caravane', label: $localize`:@@type.caravan:Caravane`, hint: $localize`:@@type-hint.caravan:1 chambre` },
+  { key: 'mobile_home', slug: 'mobil-home', label: $localize`:@@type.mobile_home:Mobil-home`, hint: $localize`:@@type-hint.mobile_home:2 à 3 chambres` },
+  { key: 'bungalow', slug: 'bungalow', label: $localize`:@@type.bungalow:Bungalow`, hint: $localize`:@@type-hint.bungalow:3 chambres` },
+  { key: 'chalet', slug: 'chalet', label: $localize`:@@type.chalet:Chalet`, hint: $localize`:@@type-hint.chalet:surtout à Euronat` },
+  { key: 'studio', slug: 'studio', label: $localize`:@@type.studio:Studio`, hint: $localize`:@@type-hint.studio:1 pièce ou 2 pièces` },
 ];
 
 export type AmenityGroup = 'confort' | 'cuisine' | 'exterieur' | 'pratique';
@@ -57,32 +57,32 @@ export interface Amenity {
  * en base et dans les liens de recherche partagés.
  */
 export const AMENITIES: readonly Amenity[] = [
-  { key: 'climatisation', label: 'Climatisation', group: 'confort', filter: true },
-  { key: 'chauffage', label: 'Chauffage', group: 'confort', filter: false },
-  { key: 'television', label: 'Télévision', group: 'confort', filter: false },
-  { key: 'wifi', label: 'Wi-Fi', group: 'confort', filter: true },
-  { key: 'lave-vaisselle', label: 'Lave-vaisselle', group: 'cuisine', filter: true },
-  { key: 'micro-ondes', label: 'Micro-ondes', group: 'cuisine', filter: false },
-  { key: 'four', label: 'Four', group: 'cuisine', filter: false },
-  { key: 'cafetiere', label: 'Cafetière', group: 'cuisine', filter: false },
-  { key: 'terrasse', label: 'Terrasse', group: 'exterieur', filter: true },
-  { key: 'terrasse-couverte', label: 'Terrasse couverte', group: 'exterieur', filter: false },
-  { key: 'salon-de-jardin', label: 'Salon de jardin', group: 'exterieur', filter: false },
-  { key: 'plancha', label: 'Plancha', group: 'exterieur', filter: true },
-  { key: 'barbecue', label: 'Barbecue', group: 'exterieur', filter: false },
-  { key: 'douche-exterieure', label: 'Douche extérieure', group: 'exterieur', filter: false },
-  { key: 'lave-linge', label: 'Lave-linge', group: 'pratique', filter: true },
-  { key: 'parking', label: 'Place de parking', group: 'pratique', filter: true },
-  { key: 'linge-fourni', label: 'Linge de lit fourni', group: 'pratique', filter: false },
-  { key: 'lit-bebe', label: 'Lit bébé', group: 'pratique', filter: true },
-  { key: 'velos', label: 'Vélos à disposition', group: 'pratique', filter: false },
+  { key: 'climatisation', label: $localize`:@@amenity.climatisation:Climatisation`, group: 'confort', filter: true },
+  { key: 'chauffage', label: $localize`:@@amenity.chauffage:Chauffage`, group: 'confort', filter: false },
+  { key: 'television', label: $localize`:@@amenity.television:Télévision`, group: 'confort', filter: false },
+  { key: 'wifi', label: $localize`:@@amenity.wifi:Wi-Fi`, group: 'confort', filter: true },
+  { key: 'lave-vaisselle', label: $localize`:@@amenity.lave-vaisselle:Lave-vaisselle`, group: 'cuisine', filter: true },
+  { key: 'micro-ondes', label: $localize`:@@amenity.micro-ondes:Micro-ondes`, group: 'cuisine', filter: false },
+  { key: 'four', label: $localize`:@@amenity.four:Four`, group: 'cuisine', filter: false },
+  { key: 'cafetiere', label: $localize`:@@amenity.cafetiere:Cafetière`, group: 'cuisine', filter: false },
+  { key: 'terrasse', label: $localize`:@@amenity.terrasse:Terrasse`, group: 'exterieur', filter: true },
+  { key: 'terrasse-couverte', label: $localize`:@@amenity.terrasse-couverte:Terrasse couverte`, group: 'exterieur', filter: false },
+  { key: 'salon-de-jardin', label: $localize`:@@amenity.salon-de-jardin:Salon de jardin`, group: 'exterieur', filter: false },
+  { key: 'plancha', label: $localize`:@@amenity.plancha:Plancha`, group: 'exterieur', filter: true },
+  { key: 'barbecue', label: $localize`:@@amenity.barbecue:Barbecue`, group: 'exterieur', filter: false },
+  { key: 'douche-exterieure', label: $localize`:@@amenity.douche-exterieure:Douche extérieure`, group: 'exterieur', filter: false },
+  { key: 'lave-linge', label: $localize`:@@amenity.lave-linge:Lave-linge`, group: 'pratique', filter: true },
+  { key: 'parking', label: $localize`:@@amenity.parking:Place de parking`, group: 'pratique', filter: true },
+  { key: 'linge-fourni', label: $localize`:@@amenity.linge-fourni:Linge de lit fourni`, group: 'pratique', filter: false },
+  { key: 'lit-bebe', label: $localize`:@@amenity.lit-bebe:Lit bébé`, group: 'pratique', filter: true },
+  { key: 'velos', label: $localize`:@@amenity.velos:Vélos à disposition`, group: 'pratique', filter: false },
 ];
 
 export const AMENITY_GROUPS: readonly { key: AmenityGroup; label: string }[] = [
-  { key: 'confort', label: 'Confort' },
-  { key: 'cuisine', label: 'Cuisine' },
-  { key: 'exterieur', label: 'Extérieur' },
-  { key: 'pratique', label: 'Pratique' },
+  { key: 'confort', label: $localize`:@@amenity-group.confort:Confort` },
+  { key: 'cuisine', label: $localize`:@@amenity-group.cuisine:Cuisine` },
+  { key: 'exterieur', label: $localize`:@@amenity-group.exterieur:Extérieur` },
+  { key: 'pratique', label: $localize`:@@amenity-group.pratique:Pratique` },
 ];
 
 /** « television » → « Télévision » ; une clé inconnue s'affiche telle quelle. */
@@ -91,8 +91,8 @@ export function amenityLabel(key: string): string {
 }
 
 export const SORT_OPTIONS: readonly { value: SortOrder; slug: string; label: string }[] = [
-  { value: 'price_asc', slug: 'prix-croissant', label: 'Prix / semaine croissant' },
-  { value: 'price_desc', slug: 'prix-decroissant', label: 'Prix / semaine décroissant' },
+  { value: 'price_asc', slug: 'prix-croissant', label: $localize`:@@sort.price_asc:Prix / semaine croissant` },
+  { value: 'price_desc', slug: 'prix-decroissant', label: $localize`:@@sort.price_desc:Prix / semaine décroissant` },
 ];
 
 export const MAX_BEDROOMS_FILTER = 3;
@@ -165,7 +165,7 @@ export function filterChips(
       ? [
           {
             key: 'bedrooms',
-            label: `${filters.bedrooms} ch. et +`,
+            label: $localize`:@@chip.bedrooms:${filters.bedrooms}:count: ch. et +`,
             without: { ...filters, bedrooms: 0 },
           },
         ]

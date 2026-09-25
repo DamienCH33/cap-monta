@@ -19,6 +19,7 @@ export class Terms implements OnInit {
         "Règles d'utilisation de Cap Monta : rôle de mise en relation, obligations des " +
         'propriétaires et des locataires, responsabilité.',
       path: '/conditions-generales',
+      frenchOnly: true,
     });
   }
 }

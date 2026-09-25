@@ -8,7 +8,7 @@
   @if (label(); as text) {
     {{ text }}
   } @else {
-    <span class="range__placeholder">Ajouter des dates</span>
+    <span class="range__placeholder" i18n="@@dates.add">Ajouter des dates</span>
   }
 </button>
 
@@ -18,12 +18,14 @@
     [class.range__panel--compact]="compact()"
     role="dialog"
     aria-label="Choisir les dates du séjour"
+    i18n-aria-label="@@dates.dialog"
   >
     <div class="range__nav">
       <button
         type="button"
         [disabled]="!canGoBack()"
         aria-label="Mois précédents"
+        i18n-aria-label="@@dates.prev"
         (click)="move(-1)"
       >
         ‹
@@ -32,6 +34,7 @@
         type="button"
         [disabled]="!canGoForward()"
         aria-label="Mois suivants"
+        i18n-aria-label="@@dates.next"
         (click)="move(1)"
       >
         ›
@@ -61,7 +64,7 @@
                 [class.range__day--taken]="day.taken"
                 [disabled]="isDisabled(day)"
                 [attr.aria-pressed]="isEnd(day.iso)"
-                [attr.aria-label]="day.taken ? day.name + ', déjà pris' : day.name"
+                [attr.aria-label]="day.taken ? day.name + takenSuffix : day.name"
                 (click)="pick(day)"
               >
                 {{ day.label }}
@@ -75,14 +78,16 @@
     <div class="range__foot">
       <span aria-live="polite">{{ summary() }}</span>
       <span class="range__actions">
-        <button type="button" class="range__clear" (click)="clear()">Effacer</button>
-        <button type="button" class="range__done" (click)="close()">OK</button>
+        <button type="button" class="range__clear" (click)="clear()" i18n="@@dates.clear">Effacer</button>
+        <button type="button" class="range__done" (click)="close()" i18n="@@dates.ok">OK</button>
       </span>
     </div>
     <p class="range__hint">
-      Samedis en gras : la plupart des locations vont du samedi au samedi.
+      <span i18n="@@dates.hint-saturday"
+        >Samedis en gras : la plupart des locations vont du samedi au samedi.</span
+      >
       @if (busy().length) {
-        Jours hachurés et barrés : déjà pris.
+        <span i18n="@@dates.hint-taken">Jours hachurés et barrés : déjà pris.</span>
       }
     </p>
   </div>

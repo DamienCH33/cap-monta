@@ -1,30 +1,47 @@
 <div class="container favorites">
   <header class="favorites__head">
     <div>
-      <h1 class="favorites__title">{{ shared() ? 'Une sélection partagée' : 'Mes favoris' }}</h1>
+      <h1 class="favorites__title">
+        @if (shared()) {
+          <ng-container i18n="@@favorites.shared-title">Une sélection partagée</ng-container>
+        } @else {
+          <ng-container i18n="@@favorites.title">Mes favoris</ng-container>
+        }
+      </h1>
       <p class="favorites__lead">
         @if (shared()) {
-          Quelqu'un vous a envoyé ces logements. Gardez-les dans vos favoris pour y revenir.
+          <ng-container i18n="@@favorites.shared-lead"
+            >Quelqu'un vous a envoyé ces logements. Gardez-les dans vos favoris pour y
+            revenir.</ng-container
+          >
         } @else {
-          Les logements mis de côté sur cet appareil, sans compte. Touchez le cœur d'une annonce
-          pour l'ajouter ou la retirer.
+          <ng-container i18n="@@favorites.lead"
+            >Les logements mis de côté sur cet appareil, sans compte. Touchez le cœur d'une
+            annonce pour l'ajouter ou la retirer.</ng-container
+          >
         }
       </p>
     </div>
 
     @if (shared()) {
       <button type="button" class="favorites__action" (click)="keepShared()">
-        <cm-icon name="heart" /> Ajouter à mes favoris
+        <cm-icon name="heart" />
+        <ng-container i18n="@@fav.add-label">Ajouter à mes favoris</ng-container>
       </button>
     } @else if (favorites.count() > 0) {
       <button type="button" class="favorites__action" (click)="share()">
-        <cm-icon name="share" /> {{ copied() ? 'Lien copié' : 'Partager ma sélection' }}
+        <cm-icon name="share" />
+        @if (copied()) {
+          <ng-container i18n="@@share.copied">Lien copié</ng-container>
+        } @else {
+          <ng-container i18n="@@favorites.share">Partager ma sélection</ng-container>
+        }
       </button>
     }
   </header>
 
   @if (loading()) {
-    <p class="favorites__empty">Chargement…</p>
+    <p class="favorites__empty" i18n="@@common.loading">Chargement…</p>
   } @else if (items().length) {
     <div class="favorites__grid">
       @for (accommodation of items(); track accommodation.slug) {
@@ -33,14 +50,18 @@
     </div>
   } @else {
     <div class="favorites__empty">
-      <p>Aucun logement pour le moment.</p>
-      <a class="favorites__cta" routerLink="/recherche">Voir les logements</a>
+      <p i18n="@@favorites.empty">Aucun logement pour le moment.</p>
+      <a class="favorites__cta" routerLink="/recherche" i18n="@@favorites.browse"
+        >Voir les logements</a
+      >
     </div>
   }
 
   @if (missing() > 0) {
     <p class="favorites__note">
-      {{ missing() }} {{ missing() > 1 ? 'logements ne sont' : "logement n'est" }} plus en ligne.
+      <ng-container i18n="@@favorites.missing"
+        >{missing(), plural, =1 {1 logement n'est plus en ligne.} other {{{ missing() }} logements ne sont plus en ligne.}}</ng-container
+      >
     </p>
   }
 </div>

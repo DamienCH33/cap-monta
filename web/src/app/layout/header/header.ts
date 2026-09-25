@@ -6,11 +6,13 @@ import { filter } from 'rxjs';
 import { AuthService } from '../../core/services/auth';
 import { Favorites } from '../../core/services/favorites';
 import { GuestRequests } from '../../core/services/guest-requests';
+import { currentLang } from '../../core/i18n/lang';
 import { Icon } from '../../shared/icon/icon';
+import { LangSwitch } from '../../shared/lang-switch/lang-switch';
 
 @Component({
   selector: 'cm-header',
-  imports: [Icon, RouterLink],
+  imports: [Icon, LangSwitch, RouterLink],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   host: { '(document:keydown.escape)': 'menuOpen.set(false)' },
@@ -24,6 +26,8 @@ export class Header {
   /** Demandes envoyées depuis ce navigateur : le lien « Mes demandes » apparaît. */
   readonly guestRequests = inject(GuestRequests).list;
   readonly favoriteCount = inject(Favorites).count;
+  /** L'espace propriétaire n'existe qu'en français. */
+  readonly french = 'fr' === currentLang();
 
   /** Sur téléphone, les liens sont repliés derrière le bouton « Menu ». */
   readonly menuOpen = signal(false);

@@ -14,8 +14,8 @@ import { SearchBar } from '../../shared/search-bar/search-bar';
 export class NotFound {
   constructor() {
     inject(SeoService).apply({
-      title: 'Page introuvable',
-      description: "Cette page n'existe pas ou a été retirée par son propriétaire.",
+      title: $localize`:@@seo.notfound.title:Page introuvable`,
+      description: $localize`:@@seo.notfound.description:Cette page n'existe pas ou a été retirée par son propriétaire.`,
       path: '/404',
       noindex: true,
     });

@@ -6,7 +6,8 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
-import { routes } from './app/app.routes';
+import { APP_PATHS } from './app/app.paths';
+import { LangOption, LANGS, pathIn } from './app/core/i18n/lang';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -17,14 +18,15 @@ const apiUrl = process.env['API_URL'] ?? 'http://127.0.0.1:8001';
 const siteUrl = process.env['SITE_URL'] ?? 'http://localhost:4201';
 
 /**
- * Les chemins qu'Angular sait rendre, dérivés de app.routes.ts plutôt que recopiés :
- * une route ajoutée là-bas est reconnue ici sans qu'on y pense.
- * « :slug » devient « n'importe quoi sauf un / ».
+ * Les chemins qu'Angular sait rendre (app.paths.ts), dans chaque langue : « /recherche »,
+ * « /en/recherche »… « :slug » devient « n'importe quoi sauf un / ».
  */
-const knownRoutes = routes
-  .map((route) => route.path)
-  .filter((path): path is string => 'string' === typeof path && '**' !== path)
-  .map((path) => new RegExp(`^/${path.replace(/:[^/]+/g, '[^/]+')}/?$`));
+const prefixes = LANGS.map((lang) => lang.prefix.replace('/', ''))
+  .filter(Boolean)
+  .join('|');
+const knownRoutes = APP_PATHS.map(
+  (path) => new RegExp(`^(?:/(?:${prefixes}))?/${path.replace(/:[^/]+/g, '[^/]+')}/?$`),
+);
 
 function isKnownRoute(pathname: string): boolean {
   return knownRoutes.some((pattern) => pattern.test(pathname));
@@ -87,11 +89,11 @@ async function listSlugs(): Promise<string[]> {
  * propriétaire publie, un fichier statique serait périmé le lendemain.
  */
 app.get('/sitemap.xml', async (_request, response) => {
-  const paths = [
-    '/',
-    '/recherche',
+  // Pages traduites : une entrée par langue, avec les alternatives hreflang.
+  const paths = ['/', '/recherche', '/comment-ca-marche'];
+  // Espace propriétaire et pages légales : en français seulement.
+  const frenchOnly = [
     '/proprietaire',
-    '/comment-ca-marche',
     '/mentions-legales',
     '/conditions-generales',
     '/confidentialite',
@@ -127,10 +129,26 @@ app.get('/sitemap.xml', async (_request, response) => {
 
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...paths.map((path) => `  <url><loc>${siteUrl}${path}</loc></url>`),
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+    ...paths.flatMap((path) => LANGS.map((lang) => localizedUrl(lang, path))),
+    ...frenchOnly.map((path) => `  <url><loc>${siteUrl}${path}</loc></url>`),
     '</urlset>',
   ].join('\n');
+
+  /** « /en/recherche », avec ses versions dans les autres langues (Google les regroupe). */
+  function localizedUrl(lang: LangOption, path: string): string {
+    const alternates = LANGS.map(
+      (lang) =>
+        `    <xhtml:link rel="alternate" hreflang="${lang.code}" href="${siteUrl}${pathIn(lang, path)}"/>`,
+    );
+    alternates.push(
+      `    <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}${path}"/>`,
+    );
+
+    return [`  <url><loc>${siteUrl}${pathIn(lang, path)}</loc>`, ...alternates, '  </url>'].join(
+      '\n',
+    );
+  }
 
   response.type('application/xml').set('Cache-Control', 'public, max-age=3600').send(xml);
 });

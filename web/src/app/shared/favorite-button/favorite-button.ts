@@ -23,7 +23,13 @@ import { Icon } from '../icon/icon';
     >
       <cm-icon name="heart" />
       @if (labelled()) {
-        <span>{{ saved() ? 'Dans vos favoris' : 'Ajouter aux favoris' }}</span>
+        <span>
+          @if (saved()) {
+            <ng-container i18n="@@fav.saved">Dans vos favoris</ng-container>
+          } @else {
+            <ng-container i18n="@@fav.add">Ajouter aux favoris</ng-container>
+          }
+        </span>
       }
     </button>
   `,
@@ -38,7 +44,9 @@ export class FavoriteButton {
 
   readonly saved = computed(() => this.favorites.list().includes(this.slug()));
   readonly label = computed(() =>
-    this.saved() ? 'Retirer de mes favoris' : 'Ajouter à mes favoris',
+    this.saved()
+      ? $localize`:@@fav.remove-label:Retirer de mes favoris`
+      : $localize`:@@fav.add-label:Ajouter à mes favoris`,
   );
 
   toggle(event: Event): void {

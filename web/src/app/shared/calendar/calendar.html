@@ -6,6 +6,7 @@
       (click)="previous()"
       [disabled]="!canGoBack()"
       aria-label="Mois précédent"
+      i18n-aria-label="@@calendar.prev"
     >
       <cm-icon name="chevron-left" />
     </button>
@@ -16,6 +17,7 @@
       (click)="next()"
       [disabled]="!canGoForward()"
       aria-label="Mois suivant"
+      i18n-aria-label="@@calendar.next"
     >
       <cm-icon name="chevron-right" />
     </button>
@@ -49,7 +51,10 @@
   </div>
 
   <div class="calendar__legend">
-    <span><i class="calendar__swatch"></i> libre</span>
-    <span><i class="calendar__swatch calendar__swatch--busy"></i> indisponible</span>
+    <span><i class="calendar__swatch"></i> <ng-container i18n="@@legend.free">libre</ng-container></span>
+    <span
+      ><i class="calendar__swatch calendar__swatch--busy"></i>
+      <ng-container i18n="@@legend.taken">indisponible</ng-container></span
+    >
   </div>
 </div>

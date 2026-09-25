@@ -42,7 +42,12 @@
             },
             "ssr": {
               "entry": "src/server.ts"
-            }
+            },
+            "localize": true,
+            "i18nMissingTranslation": "error",
+            "polyfills": [
+              "@angular/localize/init"
+            ]
           },
           "configurations": {
             "production": {
@@ -69,6 +74,24 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.development.ts"
                 }
+              ],
+              "localize": [
+                "fr"
+              ]
+            },
+            "en": {
+              "localize": [
+                "en"
+              ]
+            },
+            "nl": {
+              "localize": [
+                "nl"
+              ]
+            },
+            "de": {
+              "localize": [
+                "de"
               ]
             }
           },
@@ -86,12 +109,49 @@
             "development": {
               "buildTarget": "web:build:development",
               "proxyConfig": "proxy.conf.json"
+            },
+            "en": {
+              "buildTarget": "web:build:development,en",
+              "proxyConfig": "proxy.conf.json"
+            },
+            "nl": {
+              "buildTarget": "web:build:development,nl",
+              "proxyConfig": "proxy.conf.json"
+            },
+            "de": {
+              "buildTarget": "web:build:development,de",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "setupFiles": [
+              "src/test-setup.ts"
+            ]
+          }
+        }
+      },
+      "i18n": {
+        "sourceLocale": {
+          "code": "fr",
+          "subPath": ""
+        },
+        "locales": {
+          "en": {
+            "translation": "src/locale/messages.en.json",
+            "subPath": "en"
+          },
+          "nl": {
+            "translation": "src/locale/messages.nl.json",
+            "subPath": "nl"
+          },
+          "de": {
+            "translation": "src/locale/messages.de.json",
+            "subPath": "de"
+          }
         }
       }
     }

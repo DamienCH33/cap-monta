@@ -1,15 +1,17 @@
 @if (missing()) {
   <div class="container district__empty">
-    <h1 class="district__title">Quartier introuvable</h1>
-    <p>Ce quartier n'existe pas, ou il n'est pas encore référencé sur Cap Monta.</p>
-    <a class="district__cta" routerLink="/recherche">Voir tous les logements</a>
+    <h1 class="district__title" i18n="@@district.missing-title">Quartier introuvable</h1>
+    <p i18n="@@district.missing">
+      Ce quartier n'existe pas, ou il n'est pas encore référencé sur Cap Monta.
+    </p>
+    <a class="district__cta" routerLink="/recherche" i18n="@@fiche.back-all">Voir tous les logements</a>
   </div>
 } @else if (district(); as quartier) {
   <div class="container">
-    <nav class="crumbs" aria-label="Fil d'Ariane">
-      <a routerLink="/">Accueil</a>
+    <nav class="crumbs" aria-label="Fil d'Ariane" i18n-aria-label="@@crumbs.label">
+      <a routerLink="/" i18n="@@crumbs.home">Accueil</a>
       <span aria-hidden="true">›</span>
-      <a routerLink="/recherche">Rechercher</a>
+      <a routerLink="/recherche" i18n="@@header.search">Rechercher</a>
       <span aria-hidden="true">›</span>
       <span>{{ quartier.name }}</span>
     </nav>
@@ -19,10 +21,12 @@
         @if (area(); as zone) {
           <p class="district__area">{{ zone.label }}</p>
         }
-        <h1 class="district__title">Louer dans le quartier {{ quartier.name }}</h1>
+        <h1 class="district__title" i18n="@@district.title">
+          Louer dans le quartier {{ quartier.name }}
+        </h1>
 
         @if (quartier.intro) {
-          <p class="district__intro">{{ quartier.intro }}</p>
+          <p class="district__intro" lang="fr">{{ quartier.intro }}</p>
         }
 
         @if (quartier.highlights && quartier.highlights.length > 0) {
@@ -47,22 +51,23 @@
     <div class="stats">
       <div class="stat">
         <span class="stat__value">{{ total() }}</span>
-        <span class="stat__label">{{ total() > 1 ? 'logements' : 'logement' }}</span>
+        <span class="stat__label" i18n="@@district.stat-listings"
+          >{total(), plural, =1 {logement} other {logements}}</span
+        >
       </div>
 
       @if (quartier.priceMin && quartier.priceMax) {
         <div class="stat stat--wide">
           <span class="stat__value">
-            {{ quartier.priceMin / 100 | number: '1.0-0' }} –
-            {{ quartier.priceMax / 100 | number: '1.0-0' }} €
+            {{ euros(quartier.priceMin) }} – {{ euros(quartier.priceMax) }}
           </span>
-          <span class="stat__label">par semaine</span>
+          <span class="stat__label" i18n="@@district.per-week">par semaine</span>
         </div>
       }
 
       <div class="stat">
         <span class="stat__value">{{ quartier.resort === 'euronat' ? 'Euronat' : 'CHM' }}</span>
-        <span class="stat__label">domaine</span>
+        <span class="stat__label" i18n="@@district.resort">domaine</span>
       </div>
     </div>
 
@@ -70,13 +75,16 @@
       @for (accommodation of results(); track accommodation.slug) {
         <cm-accommodation-card [accommodation]="accommodation" />
       } @empty {
-        <p class="results__empty">Aucun logement publié dans ce quartier pour le moment.</p>
+        <p class="results__empty" i18n="@@district.none">
+          Aucun logement publié dans ce quartier pour le moment.
+        </p>
       }
     </div>
 
     <cm-pagination [page]="page()" [totalPages]="totalPages()" />
 
     <a class="district__cta" routerLink="/recherche" [queryParams]="{ quartier: quartier.slug }"
+      i18n="@@district.search-here"
       >Chercher ici sur vos dates</a
     >
 

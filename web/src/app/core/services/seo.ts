@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { environment } from '../../../environments/environment';
+import { currentLangOption, LANGS, pathIn } from '../i18n/lang';
 import { SITE_PHOTOS } from '../site-photos';
 
 /** Aperçu des liens partagés par défaut : la photo d'accueil recadrée par `npm run photos`. */
@@ -18,6 +19,11 @@ export interface SeoTags {
   image?: string;
   /** Vrai pour une page qui ne doit pas être indexée : erreur, résultat vide, espace privé. */
   noindex?: boolean;
+  /**
+   * Page qui n'existe qu'en français (pages légales, propriétaires) : l'adresse canonique est
+   * la française dans toutes les langues, sans variantes hreflang.
+   */
+  frenchOnly?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,7 +39,8 @@ export class SeoService {
    * une page qui n'en déclare pas ne doit pas hériter de celui d'avant.
    */
   apply(tags: SeoTags): void {
-    const url = `${environment.siteUrl}${tags.path}`;
+    const lang = currentLangOption();
+    const url = `${environment.siteUrl}${tags.frenchOnly ? '' : lang.prefix}${tags.path}`;
     // Une photo de logement a déjà son adresse complète (stockage des photos) ; les images du site, non.
     const path = tags.image ?? DEFAULT_IMAGE;
     const image =
@@ -50,7 +57,7 @@ export class SeoService {
     });
 
     this.meta.updateTag({ property: 'og:site_name', content: 'Cap Monta' });
-    this.meta.updateTag({ property: 'og:locale', content: 'fr_FR' });
+    this.meta.updateTag({ property: 'og:locale', content: lang.tag.replace('-', '_') });
     this.meta.updateTag({ property: 'og:type', content: 'website' });
     this.meta.updateTag({ property: 'og:title', content: title });
     this.meta.updateTag({ property: 'og:description', content: tags.description });
@@ -64,7 +71,34 @@ export class SeoService {
     this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
 
     this.setCanonical(url);
+    this.setAlternates(true === tags.frenchOnly || true === tags.noindex ? null : tags.path);
     this.clearJsonLd();
+  }
+
+  /**
+   * Les versions de la page dans les autres langues (hreflang), pour que Google montre à
+   * chacun la sienne ; x-default = le français. Aucune pour une page non traduite.
+   */
+  private setAlternates(path: string | null): void {
+    const head = this.document.head;
+    head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((link) => link.remove());
+
+    if (null === path) {
+      return;
+    }
+
+    const entries: [string, string][] = [
+      ...LANGS.map((lang): [string, string] => [lang.code, pathIn(lang, path)]),
+      ['x-default', path],
+    ];
+
+    for (const [hreflang, href] of entries) {
+      const link = this.document.createElement('link');
+      link.setAttribute('rel', 'alternate');
+      link.setAttribute('hreflang', hreflang);
+      link.setAttribute('href', `${environment.siteUrl}${href}`);
+      head.appendChild(link);
+    }
   }
 
   private setCanonical(url: string): void {

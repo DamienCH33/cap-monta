@@ -13,42 +13,54 @@
       (click)="toggleMenu()"
     >
       <cm-icon [name]="menuOpen() ? 'x' : 'menu-2'" />
-      <span>Menu</span>
+      <span i18n="@@header.menu">Menu</span>
     </button>
 
     <nav id="main-nav" class="header__nav" [class.header__nav--open]="menuOpen()">
-      <a routerLink="/recherche">Rechercher</a>
+      <a routerLink="/recherche" i18n="@@header.search">Rechercher</a>
 
       @if (favoriteCount() > 0) {
-        <a routerLink="/favoris" class="header__favs" [attr.aria-label]="'Mes favoris : ' + favoriteCount()">
+        <a routerLink="/favoris" class="header__favs">
           <cm-icon name="heart" />
-          Favoris <span class="header__count">{{ favoriteCount() }}</span>
+          <span i18n="@@header.favorites">Favoris</span>
+          <span class="header__count">{{ favoriteCount() }}</span>
         </a>
       }
 
       @if (guestRequests().length && null === owner()) {
-        <a routerLink="/mes-demandes">Mes demandes</a>
+        <a routerLink="/mes-demandes" i18n="@@header.my-requests">Mes demandes</a>
       }
 
-      @if (null !== owner()) {
+      @if (!french) {
+        <!-- L'espace propriétaire n'existe qu'en français : lien vers le site français. -->
+        <a class="header__cta" href="/proprietaire" hreflang="fr" i18n="@@header.list-property"
+          >Louer mon logement</a
+        >
+      } @else if (null !== owner()) {
         <a routerLink="/mon-espace">Mon espace</a>
       } @else {
         <a class="header__cta" routerLink="/proprietaire">Louer mon logement</a>
       }
 
-      <span class="header__account">
-        @if (sessionChecked()) {
-          @if (owner(); as me) {
-            <a class="header__who" routerLink="/mon-espace/profil" title="Mon profil">
-              <cm-icon name="user-circle" />
-              {{ me.displayName }}
-            </a>
-            <button type="button" class="header__logout" (click)="logout()">Se déconnecter</button>
-          } @else {
-            <a routerLink="/connexion">Se connecter</a>
+      @if (french) {
+        <span class="header__account">
+          @if (sessionChecked()) {
+            @if (owner(); as me) {
+              <a class="header__who" routerLink="/mon-espace/profil" title="Mon profil">
+                <cm-icon name="user-circle" />
+                {{ me.displayName }}
+              </a>
+              <button type="button" class="header__logout" (click)="logout()">
+                Se déconnecter
+              </button>
+            } @else {
+              <a routerLink="/connexion">Se connecter</a>
+            }
           }
-        }
-      </span>
+        </span>
+      }
+
+      <cm-lang-switch />
     </nav>
   </div>
 </header>

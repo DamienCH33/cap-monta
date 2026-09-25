@@ -64,36 +64,36 @@ export function nightlyFromWeek(weeklyCents: number): number {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-  mobile_home: 'Mobil-home',
-  bungalow: 'Bungalow',
-  caravan: 'Caravane',
-  chalet: 'Chalet',
-  studio: 'Studio',
+  mobile_home: $localize`:@@type.mobile_home:Mobil-home`,
+  bungalow: $localize`:@@type.bungalow:Bungalow`,
+  caravan: $localize`:@@type.caravan:Caravane`,
+  chalet: $localize`:@@type.chalet:Chalet`,
+  studio: $localize`:@@type.studio:Studio`,
 };
 
 export function typeLabel(type: string): string {
-  return TYPE_LABELS[type] ?? 'Logement';
+  return TYPE_LABELS[type] ?? $localize`:@@type.other:Logement`;
 }
 
 /** Ce que le propriétaire a décidé pour les animaux. */
 export type PetsPolicy = 'allowed' | 'on_request' | 'not_allowed';
 
 export const PETS_POLICIES: { value: PetsPolicy; label: string; hint: string }[] = [
-  { value: 'allowed', label: 'Animaux acceptés', hint: 'Les animaux sont les bienvenus.' },
+  { value: 'allowed', label: $localize`:@@pets.allowed:Animaux acceptés`, hint: 'Les animaux sont les bienvenus.' },
   {
     value: 'on_request',
-    label: 'Animaux sur demande',
+    label: $localize`:@@pets.on_request:Animaux sur demande`,
     hint: 'Le voyageur le précise dans sa demande, vous décidez au cas par cas.',
   },
   {
     value: 'not_allowed',
-    label: 'Animaux non acceptés',
+    label: $localize`:@@pets.not_allowed:Animaux non acceptés`,
     hint: 'Les demandes avec un animal sont refusées automatiquement.',
   },
 ];
 
 export function petsPolicyLabel(policy: PetsPolicy): string {
-  return PETS_POLICIES.find((p) => p.value === policy)?.label ?? 'Animaux sur demande';
+  return PETS_POLICIES.find((p) => p.value === policy)?.label ?? $localize`:@@pets.on_request:Animaux sur demande`;
 }
 
 export interface AccommodationPage {

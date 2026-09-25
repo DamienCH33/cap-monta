@@ -38,6 +38,7 @@
   #viewer
   class="viewer"
   aria-label="Photos du logement"
+  i18n-aria-label="@@gallery.label"
   (keydown)="onKeydown($event)"
   (click)="onBackdropClick($event)"
   (touchstart)="onTouchStart($event)"
@@ -46,7 +47,7 @@
   @if (photos()[current()]; as photo) {
     <p class="viewer__count" aria-live="polite">{{ current() + 1 }} / {{ photos().length }}</p>
 
-    <button type="button" class="viewer__close" (click)="close()" aria-label="Fermer">
+    <button type="button" class="viewer__close" (click)="close()" aria-label="Fermer" i18n-aria-label="@@gallery.close">
       <cm-icon name="x" />
     </button>
 
@@ -64,6 +65,7 @@
         class="viewer__nav viewer__nav--prev"
         (click)="previous()"
         aria-label="Photo précédente"
+        i18n-aria-label="@@gallery.prev"
       >
         <cm-icon name="chevron-left" />
       </button>
@@ -72,6 +74,7 @@
         class="viewer__nav viewer__nav--next"
         (click)="next()"
         aria-label="Photo suivante"
+        i18n-aria-label="@@gallery.next"
       >
         <cm-icon name="chevron-right" />
       </button>

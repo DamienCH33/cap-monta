@@ -6,6 +6,7 @@ import { catchError, forkJoin, map, of } from 'rxjs';
 import { Accommodation } from '../../core/models/accommodation';
 import { AccommodationService } from '../../core/services/accommodation';
 import { Favorites } from '../../core/services/favorites';
+import { currentLangOption } from '../../core/i18n/lang';
 import { SeoService } from '../../core/services/seo';
 import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
 import { Icon } from '../../shared/icon/icon';
@@ -38,8 +39,8 @@ export class FavoritesPage implements OnInit {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Mes favoris',
-      description: 'Les logements que vous avez mis de côté.',
+      title: $localize`:@@favorites.title:Mes favoris`,
+      description: $localize`:@@seo.favorites.description:Les logements que vous avez mis de côté.`,
       path: '/favoris',
       noindex: true,
     });
@@ -92,10 +93,10 @@ export class FavoritesPage implements OnInit {
     if (!this.isBrowser) {
       return;
     }
-    const url = `${location.origin}/favoris?liste=${this.favorites.list().join(',')}`;
+    const url = `${location.origin}${currentLangOption().prefix}/favoris?liste=${this.favorites.list().join(',')}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Ma sélection Cap Monta', url });
+        await navigator.share({ title: $localize`:@@favorites.share-title:Ma sélection Cap Monta`, url });
 
         return;
       }
