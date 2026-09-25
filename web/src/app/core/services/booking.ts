@@ -32,20 +32,25 @@ export class BookingService {
       params = params.set('adults', adults);
     }
 
-    return this.http.get<Quote>(`${this.baseUrl}/accommodations/${slug}/quote`, {
-      params,
-      headers: { Accept: 'application/ld+json' },
-    });
+    return this.http.get<Quote>(
+      `${this.baseUrl}/accommodations/${encodeURIComponent(slug)}/quote`,
+      {
+        params,
+        headers: { Accept: 'application/ld+json' },
+      },
+    );
   }
 
   /** La demande vue par le voyageur, grâce à la clé privée reçue par email. */
   track(token: string): Observable<TrackedBookingRequest> {
-    return this.http.get<TrackedBookingRequest>(`${this.baseUrl}/booking-requests/track/${token}`);
+    return this.http.get<TrackedBookingRequest>(
+      `${this.baseUrl}/booking-requests/track/${encodeURIComponent(token)}`,
+    );
   }
 
   cancelTracked(token: string): Observable<TrackedBookingRequest> {
     return this.http.post<TrackedBookingRequest>(
-      `${this.baseUrl}/booking-requests/track/${token}/cancel`,
+      `${this.baseUrl}/booking-requests/track/${encodeURIComponent(token)}/cancel`,
       null,
     );
   }

@@ -28,7 +28,7 @@ export class MyRequests implements OnInit {
   readonly remembered = inject(GuestRequests);
 
   /** Statut à jour de chaque demande retenue, par jeton ; absent tant qu'il n'est pas arrivé. */
-  readonly statuses = signal<Record<string, BookingStatus | 'gone'>>({});
+  readonly statuses = signal<Partial<Record<string, BookingStatus | 'gone'>>>({});
   readonly email = signal('');
   readonly sending = signal(false);
   readonly sent = signal(false);
@@ -79,7 +79,12 @@ export class MyRequests implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           this.sending.set(false);
-          this.error.set(apiErrorMessage(error, $localize`:@@common.send-failed:L'envoi a échoué. Réessayez dans un instant.`));
+          this.error.set(
+            apiErrorMessage(
+              error,
+              $localize`:@@common.send-failed:L'envoi a échoué. Réessayez dans un instant.`,
+            ),
+          );
         },
       });
   }

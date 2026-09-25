@@ -56,15 +56,18 @@ export class AccommodationService {
   }
 
   getBySlug(slug: string): Observable<Accommodation> {
-    return this.http.get<Accommodation>(`${this.api}/accommodations/${slug}`, {
+    return this.http.get<Accommodation>(`${this.api}/accommodations/${encodeURIComponent(slug)}`, {
       headers: { Accept: 'application/ld+json' },
     });
   }
 
   getAvailability(slug: string): Observable<Availability> {
-    return this.http.get<Availability>(`${this.api}/accommodations/${slug}/availability`, {
-      headers: { Accept: 'application/ld+json' },
-    });
+    return this.http.get<Availability>(
+      `${this.api}/accommodations/${encodeURIComponent(slug)}/availability`,
+      {
+        headers: { Accept: 'application/ld+json' },
+      },
+    );
   }
 
   private toParams(criteria: SearchCriteria): HttpParams {

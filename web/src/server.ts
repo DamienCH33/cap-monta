@@ -5,17 +5,28 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import { join } from 'node:path';
 import { APP_PATHS } from './app/app.paths';
 import { LangOption, LANGS, pathIn } from './app/core/i18n/lang';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
-/** L'API que le serveur interroge pour construire le sitemap. */
-const apiUrl = process.env['API_URL'] ?? 'http://127.0.0.1:8001';
+const production = 'production' === process.env['NODE_ENV'];
+
+/** L'API Symfony, vue d'ici : l'adresse interne de Railway en production. */
+const apiUrl = (process.env['API_URL'] ?? 'http://127.0.0.1:8001').replace(/\/$/, '');
 
 /** L'origine publique, celle qui apparaît dans le sitemap. */
-const siteUrl = process.env['SITE_URL'] ?? 'http://localhost:4201';
+const siteUrl = (process.env['SITE_URL'] ?? 'http://localhost:4201').replace(/\/$/, '');
+
+// Un sitemap qui pointe vers localhost en production serait pire que pas de sitemap.
+if (production && !process.env['SITE_URL']) {
+  throw new Error('SITE_URL manquant : l’adresse publique du site (https://…).');
+}
+
+/** Un appel à l'API qui ne répond pas ne doit pas bloquer une requête indéfiniment. */
+const API_TIMEOUT_MS = 5_000;
 
 /**
  * Les chemins qu'Angular sait rendre (app.paths.ts), dans chaque langue : « /recherche »,
@@ -32,8 +43,38 @@ function isKnownRoute(pathname: string): boolean {
   return knownRoutes.some((pattern) => pattern.test(pathname));
 }
 
+/**
+ * Au rendu serveur, Angular appelle « /api/… » sur l'adresse de la page demandée, donc sur le
+ * domaine public : un aller-retour par Internet pour revenir ici. Ces appels partent
+ * directement vers l'API interne. Les URL restent relatives côté application, ce qui garde
+ * le cache de transfert : le navigateur ne refait pas les appels déjà faits au rendu.
+ */
+const siteHosts = new Set(
+  [new URL(siteUrl).host, ...(process.env['NG_ALLOWED_HOSTS'] ?? '').split(',')]
+    .map((host) => host.trim())
+    .filter(Boolean),
+);
+const publicFetch = globalThis.fetch;
+
+globalThis.fetch = (input, init) => {
+  const url = new URL(input instanceof Request ? input.url : input.toString());
+  const ownHost =
+    siteHosts.has(url.host) || siteHosts.has(url.hostname) || 'localhost' === url.hostname;
+
+  if (ownHost && url.pathname.startsWith('/api/')) {
+    const internal = `${apiUrl}${url.pathname}${url.search}`;
+
+    return publicFetch(input instanceof Request ? new Request(internal, input) : internal, init);
+  }
+
+  return publicFetch(input, init);
+};
+
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+// Derrière le proxy de Railway, l'adresse d'origine (https, domaine) arrive dans ces en-têtes.
+const angularApp = new AngularNodeAppEngine({
+  trustProxyHeaders: ['x-forwarded-proto', 'x-forwarded-host'],
+});
 
 // Pas de « X-Powered-By: Express » : inutile de dire aux curieux ce qui tourne.
 app.disable('x-powered-by');
@@ -62,27 +103,85 @@ app.use((request, response, next) => {
   next();
 });
 
+/**
+ * Un seul domaine public (décision 009) : « /api/… » est relayé tel quel vers Symfony.
+ * Les cookies de session restent sur le même domaine, sans CORS. X-Forwarded-For est
+ * transmis tel que le bord de Railway l'a posé, sans y ajouter d'adresse : Symfony, qui
+ * fait confiance à ce serveur (TRUSTED_PROXIES), y lit l'IP réelle pour ses limiteurs.
+ */
+app.use(
+  createProxyMiddleware({
+    pathFilter: '/api',
+    target: apiUrl,
+    changeOrigin: false,
+    xfwd: false,
+    proxyTimeout: 30_000,
+    timeout: 30_000,
+    on: {
+      error: (_error, _request, response) => {
+        if ('writeHead' in response && !response.headersSent) {
+          response.writeHead(502, { 'Content-Type': 'application/problem+json' });
+        }
+        response.end('{"title":"L’API ne répond pas.","status":502}');
+      },
+    },
+  }),
+);
+
 interface AccommodationSummary {
   slug: string;
 }
 
 interface JsonLdCollection {
   member: AccommodationSummary[];
+  view?: { next?: string };
 }
 
+/** Tous les logements en ligne : la liste est paginée, on suit les pages jusqu'au bout. */
 async function listSlugs(): Promise<string[]> {
-  const response = await fetch(`${apiUrl}/api/accommodations`, {
-    headers: { Accept: 'application/ld+json' },
-  });
+  const slugs: string[] = [];
+  let next: string | undefined = '/api/accommodations?page=1';
 
-  if (!response.ok) {
-    throw new Error(`API responded ${response.status}`);
+  for (let pages = 0; next && pages < 200; pages++) {
+    const response = await fetch(`${apiUrl}${next}`, {
+      headers: { Accept: 'application/ld+json' },
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API responded ${response.status}`);
+    }
+
+    const payload = (await response.json()) as JsonLdCollection;
+    slugs.push(...payload.member.map((accommodation) => accommodation.slug));
+    next = payload.view?.next;
   }
 
-  const payload = (await response.json()) as JsonLdCollection;
-
-  return payload.member.map((accommodation) => accommodation.slug);
+  return slugs;
 }
+
+/**
+ * robots.txt servi par le serveur : l'adresse du sitemap suit SITE_URL. Les pages privées
+ * (espace propriétaire, suivi d'une demande par son lien personnel) restent hors index.
+ * La page propriétaires publique (/proprietaire) est indexable.
+ */
+app.get('/robots.txt', (_request, response) => {
+  const privatePaths = ['/api/', '/mon-espace', '/demande/', '/*/demande/'];
+
+  response
+    .type('text/plain')
+    .set('Cache-Control', 'public, max-age=3600')
+    .send(
+      [
+        'User-agent: *',
+        'Allow: /',
+        ...privatePaths.map((path) => `Disallow: ${path}`),
+        '',
+        `Sitemap: ${siteUrl}/sitemap.xml`,
+        '',
+      ].join('\n'),
+    );
+});
 
 /**
  * Sitemap construit à la demande : la liste des logements change dès qu'un
@@ -116,6 +215,7 @@ app.get('/sitemap.xml', async (_request, response) => {
   async function listDistrictSlugs(): Promise<string[]> {
     const response = await fetch(`${apiUrl}/api/districts`, {
       headers: { Accept: 'application/ld+json' },
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -156,11 +256,23 @@ app.get('/sitemap.xml', async (_request, response) => {
 /**
  * Serve static files from /browser
  */
+/**
+ * Fichiers statiques. Ceux dont le nom porte une empreinte (« main-AB12CD34.js ») ne
+ * changent jamais : cache d'un an. Les autres (robots.txt, favicon, photos du site)
+ * peuvent changer sans changer de nom : une heure.
+ */
+const FINGERPRINTED = /-[\w-]{8}\.(?:js|mjs|css|woff2?)$/;
+
 app.use(
   express.static(browserDistFolder, {
-    maxAge: '1y',
     index: false,
     redirect: false,
+    setHeaders: (response, path) => {
+      response.setHeader(
+        'Cache-Control',
+        FINGERPRINTED.test(path) ? 'public, max-age=31536000, immutable' : 'public, max-age=3600',
+      );
+    },
   }),
 );
 

@@ -1,4 +1,7 @@
 <div class="container">
+  <h1 class="sr-only" i18n="@@seo.search.title">
+    Rechercher un logement au CHM Montalivet et à Euronat
+  </h1>
   <cm-search-bar
     [initialArrival]="criteria().arrival ?? ''"
     [initialDeparture]="criteria().departure ?? ''"
@@ -65,16 +68,17 @@
           <span aria-hidden="true">×</span>
         </button>
       }
-      <button type="button" class="chips__clear" (click)="clearFilters()" i18n="@@filters.clear"
-        >Tout effacer</button
-      >
+      <button type="button" class="chips__clear" (click)="clearFilters()" i18n="@@filters.clear">
+        Tout effacer
+      </button>
     </div>
   }
 
   <p class="results__count">
-    <ng-container i18n="@@count.listings"
-      >{total(), plural, =1 {1 logement} other {{{ total() }} logements}}</ng-container
-    >
+    <ng-container i18n="@@count.listings">{total(), plural,
+      =1 {1 logement}
+      other {{{ total() }} logements}
+    }</ng-container>
     @if (totalPages() > 1) {
       <span class="results__page" i18n="@@search.page"
         >· page {{ page() }} sur {{ totalPages() }}</span
@@ -117,9 +121,10 @@
                     >
                     <strong>
                       &nbsp;·
-                      <ng-container i18n="@@count.listings"
-                        >{suggestion.availableCount, plural, =1 {1 logement} other {{{ suggestion.availableCount }} logements}}</ng-container
-                      >
+                      <ng-container i18n="@@count.listings">{suggestion.availableCount, plural,
+                        =1 {1 logement}
+                        other {{{ suggestion.availableCount }} logements}
+                      }</ng-container>
                     </strong>
                   </a>
                 </li>

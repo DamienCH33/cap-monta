@@ -38,6 +38,14 @@ export class SeoService {
    * Pose toutes les métadonnées d'une page. Efface le JSON-LD précédent :
    * une page qui n'en déclare pas ne doit pas hériter de celui d'avant.
    */
+  /**
+   * Page en erreur passagère (API injoignable) : on ne change rien d'autre, mais Google ne
+   * doit pas indexer cet état-là.
+   */
+  noindex(): void {
+    this.meta.updateTag({ name: 'robots', content: 'noindex, follow' });
+  }
+
   apply(tags: SeoTags): void {
     const lang = currentLangOption();
     const url = `${environment.siteUrl}${tags.frenchOnly ? '' : lang.prefix}${tags.path}`;

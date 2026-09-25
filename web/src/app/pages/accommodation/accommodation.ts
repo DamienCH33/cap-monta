@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, Params, RouterLink } from '@angular/router';
-import { switchMap } from 'rxjs';
+import { catchError, map, of, switchMap, tap } from 'rxjs';
 
 import {
   Accommodation,
@@ -128,40 +128,61 @@ export class AccommodationPage implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => this.searchParams.set(params));
 
+    // La même page sert d'une fiche à l'autre (lien « logement suivant », retour arrière) :
+    // chaque slug repart d'un état propre, et une erreur n'arrête pas l'écoute de la route.
     this.route.paramMap
-      .pipe(switchMap((params) => this.accommodations.getBySlug(params.get('slug') ?? '')))
-      .subscribe({
-        next: (found) => {
+      .pipe(
+        map((params) => params.get('slug') ?? ''),
+        tap(() => {
+          this.accommodation.set(null);
+          this.notFound.set(false);
+          this.unavailable.set(false);
+        }),
+        switchMap((slug) =>
+          this.accommodations.getBySlug(slug).pipe(
+            map((found) => ({ found, error: null as HttpErrorResponse | null })),
+            catchError((error: HttpErrorResponse) => of({ found: null, error })),
+          ),
+        ),
+      )
+      .subscribe(({ found, error }) => {
+        if (found) {
           this.accommodation.set(found);
           this.applySeo(found);
-        },
-        error: (error: HttpErrorResponse) => {
-          // 404 : le logement n'existe pas ou n'est plus en ligne. Autre chose : l'API ne
-          // répond pas, la page doit le dire (503) au lieu de faire croire qu'il est supprimé.
-          if (404 !== error.status) {
-            this.unavailable.set(true);
-            this.httpStatus.set(503);
 
-            return;
-          }
+          return;
+        }
 
-          this.notFound.set(true);
-          this.httpStatus.set(404);
-          this.seo.apply({
-            title: $localize`:@@seo.fiche.missing-title:Logement introuvable`,
-            description: $localize`:@@seo.fiche.missing-description:Ce logement n’est plus en ligne. Voir les autres logements disponibles.`,
-            path: '/recherche',
-            noindex: true,
-          });
-        },
+        // 404 : le logement n'existe pas ou n'est plus en ligne. Autre chose : l'API ne
+        // répond pas, la page doit le dire (503) au lieu de faire croire qu'il est supprimé.
+        if (404 !== error?.status) {
+          this.unavailable.set(true);
+          this.httpStatus.set(503);
+          this.seo.noindex();
+
+          return;
+        }
+
+        this.notFound.set(true);
+        this.httpStatus.set(404);
+        this.seo.apply({
+          title: $localize`:@@seo.fiche.missing-title:Logement introuvable`,
+          description: $localize`:@@seo.fiche.missing-description:Ce logement n’est plus en ligne. Voir les autres logements disponibles.`,
+          path: '/recherche',
+          noindex: true,
+        });
       });
 
     this.route.paramMap
-      .pipe(switchMap((params) => this.accommodations.getAvailability(params.get('slug') ?? '')))
-      .subscribe({
-        next: (availability: Availability) => this.busy.set(availability.busy),
-        error: () => this.busy.set([]),
-      });
+      .pipe(
+        switchMap((params) =>
+          this.accommodations.getAvailability(params.get('slug') ?? '').pipe(
+            map((availability: Availability) => availability.busy),
+            catchError(() => of([])),
+          ),
+        ),
+      )
+      .subscribe((busy) => this.busy.set(busy));
   }
 
   private applySeo(logement: Accommodation): void {
@@ -180,7 +201,8 @@ export class AccommodationPage implements OnInit {
       .join(', ');
 
     const price = logement.priceFrom
-      ? ' ' + $localize`:@@seo.fiche.price:À partir de ${euros(logement.priceFrom)}:price: la semaine.`
+      ? ' ' +
+        $localize`:@@seo.fiche.price:À partir de ${euros(logement.priceFrom)}:price: la semaine.`
       : '';
     const name = $localize`:@@seo.fiche.title:${type}:type: ${logement.maxCapacity}:count: pers. à ${place}:place:`;
 

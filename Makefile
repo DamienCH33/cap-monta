@@ -7,7 +7,7 @@ CONSOLE  := cd $(API) && php bin/console
 API_PORT := 8001
 API_URL  := http://127.0.0.1:$(API_PORT)
 
-.PHONY: help up down api wait-api stop status web start migrate fixtures db db-test test test-web cs stan qa
+.PHONY: help up down api wait-api stop status web preview start migrate fixtures db db-test test test-web cs stan qa
 
 help: ## Liste des commandes
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -45,6 +45,9 @@ status: ## Qui tourne : serveurs Symfony, conteneurs, réponse de l'API
 
 web: ## Lance le front (http://localhost:4201), Ctrl+C pour l'arrêter
 	cd $(WEB) && npm start
+
+preview: ## Build de prod, les 4 langues (http://localhost:4201, /en, /nl, /de), Ctrl+C pour l'arrêter
+	cd $(WEB) && npm run build && NG_ALLOWED_HOSTS=localhost PORT=4201 API_URL=http://127.0.0.1:8001 node dist/web/server/server.mjs
 
 start: up migrate api web ## Tout démarrer : Docker, migrations, API + worker, front
 

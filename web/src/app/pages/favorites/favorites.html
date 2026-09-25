@@ -16,8 +16,8 @@
           >
         } @else {
           <ng-container i18n="@@favorites.lead"
-            >Les logements mis de côté sur cet appareil, sans compte. Touchez le cœur d'une
-            annonce pour l'ajouter ou la retirer.</ng-container
+            >Les logements mis de côté sur cet appareil, sans compte. Touchez le cœur d'une annonce
+            pour l'ajouter ou la retirer.</ng-container
           >
         }
       </p>
@@ -42,9 +42,9 @@
 
   @if (loading()) {
     <p class="favorites__empty" i18n="@@common.loading">Chargement…</p>
-  } @else if (items().length) {
+  } @else if (shown().length) {
     <div class="favorites__grid">
-      @for (accommodation of items(); track accommodation.slug) {
+      @for (accommodation of shown(); track accommodation.slug) {
         <cm-accommodation-card [accommodation]="accommodation" />
       }
     </div>
@@ -59,9 +59,10 @@
 
   @if (missing() > 0) {
     <p class="favorites__note">
-      <ng-container i18n="@@favorites.missing"
-        >{missing(), plural, =1 {1 logement n'est plus en ligne.} other {{{ missing() }} logements ne sont plus en ligne.}}</ng-container
-      >
+      <ng-container i18n="@@favorites.missing">{missing(), plural,
+        =1 {1 logement n'est plus en ligne.}
+        other {{{ missing() }} logements ne sont plus en ligne.}
+      }</ng-container>
     </p>
   }
 </div>

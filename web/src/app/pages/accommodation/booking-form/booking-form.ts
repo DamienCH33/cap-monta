@@ -1,5 +1,16 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, input, linkedSignal, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  linkedSignal,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, of, Subject, switchMap } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -119,7 +130,41 @@ export class BookingForm implements OnInit {
     return $localize`:@@booking.btn-send:Envoyer la demande`;
   });
 
+  /**
+   * Chaque changement de dates ou de voyageurs relance un devis. switchMap annule le précédent :
+   * une réponse ancienne, arrivée en retard, ne peut pas écraser celle des dates affichées.
+   */
+  private readonly quoteRequests = new Subject<{
+    arrival: string;
+    departure: string;
+    travellers: number;
+    pets: number;
+    adults: number;
+  } | null>();
+
+  private readonly destroyRef = inject(DestroyRef);
+
   ngOnInit(): void {
+    this.quoteRequests
+      .pipe(
+        switchMap((request) =>
+          null === request
+            ? of(null)
+            : this.booking
+                .quote(
+                  this.slug(),
+                  request.arrival,
+                  request.departure,
+                  request.travellers,
+                  request.pets,
+                  request.adults,
+                )
+                .pipe(catchError(() => of(null))),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((quote) => this.quote.set(quote));
+
     this.refreshQuote();
   }
 
@@ -138,16 +183,18 @@ export class BookingForm implements OnInit {
 
     if ('' === arrival || '' === departure || 0 === travellers) {
       this.quote.set(null);
+      this.quoteRequests.next(null);
 
       return;
     }
 
-    this.booking
-      .quote(this.slug(), arrival, departure, travellers, this.guests().pets, this.guests().adults)
-      .subscribe({
-        next: (quote) => this.quote.set(quote),
-        error: () => this.quote.set(null),
-      });
+    this.quoteRequests.next({
+      arrival,
+      departure,
+      travellers,
+      pets: this.guests().pets,
+      adults: this.guests().adults,
+    });
   }
 
   submit(): void {
@@ -155,7 +202,7 @@ export class BookingForm implements OnInit {
     const departure = this.departure();
     const guests = this.guests();
 
-    if ('' === arrival || '' === departure || 0 === travellerCount(guests)) {
+    if (this.sending() || '' === arrival || '' === departure || 0 === travellerCount(guests)) {
       return;
     }
 
