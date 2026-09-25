@@ -79,6 +79,13 @@ export class AuthService {
       .pipe(tap((owner) => this.remember(owner)));
   }
 
+  /** Ferme le compte pour de bon. La session disparaît avec lui. */
+  deleteAccount(password: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.api}/owner/me`, { body: { password }, withCredentials: true })
+      .pipe(tap(() => this.remember(null)));
+  }
+
   changePassword(currentPassword: string, newPassword: string): Observable<void> {
     return this.http.post<void>(
       `${this.api}/owner/me/password`,

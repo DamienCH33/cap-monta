@@ -9,6 +9,15 @@ framework:
         cookie_samesite: lax
         cookie_httponly: true
 
+    http_client:
+        scoped_clients:
+            # L'assistant d'import (Mistral). Au-delà, l'appel échoue et l'import est marqué
+            # « à réessayer » : mieux qu'un worker bloqué.
+            mistral.client:
+                scope: 'https://api\.mistral\.ai'
+                timeout: 30
+                max_duration: 90
+
     exceptions:
         Symfony\Component\HttpKernel\Exception\BadRequestHttpException:
             log_level: info

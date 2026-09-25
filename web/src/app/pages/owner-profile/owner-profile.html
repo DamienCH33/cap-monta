@@ -124,4 +124,48 @@
       </button>
     </form>
   </section>
+
+  <section class="auth__card profile-page__card profile-page__card--danger">
+    <h2 class="profile-page__card-title">Supprimer mon compte</h2>
+    @if (!deleteOpen()) {
+      <p class="profile-page__text">
+        Vos annonces, leurs photos, calendriers et tarifs sont effacés. Les voyageurs qui
+        attendent une réponse en reçoivent une. Impossible tant que des séjours acceptés sont à
+        venir.
+      </p>
+      <button type="button" class="profile-page__danger-link" (click)="deleteOpen.set(true)">
+        Supprimer mon compte…
+      </button>
+    } @else {
+      <form class="auth__form" [formGroup]="deletion" (ngSubmit)="deleteAccount()" novalidate>
+        @if (deleteError(); as message) {
+          <p class="auth__notice auth__notice--error" role="alert">{{ message }}</p>
+        }
+        <p class="profile-page__text">
+          <strong>C'est définitif.</strong> Confirmez avec votre mot de passe.
+        </p>
+        <label class="auth__field">
+          <span class="auth__label">Mot de passe</span>
+          <input
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            required
+          />
+        </label>
+        <div class="profile-page__actions">
+          <button
+            type="submit"
+            class="auth__submit profile-page__danger"
+            [disabled]="deleting() || deletion.invalid"
+          >
+            {{ deleting() ? 'Suppression…' : 'Supprimer définitivement' }}
+          </button>
+          <button type="button" class="profile-page__cancel" (click)="deleteOpen.set(false)">
+            Annuler
+          </button>
+        </div>
+      </form>
+    }
+  </section>
 </div>

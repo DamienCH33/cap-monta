@@ -2,3 +2,6 @@ ai:
     platform:
         mistral:
             api_key: '%env(MISTRAL_API_KEY)%'
+            # Client à délais courts (framework.yaml) : un appel bloqué ne doit pas tenir le
+            # worker, qui envoie aussi les emails et fait expirer les demandes.
+            http_client: 'mistral.client'

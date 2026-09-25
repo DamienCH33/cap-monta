@@ -128,8 +128,10 @@ final readonly class ListingImporter
             $e instanceof RateLimitExceededException => ListingImportFailure::ProviderLimit,
             $e instanceof AuthenticationException,
             $e instanceof ModelNotFoundException,
-            $e instanceof MissingModelSupportException,
-            $e instanceof BadRequestException => ListingImportFailure::Configuration,
+            $e instanceof MissingModelSupportException => ListingImportFailure::Configuration,
+            // A 400 comes from this text, not from the settings: pausing the assistant for
+            // everyone would let one pasted text switch it off (audit of 25/09).
+            $e instanceof BadRequestException,
             $e instanceof InvalidExtractionException,
             $e instanceof \JsonException,
             $e instanceof ExceedContextSizeException => ListingImportFailure::Unreadable,

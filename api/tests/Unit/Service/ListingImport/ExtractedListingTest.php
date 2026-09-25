@@ -120,4 +120,16 @@ final class ExtractedListingTest extends TestCase
 
         self::assertSame(['06 12 34 56 78', '+33 6.12.34.56.79', 'jean.dupont@exemple.fr'], $found);
     }
+
+    public function testForeignPhoneNumbersAreFoundAndMaskedToo(): void
+    {
+        $text = 'Bel : +32 470 12 34 56, NL +31 6 12345678. Loyer 450 €, +100 € le ménage, 2 + 2 personnes.';
+        $detector = new ContactDetector();
+
+        self::assertSame(['+32 470 12 34 56', '+31 6 12345678'], $detector->find($text));
+        self::assertSame(
+            'Bel : [téléphone], NL [téléphone]. Loyer 450 €, +100 € le ménage, 2 + 2 personnes.',
+            $detector->mask($text),
+        );
+    }
 }
