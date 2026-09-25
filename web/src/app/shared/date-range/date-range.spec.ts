@@ -65,6 +65,19 @@ describe('DateRange', () => {
     expect(range.departure()).toBe(start);
   });
 
+  it('reads full timestamps as days: the first night is taken, the departure day is free', () => {
+    const fixture = TestBed.createComponent(DateRange);
+    const start = plusDays(today(), 12);
+    const end = plusDays(start, 7);
+    fixture.componentRef.setInput('busy', [
+      { start: `${start}T00:00:00+02:00`, end: `${end}T00:00:00+02:00` },
+    ]);
+    const days = fixture.componentInstance.months().flatMap((month) => month.days);
+
+    expect(days.find((d) => d.iso === start)?.taken).toBe(true);
+    expect(days.find((d) => d.iso === end)?.taken).toBe(false);
+  });
+
   it('shows a single month in compact mode', () => {
     const fixture = TestBed.createComponent(DateRange);
     fixture.componentRef.setInput('compact', true);

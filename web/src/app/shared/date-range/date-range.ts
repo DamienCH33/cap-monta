@@ -111,7 +111,12 @@ export class DateRange {
   readonly arrival = model('');
   readonly departure = model('');
   /** Périodes déjà prises (fiche d'un logement) : ces nuits sont barrées et hachurées. */
-  readonly busy = input<BusyPeriod[]>([]);
+  readonly busy = input<BusyPeriod[], BusyPeriod[]>([], {
+    // Comparées comme des chaînes « AAAA-MM-JJ » : une date complète (« …T00:00:00+02:00 »)
+    // décalerait tout d'un jour.
+    transform: (periods) =>
+      periods.map((period) => ({ start: period.start.slice(0, 10), end: period.end.slice(0, 10) })),
+  });
   /** Premier jour d'arrivée possible ; aujourd'hui par défaut. */
   readonly min = input('');
   /** Un seul mois, panneau étroit : pour une colonne comme le formulaire de demande. */

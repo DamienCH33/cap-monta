@@ -11,7 +11,9 @@ use App\Entity\BookingRequest;
 use App\Service\Booking\BookingRefusedException;
 use App\Service\Booking\DuplicateBookingRequestException;
 use App\State\CreateBookingRequestProcessor;
+use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -45,10 +47,12 @@ final class BookingRequestResource
 
     #[Assert\NotNull]
     #[Assert\GreaterThan('today', message: 'Choisissez une arrivée à partir de demain : le propriétaire doit avoir le temps de répondre.')]
+    #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     public ?\DateTimeImmutable $arrival = null;
 
     #[Assert\NotNull]
     #[Assert\GreaterThan(propertyPath: 'arrival', message: 'The departure must come after the arrival.')]
+    #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     public ?\DateTimeImmutable $departure = null;
 
     #[Assert\Positive]
