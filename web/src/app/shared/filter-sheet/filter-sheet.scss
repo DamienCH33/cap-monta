@@ -83,13 +83,13 @@
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     color: var(--blue-soft);
-    background: var(--blue);
+    background: var(--ocean);
     border: none;
-    border-radius: var(--radius);
+    border-radius: 999px;
     cursor: pointer;
 
     &:hover {
-      background: var(--blue-dark);
+      background: var(--blue);
     }
   }
 }

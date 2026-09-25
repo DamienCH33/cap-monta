@@ -207,8 +207,8 @@
   min-width: 9rem;
   padding: 0.6rem 1.1rem;
   border: 1px solid var(--blue);
-  border-radius: 0.6rem;
-  background: var(--blue);
+  border-radius: 999px;
+  background: var(--ocean);
   color: #fff;
   font: inherit;
   font-weight: 600;
@@ -216,7 +216,7 @@
   transition: background 0.15s ease;
 
   &:hover:not(:disabled) {
-    background: var(--ocean);
+    background: var(--blue);
   }
 
   &--secondary {
@@ -319,14 +319,14 @@
 .owner-accommodations .owner-accommodations__add {
   display: inline-block;
   padding: 0.65rem 1.2rem;
-  border-radius: 0.6rem;
-  background: var(--blue);
+  border-radius: 999px;
+  background: var(--ocean);
   color: #fff;
   font-weight: 600;
   text-decoration: none;
 
   &:hover {
-    background: var(--ocean);
+    background: var(--blue);
     text-decoration: none;
   }
 
