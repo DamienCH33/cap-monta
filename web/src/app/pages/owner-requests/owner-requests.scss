@@ -21,7 +21,7 @@
 
   &__heading {
     margin: 0;
-    font-size: 1.75rem;
+    font-size: clamp(2rem, 3.6vw, 2.5rem);
     font-weight: 500;
   }
 
@@ -335,12 +335,12 @@
   font-weight: 500;
   color: #fff;
   cursor: pointer;
-  background: var(--blue);
+  background: var(--ocean);
   border: 1px solid var(--blue);
-  border-radius: var(--radius);
+  border-radius: 999px;
 
   &:hover:not(:disabled) {
-    background: var(--blue-dark);
+    background: var(--blue);
   }
 
   &:disabled {
