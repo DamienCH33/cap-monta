@@ -294,25 +294,6 @@
 .owner-accommodations__skeleton {
   height: 8.5rem;
   border-radius: 0.875rem;
-  background: linear-gradient(90deg, #eceae5 25%, #f5f4f0 50%, #eceae5 75%);
-  background-size: 200% 100%;
-  animation: owner-accommodations-shimmer 1.2s ease-in-out infinite;
-}
-
-@keyframes owner-accommodations-shimmer {
-  from {
-    background-position: 200% 0;
-  }
-
-  to {
-    background-position: -200% 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .owner-accommodations__skeleton {
-    animation: none;
-  }
 }
 
 // « Ajouter un logement » : l'action principale de la page, en bleu mer plein.

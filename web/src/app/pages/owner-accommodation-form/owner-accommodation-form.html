@@ -29,7 +29,7 @@
   }
 
   @if (loading()) {
-    <div class="listing-form__skeleton" aria-busy="true" aria-label="Chargement"></div>
+    <div class="listing-form__skeleton cm-shimmer" aria-busy="true" aria-label="Chargement"></div>
   } @else if (loadFailed()) {
     <p class="listing-form__alert" role="alert">
       Ce logement est introuvable. <a routerLink="/mon-espace/logements">Retour à mes logements</a>
