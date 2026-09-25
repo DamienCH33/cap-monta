@@ -1,8 +1,5 @@
-<section class="hero">
-  <picture>
-    <source media="(max-width: 640px)" srcset="/hero-mobile.png" />
-    <img src="/hero-desktop.png" alt="La plage et la dune de Montalivet" fetchpriority="high" />
-  </picture>
+<section class="hero" [class.hero--photo]="heroPhoto">
+  <cm-site-photo class="hero__photo" slot="hero" sizes="100vw" [eager]="true" />
   <div class="hero__veil"></div>
 
   <div class="container hero__text">
@@ -13,6 +10,20 @@
       réponse du propriétaire sous 48 heures.
     </p>
   </div>
+
+  @if (heroPhoto; as photo) {
+    <p class="hero__credit">
+      Photo :
+      @if (photo.source) {
+        <a [href]="photo.source" target="_blank" rel="noopener">{{ photo.credit }}</a>
+      } @else {
+        {{ photo.credit }}
+      }
+      @if (photo.license) {
+        · {{ photo.license }}
+      }
+    </p>
+  }
 </section>
 
 <div class="container">
@@ -46,7 +57,12 @@
     <div class="zones">
       @for (zone of zones(); track zone.key) {
         <article class="zone">
-          <cm-scene class="zone__scene" [kind]="zone.key" />
+          <cm-site-photo
+            class="zone__photo"
+            [slot]="zone.key"
+            sizes="(max-width: 719px) 100vw, 400px"
+            [decorative]="true"
+          />
           <div class="zone__body">
             <h3 class="zone__title">{{ zone.title }}</h3>
             <p class="zone__meta">
@@ -97,8 +113,13 @@
 </div>
 
 <section class="owner">
-  <div class="container owner__inner">
-    <cm-scene class="owner__scene" kind="owner" />
+  <div class="container owner__inner" [class.owner__inner--photo]="ownerPhoto">
+    <cm-site-photo
+      class="owner__photo"
+      slot="owner"
+      sizes="(max-width: 719px) 100vw, 560px"
+      [decorative]="true"
+    />
     <div>
       <h2 class="owner__title">Vous louez votre logement au CHM ou à Euronat ?</h2>
       <ol class="owner__steps">

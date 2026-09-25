@@ -3,6 +3,10 @@ import { inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
 import { environment } from '../../../environments/environment';
+import { SITE_PHOTOS } from '../site-photos';
+
+/** Aperçu des liens partagés par défaut : la photo d'accueil recadrée par `npm run photos`. */
+const DEFAULT_IMAGE = SITE_PHOTOS.hero ? '/photos/site/partage.jpg' : null;
 
 export interface SeoTags {
   /** Titre de l'onglet et des partages. « | Cap Monta » est ajouté automatiquement. */
@@ -10,7 +14,7 @@ export interface SeoTags {
   description: string;
   /** Chemin canonique, sans paramètres de requête. Commence par « / ». */
   path: string;
-  /** Chemin d'une image du site (« /hero-desktop.png ») ou adresse complète d'une photo de logement. */
+  /** Chemin d'une image du site (« /photos/site/partage.jpg ») ou adresse complète d'une photo de logement. */
   image?: string;
   /** Vrai pour une page qui ne doit pas être indexée : erreur, résultat vide, espace privé. */
   noindex?: boolean;
@@ -31,9 +35,9 @@ export class SeoService {
   apply(tags: SeoTags): void {
     const url = `${environment.siteUrl}${tags.path}`;
     // Une photo de logement a déjà son adresse complète (stockage des photos) ; les images du site, non.
-    const image = /^https?:\/\//.test(tags.image ?? '')
-      ? (tags.image as string)
-      : `${environment.siteUrl}${tags.image ?? '/hero-desktop.png'}`;
+    const path = tags.image ?? DEFAULT_IMAGE;
+    const image =
+      null === path ? null : /^https?:\/\//.test(path) ? path : `${environment.siteUrl}${path}`;
     const title = `${tags.title} | Cap Monta`;
 
     this.titleService.setTitle(title);
@@ -51,7 +55,11 @@ export class SeoService {
     this.meta.updateTag({ property: 'og:title', content: title });
     this.meta.updateTag({ property: 'og:description', content: tags.description });
     this.meta.updateTag({ property: 'og:url', content: url });
-    this.meta.updateTag({ property: 'og:image', content: image });
+    if (null === image) {
+      this.meta.removeTag('property="og:image"');
+    } else {
+      this.meta.updateTag({ property: 'og:image', content: image });
+    }
 
     this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
 

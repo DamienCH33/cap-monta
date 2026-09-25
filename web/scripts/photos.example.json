@@ -1,0 +1,30 @@
+{
+  "hero": {
+    "file": "plage.jpg",
+    "alt": "La plage de Montalivet et la dune, vues du haut de l'accès",
+    "focus": "center 60%",
+    "credit": "Prénom Nom",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Exemple.jpg"
+  },
+  "dunes": {
+    "file": "dune.jpg",
+    "alt": "La dune et ses ganivelles",
+    "credit": "Damien Chauveau"
+  },
+  "central": {
+    "file": "allee.jpg",
+    "alt": "Une allée du domaine sous les pins",
+    "credit": "Damien Chauveau"
+  },
+  "roadside": {
+    "file": "pinede.jpg",
+    "alt": "La pinède côté avenue",
+    "credit": "Damien Chauveau"
+  },
+  "owner": {
+    "file": "terrasse.jpg",
+    "alt": "Terrasse d'un bungalow sous les pins",
+    "credit": "Damien Chauveau"
+  }
+}

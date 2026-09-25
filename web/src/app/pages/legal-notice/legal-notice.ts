@@ -1,6 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 
+import { SitePhotoSlot } from '../../core/models/site-photo';
 import { SeoService } from '../../core/services/seo';
+import { SITE_PHOTOS } from '../../core/site-photos';
 
 @Component({
   selector: 'cm-legal-notice',
@@ -10,6 +12,11 @@ import { SeoService } from '../../core/services/seo';
 })
 export class LegalNotice implements OnInit {
   private readonly seo = inject(SeoService);
+
+  readonly photoCredits = (Object.keys(SITE_PHOTOS) as SitePhotoSlot[]).map((slot) => ({
+    slot,
+    ...SITE_PHOTOS[slot]!,
+  }));
 
   ngOnInit(): void {
     this.seo.apply({

@@ -3,14 +3,13 @@ import { Component, input, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DISTRICT_AREAS, DistrictArea } from '../../core/models/district';
 import { Icon } from '../icon/icon';
-import { Scene } from '../scene/scene';
 import { IconName } from '../icon/icons';
 
 import { Accommodation, typeLabel } from '../../core/models/accommodation';
 
 @Component({
   selector: 'cm-accommodation-card',
-  imports: [DatePipe, RouterLink, Icon, Scene],
+  imports: [DatePipe, RouterLink, Icon],
   templateUrl: './accommodation-card.html',
   styleUrl: './accommodation-card.scss',
 })

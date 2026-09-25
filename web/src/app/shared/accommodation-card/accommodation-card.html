@@ -11,7 +11,7 @@
         decoding="async"
       />
     } @else {
-      <cm-scene class="card__img" [kind]="accommodation().type" />
+      <span class="card__img card__img--empty"><cm-icon name="photo" />Photos à venir</span>
     }
     @if (accommodation().calendarUpToDate) {
       <span class="card__badge"><i aria-hidden="true"></i>Calendrier à jour</span>

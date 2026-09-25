@@ -9,20 +9,28 @@
   position: relative;
   display: grid;
   align-items: center;
-  min-height: 500px;
+  min-height: 520px;
   color: #fff;
+  // Sans photo (avant `npm run photos`) : un aplat océan, jamais une image floue.
+  background: linear-gradient(160deg, var(--ocean) 0%, var(--blue) 100%);
 
-  picture,
-  img {
+  &__photo {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
   }
 
-  img {
-    object-fit: cover;
-    object-position: center 60%;
+  &__credit {
+    position: absolute;
+    right: 12px;
+    bottom: 50px;
+    margin: 0;
+    font-size: 11px;
+    color: rgb(255 255 255 / 80%);
+    text-shadow: 0 1px 4px rgb(8 30 44 / 60%);
+
+    a {
+      color: inherit;
+    }
   }
 
   &__veil {
@@ -160,8 +168,9 @@
   background: var(--surface-2);
   box-shadow: 0 0 0 1px var(--border);
 
-  &__scene {
-    aspect-ratio: 16 / 9;
+  &__photo {
+    aspect-ratio: 3 / 2;
+    background: var(--blue-soft);
   }
 
   &__body {
@@ -221,13 +230,19 @@
 
   &__inner {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 40px;
-    align-items: center;
-    padding-block: 48px;
+    max-width: 760px;
+    padding-block: 56px;
+
+    &--photo {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 48px;
+      align-items: center;
+      max-width: none;
+    }
   }
 
-  &__scene {
+  &__photo {
     aspect-ratio: 4 / 3;
     overflow: hidden;
     border-radius: 14px;
@@ -296,7 +311,11 @@
 
 @media (max-width: 640px) {
   .hero {
-    min-height: 420px;
+    min-height: 440px;
+  }
+
+  .hero__credit {
+    bottom: 58px;
   }
 
   .home__search {
