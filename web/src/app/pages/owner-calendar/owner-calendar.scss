@@ -155,8 +155,9 @@
     background: var(--blue);
   }
 
+  // Importé : à pois. Trois motifs différents (plein, hachures, pois), jamais la couleur seule.
   &--import {
-    background: var(--taken);
+    background: radial-gradient(circle, #6b7a81 1.3px, transparent 1.6px) 0 0 / 6px 6px, var(--surface-2);
   }
 
   // La sélection en cours : un contour, pour rester lisible par-dessus une période prise.
@@ -219,7 +220,7 @@
     }
 
     &--import {
-      background: var(--taken);
+      background: radial-gradient(circle, #6b7a81 1.3px, transparent 1.6px) 0 0 / 6px 6px, var(--surface-2);
     }
   }
 }
