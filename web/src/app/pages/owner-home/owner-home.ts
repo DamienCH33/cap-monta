@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { typeLabel } from '../../core/models/accommodation';
 import {
@@ -32,7 +32,6 @@ interface Stat {
 })
 export class OwnerHome {
   private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
 
   readonly owner = this.auth.currentOwner;
 
@@ -144,9 +143,5 @@ export class OwnerHome {
         // Les chiffres restent à « – » : le lien vers la liste fonctionne quand même.
         error: () => undefined,
       });
-  }
-
-  logout(): void {
-    this.auth.logout().subscribe(() => void this.router.navigateByUrl('/'));
   }
 }
