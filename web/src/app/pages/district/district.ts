@@ -12,10 +12,12 @@ import { SeoService } from '../../core/services/seo';
 import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
 import { Pagination } from '../../shared/pagination/pagination';
 import { HttpStatus } from '../../core/services/http-status';
+import { SITE_PHOTOS } from '../../core/site-photos';
+import { SitePhoto } from '../../shared/site-photo/site-photo';
 
 @Component({
   selector: 'cm-district',
-  imports: [AccommodationCard, Pagination, RouterLink, DecimalPipe],
+  imports: [AccommodationCard, Pagination, RouterLink, DecimalPipe, SitePhoto],
   templateUrl: './district.html',
   styleUrl: './district.scss',
 })
@@ -38,6 +40,13 @@ export class DistrictPage implements OnInit {
   readonly area = computed(
     () => DISTRICT_AREAS.find((area) => area.key === this.district()?.area) ?? null,
   );
+
+  /** La photo de la zone (dunes, cœur du domaine, avenue), si elle a été ajoutée. */
+  readonly areaPhoto = computed(() => {
+    const zone = this.area();
+
+    return zone && SITE_PHOTOS[zone.key] ? zone.key : null;
+  });
 
   /** Des quartiers comparables, pas mitoyens : le plan ne nous donne pas l'adjacence réelle. */
   readonly neighbours = computed(() => {
