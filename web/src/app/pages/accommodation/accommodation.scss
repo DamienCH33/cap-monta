@@ -25,7 +25,22 @@
 }
 
 .head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
   margin: 28px 0 14px;
+
+  &__title,
+  &__facts {
+    grid-column: 1;
+  }
+
+  &__fav {
+    justify-self: end;
+    grid-row: 1;
+    grid-column: 2;
+    align-self: start;
+  }
 
   &__title {
     margin: 0;

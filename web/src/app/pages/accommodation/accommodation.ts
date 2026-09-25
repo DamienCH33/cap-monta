@@ -19,6 +19,7 @@ import { Calendar } from '../../shared/calendar/calendar';
 import { BookingForm } from './booking-form/booking-form';
 import { environment } from '../../../environments/environment';
 import { guestsFromQuery, travellerCount } from '../../core/models/guests';
+import { FavoriteButton } from '../../shared/favorite-button/favorite-button';
 import { Icon } from '../../shared/icon/icon';
 import { NavigationOrigin } from '../../core/services/navigation-origin';
 import { AuthService } from '../../core/services/auth';
@@ -31,6 +32,7 @@ import { ReportListing } from './report-listing/report-listing';
   imports: [
     Icon,
     DatePipe,
+    FavoriteButton,
     DecimalPipe,
     RouterLink,
     Calendar,

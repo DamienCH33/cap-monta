@@ -13,6 +13,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'demande/**', renderMode: RenderMode.Client },
   // Liste lue dans le navigateur (demandes retenues sur cet appareil) : rien à rendre côté serveur.
   { path: 'mes-demandes', renderMode: RenderMode.Client },
+  { path: 'favoris', renderMode: RenderMode.Client },
 
   // Tout le reste est rendu côté serveur : c'est ce qui rend le site indexable.
   { path: '**', renderMode: RenderMode.Server },

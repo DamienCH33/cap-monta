@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, input, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DISTRICT_AREAS, DistrictArea } from '../../core/models/district';
+import { FavoriteButton } from '../favorite-button/favorite-button';
 import { Icon } from '../icon/icon';
 import { IconName } from '../icon/icons';
 
@@ -9,7 +10,7 @@ import { Accommodation, typeLabel } from '../../core/models/accommodation';
 
 @Component({
   selector: 'cm-accommodation-card',
-  imports: [DatePipe, RouterLink, Icon],
+  imports: [DatePipe, RouterLink, Icon, FavoriteButton],
   templateUrl: './accommodation-card.html',
   styleUrl: './accommodation-card.scss',
 })

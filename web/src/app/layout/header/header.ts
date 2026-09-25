@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth';
+import { Favorites } from '../../core/services/favorites';
 import { GuestRequests } from '../../core/services/guest-requests';
 import { Icon } from '../../shared/icon/icon';
 
@@ -22,6 +23,7 @@ export class Header {
   readonly sessionChecked = this.auth.sessionChecked;
   /** Demandes envoyées depuis ce navigateur : le lien « Mes demandes » apparaît. */
   readonly guestRequests = inject(GuestRequests).list;
+  readonly favoriteCount = inject(Favorites).count;
 
   /** Sur téléphone, les liens sont repliés derrière le bouton « Menu ». */
   readonly menuOpen = signal(false);
