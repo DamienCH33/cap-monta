@@ -14,6 +14,16 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: BookingRequestRepository::class)]
 #[ORM\Index(name: 'idx_booking_request_pending', columns: ['status', 'expires_at'])]
+// « Retrouver mes demandes » cherche par email.
+#[ORM\Index(name: 'idx_booking_request_guest_email', columns: ['guest_email'])]
+// Deux envois simultanés du même formulaire passaient tous deux le contrôle fait en PHP
+// (hasPendingDuplicate) : la base refuse le second.
+#[ORM\UniqueConstraint(
+    name: 'uniq_booking_request_pending',
+    columns: ['accommodation_id', 'guest_email', 'start_date', 'end_date'],
+    // Écrit comme PostgreSQL le relit, sinon Doctrine croit l'index différent à chaque diff.
+    options: ['where' => "((status)::text = 'pending'::text)"],
+)]
 class BookingRequest
 {
     /**
@@ -125,7 +135,8 @@ class BookingRequest
         $this->endDate = $endDate;
         $this->adults = $adults;
         $this->guestName = $guestName;
-        $this->guestEmail = $guestEmail;
+        // Une adresse n'a pas de casse : « Anna@… » et « anna@… » sont la même personne.
+        $this->guestEmail = mb_strtolower(trim($guestEmail));
         $this->trackingToken = bin2hex(random_bytes(24));
     }
 

@@ -322,7 +322,7 @@ final class BookingRequestApiTest extends ApiTestCase
             'arrival' => '2027-07-01',
             'departure' => '2027-07-08',
             'adults' => 2,
-            'guestName' => "Jean\n\nhttps://evil.example/connexion",
+            'guestName' => 'Jean Dupont',
             'guestEmail' => 'damien@example.com',
             'message' => "Bonjour.\n\nhttps://evil.example/mon-espace/demandes\n\nPrix : 0 €",
         ]);
@@ -333,6 +333,71 @@ final class BookingRequestApiTest extends ApiTestCase
         $html = (string) $toOwner->getHtmlBody();
         self::assertStringNotContainsString('href="https://evil.example', $html);
         self::assertStringContainsString('https://evil.example/mon-espace/demandes', $html);
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function namesThatAreNotNames(): iterable
+    {
+        yield 'lien après un retour à la ligne' => ["Jean\n\nhttps://evil.example/connexion"];
+        yield 'adresse sans protocole' => ['Jean www.evil.example'];
+        yield 'balise' => ['<b>Jean</b>'];
+    }
+
+    /**
+     * The name is repeated in « Bonjour … » of the emails: a link there would become a button
+     * sent from the site's own address (phishing).
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('namesThatAreNotNames')]
+    public function testTheGuestNameIsANameNotALink(string $name): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+
+        $body = $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
+            'adults' => 2,
+            'guestName' => $name,
+            'guestEmail' => 'damien@example.com',
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame('guestName', $body['violations'][0]['propertyPath'] ?? null);
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>, string}>
+     */
+    public static function absurdRequests(): iterable
+    {
+        yield 'arrivée dans 2000 ans' => [['arrival' => '9998-01-03', 'departure' => '9998-01-10'], 'arrival'];
+        yield 'séjour de 200 nuits' => [['arrival' => '2027-05-01', 'departure' => '2027-11-17'], 'departure'];
+        yield 'adultes par milliards' => [['adults' => 4611686018427387904], 'adults'];
+    }
+
+    /**
+     * Found by the audit: these used to be accepted (201), or to overflow into a 500.
+     *
+     * @param array<string, mixed> $override
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('absurdRequests')]
+    public function testAbsurdRequestsAreRefusedNotStored(array $override, string $field): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+
+        $body = $this->post($override + [
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
+            'adults' => 2,
+            'guestName' => 'Jean Dupont',
+            'guestEmail' => 'damien@example.com',
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertContains($field, array_column($body['violations'] ?? [], 'propertyPath'));
     }
 
     private function recover(string $email): void

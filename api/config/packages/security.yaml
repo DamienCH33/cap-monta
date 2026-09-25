@@ -4,9 +4,9 @@ security:
 
     providers:
         app_user_provider:
+            # Sans « property » : UserRepository::loadUserByIdentifier (casse, temps constant).
             entity:
                 class: App\Entity\User
-                property: email
 
     firewalls:
         dev:

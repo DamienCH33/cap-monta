@@ -42,27 +42,6 @@ class AccommodationRepository extends ServiceEntityRepository
     }
 
     /**
-     * Kept for existing callers: a search on dates, with at most one district.
-     *
-     * @return list<Accommodation>
-     */
-    public function searchAvailable(
-        \DateTimeImmutable $arrival,
-        \DateTimeImmutable $departure,
-        int $guests = 1,
-        ?Resort $resort = null,
-        ?string $district = null,
-    ): array {
-        return $this->search(
-            arrival: $arrival,
-            departure: $departure,
-            guests: $guests,
-            resort: $resort,
-            districts: null === $district ? [] : [$district],
-        );
-    }
-
-    /**
      * The public search. Dates are optional; every list filter means "any of",
      * except amenities, which the accommodation must all have.
      *
@@ -84,7 +63,11 @@ class AccommodationRepository extends ServiceEntityRepository
         int $pets = 0,
     ): array {
         // Les deux règles toujours vraies : assez grand, et publié.
+        // Le quartier est affiché sur chaque carte : chargé dans la même requête, pas un
+        // appel par carte (audit du 25/09 : jusqu'à 21 requêtes pour une page).
         $qb = $this->createQueryBuilder('a')
+            ->leftJoin('a.district', 'd')
+            ->addSelect('d')
             ->andWhere('a.maxCapacity >= :guests')
             ->andWhere('a.status = :published')
             ->setParameter('guests', $guests)
@@ -110,8 +93,7 @@ class AccommodationRepository extends ServiceEntityRepository
         }
 
         if ([] !== $districts) {
-            $qb->innerJoin('a.district', 'd')
-                ->andWhere('d.slug IN (:districtSlugs) OR d.name IN (:districtNames)')
+            $qb->andWhere('d.slug IN (:districtSlugs) OR d.name IN (:districtNames)')
                 ->setParameter('districtSlugs', $districts, ArrayParameterType::STRING)
                 ->setParameter('districtNames', $districts, ArrayParameterType::STRING);
         }
@@ -315,6 +297,9 @@ class AccommodationRepository extends ServiceEntityRepository
         $result = $this->createQueryBuilder('a')
             ->leftJoin('a.district', 'd')
             ->addSelect('d')
+            // La couverture de chaque logement : dans la même requête (sinon une par logement).
+            ->leftJoin('a.photos', 'p')
+            ->addSelect('p')
             ->andWhere('a.owner = :owner')
             ->setParameter('owner', $owner->getId(), UuidType::NAME)
             ->orderBy('a.slug', 'ASC')

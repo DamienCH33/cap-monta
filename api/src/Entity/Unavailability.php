@@ -13,7 +13,12 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UnavailabilityRepository::class)]
-#[ORM\Index(name: 'idx_unavailability_lookup', columns: ['accommodation_id', 'start_date'])]
+// L'index de la contrainte d'exclusion (EXCLUDE USING gist, créée à la main dans les
+// migrations, ADR 010). Déclaré ici pour que Doctrine ne propose plus de le supprimer.
+#[ORM\Index(name: 'unavailability_no_overlap', columns: ['accommodation_id'])]
+// La recherche cherche, par logement, ce qui se termine après l'arrivée et commence avant le
+// départ : (logement, fin, début) sert ce filtre sans lire la table (audit du 25/09).
+#[ORM\Index(name: 'idx_unavailability_lookup', columns: ['accommodation_id', 'end_date', 'start_date'])]
 class Unavailability
 {
     #[ORM\Id]

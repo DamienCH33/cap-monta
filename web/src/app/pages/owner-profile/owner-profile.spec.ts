@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth';
-import { FRENCH_PHONE, OwnerProfile } from './owner-profile';
+import { PHONE, OwnerProfile } from './owner-profile';
 
 describe('OwnerProfile', () => {
   const api = `${environment.apiUrl}/api`;
@@ -32,11 +32,17 @@ describe('OwnerProfile', () => {
   afterEach(() => http.verify());
 
   it('accepts the phone numbers the API accepts', () => {
-    for (const phone of ['06 12 34 56 78', '0612345678', '+33 6 12 34 56 78', '05.56.12.34.56']) {
-      expect(FRENCH_PHONE.test(phone)).toBe(true);
+    for (const phone of [
+      '06 12 34 56 78',
+      '0612345678',
+      '+33 6 12 34 56 78',
+      '05.56.12.34.56',
+      '+44 20 7946 0958',
+    ]) {
+      expect(PHONE.test(phone)).toBe(true);
     }
-    for (const phone of ['12', '06 12 34 56', '+44 20 7946 0958']) {
-      expect(FRENCH_PHONE.test(phone)).toBe(false);
+    for (const phone of ['12', '06 12 34 56', '0151 23456789', '+31 six']) {
+      expect(PHONE.test(phone)).toBe(false);
     }
   });
 
