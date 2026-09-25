@@ -9,7 +9,8 @@ export interface SitePhoto {
   alt: string;
   /** Valeur CSS object-position : la partie de la photo à garder quand elle est recadrée. */
   focus: string;
-  credit: string;
+  /** Auteur, affiché dans les crédits des mentions légales ; facultatif. */
+  credit: string | null;
   license: string | null;
   source: string | null;
 }

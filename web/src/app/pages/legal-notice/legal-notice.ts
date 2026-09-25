@@ -13,10 +13,9 @@ import { SITE_PHOTOS } from '../../core/site-photos';
 export class LegalNotice implements OnInit {
   private readonly seo = inject(SeoService);
 
-  readonly photoCredits = (Object.keys(SITE_PHOTOS) as SitePhotoSlot[]).map((slot) => ({
-    slot,
-    ...SITE_PHOTOS[slot]!,
-  }));
+  readonly photoCredits = (Object.keys(SITE_PHOTOS) as SitePhotoSlot[])
+    .map((slot) => ({ slot, ...SITE_PHOTOS[slot]! }))
+    .filter((photo) => null !== photo.credit);
 
   ngOnInit(): void {
     this.seo.apply({
