@@ -9,7 +9,7 @@
   position: relative;
   display: grid;
   align-items: center;
-  min-height: 520px;
+  min-height: min(76vh, 700px); // plus haut = photo moins recadrée
   color: #fff;
   // Sans photo (avant `npm run photos`) : un aplat océan, jamais une image floue.
   background: linear-gradient(160deg, var(--ocean) 0%, var(--blue) 100%);
