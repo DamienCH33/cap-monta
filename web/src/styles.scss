@@ -236,8 +236,10 @@ h2 {
     padding-top: 3.5rem;
   }
 
+  // Toutes les étapes sur une ligne, qu'il y en ait 3 ou 4 : jamais une carte seule en dessous.
   .steps {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
   }
 
   .steps__item {

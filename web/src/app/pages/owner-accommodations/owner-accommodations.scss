@@ -140,7 +140,7 @@
     background: #fcfbf9;
   }
 
-  @media (max-width: 36rem) {
+  @media (max-width: 56rem) {
     grid-template-columns: 1fr;
     padding-inline: 1.25rem;
   }
@@ -188,7 +188,7 @@
   align-items: center;
   justify-content: flex-end;
 
-  @media (max-width: 36rem) {
+  @media (max-width: 56rem) {
     justify-content: stretch;
     margin-top: 0.75rem;
 

@@ -29,7 +29,7 @@ import { SITE_PHOTOS } from '../../core/site-photos';
     }
   `,
   styles: [
-    ':host{display:block}picture,img{display:block;width:100%;height:100%}img{object-fit:cover}',
+    ':host{display:block}:host:empty{display:none}picture,img{display:block;width:100%;height:100%}img{object-fit:cover}',
   ],
 })
 export class SitePhoto {
