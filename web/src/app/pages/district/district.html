@@ -51,7 +51,7 @@
       </div>
 
       @if (quartier.priceMin && quartier.priceMax) {
-        <div class="stat">
+        <div class="stat stat--wide">
           <span class="stat__value">
             {{ quartier.priceMin / 100 | number: '1.0-0' }} –
             {{ quartier.priceMax / 100 | number: '1.0-0' }} €
