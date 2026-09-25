@@ -10,20 +10,6 @@
       réponse du propriétaire sous 48 heures.
     </p>
   </div>
-
-  @if (heroPhoto; as photo) {
-    <p class="hero__credit">
-      Photo :
-      @if (photo.source) {
-        <a [href]="photo.source" target="_blank" rel="noopener">{{ photo.credit }}</a>
-      } @else {
-        {{ photo.credit }}
-      }
-      @if (photo.license) {
-        · {{ photo.license }}
-      }
-    </p>
-  }
 </section>
 
 <div class="container">

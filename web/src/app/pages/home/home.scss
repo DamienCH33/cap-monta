@@ -19,20 +19,6 @@
     inset: 0;
   }
 
-  &__credit {
-    position: absolute;
-    right: 12px;
-    bottom: 50px;
-    margin: 0;
-    font-size: 11px;
-    color: rgb(255 255 255 / 80%);
-    text-shadow: 0 1px 4px rgb(8 30 44 / 60%);
-
-    a {
-      color: inherit;
-    }
-  }
-
   &__veil {
     position: absolute;
     inset: 0;
@@ -312,10 +298,6 @@
 @media (max-width: 640px) {
   .hero {
     min-height: 440px;
-  }
-
-  .hero__credit {
-    bottom: 58px;
   }
 
   .home__search {

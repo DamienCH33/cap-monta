@@ -67,7 +67,7 @@ if (!config.hero) {
 // Tout vérifier avant d'écrire quoi que ce soit.
 const jobs = [];
 for (const [slot, entry] of Object.entries(config)) {
-  for (const field of ['file', 'alt', 'credit']) {
+  for (const field of ['file', 'alt']) {
     if (typeof entry[field] !== 'string' || '' === entry[field].trim()) {
       fail(`"${slot}" : le champ "${field}" est obligatoire (voir photos.example.json).`);
     }
@@ -122,7 +122,7 @@ for (const { slot, entry, data, width, height } of jobs) {
     ratio: Math.round((width / height) * 1000) / 1000,
     alt: entry.alt.trim(),
     focus: entry.focus ?? 'center',
-    credit: entry.credit.trim(),
+    credit: entry.credit?.trim() || null,
     license: entry.license?.trim() || null,
     source: entry.source?.trim() || null,
   };
