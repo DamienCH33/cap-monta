@@ -10,6 +10,8 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\QueryParameter;
 use App\Service\Booking\Quote;
 use App\State\QuoteProvider;
+use Symfony\Component\Serializer\Attribute\Context;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 /**
  * Ce que coûterait un séjour, avant toute demande.
@@ -52,7 +54,9 @@ final class QuoteResource
     public function __construct(
         #[ApiProperty(identifier: true)]
         public string $slug,
+        #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
         public \DateTimeImmutable $arrival,
+        #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
         public \DateTimeImmutable $departure,
         public int $nights,
         public int $guests,

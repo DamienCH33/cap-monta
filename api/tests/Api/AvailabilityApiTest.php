@@ -44,8 +44,8 @@ final class AvailabilityApiTest extends WebTestCase
 
         $busy = $payload['busy'] ?? [];
         self::assertCount(1, $busy);
-        self::assertStringStartsWith($start->format('Y-m-d'), (string) ($busy[0]['start'] ?? ''));
-        self::assertStringStartsWith($end->format('Y-m-d'), (string) ($busy[0]['end'] ?? ''));
+        self::assertSame($start->format('Y-m-d'), $busy[0]['start'] ?? null);
+        self::assertSame($end->format('Y-m-d'), $busy[0]['end'] ?? null);
         // Why a date is taken is the owner's business, not the visitor's.
         self::assertArrayNotHasKey('source', $busy[0]);
     }
@@ -61,7 +61,7 @@ final class AvailabilityApiTest extends WebTestCase
         $busy = $this->request('/api/accommodations/mobile-home-dunes/availability')['busy'] ?? [];
 
         self::assertCount(1, $busy);
-        self::assertStringStartsWith($start->modify('+10 days')->format('Y-m-d'), (string) ($busy[0]['end'] ?? ''));
+        self::assertSame($start->modify('+10 days')->format('Y-m-d'), $busy[0]['end'] ?? null);
     }
 
     public function testAnAccommodationWithNothingBookedHasAnEmptyCalendar(): void

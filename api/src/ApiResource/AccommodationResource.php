@@ -12,6 +12,8 @@ use ApiPlatform\Metadata\QueryParameter;
 use App\Entity\Accommodation;
 use App\State\AccommodationCollectionProvider;
 use App\State\AccommodationItemProvider;
+use Symfony\Component\Serializer\Attribute\Context;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 /**
  * What the public API exposes of an accommodation.
@@ -102,6 +104,7 @@ final class AccommodationResource
         public array $amenities,
         public string $description,
         public ?int $priceFrom,
+        #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
         public array $availability = [],
         public array $pricePeriods = [],
         public ?string $districtSlug = null,
