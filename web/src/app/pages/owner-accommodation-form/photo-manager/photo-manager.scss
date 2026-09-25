@@ -1,14 +1,5 @@
-// Mêmes couleurs que le formulaire. À relier aux variables globales de la charte.
+// Couleurs : les jetons globaux de styles.scss.
 :host {
-  --pm-sea: #0b5f8a;
-  --pm-sea-dark: #084a6b;
-  --pm-sea-soft: #eef5f9;
-  --pm-pine: #2f6b4f;
-  --pm-ink: #1c2530;
-  --pm-muted: #5b6672;
-  --pm-line: rgb(0 0 0 / 12%);
-  --pm-error: #a3261d;
-
   display: block;
 }
 
@@ -26,7 +17,7 @@
   border: 1px solid rgb(47 107 79 / 30%);
   border-radius: 0.6rem;
   background: #f1f7f3;
-  color: var(--pm-ink);
+  color: var(--text-primary);
   font-size: 0.925rem;
   line-height: 1.45;
   cursor: pointer;
@@ -36,7 +27,7 @@
     width: 1.15rem;
     height: 1.15rem;
     margin-top: 0.15rem;
-    accent-color: var(--pm-pine);
+    accent-color: var(--pine);
   }
 
   strong {
@@ -51,32 +42,32 @@
   gap: 0.35rem;
   justify-items: center;
   padding: 1.75rem 1rem;
-  border: 2px dashed rgb(11 95 138 / 35%);
+  border: 2px dashed rgb(29 111 151 / 35%);
   border-radius: 0.875rem;
-  background: var(--pm-sea-soft);
+  background: var(--blue-soft);
   text-align: center;
   transition:
     border-color 0.15s ease,
     background 0.15s ease;
 
   &--active {
-    border-color: var(--pm-sea);
+    border-color: var(--blue);
     background: #dcebf4;
   }
 
   &--disabled {
-    border-color: var(--pm-line);
+    border-color: var(--border);
     background: #f7f6f3;
-    color: var(--pm-muted);
+    color: var(--text-secondary);
   }
 }
 
 .photos__drop-icon {
-  color: var(--pm-sea);
+  color: var(--blue);
   font-size: 2rem;
 
   .photos__drop--disabled & {
-    color: var(--pm-muted);
+    color: var(--text-secondary);
   }
 }
 
@@ -87,14 +78,14 @@
 
 .photos__drop-hint {
   margin: 0;
-  color: var(--pm-muted);
+  color: var(--text-secondary);
   font-size: 0.85rem;
 }
 
 // Le vrai champ fichier est invisible : c'est l'étiquette qui fait office de bouton.
 .photos__pick {
   position: relative;
-  color: var(--pm-sea);
+  color: var(--blue);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 0.2em;
@@ -109,13 +100,13 @@
   }
 
   &:has(input:focus-visible) {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 3px;
     border-radius: 0.25rem;
   }
 
   &--disabled {
-    color: var(--pm-muted);
+    color: var(--text-secondary);
     cursor: not-allowed;
   }
 }
@@ -125,7 +116,7 @@
   padding: 0.7rem 0.9rem;
   border-radius: 0.6rem;
   background: #fbeceb;
-  color: var(--pm-error);
+  color: var(--danger-text);
   font-size: 0.9rem;
 }
 
@@ -136,7 +127,7 @@
 }
 
 .photos__tip {
-  color: var(--pm-muted);
+  color: var(--text-secondary);
   font-weight: 400;
 }
 
@@ -153,13 +144,13 @@
   position: relative;
   display: grid;
   overflow: hidden;
-  border: 1px solid var(--pm-line);
+  border: 1px solid var(--border);
   border-radius: 0.6rem;
   background: #fff;
 
   &:first-child {
-    border-color: var(--pm-sea);
-    box-shadow: 0 0 0 2px rgb(11 95 138 / 20%);
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px rgb(29 111 151 / 20%);
   }
 
   &--failed {
@@ -187,7 +178,7 @@
   left: 0.5rem;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
-  background: var(--pm-sea);
+  background: var(--blue);
   color: #fff;
   font-size: 0.75rem;
   font-weight: 600;
@@ -215,14 +206,14 @@
   border: 0;
   border-radius: 0.4rem;
   background: transparent;
-  color: var(--pm-ink);
+  color: var(--text-primary);
   font: inherit;
   font-size: 0.8rem;
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    background: var(--pm-sea-soft);
-    color: var(--pm-sea-dark);
+    background: var(--blue-soft);
+    color: var(--ocean);
   }
 
   &:disabled {
@@ -231,18 +222,18 @@
   }
 
   &:focus-visible {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 1px;
   }
 
   &--wide {
-    color: var(--pm-sea);
+    color: var(--blue);
     font-weight: 600;
   }
 
   &--danger:hover:not(:disabled) {
     background: #fbeceb;
-    color: var(--pm-error);
+    color: var(--danger-text);
   }
 }
 
@@ -265,7 +256,7 @@
   }
 
   &--error {
-    color: var(--pm-error);
+    color: var(--danger-text);
   }
 }
 
@@ -290,20 +281,20 @@
 }
 
 .photos__confirm-yes {
-  border: 1px solid var(--pm-sea);
-  background: var(--pm-sea);
+  border: 1px solid var(--blue);
+  background: var(--blue);
   color: #fff;
 
   .photos__overlay:not(.photos__overlay--error) & {
-    border-color: var(--pm-error);
-    background: var(--pm-error);
+    border-color: var(--danger-text);
+    background: var(--danger-text);
   }
 }
 
 .photos__confirm-no {
-  border: 1px solid var(--pm-line);
+  border: 1px solid var(--border);
   background: #fff;
-  color: var(--pm-ink);
+  color: var(--text-primary);
 }
 
 .photos__progress {
@@ -321,13 +312,13 @@
   span {
     display: block;
     height: 100%;
-    background: var(--pm-sea);
+    background: var(--blue);
     transition: width 0.2s ease;
   }
 }
 
 .photos__progress-label {
-  color: var(--pm-muted);
+  color: var(--text-secondary);
   font-size: 0.8rem;
 }
 

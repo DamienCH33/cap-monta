@@ -1,20 +1,14 @@
-// Couleurs de la charte : mer dominante, pin en accent. À relier aux variables globales.
+// Couleurs : les jetons globaux de styles.scss.
 :host {
-  --oa-sea: #0b5f8a;
-  --oa-sea-dark: #084a6b;
-  --oa-pine: #2f6b4f;
   --oa-sand: #9a7440;
-  --oa-ink: #1c2530;
-  --oa-muted: #5b6672;
-  --oa-line: rgb(0 0 0 / 9%);
 }
 
 .owner-accommodations {
   padding-block: 1.5rem 3rem;
-  color: var(--oa-ink);
+  color: var(--text-primary);
 
   a {
-    color: var(--oa-sea);
+    color: var(--blue);
     text-decoration: none;
 
     &:hover {
@@ -28,7 +22,7 @@
   gap: 0.5rem;
   align-items: center;
   margin-bottom: 1rem;
-  color: var(--oa-muted);
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -47,7 +41,7 @@
 
 .owner-accommodations__summary {
   margin: 0.35rem 0 0;
-  color: var(--oa-muted);
+  color: var(--text-secondary);
 }
 
 // Filtres par statut : pastilles, le filtre actif en bleu mer plein.
@@ -63,27 +57,27 @@
   gap: 0.5rem;
   align-items: center;
   padding: 0.4rem 0.9rem;
-  border: 1px solid var(--oa-line);
+  border: 1px solid var(--border);
   border-radius: 999px;
   background: #fff;
-  color: var(--oa-ink);
+  color: var(--text-primary);
   font-weight: 500;
   text-decoration: none;
 
   &:hover {
-    border-color: rgb(11 95 138 / 40%);
+    border-color: rgb(29 111 151 / 40%);
     text-decoration: none;
   }
 
   &:focus-visible {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 2px;
   }
 
   &--active,
   &--active:hover {
-    border-color: var(--oa-sea);
-    background: var(--oa-sea);
+    border-color: var(--blue);
+    background: var(--blue);
     color: #fff;
   }
 }
@@ -122,8 +116,8 @@
   gap: 0.25rem 1.5rem;
   align-items: center;
   padding: 1.25rem 1.5rem 1rem;
-  border: 1px solid var(--oa-line);
-  border-left: 4px solid var(--oa-muted);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--text-secondary);
   border-radius: 0.875rem;
   background: #fff;
   box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
@@ -138,7 +132,7 @@
   }
 
   &--published {
-    border-left-color: var(--oa-pine);
+    border-left-color: var(--pine);
   }
 
   &--archived {
@@ -167,7 +161,7 @@
 
   &--published {
     background: #e4f1e9;
-    color: var(--oa-pine);
+    color: var(--pine);
   }
 
   &--archived {
@@ -184,7 +178,7 @@
 
 .owner-accommodations__details {
   margin: 0;
-  color: var(--oa-muted);
+  color: var(--text-secondary);
 }
 
 .owner-accommodations__actions {
@@ -212,9 +206,9 @@
 .owner-accommodations__button {
   min-width: 9rem;
   padding: 0.6rem 1.1rem;
-  border: 1px solid var(--oa-sea);
+  border: 1px solid var(--blue);
   border-radius: 0.6rem;
-  background: var(--oa-sea);
+  background: var(--blue);
   color: #fff;
   font: inherit;
   font-weight: 600;
@@ -222,15 +216,15 @@
   transition: background 0.15s ease;
 
   &:hover:not(:disabled) {
-    background: var(--oa-sea-dark);
+    background: var(--ocean);
   }
 
   &--secondary {
     background: #fff;
-    color: var(--oa-sea);
+    color: var(--blue);
 
     &:hover:not(:disabled) {
-      background: #eef5f9;
+      background: var(--blue-soft);
     }
   }
 
@@ -240,7 +234,7 @@
   }
 
   &:focus-visible {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 2px;
   }
 }
@@ -250,7 +244,7 @@
   grid-column: 1 / -1;
   margin-top: 0.85rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--oa-line);
+  border-top: 1px solid var(--border);
 }
 
 .owner-accommodations__hint,
@@ -260,7 +254,7 @@
 }
 
 .owner-accommodations__hint {
-  color: var(--oa-muted);
+  color: var(--text-secondary);
 }
 
 // Les messages de l'API peuvent tenir sur plusieurs lignes (un manque par ligne).
@@ -272,7 +266,7 @@
   }
 
   &--ok {
-    color: var(--oa-pine);
+    color: var(--pine);
     font-weight: 600;
   }
 }
@@ -283,7 +277,7 @@
   border-radius: 0.875rem;
   background: #fff;
   text-align: center;
-  color: var(--oa-muted);
+  color: var(--text-secondary);
 
   p {
     margin: 0.25rem 0;
@@ -291,7 +285,7 @@
 }
 
 .owner-accommodations__empty-title {
-  color: var(--oa-ink);
+  color: var(--text-primary);
   font-size: 1.125rem;
   font-weight: 600;
 }
@@ -326,18 +320,18 @@
   display: inline-block;
   padding: 0.65rem 1.2rem;
   border-radius: 0.6rem;
-  background: var(--oa-sea);
+  background: var(--blue);
   color: #fff;
   font-weight: 600;
   text-decoration: none;
 
   &:hover {
-    background: var(--oa-sea-dark);
+    background: var(--ocean);
     text-decoration: none;
   }
 
   &:focus-visible {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 2px;
   }
 }
@@ -349,7 +343,7 @@
 // Le logement qui vient d'être créé : un halo bleu mer, pour le repérer tout de suite.
 .owner-accommodations__card--new,
 .owner-accommodations__card--new:hover {
-  box-shadow: 0 0 0 3px rgb(11 95 138 / 25%);
+  box-shadow: 0 0 0 3px rgb(29 111 151 / 25%);
 }
 
 // Liens en forme de bouton : la couleur des liens de la page ne doit pas les écraser.
@@ -360,6 +354,6 @@
   text-decoration: none;
 
   &.owner-accommodations__button--secondary {
-    color: var(--oa-sea);
+    color: var(--blue);
   }
 }

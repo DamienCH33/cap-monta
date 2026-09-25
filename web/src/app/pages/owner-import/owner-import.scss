@@ -1,12 +1,5 @@
-// Mêmes couleurs que le formulaire du logement. À relier aux variables globales de la charte.
+// Couleurs : les jetons globaux de styles.scss.
 :host {
-  --im-sea: #0b5f8a;
-  --im-sea-soft: #eef5f9;
-  --im-ink: #1c2530;
-  --im-muted: #5b6672;
-  --im-line: rgb(0 0 0 / 12%);
-  --im-error: #a3261d;
-  --im-warn: #fff6e5;
   --im-amber: #c98a1b;
 }
 
@@ -18,10 +11,10 @@
   }
 
   padding-block: 1.5rem 3rem;
-  color: var(--im-ink);
+  color: var(--text-primary);
 
   a {
-    color: var(--im-sea);
+    color: var(--blue);
   }
 
   input,
@@ -29,7 +22,7 @@
   textarea {
     width: 100%;
     padding: 0.5rem 0.6rem;
-    border: 1px solid var(--im-line);
+    border: 1px solid var(--border);
     border-radius: 0.45rem;
     font: inherit;
   }
@@ -44,7 +37,7 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  color: var(--im-muted);
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -55,7 +48,7 @@
 .import__intro,
 .import__muted {
   margin: 0.5rem 0 0;
-  color: var(--im-muted);
+  color: var(--text-secondary);
 }
 
 .import__muted {
@@ -73,7 +66,7 @@
 
 .import__alert {
   background: #fbeceb;
-  color: var(--im-error);
+  color: var(--danger-text);
 
   &--flat {
     margin: 0;
@@ -81,8 +74,8 @@
 }
 
 .import__notice {
-  border: 1px solid rgb(11 95 138 / 25%);
-  background: var(--im-sea-soft);
+  border: 1px solid rgb(29 111 151 / 25%);
+  background: var(--blue-soft);
 }
 
 .import__form {
@@ -101,7 +94,7 @@
 
   &--warn {
     border-color: #e8c98b;
-    background: var(--im-warn);
+    background: var(--amber-bg);
   }
 }
 
@@ -150,7 +143,7 @@
 .import__range {
   margin: 0;
   padding: 0.9rem;
-  border: 1px solid var(--im-line);
+  border: 1px solid var(--border);
   border-radius: 0.6rem;
 }
 
@@ -189,7 +182,7 @@
 .import__error {
   flex-basis: 100%;
   margin: 0.4rem 0 0;
-  color: var(--im-error);
+  color: var(--danger-text);
   font-size: 0.875rem;
 }
 
@@ -203,7 +196,7 @@
 .import__primary,
 .import__secondary {
   padding: 0.7rem 1.2rem;
-  border: 1px solid var(--im-sea);
+  border: 1px solid var(--blue);
   border-radius: 0.6rem;
   font: inherit;
   font-weight: 600;
@@ -216,13 +209,13 @@
 }
 
 .import__primary {
-  background: var(--im-sea);
+  background: var(--blue);
   color: #fff;
 }
 
 .import__secondary {
   background: #fff;
-  color: var(--im-sea);
+  color: var(--blue);
 }
 
 .import__waiting {
@@ -233,8 +226,8 @@
 .import__spinner {
   width: 2rem;
   height: 2rem;
-  border: 3px solid var(--im-sea-soft);
-  border-top-color: var(--im-sea);
+  border: 3px solid var(--blue-soft);
+  border-top-color: var(--blue);
   border-radius: 50%;
   animation: import-spin 0.9s linear infinite;
 
@@ -281,7 +274,7 @@
 
   p {
     margin: 0.75rem 0 0;
-    color: var(--im-muted);
+    color: var(--text-secondary);
     font-size: 0.875rem;
     white-space: pre-line;
   }
@@ -301,7 +294,7 @@
   padding: 0.6rem;
   border: 1px dashed var(--im-amber);
   border-radius: 0.6rem;
-  background: var(--im-warn);
+  background: var(--amber-bg);
 }
 
 // Mêmes cases et pastilles que le formulaire du logement.
@@ -316,7 +309,7 @@
 .import__pill {
   position: relative;
   padding: 0.6rem 1rem;
-  border: 1px solid var(--im-line);
+  border: 1px solid var(--border);
   border-radius: 0.6rem;
   background: #fff;
   font-weight: 600;
@@ -329,13 +322,13 @@
   }
 
   &:has(input:checked) {
-    border-color: var(--im-sea);
-    background: var(--im-sea-soft);
-    box-shadow: inset 0 0 0 1px var(--im-sea);
+    border-color: var(--blue);
+    background: var(--blue-soft);
+    box-shadow: inset 0 0 0 1px var(--blue);
   }
 
   &:has(input:focus-visible) {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
   }
 }
 
@@ -355,7 +348,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.3rem;
-  border: 1px solid var(--im-line);
+  border: 1px solid var(--border);
   border-radius: 0.6rem;
   background: #fff;
 
@@ -364,7 +357,7 @@
     height: 2.4rem;
     border: 0;
     border-radius: 0.45rem;
-    background: var(--im-sea-soft);
+    background: var(--blue-soft);
     font: inherit;
     font-size: 1.25rem;
     font-weight: 600;
@@ -386,7 +379,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--im-sea);
+  color: var(--blue);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
