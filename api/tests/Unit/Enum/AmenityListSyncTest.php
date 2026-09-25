@@ -22,7 +22,8 @@ final class AmenityListSyncTest extends TestCase
         }
 
         $source = (string) file_get_contents(self::FRONT_LIST);
-        preg_match_all("/\\{ key: '([a-z-]+)', label: '[^']+', group: '[a-z]+'/", $source, $matches);
+        // Le libellé est traduit : `label: $localize`:@@amenity.x:Libellé``.
+        preg_match_all("/\\{ key: '([a-z-]+)', label: [^,]+, group: '[a-z]+'/", $source, $matches);
 
         $front = $matches[1];
         $api = Amenity::values();
