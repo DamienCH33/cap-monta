@@ -8,6 +8,7 @@ import { BookingRequest } from '../../../core/models/booking-request';
 import { PetsPolicy } from '../../../core/models/accommodation';
 import { Guests, NO_GUESTS, travellerCount } from '../../../core/models/guests';
 import { Quote } from '../../../core/models/quote';
+import { ExtraCode, EXTRA_LABELS, euros } from '../../../core/models/stay-terms';
 import { BookingService } from '../../../core/services/booking';
 import { GuestRequests } from '../../../core/services/guest-requests';
 import { BusyPeriod } from '../../../core/models/availability';
@@ -75,6 +76,25 @@ export class BookingForm implements OnInit {
 
   readonly violations = signal<Record<string, string>>({});
 
+  readonly euros = euros;
+  readonly mandatoryExtras = computed(() =>
+    (this.quote()?.extras ?? []).filter((e) => !e.optional),
+  );
+  readonly optionalExtras = computed(() => (this.quote()?.extras ?? []).filter((e) => e.optional));
+
+  extraLabel(code: ExtraCode): string {
+    return EXTRA_LABELS[code];
+  }
+
+  /** « Taxe de séjour et redevance du domaine » */
+  unknownFeesLabel(codes: ExtraCode[]): string {
+    const labels = codes.map((code, i) =>
+      0 === i ? EXTRA_LABELS[code] : EXTRA_LABELS[code].toLowerCase(),
+    );
+
+    return labels.join(' et ');
+  }
+
   /** Le bouton dit ce qui manque plutôt que de rester grisé sans explication. */
   readonly submitLabel = computed(() => {
     if (this.sending()) {
@@ -117,10 +137,12 @@ export class BookingForm implements OnInit {
       return;
     }
 
-    this.booking.quote(this.slug(), arrival, departure, travellers, this.guests().pets).subscribe({
-      next: (quote) => this.quote.set(quote),
-      error: () => this.quote.set(null),
-    });
+    this.booking
+      .quote(this.slug(), arrival, departure, travellers, this.guests().pets, this.guests().adults)
+      .subscribe({
+        next: (quote) => this.quote.set(quote),
+        error: () => this.quote.set(null),
+      });
   }
 
   submit(): void {

@@ -18,6 +18,7 @@ export class BookingService {
     departure: string,
     guests: number,
     pets = 0,
+    adults?: number,
   ): Observable<Quote> {
     let params = new HttpParams()
       .set('arrival', arrival)
@@ -26,6 +27,9 @@ export class BookingService {
 
     if (pets > 0) {
       params = params.set('pets', pets);
+    }
+    if (undefined !== adults) {
+      params = params.set('adults', adults);
     }
 
     return this.http.get<Quote>(`${this.baseUrl}/accommodations/${slug}/quote`, {

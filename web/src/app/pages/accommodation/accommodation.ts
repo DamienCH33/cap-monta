@@ -19,7 +19,9 @@ import { Calendar } from '../../shared/calendar/calendar';
 import { BookingForm } from './booking-form/booking-form';
 import { environment } from '../../../environments/environment';
 import { guestsFromQuery, travellerCount } from '../../core/models/guests';
+import { euros, hasTerms, timeLabel } from '../../core/models/stay-terms';
 import { FavoriteButton } from '../../shared/favorite-button/favorite-button';
+import { ShareButton } from '../../shared/share-button/share-button';
 import { Icon } from '../../shared/icon/icon';
 import { NavigationOrigin } from '../../core/services/navigation-origin';
 import { AuthService } from '../../core/services/auth';
@@ -33,6 +35,7 @@ import { ReportListing } from './report-listing/report-listing';
     Icon,
     DatePipe,
     FavoriteButton,
+    ShareButton,
     DecimalPipe,
     RouterLink,
     Calendar,
@@ -44,6 +47,10 @@ import { ReportListing } from './report-listing/report-listing';
   styleUrl: './accommodation.scss',
 })
 export class AccommodationPage implements OnInit {
+  readonly euros = euros;
+  readonly hasTerms = hasTerms;
+  readonly timeLabel = timeLabel;
+
   /** Ouverte depuis « Voir l'annonce » dans Mes logements : le retour y ramène. */
   private readonly openedFromOwnerSpace = inject(NavigationOrigin).isFromOwnerSpace(
     inject(ActivatedRoute).snapshot.paramMap.get('slug'),

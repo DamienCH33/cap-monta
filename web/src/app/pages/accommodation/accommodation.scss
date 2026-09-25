@@ -35,7 +35,11 @@
     grid-column: 1;
   }
 
-  &__fav {
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
     justify-self: end;
     grid-row: 1;
     grid-column: 2;
@@ -161,6 +165,66 @@
     font-size: 13px;
     line-height: 1.5;
     color: var(--text-muted);
+  }
+}
+
+.terms {
+  display: grid;
+  margin: 0;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 4px 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+
+    &:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+  }
+
+  dt {
+    font-weight: 700;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+  }
+
+  &__text {
+    white-space: pre-line;
+  }
+
+  &__note {
+    margin: 14px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+}
+
+// Téléphone : les boutons passent sous le titre, le titre garde toute la largeur.
+@media (max-width: 719px) {
+  .head {
+    grid-template-columns: 1fr;
+  }
+
+  .head__actions {
+    grid-row: 3;
+    grid-column: 1;
+    justify-self: start;
+    justify-content: flex-start;
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 599px) {
+  .terms__row {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -1,4 +1,5 @@
 import { PetsPolicy } from './accommodation';
+import { StayTerms } from './stay-terms';
 
 /** Un logement vu par son propriétaire, dans son espace : tous les statuts. */
 export type AccommodationStatus = 'draft' | 'published' | 'archived';
@@ -15,6 +16,7 @@ export interface OwnerAccommodation {
   surface: number | null;
   amenities: string[];
   petsPolicy: PetsPolicy;
+  terms: StayTerms;
   description: string;
   /** Dans l'ordre : la première est la couverture. */
   photos: OwnerPhoto[];
@@ -70,6 +72,7 @@ export interface NewAccommodation {
   petsPolicy?: PetsPolicy;
   description?: string;
   district?: string | null;
+  terms?: StayTerms;
 }
 
 /** Édition : seulement les champs modifiés. null efface le quartier ou la surface. */
@@ -82,6 +85,8 @@ export interface AccommodationChanges {
   petsPolicy?: PetsPolicy;
   description?: string;
   district?: string | null;
+  /** Remplace toutes les conditions d'un coup. */
+  terms?: StayTerms;
 }
 
 /** Un quartier, tel que les formulaires de l'espace propriétaire en ont besoin. */

@@ -34,7 +34,17 @@
     }
 
     <header class="head">
-      <cm-favorite-button class="head__fav" [slug]="logement.slug" [labelled]="true" />
+      <div class="head__actions">
+        <cm-share-button
+          [path]="'/logement/' + logement.slug"
+          [title]="
+            typeLabel(logement.type) +
+            (logement.district ? ' · ' + logement.district : '') +
+            ' | Cap Monta'
+          "
+        />
+        <cm-favorite-button [slug]="logement.slug" [labelled]="true" />
+      </div>
       <h1 class="head__title">
         {{ typeLabel(logement.type) }}
         @if (logement.district) {
@@ -121,6 +131,98 @@
           } @else {
             <p class="block__empty">
               Le propriétaire n'a pas publié ses tarifs. Envoyez-lui une demande, il vous répondra.
+            </p>
+          }
+        </section>
+
+        <section class="block">
+          <h2 class="block__title">Conditions du séjour</h2>
+          @if (hasTerms(logement.terms)) {
+            <dl class="terms">
+              @if (logement.terms.checkInFrom || logement.terms.checkOutBefore) {
+                <div class="terms__row">
+                  <dt>Horaires</dt>
+                  <dd>
+                    @if (logement.terms.checkInFrom) {
+                      Arrivée à partir de {{ timeLabel(logement.terms.checkInFrom) }}
+                    }
+                    @if (logement.terms.checkInFrom && logement.terms.checkOutBefore) {
+                      ·
+                    }
+                    @if (logement.terms.checkOutBefore) {
+                      départ avant {{ timeLabel(logement.terms.checkOutBefore) }}
+                    }
+                  </dd>
+                </div>
+              }
+              @if (null !== logement.terms.depositPercent) {
+                <div class="terms__row">
+                  <dt>Acompte</dt>
+                  <dd>
+                    @if (0 === logement.terms.depositPercent) {
+                      Aucun acompte
+                    } @else {
+                      {{ logement.terms.depositPercent }} % du loyer, à verser au propriétaire quand
+                      il accepte votre demande
+                    }
+                  </dd>
+                </div>
+              }
+              @if (null !== logement.terms.securityDeposit) {
+                <div class="terms__row">
+                  <dt>Caution</dt>
+                  <dd>
+                    @if (0 === logement.terms.securityDeposit) {
+                      Aucune caution
+                    } @else {
+                      {{ euros(logement.terms.securityDeposit) }}, rendue après l'état des lieux
+                    }
+                  </dd>
+                </div>
+              }
+              @if (logement.terms.cancellationPolicy) {
+                <div class="terms__row">
+                  <dt>Annulation</dt>
+                  <dd class="terms__text">{{ logement.terms.cancellationPolicy }}</dd>
+                </div>
+              }
+              @if (null !== logement.terms.touristTax || null !== logement.terms.resortFee) {
+                <div class="terms__row">
+                  <dt>En plus du loyer</dt>
+                  <dd>
+                    @if (null !== logement.terms.touristTax) {
+                      Taxe de séjour {{ euros(logement.terms.touristTax) }} par adulte et par nuit
+                      <br />
+                    }
+                    @if (null !== logement.terms.resortFee) {
+                      Redevance du domaine {{ euros(logement.terms.resortFee) }} par personne et par
+                      nuit
+                    }
+                  </dd>
+                </div>
+              }
+              @if (logement.terms.cleaningFee || logement.terms.linenFee) {
+                <div class="terms__row">
+                  <dt>En option</dt>
+                  <dd>
+                    @if (logement.terms.cleaningFee) {
+                      Ménage de fin de séjour {{ euros(logement.terms.cleaningFee) }}
+                      <br />
+                    }
+                    @if (logement.terms.linenFee) {
+                      Linge {{ euros(logement.terms.linenFee) }} par personne
+                    }
+                  </dd>
+                </div>
+              }
+            </dl>
+            <p class="terms__note">
+              Tout se règle directement avec le propriétaire : Cap Monta ne prend aucun paiement.
+            </p>
+          } @else {
+            <p class="block__empty">
+              Le propriétaire n'a pas encore précisé ses conditions (horaires, acompte, caution,
+              annulation). Posez-lui la question dans votre demande.
             </p>
           }
         </section>

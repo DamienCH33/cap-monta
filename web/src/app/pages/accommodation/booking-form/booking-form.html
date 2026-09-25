@@ -62,18 +62,45 @@
       @if (currentQuote.available) {
         <div class="summary">
           <div class="summary__line">
-            <span>{{ currentQuote.nights }} {{ currentQuote.nights > 1 ? 'nuits' : 'nuit' }}</span>
-            <strong>
+            <span
+              >Loyer, {{ currentQuote.nights }}
+              {{ currentQuote.nights > 1 ? 'nuits' : 'nuit' }}</span
+            >
+            <span>
               @if (currentQuote.total) {
-                {{ currentQuote.total / 100 | number: '1.0-0' }} €
+                {{ euros(currentQuote.total) }}
               } @else {
                 à convenir
               }
-            </strong>
+            </span>
           </div>
-          <p class="summary__note">
-            Redevances du domaine et taxe de séjour à régler sur place, en plus.
-          </p>
+          @for (extra of mandatoryExtras(); track extra.code) {
+            <div class="summary__line">
+              <span>{{ extraLabel(extra.code) }}</span>
+              <span>{{ euros(extra.amount) }}</span>
+            </div>
+          }
+          @if (currentQuote.estimatedTotal && mandatoryExtras().length) {
+            <div class="summary__line summary__line--total">
+              <strong>Total estimé</strong>
+              <strong>{{ euros(currentQuote.estimatedTotal) }}</strong>
+            </div>
+          }
+          @if (optionalExtras().length) {
+            <p class="summary__note">
+              En option :
+              @for (extra of optionalExtras(); track extra.code; let last = $last) {
+                {{ extraLabel(extra.code).toLowerCase() }} {{ euros(extra.amount)
+                }}{{ last ? '.' : ',' }}
+              }
+            </p>
+          }
+          @if (currentQuote.unknownFees.length) {
+            <p class="summary__note">
+              {{ unknownFeesLabel(currentQuote.unknownFees) }} : montant non précisé par le
+              propriétaire, à régler sur place en plus.
+            </p>
+          }
         </div>
         @if ('on_request' === petsPolicy() && guests().pets > 0) {
           <p class="preference">
