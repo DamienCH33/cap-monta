@@ -238,7 +238,7 @@
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 48px;
       align-items: center;
-      max-width: none;
+      max-width: 1120px; // même largeur que .container : la photo ne touche plus le bord
     }
   }
 
