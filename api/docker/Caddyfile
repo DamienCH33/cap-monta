@@ -1,0 +1,26 @@
+# Caddy (FrankenPHP) devant Symfony, en production. Le port vient de Railway ($PORT).
+{
+	frankenphp
+	servers {
+		# Le proxy de Railway (réseau privé) est de confiance pour X-Forwarded-*.
+		trusted_proxies static private_ranges 100.64.0.0/10
+	}
+}
+
+:{$PORT:8080} {
+	root * /app/public
+	encode zstd gzip
+
+	# Photos des logements (volume Railway monté sur /app/public/media) : fichiers WebP
+	# réencodés à l'envoi, noms aléatoires, jamais modifiés.
+	@media path /media/*
+	header @media {
+		X-Content-Type-Options nosniff
+		Cache-Control "public, max-age=2592000, immutable"
+	}
+
+	# Pas de version du serveur dans les en-têtes.
+	header -Server
+
+	php_server
+}

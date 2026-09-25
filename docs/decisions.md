@@ -368,3 +368,27 @@ C'est le score de référence de l'import, et il reste la référence : deux dé
 - Téléphone du voyageur : le format international est accepté (+31, +49…), sinon un Néerlandais ne pouvait pas envoyer sa demande.
 
 **Coût.** Quatre builds au lieu d'un (≈ 30 s de plus). Chaque nouveau texte doit être traduit trois fois avant de passer la CI : `npm run i18n:extract` puis compléter `src/locale/messages.{en,nl,de}.json`. Les emails envoyés aux voyageurs restent en français pour l'instant.
+
+## 032 — Données personnelles : durées de conservation et effacement (25/09/2026)
+
+**Contexte.** Audit du 25/09 : rien n'était jamais effacé (demandes, textes d'import, signalements, comptes jamais confirmés, emails en échec), et un propriétaire ne pouvait pas fermer son compte. La politique de confidentialité annonçait des durées que rien n'appliquait.
+
+**Décision.**
+- `app:privacy:purge`, lancée par la tâche horaire (idempotente) : demandes **anonymisées** un an après la fin du séjour, six mois après l'envoi si elles n'ont pas abouti ; textes d'import effacés après 30 jours ; signalements après un an ; comptes jamais confirmés et sans annonce après 7 jours ; emails en échec après 30 jours. Les durées sont des constantes de la commande et figurent mot pour mot dans la politique de confidentialité : l'une ne change pas sans l'autre.
+- Anonymiser plutôt que supprimer les demandes : dates, montants et statut restent (historique du propriétaire, statistiques), plus rien ne désigne une personne, et le lien de suivi meurt (nouveau jeton).
+- « Supprimer mon compte » : mot de passe redemandé ; refusé tant que des séjours acceptés sont à venir (le voyageur doit être prévenu par une annulation, pas découvrir une annonce disparue) ; les demandes en attente reçoivent un refus motivé ; photos effacées du stockage ; tout le reste part par les cascades de la base.
+
+**Coût.** Une tâche planifiée de plus à surveiller. Un propriétaire qui supprime son compte perd son historique.
+
+## 033 — Mise en production : relais, sessions, garde-fous (25/09/2026)
+
+**Contexte.** Audit du 25/09 : le serveur Node ne relayait pas `/api` (décision 009 jamais appliquée), les sessions vivaient dans des fichiers du conteneur, et la protection CSRF reposait sur SameSite=Lax seul.
+
+**Décision.**
+- `server.ts` relaie `/api` et `/media` vers l'API (réseau privé Railway), sans ajouter d'adresse à `X-Forwarded-For`. Au rendu serveur, les appels partent directement vers l'adresse interne (`fetch` global redirigé) ; les URL restent relatives dans l'application, ce qui garde le cache de transfert : le navigateur ne refait pas les appels du rendu. Condition : les lectures publiques envoient `Cache-Control: public` (Angular ne transfère pas une réponse `private`).
+- Sessions dans PostgreSQL (`PdoSessionHandler`, table `sessions` créée par migration) : survivent aux déploiements, partagées entre instances, et ne dépendent pas de Redis.
+- Écritures de l'espace propriétaire : refusées si l'en-tête `Origin` n'est pas le site (403) ou si le corps n'est pas du JSON (415). Ferme les deux trous de SameSite=Lax (formulaire `text/plain`, sous-domaine voisin).
+- Conflits de la base (contrainte d'exclusion, index unique) : 409 avec une phrase, jamais 500.
+- Images Docker : FrankenPHP pour l'API (une image, trois services : API, worker, tâche horaire), Node pour le front (le serveur est un seul fichier, sans `node_modules`). Détail dans `deploiement.md`.
+
+**Coût.** Une table de plus, et `NG_ALLOWED_HOSTS` / `SITE_URL` à ne pas oublier en production (le serveur refuse de démarrer sans `SITE_URL`).
