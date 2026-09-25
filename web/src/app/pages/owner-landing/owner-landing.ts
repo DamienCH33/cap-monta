@@ -31,7 +31,7 @@ export class OwnerLanding {
           name: "Combien coûte la publication d'une annonce ?",
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Rien. Cap Monta ne prélève aucune commission sur vos locations.',
+            text: 'Rien. Aucun abonnement, aucune commission sur vos locations.',
           },
         },
         {
@@ -39,7 +39,7 @@ export class OwnerLanding {
           name: 'Faut-il être propriétaire au CHM Montalivet ou à Euronat ?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Oui. Cap Monta ne référence que les logements situés dans ces deux domaines.',
+            text: "Oui. Cap Monta ne référence que ces deux domaines, et c'est volontaire : un site qui connaît les quartiers, les distances à la plage et les usages du lieu est plus utile qu'un annuaire généraliste.",
           },
         },
         {
@@ -47,7 +47,7 @@ export class OwnerLanding {
           name: 'Puis-je publier plusieurs logements ?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Oui, un même compte peut gérer plusieurs logements et leurs calendriers.',
+            text: 'Oui. Un même compte gère autant de logements et de calendriers que nécessaire.',
           },
         },
       ],
