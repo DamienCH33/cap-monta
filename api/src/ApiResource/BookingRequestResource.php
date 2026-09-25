@@ -75,9 +75,11 @@ final class BookingRequestResource
     public string $guestEmail = '';
 
     #[Assert\Length(max: 30)]
+    // Numéro français, ou étranger au format international : les locataires viennent aussi
+    // des Pays-Bas, d'Allemagne, de Belgique…
     #[Assert\Regex(
-        pattern: '/^(?:\+33|0)\s*[1-9](?:[\s.\-]*\d{2}){4}$/',
-        message: 'Numéro de téléphone français attendu, par exemple 06 12 34 56 78.',
+        pattern: '/^(?:(?:\+33|0)\s*[1-9](?:[\s.\-]*\d{2}){4}|\+[1-9](?:[\s.\-]?\d){6,14})$/',
+        message: 'Numéro attendu : 06 12 34 56 78, ou au format international (+31 6 12 34 56 78).',
     )]
     public ?string $guestPhone = null;
 
