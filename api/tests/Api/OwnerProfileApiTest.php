@@ -4,15 +4,23 @@ declare(strict_types=1);
 
 namespace App\Tests\Api;
 
+use App\Entity\Accommodation;
+use App\Entity\BookingRequest;
 use App\Entity\User;
+use App\Enum\BookingRequestStatus;
+use App\Factory\AccommodationFactory;
+use App\Factory\BookingRequestFactory;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Zenstruck\Foundry\Test\Factories;
 
 final class OwnerProfileApiTest extends WebTestCase
 {
+    use Factories;
+
     private const PASSWORD = 'mot-de-passe-solide';
 
     private KernelBrowser $client;
@@ -89,6 +97,52 @@ final class OwnerProfileApiTest extends WebTestCase
         $alice = $this->em->getRepository(User::class)->findOneBy(['email' => 'alice@example.com']);
         self::assertInstanceOf(User::class, $alice);
         self::assertTrue($this->hasher()->isPasswordValid($alice, 'nouveau-mot-de-passe'));
+    }
+
+    public function testClosingTheAccountNeedsThePassword(): void
+    {
+        $this->client->loginUser($this->alice, 'main');
+
+        $this->send('DELETE', '/api/owner/me', ['password' => 'pas-le-bon']);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame('password', $this->json()['violations'][0]['propertyPath']);
+    }
+
+    public function testAnAccountWithGuestsStillToComeCannotBeClosed(): void
+    {
+        $home = AccommodationFactory::createOne(['owner' => $this->alice]);
+        BookingRequestFactory::createOne(['accommodation' => $home, 'status' => BookingRequestStatus::Accepted]);
+        $this->client->loginUser($this->alice, 'main');
+
+        $this->send('DELETE', '/api/owner/me', ['password' => self::PASSWORD]);
+
+        self::assertResponseStatusCodeSame(409);
+        self::assertNotNull($this->em->getRepository(User::class)->findOneBy(['email' => 'alice@example.com']));
+    }
+
+    public function testClosingTheAccountErasesTheOwnerAndHisListingsAndAnswersWaitingGuests(): void
+    {
+        $home = AccommodationFactory::createOne(['owner' => $this->alice]);
+        BookingRequestFactory::createOne(['accommodation' => $home, 'guestEmail' => 'anna@example.com']);
+        $this->client->loginUser($this->alice, 'main');
+
+        $this->send('DELETE', '/api/owner/me', ['password' => self::PASSWORD]);
+
+        self::assertResponseStatusCodeSame(204);
+        self::assertEmailCount(1);
+        $mail = self::getMailerMessage(0);
+        self::assertNotNull($mail);
+        self::assertEmailAddressContains($mail, 'To', 'anna@example.com');
+
+        $this->em->clear();
+        self::assertNull($this->em->getRepository(User::class)->findOneBy(['email' => 'alice@example.com']));
+        self::assertSame(0, $this->em->getRepository(Accommodation::class)->count([]));
+        self::assertSame(0, $this->em->getRepository(BookingRequest::class)->count([]));
+
+        // The session is gone with the account.
+        $this->client->request('GET', '/api/owner/me');
+        self::assertResponseStatusCodeSame(401);
     }
 
     private function hasher(): UserPasswordHasherInterface

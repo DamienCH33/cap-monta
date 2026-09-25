@@ -1,13 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { apiErrorMessage } from '../../core/http/api-error';
 import { AuthService } from '../../core/services/auth';
 import { SeoService } from '../../core/services/seo';
 
-/** Même règle que l'API : numéro français, espaces, points ou tirets tolérés. */
 /** Même règle que l'API : format français, ou international (propriétaire belge, néerlandais…). */
 export const PHONE = /^(?:(?:\+33|0)\s*[1-9](?:[\s.-]*\d{2}){4}|\+[1-9](?:[\s.-]?\d){6,14})$/;
 
@@ -40,6 +39,12 @@ export class OwnerProfile {
   readonly profileState = signal<'idle' | 'saving' | 'saved'>('idle');
   readonly profileError = signal<string | null>(null);
   readonly profileSubmitted = signal(false);
+
+  readonly deletion = this.fb.group({ password: ['', [Validators.required]] });
+  readonly deleteOpen = signal(false);
+  readonly deleting = signal(false);
+  readonly deleteError = signal<string | null>(null);
+  private readonly router = inject(Router);
 
   readonly passwordState = signal<'idle' | 'saving' | 'saved'>('idle');
   readonly passwordError = signal<string | null>(null);
@@ -100,6 +105,28 @@ export class OwnerProfile {
       error: (error: HttpErrorResponse) => {
         this.passwordState.set('idle');
         this.passwordError.set(apiErrorMessage(error));
+      },
+    });
+  }
+
+  /** Droit à l'effacement : tout part, puis retour à l'accueil, déconnecté. */
+  deleteAccount(): void {
+    if (this.deletion.invalid || this.deleting()) {
+      return;
+    }
+
+    this.deleting.set(true);
+    this.deleteError.set(null);
+
+    this.auth.deleteAccount(this.deletion.getRawValue().password).subscribe({
+      next: () => void this.router.navigateByUrl('/'),
+      error: (error: HttpErrorResponse) => {
+        this.deleting.set(false);
+        this.deleteError.set(
+          409 === error.status
+            ? ((error.error as { detail?: string } | null)?.detail ?? apiErrorMessage(error))
+            : apiErrorMessage(error),
+        );
       },
     });
   }

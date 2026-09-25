@@ -56,6 +56,8 @@ final class AssistantAvailabilityTest extends TestCase
         self::assertSame(ListingImportFailure::Unavailable, ListingImporter::classify(new ServerException(502, 'bad gateway')));
         self::assertSame(ListingImportFailure::Unavailable, ListingImporter::classify(new TransportException('timeout')));
         self::assertSame(ListingImportFailure::Unreadable, ListingImporter::classify(new InvalidExtractionException('forme')));
+        // A 400 is about this text: it must not switch the assistant off for everyone.
+        self::assertSame(ListingImportFailure::Unreadable, ListingImporter::classify(new \Symfony\AI\Platform\Exception\BadRequestException('texte')));
         self::assertFalse(ListingImportFailure::Configuration->isWorthRetrying());
     }
 }

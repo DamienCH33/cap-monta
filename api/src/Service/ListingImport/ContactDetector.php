@@ -12,6 +12,8 @@ namespace App\Service\ListingImport;
 final class ContactDetector
 {
     private const string PHONE = '/(?<![\d+])(?:\+33[\s.\-]?|0)[1-9](?:[\s.\-]?\d{2}){4}(?!\d)/';
+    /** Foreign owners too (+32, +31, +49…): 7 to 13 digits after the country code. */
+    private const string INTERNATIONAL_PHONE = '/(?<![\d+])\+(?!33)[1-9]\d{0,2}(?:[\s.\-]?\d){7,13}(?!\d)/';
     private const string EMAIL = '/[\p{L}0-9._%+\-]+@[\p{L}0-9.\-]+\.[a-z]{2,}/iu';
 
     /**
@@ -20,7 +22,11 @@ final class ContactDetector
      */
     public function mask(string $text): string
     {
-        return (string) preg_replace([self::PHONE, self::EMAIL], ['[téléphone]', '[email]'], $text);
+        return (string) preg_replace(
+            [self::PHONE, self::INTERNATIONAL_PHONE, self::EMAIL],
+            ['[téléphone]', '[téléphone]', '[email]'],
+            $text,
+        );
     }
 
     /**
@@ -29,8 +35,9 @@ final class ContactDetector
     public function find(string $text): array
     {
         preg_match_all(self::PHONE, $text, $phones);
+        preg_match_all(self::INTERNATIONAL_PHONE, $text, $international);
         preg_match_all(self::EMAIL, $text, $emails);
 
-        return array_values(array_unique([...$phones[0], ...$emails[0]]));
+        return array_values(array_unique([...$phones[0], ...$international[0], ...$emails[0]]));
     }
 }

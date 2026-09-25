@@ -33,4 +33,43 @@
     margin: 0 0 1rem;
     font-size: 1.1rem;
   }
+
+  &__text {
+    margin: 0 0 1rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  // Rouge ET libellé explicite : l'action ne se reconnaît pas à la couleur seule.
+  &__danger {
+    background: var(--danger-text);
+  }
+
+  &__danger-link,
+  &__cancel {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  &__danger-link {
+    color: var(--danger-text);
+  }
+
+  &__cancel {
+    color: var(--text-secondary);
+  }
 }
