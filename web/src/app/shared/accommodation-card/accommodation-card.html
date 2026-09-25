@@ -13,6 +13,7 @@
     } @else {
       <span class="card__img card__img--empty"><cm-icon name="photo" />Photos à venir</span>
     }
+    <cm-favorite-button class="card__fav" [slug]="accommodation().slug" />
     @if (accommodation().calendarUpToDate) {
       <span class="card__badge"><i aria-hidden="true"></i>Calendrier à jour</span>
     }

@@ -34,6 +34,7 @@
     }
 
     <header class="head">
+      <cm-favorite-button class="head__fav" [slug]="logement.slug" [labelled]="true" />
       <h1 class="head__title">
         {{ typeLabel(logement.type) }}
         @if (logement.district) {

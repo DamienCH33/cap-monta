@@ -85,6 +85,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/owner-profile/owner-profile').then((m) => m.OwnerProfile),
   },
   {
+    path: 'favoris',
+    loadComponent: () => import('./pages/favorites/favorites').then((m) => m.FavoritesPage),
+  },
+  {
     path: 'mes-demandes',
     loadComponent: () => import('./pages/my-requests/my-requests').then((m) => m.MyRequests),
   },

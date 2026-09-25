@@ -19,6 +19,13 @@
     <nav id="main-nav" class="header__nav" [class.header__nav--open]="menuOpen()">
       <a routerLink="/recherche">Rechercher</a>
 
+      @if (favoriteCount() > 0) {
+        <a routerLink="/favoris" class="header__favs" [attr.aria-label]="'Mes favoris : ' + favoriteCount()">
+          <cm-icon name="heart" />
+          Favoris <span class="header__count">{{ favoriteCount() }}</span>
+        </a>
+      }
+
       @if (guestRequests().length && null === owner()) {
         <a routerLink="/mes-demandes">Mes demandes</a>
       }
