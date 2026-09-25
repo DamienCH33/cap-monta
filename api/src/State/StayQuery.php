@@ -20,6 +20,22 @@ final readonly class StayQuery
     private const MAX_VALUES = 10;
 
     /**
+     * Upper bounds for the numbers read from the URL. Beyond them the request is absurd, and a
+     * huge value (9223372036854775807 guests) used to overflow the price computation into a 500.
+     */
+    public const MAX_GUESTS = 50;
+    private const MAX_PETS = 10;
+    private const MAX_BEDROOMS = 20;
+    private const MAX_PAGE = 1000;
+
+    /** A seasonal rental at most: longer is not a holiday stay. */
+    public const MAX_NIGHTS = 120;
+
+    /** Dates outside this window are typing errors, not stays. */
+    private const FIRST_YEAR = 2000;
+    private const LAST_YEAR = 2100;
+
+    /**
      * @param list<string>            $districts
      * @param list<AccommodationType> $types
      * @param list<string>            $amenities
@@ -55,16 +71,20 @@ final readonly class StayQuery
             throw new BadRequestHttpException('"departure" must come after "arrival".');
         }
 
+        if (null !== $arrival && null !== $departure && $departure > $arrival->modify(sprintf('+%d days', self::MAX_NIGHTS))) {
+            throw new BadRequestHttpException(sprintf('A stay lasts %d nights at most.', self::MAX_NIGHTS));
+        }
+
         $guests = isset($filters['guests']) ? (int) $filters['guests'] : 1;
 
-        if ($guests < 1) {
-            throw new BadRequestHttpException('"guests" must be at least 1.');
+        if ($guests < 1 || $guests > self::MAX_GUESTS) {
+            throw new BadRequestHttpException(sprintf('"guests" must be between 1 and %d.', self::MAX_GUESTS));
         }
 
         $pets = isset($filters['pets']) ? (int) $filters['pets'] : 0;
 
-        if ($pets < 0) {
-            throw new BadRequestHttpException('"pets" cannot be negative.');
+        if ($pets < 0 || $pets > self::MAX_PETS) {
+            throw new BadRequestHttpException(sprintf('"pets" must be between 0 and %d.', self::MAX_PETS));
         }
 
         $resort = null;
@@ -82,8 +102,8 @@ final readonly class StayQuery
 
         $bedrooms = isset($filters['bedrooms']) ? (int) $filters['bedrooms'] : 0;
 
-        if ($bedrooms < 0) {
-            throw new BadRequestHttpException('"bedrooms" cannot be negative.');
+        if ($bedrooms < 0 || $bedrooms > self::MAX_BEDROOMS) {
+            throw new BadRequestHttpException(sprintf('"bedrooms" must be between 0 and %d.', self::MAX_BEDROOMS));
         }
 
         $order = $filters['order'] ?? null;
@@ -94,8 +114,8 @@ final readonly class StayQuery
 
         $page = isset($filters['page']) ? (int) $filters['page'] : 1;
 
-        if ($page < 1) {
-            throw new BadRequestHttpException('"page" must be at least 1.');
+        if ($page < 1 || $page > self::MAX_PAGE) {
+            throw new BadRequestHttpException(sprintf('"page" must be between 1 and %d.', self::MAX_PAGE));
         }
 
         return new self(
@@ -167,6 +187,12 @@ final readonly class StayQuery
 
         if (false === $date || $date->format('Y-m-d') !== $value) {
             throw new BadRequestHttpException(sprintf('"%s" must be a date formatted YYYY-MM-DD.', $name));
+        }
+
+        $year = (int) $date->format('Y');
+
+        if ($year < self::FIRST_YEAR || $year > self::LAST_YEAR) {
+            throw new BadRequestHttpException(sprintf('"%s" must be between %d and %d.', $name, self::FIRST_YEAR, self::LAST_YEAR));
         }
 
         return $date;

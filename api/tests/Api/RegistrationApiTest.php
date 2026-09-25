@@ -96,6 +96,28 @@ final class RegistrationApiTest extends ApiTestCase
         self::assertFalse($this->reload('intact@example.com')->isVerified());
     }
 
+    /**
+     * The display name is repeated in « Bonjour … » of the emails sent to the address given at
+     * sign-up. With a line break and a link, it became a button in a genuine Cap Monta email
+     * sent to someone else's address (audit of 25/09).
+     */
+    public function testTheDisplayNameCannotCarryALink(): void
+    {
+        $this->client->request(
+            'POST',
+            '/api/register',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: (string) json_encode([
+                'email' => 'victime@example.com',
+                'displayName' => "Audit\nhttps://evil.example/connexion",
+                'password' => 'chevalpileagrafe',
+            ]),
+        );
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertEmailCount(0);
+    }
+
     private function register(string $email): void
     {
         $this->client->request(

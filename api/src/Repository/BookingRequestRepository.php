@@ -6,11 +6,14 @@ namespace App\Repository;
 
 use App\Entity\Accommodation;
 use App\Entity\BookingRequest;
+use App\Entity\Unavailability;
 use App\Entity\User;
 use App\Enum\BookingRequestStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<BookingRequest>
@@ -31,8 +34,9 @@ class BookingRequestRepository extends ServiceEntityRepository
     {
         /** @var list<BookingRequest> $result */
         $result = $this->createQueryBuilder('b')
-            ->addSelect('a')
+            ->addSelect('a', 'd')
             ->join('b.accommodation', 'a')
+            ->leftJoin('a.district', 'd')
             ->andWhere('a.owner = :owner')
             ->orderBy('b.createdAt', 'DESC')
             ->setParameter('owner', $owner->getId(), UuidType::NAME)
@@ -40,6 +44,45 @@ class BookingRequestRepository extends ServiceEntityRepository
             ->getResult();
 
         return $result;
+    }
+
+    /**
+     * Among these requests, the pending ones whose dates were taken since they arrived (another
+     * request accepted, dates blocked). One query for the whole inbox, not one per request.
+     *
+     * @param list<BookingRequest> $requests
+     *
+     * @return array<string, true> request ids (RFC 4122) as keys
+     */
+    public function pendingWithTakenDates(array $requests): array
+    {
+        $pending = array_values(array_filter($requests, static fn (BookingRequest $request): bool => $request->isPending()));
+
+        if ([] === $pending) {
+            return [];
+        }
+
+        // The overlap rule of StayOverlap, written against the request's own dates.
+        /** @var list<array{id: Uuid|string}> $rows */
+        $rows = $this->createQueryBuilder('b')
+            ->select('b.id')
+            ->andWhere('b.id IN (:ids)')
+            ->andWhere(sprintf(
+                'EXISTS (SELECT 1 FROM %s u WHERE u.accommodation = b.accommodation AND u.startDate < b.endDate AND u.endDate > b.startDate)',
+                Unavailability::class,
+            ))
+            ->setParameter('ids', array_map(static fn (BookingRequest $request): string => $request->getId()->toRfc4122(), $pending), ArrayParameterType::STRING)
+            ->getQuery()
+            ->getArrayResult();
+
+        $taken = [];
+
+        foreach ($rows as $row) {
+            $id = $row['id'];
+            $taken[$id instanceof Uuid ? $id->toRfc4122() : (string) $id] = true;
+        }
+
+        return $taken;
     }
 
     /**
@@ -94,7 +137,7 @@ class BookingRequestRepository extends ServiceEntityRepository
             ->select('COUNT(b.id)')
             ->andWhere('b.accommodation = :accommodation')
             ->andWhere('b.status = :pending')
-            ->andWhere('LOWER(b.guestEmail) = :email')
+            ->andWhere('b.guestEmail = :email')
             ->andWhere('b.startDate = :arrival')
             ->andWhere('b.endDate = :departure')
             ->setParameter('accommodation', $accommodation)
@@ -117,7 +160,7 @@ class BookingRequestRepository extends ServiceEntityRepository
         $result = $this->createQueryBuilder('b')
             ->addSelect('a')
             ->join('b.accommodation', 'a')
-            ->andWhere('LOWER(b.guestEmail) = :email')
+            ->andWhere('b.guestEmail = :email')
             ->andWhere('b.status = :pending OR (b.status = :accepted AND b.endDate > :today)')
             ->orderBy('b.startDate', 'ASC')
             ->setParameter('email', mb_strtolower(trim($email)))

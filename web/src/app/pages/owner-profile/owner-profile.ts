@@ -8,7 +8,8 @@ import { AuthService } from '../../core/services/auth';
 import { SeoService } from '../../core/services/seo';
 
 /** Même règle que l'API : numéro français, espaces, points ou tirets tolérés. */
-export const FRENCH_PHONE = /^(?:\+33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/;
+/** Même règle que l'API : format français, ou international (propriétaire belge, néerlandais…). */
+export const PHONE = /^(?:(?:\+33|0)\s*[1-9](?:[\s.-]*\d{2}){4}|\+[1-9](?:[\s.-]?\d){6,14})$/;
 
 @Component({
   selector: 'cm-owner-profile',
@@ -28,7 +29,7 @@ export class OwnerProfile {
       this.owner()?.displayName ?? '',
       [Validators.required, Validators.minLength(2), Validators.maxLength(80)],
     ],
-    phone: [this.owner()?.phone ?? '', [Validators.pattern(FRENCH_PHONE)]],
+    phone: [this.owner()?.phone ?? '', [Validators.pattern(PHONE)]],
   });
 
   readonly password = this.fb.group({

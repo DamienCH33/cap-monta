@@ -11,10 +11,12 @@ use App\Entity\BookingRequest;
 use App\Service\Booking\BookingRefusedException;
 use App\Service\Booking\DuplicateBookingRequestException;
 use App\State\CreateBookingRequestProcessor;
+use App\State\StayQuery;
 use Symfony\Component\Serializer\Attribute\Context;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * A booking request, as seen from the outside.
@@ -47,6 +49,7 @@ final class BookingRequestResource
 
     #[Assert\NotNull]
     #[Assert\GreaterThan('today', message: 'Choisissez une arrivée à partir de demain : le propriétaire doit avoir le temps de répondre.')]
+    #[Assert\LessThanOrEqual('+24 months', message: 'Les calendriers ne vont pas au-delà de deux ans.')]
     #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     public ?\DateTimeImmutable $arrival = null;
 
@@ -56,9 +59,11 @@ final class BookingRequestResource
     public ?\DateTimeImmutable $departure = null;
 
     #[Assert\Positive]
+    #[Assert\LessThanOrEqual(30)]
     public int $adults = 1;
 
     #[Assert\PositiveOrZero]
+    #[Assert\LessThanOrEqual(30)]
     public int $children = 0;
 
     #[Assert\PositiveOrZero]
@@ -70,7 +75,13 @@ final class BookingRequestResource
     public int $pets = 0;
 
     #[Assert\NotBlank]
-    #[Assert\Length(max: 255)]
+    #[Assert\Length(max: 80)]
+    // Un nom, pas un message : il est repris dans « Bonjour … » des emails envoyés. Un lien ou
+    // un retour à la ligne permettrait d'y glisser un faux bouton (hameçonnage).
+    #[Assert\Regex(
+        pattern: '/^(?!.*(?:https?:|www\.|:\/\/))[^\r\n\t<>]+$/iu',
+        message: 'Indiquez seulement votre nom, sans lien ni retour à la ligne.',
+    )]
     public string $guestName = '';
 
     #[Assert\NotBlank]
@@ -127,5 +138,20 @@ final class BookingRequestResource
         $resource->pets = $request->getPets();
 
         return $resource;
+    }
+
+    /** A holiday stay, not a year-long lease: StayQuery applies the same bound to the search. */
+    #[Assert\Callback]
+    public function validateStayLength(ExecutionContextInterface $context): void
+    {
+        if (null === $this->arrival || null === $this->departure) {
+            return;
+        }
+
+        if ($this->departure > $this->arrival->modify(sprintf('+%d days', StayQuery::MAX_NIGHTS))) {
+            $context->buildViolation(sprintf('Un séjour dure %d nuits au plus.', StayQuery::MAX_NIGHTS))
+                ->atPath('departure')
+                ->addViolation();
+        }
     }
 }

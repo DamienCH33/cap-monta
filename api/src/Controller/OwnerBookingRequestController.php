@@ -7,7 +7,6 @@ namespace App\Controller;
 use App\Entity\BookingRequest;
 use App\Entity\User;
 use App\Repository\BookingRequestRepository;
-use App\Repository\UnavailabilityRepository;
 use App\Security\Voter\AccommodationVoter;
 use App\Service\Booking\BookingAnswerRefused;
 use App\Service\Booking\BookingDesk;
@@ -32,7 +31,6 @@ final class OwnerBookingRequestController
 {
     public function __construct(
         private readonly BookingRequestRepository $requests,
-        private readonly UnavailabilityRepository $unavailabilities,
         private readonly BookingDesk $desk,
         private readonly Security $security,
         private readonly ClockInterface $clock,
@@ -95,18 +93,17 @@ final class OwnerBookingRequestController
         \assert($owner instanceof User);
         $today = $this->clock->now()->setTime(0, 0);
 
+        $requests = $this->requests->findForOwner($owner);
+        // Dates taken since the request arrived: accepting would fail, better say it now.
+        $taken = $this->requests->pendingWithTakenDates($requests);
+
         return array_map(
-            fn (BookingRequest $request): array => BookingRequestView::forOwner(
+            static fn (BookingRequest $request): array => BookingRequestView::forOwner(
                 $request,
                 $today,
-                // Dates taken since the request arrived: accepting would fail, better say it now.
-                $request->isPending() && $this->unavailabilities->hasOverlap(
-                    $request->getAccommodation(),
-                    $request->getStartDate(),
-                    $request->getEndDate(),
-                ),
+                isset($taken[$request->getId()->toRfc4122()]),
             ),
-            $this->requests->findForOwner($owner),
+            $requests,
         );
     }
 

@@ -85,11 +85,11 @@ final class AccommodationSearchTest extends DatabaseTestCase
     ): array {
         return array_map(
             static fn (Accommodation $accommodation): string => $accommodation->getSlug(),
-            $this->repository->searchAvailable(
-                new \DateTimeImmutable($arrival),
-                new \DateTimeImmutable($departure),
-                $guests,
-                $resort,
+            $this->repository->search(
+                arrival: new \DateTimeImmutable($arrival),
+                departure: new \DateTimeImmutable($departure),
+                guests: $guests,
+                resort: $resort,
             ),
         );
     }

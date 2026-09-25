@@ -12,6 +12,9 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: PricePeriodRepository::class)]
+// L'index de la contrainte d'exclusion (EXCLUDE USING gist, créée à la main dans les
+// migrations, ADR 010). Déclaré ici pour que Doctrine ne propose plus de le supprimer.
+#[ORM\Index(name: 'price_period_no_overlap', columns: ['accommodation_id'])]
 class PricePeriod
 {
     #[ORM\Id]

@@ -21,6 +21,11 @@ final class RegistrationRequest
             minMessage: 'Ce nom est trop court.',
             maxMessage: 'Ce nom ne peut pas dépasser {{ limit }} caractères.',
         )]
+        // Repris dans « Bonjour … » des emails : ni lien ni retour à la ligne (hameçonnage).
+        #[Assert\Regex(
+            pattern: '/^(?!.*(?:https?:|www\.|:\/\/))[^\r\n\t<>]+$/iu',
+            message: 'Indiquez seulement un nom, sans lien ni retour à la ligne.',
+        )]
         public string $displayName = '',
 
         #[Assert\NotBlank(message: 'Choisissez un mot de passe.')]

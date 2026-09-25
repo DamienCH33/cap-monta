@@ -53,6 +53,13 @@ final class AuthenticationApiTest extends ApiTestCase
         self::assertResponseStatusCodeSame(401);
     }
 
+    public function testTheAddressIsNotCaseSensitive(): void
+    {
+        $this->login(self::PASSWORD, mb_strtoupper(self::EMAIL));
+
+        self::assertResponseStatusCodeSame(200);
+    }
+
     public function testTheOwnerAreaIsClosedToAnonymousVisitors(): void
     {
         $this->client->request('GET', '/api/owner/me');
@@ -74,13 +81,13 @@ final class AuthenticationApiTest extends ApiTestCase
     /**
      * @return array<string, mixed>
      */
-    private function login(string $password): array
+    private function login(string $password, string $email = self::EMAIL): array
     {
         $this->client->request(
             'POST',
             '/api/login',
             server: ['CONTENT_TYPE' => 'application/json'],
-            content: (string) json_encode(['email' => self::EMAIL, 'password' => $password]),
+            content: (string) json_encode(['email' => $email, 'password' => $password]),
         );
 
         $decoded = json_decode((string) $this->client->getResponse()->getContent(), true);

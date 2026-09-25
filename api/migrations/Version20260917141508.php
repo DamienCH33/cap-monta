@@ -31,11 +31,13 @@ final class Version20260917141508 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP TABLE district');
+        // The foreign key first, and the district names back into the text column before the
+        // table that holds them goes.
         $this->addSql('ALTER TABLE accommodation DROP CONSTRAINT FK_2D385412B08FA272');
         $this->addSql('DROP INDEX IDX_2D385412B08FA272');
         $this->addSql('ALTER TABLE accommodation ADD district VARCHAR(255) DEFAULT NULL');
+        $this->addSql('UPDATE accommodation a SET district = d.name FROM district d WHERE d.id = a.district_id');
         $this->addSql('ALTER TABLE accommodation DROP district_id');
+        $this->addSql('DROP TABLE district');
     }
 }

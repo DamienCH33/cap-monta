@@ -29,10 +29,10 @@ final class Version20260918103526 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP TABLE "user"');
+        // The foreign key first: the table it points to can only go afterwards.
         $this->addSql('ALTER TABLE accommodation DROP CONSTRAINT FK_2D3854127E3C61F9');
         $this->addSql('DROP INDEX IDX_2D3854127E3C61F9');
         $this->addSql('ALTER TABLE accommodation DROP owner_id');
+        $this->addSql('DROP TABLE "user"');
     }
 }

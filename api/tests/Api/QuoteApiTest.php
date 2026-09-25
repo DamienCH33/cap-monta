@@ -116,6 +116,32 @@ final class QuoteApiTest extends ApiTestCase
         self::assertContains($this->client->getResponse()->getStatusCode(), [400, 422]);
     }
 
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function absurdQueries(): iterable
+    {
+        yield 'voyageurs au-delà des entiers' => ['arrival=2027-07-03&departure=2027-07-10&guests=9223372036854775807'];
+        yield 'voyageurs par milliards' => ['arrival=2027-07-03&departure=2027-07-10&guests=99999999999'];
+        yield 'an 1' => ['arrival=0001-01-01&departure=0001-01-08'];
+        yield 'séjour de 10 ans' => ['arrival=2027-01-01&departure=2037-01-01'];
+    }
+
+    /**
+     * These used to overflow the fee computation into a 500, or to compute 3 million nights.
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('absurdQueries')]
+    public function testAbsurdQueriesAreBadRequestsNotServerErrors(string $query): void
+    {
+        AccommodationFactory::createOne(['slug' => 'mobil-home-absurde']);
+
+        $this->client->request('GET', '/api/accommodations/mobil-home-absurde/quote?'.$query, server: [
+            'HTTP_ACCEPT' => 'application/ld+json',
+        ]);
+
+        self::assertContains($this->client->getResponse()->getStatusCode(), [400, 422]);
+    }
+
     public function testAnUnknownAccommodationIsNotFound(): void
     {
         $this->client->request('GET', '/api/accommodations/nope/quote?arrival=2027-07-03&departure=2027-07-10', server: [
