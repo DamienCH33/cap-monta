@@ -8,16 +8,19 @@ use App\Entity\Accommodation;
 use App\Entity\Photo;
 use App\Repository\AccommodationRepository;
 use App\Security\Voter\AccommodationVoter;
+use App\Service\Http\FloodGuard;
 use App\Service\Photo\InvalidPhotoException;
 use App\Service\Photo\PhotoResizer;
 use App\Service\Photo\PhotoStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -45,12 +48,16 @@ final class OwnerPhotoController
         private readonly PhotoStorage $storage,
         private readonly ValidatorInterface $validator,
         private readonly Security $security,
+        private readonly FloodGuard $floodGuard,
+        #[Target('photo_uploads')]
+        private readonly RateLimiterFactoryInterface $uploadsLimiter,
     ) {
     }
 
     #[Route('', name: 'api_owner_photo_upload', methods: ['POST'])]
     public function upload(string $slug, Request $request): JsonResponse
     {
+        $this->floodGuard->check($this->uploadsLimiter);
         $accommodation = $this->ownedAccommodation($slug);
 
         // Photos are public files: an account nobody has confirmed must not turn the site into

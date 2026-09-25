@@ -19,8 +19,6 @@ services:
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: "../src/"
         exclude:
@@ -44,4 +42,6 @@ services:
         factory: ['Symfony\Component\Cache\Adapter\RedisAdapter', 'createConnection']
         arguments:
             - '%env(REDIS_URL)%'
-            - { lazy: true, timeout: 1, read_timeout: 1, retry_interval: 0 }
+            # Délais courts : un Redis qui ne répond plus coûtait jusqu'à 2 s par fiche. Le
+            # calendrier se relit alors en base, sans attendre (audit du 25/09).
+            - { lazy: true, timeout: 0.3, read_timeout: 0.3, retry_interval: 0 }

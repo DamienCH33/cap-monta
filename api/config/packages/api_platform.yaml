@@ -8,3 +8,10 @@ api_platform:
             vary: ["Content-Type", "Authorization", "Origin"]
         normalization_context:
             skip_null_values: false
+
+when@prod:
+    api_platform:
+        # La documentation interactive décrit aussi les routes propriétaire : utile en
+        # développement, rien à faire en ligne.
+        enable_swagger_ui: false
+        enable_re_doc: false

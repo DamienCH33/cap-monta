@@ -25,5 +25,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - run: npm ci
+      # Failles connues, hautes ou critiques, dans ce qui part en production.
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run build
       - run: npm test -- --watch=false

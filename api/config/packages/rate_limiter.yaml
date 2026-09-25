@@ -63,6 +63,16 @@ framework:
             lock_factory: null
             limit: 10
             interval: "1 day"
+        # Envoi de photos : chacune est redimensionnée (jusqu'à 512 Mo de mémoire). Douze
+        # photos par annonce ; soixante par heure laisse refaire plusieurs annonces, pas
+        # saturer le serveur.
+        photo_uploads:
+            policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
+            limit: 60
+            interval: "1 hour"
+
         # Et un plafond pour tout le site : un bug ou une série de comptes ne vide pas le quota.
         listing_imports_all:
             policy: "fixed_window"
@@ -116,6 +126,8 @@ when@test:
             listing_imports_owner:
                 limit: 1000
             listing_imports_all:
+                limit: 1000
+            photo_uploads:
                 limit: 1000
 
 # Assez large pour travailler, assez bas pour croiser le 429 de temps en temps

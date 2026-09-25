@@ -48,10 +48,7 @@ final readonly class AccountDeleter
         );
 
         if ([] !== $upcoming) {
-            throw new AccountDeletionRefused(sprintf(
-                '%d séjour(s) accepté(s) sont encore à venir. Annulez-les depuis « Demandes » (le voyageur sera prévenu), puis revenez ici.',
-                count($upcoming),
-            ));
+            throw new AccountDeletionRefused(sprintf('%d séjour(s) accepté(s) sont encore à venir. Annulez-les depuis « Demandes » (le voyageur sera prévenu), puis revenez ici.', count($upcoming)));
         }
 
         // Guests still waiting get a real answer, not a dead link.
