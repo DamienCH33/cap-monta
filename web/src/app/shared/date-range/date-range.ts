@@ -1,5 +1,6 @@
-import { Component, computed, ElementRef, inject, model, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, model, signal } from '@angular/core';
 
+import { BusyPeriod } from '../../core/models/availability';
 import { plusDays, today } from '../../core/models/stay-dates';
 
 interface Day {
@@ -8,7 +9,10 @@ interface Day {
   /** « samedi 4 juillet 2026 », pour les lecteurs d'écran. */
   name: string;
   saturday: boolean;
+  /** Avant le premier jour possible (aujourd'hui, ou demain pour une demande). */
   past: boolean;
+  /** Nuit déjà prise dans le calendrier du logement. */
+  taken?: boolean;
 }
 
 interface Month {
@@ -93,6 +97,12 @@ export class DateRange {
 
   readonly arrival = model('');
   readonly departure = model('');
+  /** Périodes déjà prises (fiche d'un logement) : ces nuits sont barrées et hachurées. */
+  readonly busy = input<BusyPeriod[]>([]);
+  /** Premier jour d'arrivée possible ; aujourd'hui par défaut. */
+  readonly min = input('');
+  /** Un seul mois, panneau étroit : pour une colonne comme le formulaire de demande. */
+  readonly compact = input(false);
   readonly open = signal(false);
 
   readonly weekdays = ['lu', 'ma', 'me', 'je', 've', 'sa', 'di'];
@@ -128,12 +138,47 @@ export class DateRange {
     return `${shortDate(arrival)} → ${shortDate(departure)} · ${count} nuit${count > 1 ? 's' : ''}`;
   });
 
-  readonly months = computed<Month[]>(() => [
-    this.month(this.offset()),
-    this.month(this.offset() + 1),
-  ]);
+  readonly months = computed<Month[]>(() =>
+    this.compact()
+      ? [this.month(this.offset())]
+      : [this.month(this.offset()), this.month(this.offset() + 1)],
+  );
+  private readonly shown = computed(() => (this.compact() ? 1 : 2));
   readonly canGoBack = computed(() => this.offset() > 0);
-  readonly canGoForward = computed(() => this.offset() < MONTHS_AHEAD - 2);
+  readonly canGoForward = computed(() => this.offset() < MONTHS_AHEAD - this.shown());
+
+  /**
+   * Pendant le choix du départ : le dernier départ possible, c'est-à-dire le début de la
+   * prochaine période prise (on part le matin où d'autres arrivent). Null s'il n'y en a pas.
+   */
+  private readonly lastDeparture = computed(() => {
+    const arrival = this.arrival();
+    if ('' === arrival || '' !== this.departure()) {
+      return null;
+    }
+    const starts = this.busy()
+      .map((period) => period.start)
+      .filter((start) => start > arrival)
+      .sort();
+
+    return starts[0] ?? null;
+  });
+
+  /** Un jour qu'on ne peut pas cliquer maintenant. */
+  isDisabled(day: Day): boolean {
+    if (day.past) {
+      return true;
+    }
+    const arrival = this.arrival();
+    const choosingDeparture = '' !== arrival && '' === this.departure() && day.iso > arrival;
+    if (choosingDeparture) {
+      const last = this.lastDeparture();
+
+      return null !== last && day.iso > last;
+    }
+
+    return !!day.taken;
+  }
 
   toggle(): void {
     this.open.update((isOpen) => !isOpen);
@@ -150,12 +195,12 @@ export class DateRange {
   }
 
   move(step: number): void {
-    this.offset.update((value) => Math.min(MONTHS_AHEAD - 2, Math.max(0, value + step)));
+    this.offset.update((value) => Math.min(MONTHS_AHEAD - this.shown(), Math.max(0, value + step)));
   }
 
   /** Premier clic : l'arrivée. Second clic, plus tard : le départ, et le calendrier se referme. */
   pick(day: Day): void {
-    if (day.past) {
+    if (this.isDisabled(day)) {
       return;
     }
 
@@ -186,6 +231,8 @@ export class DateRange {
 
   private month(offset: number): Month {
     const [year, month] = parts(this.today);
+    const min = this.min() || this.today;
+    const busy = this.busy();
     const first = new Date(year, month - 1 + offset, 1);
     const count = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
     const firstIso = `${first.getFullYear()}-${String(first.getMonth() + 1).padStart(2, '0')}-01`;
@@ -199,7 +246,8 @@ export class DateRange {
         label: n + 1,
         name: `${DAYS[weekday]} ${n + 1} ${MONTHS[first.getMonth()]} ${first.getFullYear()}`,
         saturday: 6 === weekday,
-        past: iso < this.today,
+        past: iso < min,
+        taken: busy.some((period) => period.start <= iso && iso < period.end),
       });
     }
 
