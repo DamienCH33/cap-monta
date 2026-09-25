@@ -283,7 +283,134 @@
         </label>
       </section>
 
-      <!-- 5. Photos -->
+      <!-- 5. Conditions et frais -->
+      <section class="listing-form__section" formGroupName="terms">
+        <h2 class="listing-form__section-title">
+          Conditions et frais <span class="listing-form__muted">(facultatif)</span>
+        </h2>
+        <p class="listing-form__muted">
+          Affichés sur l'annonce : le voyageur connaît le vrai prix avant d'écrire. Laissez vide ce
+          que vous ne voulez pas préciser.
+        </p>
+
+        <div class="listing-form__row">
+          <label class="listing-form__group">
+            <span class="listing-form__label">Arrivée à partir de</span>
+            <select formControlName="checkInFrom" (change)="forget('terms')">
+              <option value="">Non précisé</option>
+              @for (time of timeOptions; track time) {
+                <option [value]="time">{{ timeLabel(time) }}</option>
+              }
+            </select>
+          </label>
+          <label class="listing-form__group">
+            <span class="listing-form__label">Départ avant</span>
+            <select formControlName="checkOutBefore" (change)="forget('terms')">
+              <option value="">Non précisé</option>
+              @for (time of timeOptions; track time) {
+                <option [value]="time">{{ timeLabel(time) }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="listing-form__row">
+          <label class="listing-form__group">
+            <span class="listing-form__label">Acompte à l'acceptation</span>
+            <span class="listing-form__suffix">
+              <input
+                inputmode="numeric"
+                formControlName="depositPercent"
+                placeholder="30"
+                (input)="forget('terms')"
+              />
+              <span aria-hidden="true">%</span>
+            </span>
+          </label>
+          <label class="listing-form__group">
+            <span class="listing-form__label">Caution</span>
+            <span class="listing-form__suffix">
+              <input
+                inputmode="decimal"
+                formControlName="securityDeposit"
+                placeholder="300"
+                (input)="forget('terms')"
+              />
+              <span aria-hidden="true">€</span>
+            </span>
+          </label>
+        </div>
+
+        <label class="listing-form__group">
+          <span class="listing-form__label">Annulation</span>
+          <textarea
+            rows="2"
+            formControlName="cancellationPolicy"
+            placeholder="Par exemple : acompte rendu en cas d'annulation plus de 30 jours avant l'arrivée."
+            (input)="forget('terms')"
+          ></textarea>
+        </label>
+
+        <div class="listing-form__row">
+          <label class="listing-form__group">
+            <span class="listing-form__label">Taxe de séjour, par adulte et par nuit</span>
+            <span class="listing-form__suffix">
+              <input
+                inputmode="decimal"
+                formControlName="touristTax"
+                placeholder="0,88"
+                (input)="forget('terms')"
+              />
+              <span aria-hidden="true">€</span>
+            </span>
+          </label>
+          <label class="listing-form__group">
+            <span class="listing-form__label">Redevance du domaine, par personne et par nuit</span>
+            <span class="listing-form__suffix">
+              <input
+                inputmode="decimal"
+                formControlName="resortFee"
+                placeholder="4,50"
+                (input)="forget('terms')"
+              />
+              <span aria-hidden="true">€</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="listing-form__row">
+          <label class="listing-form__group">
+            <span class="listing-form__label">Ménage de fin de séjour, en option</span>
+            <span class="listing-form__suffix">
+              <input
+                inputmode="decimal"
+                formControlName="cleaningFee"
+                placeholder="60"
+                (input)="forget('terms')"
+              />
+              <span aria-hidden="true">€</span>
+            </span>
+          </label>
+          <label class="listing-form__group">
+            <span class="listing-form__label">Linge, en option, par personne</span>
+            <span class="listing-form__suffix">
+              <input
+                inputmode="decimal"
+                formControlName="linenFee"
+                placeholder="15"
+                (input)="forget('terms')"
+              />
+              <span aria-hidden="true">€</span>
+            </span>
+          </label>
+        </div>
+
+        @if (error('terms'); as message) {
+          <p class="listing-form__error" role="alert">{{ message }}</p>
+        }
+      </section>
+
+      <!-- 6. Photos -->
       <section class="listing-form__section">
         <h2 class="listing-form__section-title">Photos</h2>
         <p class="listing-form__muted">

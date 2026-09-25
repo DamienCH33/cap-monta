@@ -165,7 +165,17 @@
   &__line {
     display: flex;
     justify-content: space-between;
+    gap: 12px;
+    padding: 3px 0;
     font-size: 15px;
+    font-variant-numeric: tabular-nums;
+
+    &--total {
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      font-size: 16px;
+    }
   }
 
   &__note {

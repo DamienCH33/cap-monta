@@ -1,4 +1,6 @@
 import { DistrictArea } from './district';
+import { StayTerms } from './stay-terms';
+
 export interface Accommodation {
   slug: string;
   resort: string;
@@ -12,6 +14,7 @@ export interface Accommodation {
   surface: number | null;
   amenities: string[];
   petsPolicy: PetsPolicy;
+  terms: StayTerms;
   description: string;
   priceFrom: number | null;
   availability: AvailabilityWeek[];

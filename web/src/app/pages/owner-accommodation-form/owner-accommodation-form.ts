@@ -2,7 +2,14 @@ import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, EMPTY, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 
@@ -22,6 +29,60 @@ import { OwnerAccommodationService } from '../../core/services/owner-accommodati
 import { OwnerFlash } from '../../core/services/owner-flash';
 import { SeoService } from '../../core/services/seo';
 import { PhotoManager } from './photo-manager/photo-manager';
+import {
+  NO_TERMS,
+  StayTerms,
+  TIME_OPTIONS,
+  timeLabel,
+  toCents,
+  toEuroInput,
+} from '../../core/models/stay-terms';
+
+type TermsForm = Record<keyof StayTerms, string>;
+
+const AMOUNTS = ['securityDeposit', 'cleaningFee', 'linenFee', 'touristTax', 'resortFee'] as const;
+
+/** Montants lisibles en euros et acompte entier de 0 à 100 ; les bornes fines sont à l'API. */
+function termsValidator(group: AbstractControl): ValidationErrors | null {
+  const value = group.value as TermsForm;
+  const badAmount = AMOUNTS.some((key) => Number.isNaN(toCents(value[key])));
+  const percent = value.depositPercent.trim();
+  const badPercent = '' !== percent && !/^(100|\d{1,2})$/.test(percent);
+
+  return badAmount || badPercent ? { terms: true } : null;
+}
+
+function termsToForm(terms: StayTerms | undefined): TermsForm {
+  const t = { ...NO_TERMS, ...terms };
+
+  return {
+    checkInFrom: t.checkInFrom ?? '',
+    checkOutBefore: t.checkOutBefore ?? '',
+    depositPercent: null === t.depositPercent ? '' : String(t.depositPercent),
+    securityDeposit: toEuroInput(t.securityDeposit),
+    cancellationPolicy: t.cancellationPolicy ?? '',
+    cleaningFee: toEuroInput(t.cleaningFee),
+    linenFee: toEuroInput(t.linenFee),
+    touristTax: toEuroInput(t.touristTax),
+    resortFee: toEuroInput(t.resortFee),
+  };
+}
+
+function formToTerms(form: TermsForm): StayTerms {
+  const percent = form.depositPercent.trim();
+
+  return {
+    checkInFrom: form.checkInFrom || null,
+    checkOutBefore: form.checkOutBefore || null,
+    depositPercent: '' === percent ? null : Number(percent),
+    securityDeposit: toCents(form.securityDeposit),
+    cancellationPolicy: form.cancellationPolicy.trim() || null,
+    cleaningFee: toCents(form.cleaningFee),
+    linenFee: toCents(form.linenFee),
+    touristTax: toCents(form.touristTax),
+    resortFee: toCents(form.resortFee),
+  };
+}
 
 type Field =
   | 'resort'
@@ -32,6 +93,7 @@ type Field =
   | 'surface'
   | 'amenities'
   | 'petsPolicy'
+  | 'terms'
   | 'description';
 
 /** Ce que veut faire le propriétaire en validant. */
@@ -46,6 +108,7 @@ const FIELDS: Field[] = [
   'surface',
   'amenities',
   'petsPolicy',
+  'terms',
   'description',
 ];
 
@@ -62,6 +125,8 @@ const MESSAGES: Record<Field, string> = {
   surface: 'Indiquez une surface en m² entiers, entre 5 et 200 (par exemple 40).',
   amenities: 'Pas plus de 20 équipements.',
   petsPolicy: 'Choisissez une règle pour les animaux.',
+  terms:
+    'Vérifiez les conditions : montants en euros (par exemple 0,88), acompte entre 0 et 100 %.',
   description: 'La description ne peut pas dépasser 5000 caractères.',
 };
 
@@ -141,8 +206,25 @@ export class OwnerAccommodationForm {
       validators: Validators.maxLength(20),
     }),
     petsPolicy: new FormControl<PetsPolicy>('on_request', { nonNullable: true }),
+    terms: inject(FormBuilder).nonNullable.group(
+      {
+        checkInFrom: [''],
+        checkOutBefore: [''],
+        depositPercent: [''],
+        securityDeposit: [''],
+        cancellationPolicy: ['', Validators.maxLength(600)],
+        cleaningFee: [''],
+        linenFee: [''],
+        touristTax: [''],
+        resortFee: [''],
+      },
+      { validators: termsValidator },
+    ),
     description: ['', Validators.maxLength(5000)],
   });
+
+  readonly timeOptions = TIME_OPTIONS;
+  readonly timeLabel = timeLabel;
 
   private readonly districts = signal<DistrictOption[]>([]);
   private readonly resort = toSignal(this.form.controls.resort.valueChanges, { initialValue: '' });
@@ -315,7 +397,12 @@ export class OwnerAccommodationForm {
 
   /** Le message à afficher sous un champ, ou null. L'API a le dernier mot. */
   error(field: Field): string | null {
-    const server = this.serverErrors()[field];
+    const errors = this.serverErrors() as Record<string, string | undefined>;
+    // Les erreurs de l'API sur les conditions arrivent par champ (terms.touristTax…).
+    const server =
+      'terms' === field
+        ? Object.entries(errors).find(([path]) => path.startsWith('terms'))?.[1]
+        : errors[field];
 
     if (server) {
       return server;
@@ -333,9 +420,13 @@ export class OwnerAccommodationForm {
   /** Un champ corrigé ne garde pas l'ancien refus de l'API. */
   forget(field: Field): void {
     this.serverErrors.update((errors) => {
-      const next = { ...errors };
-      delete next[field];
-      return next;
+      const next = { ...errors } as Record<string, string>;
+      for (const path of Object.keys(next)) {
+        if (path === field || ('terms' === field && path.startsWith('terms'))) {
+          delete next[path];
+        }
+      }
+      return next as typeof errors;
     });
   }
 
@@ -400,6 +491,7 @@ export class OwnerAccommodationForm {
           surface: item.surface,
           amenities: item.amenities,
           petsPolicy: item.petsPolicy,
+          terms: termsToForm(item.terms),
           description: item.description,
         });
         // Un mobil-home ne change pas de domaine : pour cela, on crée un autre logement.
@@ -445,6 +537,7 @@ export class OwnerAccommodationForm {
       petsPolicy: value.petsPolicy,
       description: value.description.trim(),
       district: 'chm' === value.resort && '' !== value.district ? value.district : null,
+      terms: formToTerms(value.terms),
     };
   }
 
@@ -472,6 +565,10 @@ export class OwnerAccommodationForm {
     }
     if (value.petsPolicy !== existing.petsPolicy) {
       changes.petsPolicy = value.petsPolicy;
+    }
+    const terms = formToTerms(value.terms);
+    if (JSON.stringify(terms) !== JSON.stringify({ ...NO_TERMS, ...existing.terms })) {
+      changes.terms = terms;
     }
     if (description !== existing.description) {
       changes.description = description;
