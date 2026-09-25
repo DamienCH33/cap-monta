@@ -1,20 +1,13 @@
-// Mêmes couleurs que Mes logements. À relier aux variables globales de la charte.
 :host {
-  --oh-sea: #0b5f8a;
-  --oh-sea-dark: #084a6b;
-  --oh-pine: #2f6b4f;
   --oh-sand: #9a7440;
-  --oh-ink: #1c2530;
-  --oh-muted: #5b6672;
-  --oh-line: rgb(0 0 0 / 9%);
 
   display: block;
-  color: var(--oh-ink);
+  color: var(--text-primary);
 }
 
 // Bandeau d'accueil : la mer domine, un reflet de pinède en bas à droite.
 .owner-home__hero {
-  border-bottom: 1px solid rgb(11 95 138 / 12%);
+  border-bottom: 1px solid rgb(29 111 151 / 12%);
   background: linear-gradient(120deg, #e2eef6 0%, #eaf3f6 60%, #e8f1ec 100%);
 }
 
@@ -29,7 +22,7 @@
 
 .owner-home__eyebrow {
   margin: 0 0 0.35rem;
-  color: var(--oh-sea);
+  color: var(--blue);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -43,18 +36,18 @@
 .owner-home__primary {
   padding: 0.75rem 1.4rem;
   border-radius: 0.6rem;
-  background: var(--oh-sea);
+  background: var(--blue);
   color: #fff;
   font-weight: 600;
   text-decoration: none;
   transition: background 0.15s ease;
 
   &:hover {
-    background: var(--oh-sea-dark);
+    background: var(--ocean);
   }
 
   &:focus-visible {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 2px;
   }
 }
@@ -73,21 +66,21 @@
   max-width: 56rem;
   margin-bottom: 2rem;
   padding: 1rem 1.25rem;
-  border: 1px solid rgb(11 95 138 / 25%);
+  border: 1px solid rgb(29 111 151 / 25%);
   border-radius: 0.875rem;
   background: #fff;
-  color: var(--oh-ink);
+  color: var(--text-primary);
   font-weight: 600;
   text-decoration: none;
 
   &:hover {
-    border-color: rgb(11 95 138 / 45%);
+    border-color: rgb(29 111 151 / 45%);
     text-decoration: none;
   }
 }
 
 .owner-home__callout-action {
-  color: var(--oh-sea);
+  color: var(--blue);
 }
 
 // Des voyageurs attendent une réponse : le bandeau le plus visible de la page.
@@ -111,7 +104,7 @@
 
 .owner-home__section-title {
   margin: 0 0 1rem;
-  color: var(--oh-muted);
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -138,11 +131,11 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 1.25rem 1.5rem;
-  border: 1px solid var(--oh-line);
+  border: 1px solid var(--border);
   border-left: 4px solid #aab4be;
   border-radius: 0.875rem;
   background: #fff;
-  color: var(--oh-ink);
+  color: var(--text-primary);
   text-decoration: none;
   box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
   transition: box-shadow 0.15s ease;
@@ -152,12 +145,12 @@
   }
 
   &:focus-visible {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 2px;
   }
 
   &--published {
-    border-left-color: var(--oh-pine);
+    border-left-color: var(--pine);
   }
 
   &--archived {
@@ -172,7 +165,7 @@
 }
 
 .owner-home__stat-label {
-  color: var(--oh-muted);
+  color: var(--text-secondary);
 }
 
 // Un calendrier par logement en ligne ; ceux à vérifier en premier.
@@ -180,14 +173,14 @@
   max-width: 56rem;
   margin: 0 0 2.5rem;
   padding: 1rem 1.25rem;
-  border: 1px solid var(--oh-line);
+  border: 1px solid var(--border);
   border-radius: 0.875rem;
   background: #fff;
 }
 
 .owner-home__calendars-summary {
   margin: 0 0 0.5rem;
-  color: var(--oh-muted);
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -203,7 +196,7 @@
   gap: 0.35rem 1rem;
   align-items: center;
   padding: 0.7rem 0;
-  border-top: 1px solid var(--oh-line);
+  border-top: 1px solid var(--border);
 
   &:first-child {
     border-top: none;
@@ -234,12 +227,12 @@
 }
 
 .owner-home__calendar-date {
-  color: var(--oh-muted);
+  color: var(--text-secondary);
   font-size: 0.85rem;
 }
 
 .owner-home__calendar-link {
-  color: var(--oh-sea);
+  color: var(--blue);
   font-weight: 600;
   text-decoration: none;
 

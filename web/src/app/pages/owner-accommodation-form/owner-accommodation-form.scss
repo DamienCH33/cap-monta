@@ -1,21 +1,9 @@
-// Mêmes couleurs que Mes logements. À relier aux variables globales de la charte.
-:host {
-  --lf-sea: #0b5f8a;
-  --lf-sea-dark: #084a6b;
-  --lf-sea-soft: #eef5f9;
-  --lf-pine: #2f6b4f;
-  --lf-ink: #1c2530;
-  --lf-muted: #5b6672;
-  --lf-line: rgb(0 0 0 / 12%);
-  --lf-error: #a3261d;
-}
-
 .listing-form {
   padding-block: 1.5rem 3rem;
-  color: var(--lf-ink);
+  color: var(--text-primary);
 
   a {
-    color: var(--lf-sea);
+    color: var(--blue);
     text-decoration: none;
 
     &:hover {
@@ -30,7 +18,7 @@
   gap: 0.5rem;
   align-items: center;
   margin-bottom: 1rem;
-  color: var(--lf-muted);
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -58,7 +46,7 @@
 
   &--published {
     background: #e4f1e9;
-    color: var(--lf-pine);
+    color: var(--pine);
   }
 
   &--archived {
@@ -70,7 +58,7 @@
 .listing-form__intro {
   max-width: 44rem;
   margin: 0.5rem 0 0;
-  color: var(--lf-muted);
+  color: var(--text-secondary);
 }
 
 .listing-form__form {
@@ -91,7 +79,7 @@
 
 .listing-form__alert {
   background: #fbeceb;
-  color: var(--lf-error);
+  color: var(--danger-text);
 }
 
 .listing-form__form .listing-form__alert {
@@ -99,8 +87,8 @@
 }
 
 .listing-form__notice {
-  border: 1px solid rgb(11 95 138 / 25%);
-  background: var(--lf-sea-soft);
+  border: 1px solid rgb(29 111 151 / 25%);
+  background: var(--blue-soft);
 }
 
 .listing-form__form .listing-form__notice--inline {
@@ -120,7 +108,6 @@
   @media (max-width: 36rem) {
     padding: 1.25rem;
   }
-
 }
 
 .listing-form__section-title {
@@ -147,7 +134,7 @@
 
 .listing-form__muted {
   margin: 0;
-  color: var(--lf-muted);
+  color: var(--text-secondary);
   font-weight: 400;
 }
 
@@ -158,17 +145,17 @@
 
 .listing-form__hint,
 .listing-form__counter {
-  color: var(--lf-muted);
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
 .listing-form__counter--ok {
-  color: var(--lf-pine);
+  color: var(--pine);
 }
 
 .listing-form__error {
   margin: 0;
-  color: var(--lf-error);
+  color: var(--danger-text);
   font-size: 0.875rem;
 }
 
@@ -196,7 +183,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--lf-line);
+  border: 1px solid var(--border);
   background: #fff;
   font-weight: 600;
   text-align: center;
@@ -212,18 +199,18 @@
   }
 
   &:hover {
-    border-color: rgb(11 95 138 / 45%);
+    border-color: rgb(29 111 151 / 45%);
   }
 
   &:has(input:checked) {
-    border-color: var(--lf-sea);
-    background: var(--lf-sea-soft);
-    color: var(--lf-sea-dark);
-    box-shadow: inset 0 0 0 1px var(--lf-sea);
+    border-color: var(--blue);
+    background: var(--blue-soft);
+    color: var(--ocean);
+    box-shadow: inset 0 0 0 1px var(--blue);
   }
 
   &:has(input:focus-visible) {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 2px;
   }
 }
@@ -269,7 +256,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.3rem;
-  border: 1px solid var(--lf-line);
+  border: 1px solid var(--border);
   border-radius: 0.6rem;
 }
 
@@ -278,8 +265,8 @@
   height: 2.4rem;
   border: 0;
   border-radius: 0.45rem;
-  background: var(--lf-sea-soft);
-  color: var(--lf-sea-dark);
+  background: var(--blue-soft);
+  color: var(--ocean);
   font: inherit;
   font-size: 1.25rem;
   font-weight: 600;
@@ -295,7 +282,7 @@
   }
 
   &:focus-visible {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 2px;
   }
 }
@@ -308,7 +295,7 @@
 .listing-form__suffix {
   display: flex;
   align-items: center;
-  border: 1px solid var(--lf-line);
+  border: 1px solid var(--border);
   border-radius: 0.6rem;
   background: #fff;
 
@@ -324,13 +311,13 @@
 
   span {
     padding-right: 0.8rem;
-    color: var(--lf-muted);
+    color: var(--text-secondary);
   }
 
   &:focus-within {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 1px;
-    border-color: var(--lf-sea);
+    border-color: var(--blue);
   }
 }
 
@@ -338,16 +325,16 @@
 .listing-form textarea {
   width: 100%;
   padding: 0.75rem 0.8rem;
-  border: 1px solid var(--lf-line);
+  border: 1px solid var(--border);
   border-radius: 0.6rem;
   background: #fff;
-  color: var(--lf-ink);
+  color: var(--text-primary);
   font: inherit;
 
   &:focus-visible {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 1px;
-    border-color: var(--lf-sea);
+    border-color: var(--blue);
   }
 }
 
@@ -372,24 +359,24 @@
 
 .listing-form__button {
   padding: 0.75rem 1.4rem;
-  border: 1px solid var(--lf-sea);
+  border: 1px solid var(--blue);
   border-radius: 0.6rem;
-  background: var(--lf-sea);
+  background: var(--blue);
   color: #fff;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    background: var(--lf-sea-dark);
+    background: var(--ocean);
   }
 
   &--secondary {
     background: #fff;
-    color: var(--lf-sea);
+    color: var(--blue);
 
     &:hover:not(:disabled) {
-      background: var(--lf-sea-soft);
+      background: var(--blue-soft);
     }
   }
 
@@ -399,7 +386,7 @@
   }
 
   &:focus-visible {
-    outline: 3px solid rgb(11 95 138 / 35%);
+    outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 2px;
   }
 }
