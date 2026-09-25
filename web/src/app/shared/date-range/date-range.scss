@@ -38,6 +38,19 @@
   box-shadow: var(--shadow-float);
 }
 
+.range__panel--compact {
+  // Aligné sur le cadre du champ (12 px de marge intérieure + 1 px de bordure).
+  left: -13px;
+  right: -13px;
+  width: auto;
+  top: calc(100% + 14px);
+  padding-inline: 14px;
+
+  .range__months {
+    grid-template-columns: 1fr;
+  }
+}
+
 .range__nav {
   position: absolute;
   top: 14px;
@@ -117,15 +130,22 @@
     outline: 3px solid rgb(29 111 151 / 45%);
   }
 
+  // Passé : estompé. Le barré est réservé aux nuits déjà prises (--taken).
   &:disabled {
     color: #b4bec2;
-    text-decoration: line-through;
     cursor: default;
   }
 
   &--sat {
     font-weight: 700;
     color: var(--blue);
+  }
+
+  // Nuit prise : hachures + barré, lisible sans distinguer les couleurs.
+  &--taken {
+    background: repeating-linear-gradient(135deg, transparent 0 4px, rgb(15 59 85 / 14%) 4px 6px);
+    border-radius: 0;
+    text-decoration: line-through;
   }
 
   &--in {

@@ -29,6 +29,7 @@
     } @else {
       <section class="photo">
         <cm-icon name="photo" />
+        Photos à venir
       </section>
     }
 
@@ -152,6 +153,7 @@
             [initialDeparture]="initialDeparture()"
             [initialGuests]="initialGuests()"
             [petsPolicy]="logement.petsPolicy"
+            [busy]="busy()"
           />
         }
       </aside>

@@ -42,4 +42,33 @@ describe('DateRange', () => {
       true,
     );
   });
+
+  it('bars taken nights and stops the departure at the next taken period', () => {
+    const fixture = TestBed.createComponent(DateRange);
+    const range = fixture.componentInstance;
+    const start = plusDays(today(), 12);
+    fixture.componentRef.setInput('busy', [{ start, end: plusDays(start, 7) }]);
+    const day = (iso: string) => ({ iso, label: 1, name: iso, saturday: false, past: false });
+    const taken = { ...day(start), taken: true };
+
+    // Une nuit prise ne peut pas être une arrivée.
+    expect(range.isDisabled(taken)).toBe(true);
+    range.pick(taken);
+    expect(range.arrival()).toBe('');
+
+    range.pick(day(plusDays(today(), 5)));
+    // On peut partir le matin où la période prise commence, pas après.
+    expect(range.isDisabled(taken)).toBe(false);
+    expect(range.isDisabled(day(plusDays(start, 1)))).toBe(true);
+
+    range.pick(taken);
+    expect(range.departure()).toBe(start);
+  });
+
+  it('shows a single month in compact mode', () => {
+    const fixture = TestBed.createComponent(DateRange);
+    fixture.componentRef.setInput('compact', true);
+
+    expect(fixture.componentInstance.months()).toHaveLength(1);
+  });
 });

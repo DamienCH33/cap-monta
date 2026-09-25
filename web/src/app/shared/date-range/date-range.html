@@ -13,7 +13,12 @@
 </button>
 
 @if (open()) {
-  <div class="range__panel" role="dialog" aria-label="Choisir les dates du séjour">
+  <div
+    class="range__panel"
+    [class.range__panel--compact]="compact()"
+    role="dialog"
+    aria-label="Choisir les dates du séjour"
+  >
     <div class="range__nav">
       <button
         type="button"
@@ -53,9 +58,10 @@
                 [class.range__day--sat]="day.saturday"
                 [class.range__day--end]="isEnd(day.iso)"
                 [class.range__day--in]="isInside(day.iso)"
-                [disabled]="day.past"
+                [class.range__day--taken]="day.taken"
+                [disabled]="isDisabled(day)"
                 [attr.aria-pressed]="isEnd(day.iso)"
-                [attr.aria-label]="day.name"
+                [attr.aria-label]="day.taken ? day.name + ', déjà pris' : day.name"
                 (click)="pick(day)"
               >
                 {{ day.label }}
@@ -73,6 +79,11 @@
         <button type="button" class="range__done" (click)="close()">OK</button>
       </span>
     </div>
-    <p class="range__hint">Samedis en gras : la plupart des locations vont du samedi au samedi.</p>
+    <p class="range__hint">
+      Samedis en gras : la plupart des locations vont du samedi au samedi.
+      @if (busy().length) {
+        Jours hachurés et barrés : déjà pris.
+      }
+    </p>
   </div>
 }

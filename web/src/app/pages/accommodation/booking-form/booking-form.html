@@ -23,33 +23,25 @@
     <h2 class="box__title">Demander ces dates</h2>
 
     <div class="box__grid">
-      <label class="field">
-        <span class="field__label">Arrivée</span>
-        <input
-          type="date"
-          name="arrival"
+      <div class="field field--full field--dates">
+        <span class="field__label" id="booking-dates">Dates du séjour</span>
+        <cm-date-range
+          class="field__range"
+          aria-labelledby="booking-dates"
+          [compact]="true"
           [min]="firstArrival"
-          [ngModel]="arrival()"
-          (ngModelChange)="onArrivalChange($event)"
+          [busy]="busy()"
+          [arrival]="arrival()"
+          (arrivalChange)="onArrivalChange($event)"
+          [departure]="departure()"
+          (departureChange)="onDepartureChange($event)"
         />
-        @if (violations()['arrival']; as violation) {
-          <span class="field__error">{{ violation }}</span>
+        @for (field of dateFields; track field) {
+          @if (violations()[field]; as violation) {
+            <span class="field__error">{{ violation }}</span>
+          }
         }
-      </label>
-
-      <label class="field">
-        <span class="field__label">Départ</span>
-        <input
-          type="date"
-          name="departure"
-          [min]="arrival() ? plusDays(arrival(), 1) : plusDays(firstArrival, 1)"
-          [ngModel]="departure()"
-          (ngModelChange)="departure.set($event); clearViolation('departure'); refreshQuote()"
-        />
-        @if (violations()['departure']; as violation) {
-          <span class="field__error">{{ violation }}</span>
-        }
-      </label>
+      </div>
 
       <div class="field field--full">
         <span class="field__label">Voyageurs</span>
@@ -165,7 +157,7 @@
     }
 
     <button class="box__submit" type="submit" [disabled]="sending() || !quote()?.available">
-      {{ sending() ? 'Envoi…' : 'Envoyer la demande' }}
+      {{ submitLabel() }}
     </button>
 
     <p class="box__note">

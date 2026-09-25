@@ -1,6 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, input, linkedSignal, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -10,12 +10,14 @@ import { Guests, NO_GUESTS, travellerCount } from '../../../core/models/guests';
 import { Quote } from '../../../core/models/quote';
 import { BookingService } from '../../../core/services/booking';
 import { GuestRequests } from '../../../core/services/guest-requests';
+import { BusyPeriod } from '../../../core/models/availability';
+import { DateRange } from '../../../shared/date-range/date-range';
 import { GuestPicker } from '../../../shared/guest-picker/guest-picker';
-import { departureAfter, plusDays, today } from '../../../core/models/stay-dates';
+import { plusDays, today } from '../../../core/models/stay-dates';
 
 @Component({
   selector: 'cm-booking-form',
-  imports: [FormsModule, DecimalPipe, GuestPicker, RouterLink],
+  imports: [FormsModule, DecimalPipe, DateRange, GuestPicker, RouterLink],
   templateUrl: './booking-form.html',
   styleUrl: './booking-form.scss',
 })
@@ -31,6 +33,8 @@ export class BookingForm implements OnInit {
   readonly initialDeparture = input('');
   readonly initialGuests = input<Guests>(NO_GUESTS);
   readonly petsPolicy = input<PetsPolicy>('on_request');
+  /** Périodes prises, barrées dans le calendrier de dates. */
+  readonly busy = input<BusyPeriod[]>([]);
 
   readonly arrival = linkedSignal(() => this.initialArrival());
   readonly departure = linkedSignal(() => this.initialDeparture());
@@ -39,13 +43,20 @@ export class BookingForm implements OnInit {
   readonly today = today();
   /** Première arrivée possible : demain. Le propriétaire doit avoir le temps de répondre. */
   readonly firstArrival = plusDays(today(), 1);
-  readonly plusDays = plusDays;
 
+  /** Les erreurs de l'API sur les dates s'affichent sous le calendrier. */
+  readonly dateFields = ['arrival', 'departure'] as const;
+
+  /** Le calendrier vide le départ quand on choisit une nouvelle arrivée : pas de devis entre les deux. */
   onArrivalChange(arrival: string): void {
     this.arrival.set(arrival);
-    this.departure.set(departureAfter(arrival, this.departure()));
-    this.clearViolation('arrival');
-    this.clearViolation('departure');
+    this.dateFields.forEach((field) => this.clearViolation(field));
+    this.refreshQuote();
+  }
+
+  onDepartureChange(departure: string): void {
+    this.departure.set(departure);
+    this.dateFields.forEach((field) => this.clearViolation(field));
     this.refreshQuote();
   }
 
@@ -63,6 +74,25 @@ export class BookingForm implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly violations = signal<Record<string, string>>({});
+
+  /** Le bouton dit ce qui manque plutôt que de rester grisé sans explication. */
+  readonly submitLabel = computed(() => {
+    if (this.sending()) {
+      return 'Envoi…';
+    }
+    if ('' === this.arrival() || '' === this.departure()) {
+      return 'Choisissez vos dates';
+    }
+    if (0 === travellerCount(this.guests())) {
+      return 'Indiquez les voyageurs';
+    }
+    const quote = this.quote();
+    if (null !== quote && !quote.available) {
+      return 'Dates impossibles';
+    }
+
+    return 'Envoyer la demande';
+  });
 
   ngOnInit(): void {
     this.refreshQuote();
