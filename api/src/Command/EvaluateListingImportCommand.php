@@ -19,6 +19,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\When;
 
 /**
  * Scores the listing import against the evaluation set.
@@ -28,6 +29,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  * - --run: calls the model on every case, saves the answers in evals/listing-import/runs/, then
  *   scores them. Costs a few cents; --case limits it to the cases whose id contains a string.
  */
+// Outil de mesure de l'assistant (jeu d'annonces réelles, hors dépôt) : pas en production.
+#[When(env: 'dev')]
+#[When(env: 'test')]
 #[AsCommand(name: 'app:listing-import:eval', description: 'Évalue l\'import d\'annonce sur le jeu de cas réels')]
 final readonly class EvaluateListingImportCommand
 {

@@ -70,7 +70,11 @@ final readonly class PublicCalendar
     public function invalidate(Accommodation $accommodation): void
     {
         try {
-            $this->cache->invalidateTags([self::tag($accommodation)]);
+            // Redis briefly unreachable: no exception, just false. The old calendar would then be
+            // served for up to a day, dates shown free while taken: at least say it.
+            if (!$this->cache->invalidateTags([self::tag($accommodation)])) {
+                $this->logger->error('Calendar cache not invalidated for {slug}', ['slug' => $accommodation->getSlug()]);
+            }
         } catch (\Throwable $e) {
             // Redis down: nothing was cached meanwhile, and the entries expire within a day anyway.
             $this->logger->error('Calendar cache not invalidated for {slug}: {message}', [

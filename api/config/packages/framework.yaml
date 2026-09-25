@@ -4,7 +4,10 @@ framework:
     trusted_headers: ["x-forwarded-for", "x-forwarded-proto"]
 
     session:
-        handler_id: null
+        # Sessions en base (PostgreSQL) : elles survivent à un redéploiement sur Railway, et
+        # plusieurs instances les partagent. Dans des fichiers, chaque déploiement déconnectait
+        # tous les propriétaires. Table « sessions », créée par une migration.
+        handler_id: '%env(DATABASE_URL)%'
         cookie_secure: auto
         cookie_samesite: lax
         cookie_httponly: true
@@ -23,6 +26,12 @@ framework:
             log_level: info
         ApiPlatform\Validator\Exception\ValidationException:
             log_level: info
+
+when@prod:
+    framework:
+        session:
+            # Derrière HTTPS uniquement en production : « auto » dépendrait de TRUSTED_PROXIES.
+            cookie_secure: true
 
 when@test:
     framework:

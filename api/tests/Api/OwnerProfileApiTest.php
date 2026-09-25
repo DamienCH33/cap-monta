@@ -99,6 +99,27 @@ final class OwnerProfileApiTest extends WebTestCase
         self::assertTrue($this->hasher()->isPasswordValid($alice, 'nouveau-mot-de-passe'));
     }
 
+    /**
+     * SameSite=Lax leaves two holes: a form posted as text/plain can carry JSON, and a sibling
+     * sub-domain counts as the same site. Both are closed on the owner's writes.
+     */
+    public function testAWriteFromAnotherSiteOrNotInJsonIsRefused(): void
+    {
+        $this->client->loginUser($this->alice, 'main');
+
+        $this->client->request('PATCH', '/api/owner/me', server: [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_ORIGIN' => 'https://evil.example',
+        ], content: '{"displayName":"Pirate"}');
+        self::assertResponseStatusCodeSame(403);
+
+        $this->client->request('PATCH', '/api/owner/me', server: ['CONTENT_TYPE' => 'text/plain'], content: '{"displayName":"Pirate"}');
+        self::assertResponseStatusCodeSame(415);
+
+        $this->em->clear();
+        self::assertSame('Alice', $this->em->getRepository(User::class)->findOneBy(['email' => 'alice@example.com'])?->getDisplayName());
+    }
+
     public function testClosingTheAccountNeedsThePassword(): void
     {
         $this->client->loginUser($this->alice, 'main');

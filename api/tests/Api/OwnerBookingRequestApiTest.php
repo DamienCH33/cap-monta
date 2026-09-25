@@ -77,7 +77,7 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         $this->request($this->home, 30, 37, 'Luc Petit');
         $this->login();
 
-        $this->client->request('POST', '/api/owner/booking-requests/'.$chosen->getId()->toRfc4122().'/accept', content: '{"message":"Bienvenue !"}');
+        $this->client->request('POST', '/api/owner/booking-requests/'.$chosen->getId()->toRfc4122().'/accept', server: ['CONTENT_TYPE' => 'application/json'], content: '{"message":"Bienvenue !"}');
 
         self::assertResponseIsSuccessful();
         $inbox = array_column($this->json(), null, 'guestName');
@@ -113,7 +113,7 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
         self::assertSame('price', $this->json()['violations'][0]['propertyPath']);
 
-        $this->client->request('POST', $url, content: '{"price":45000}');
+        $this->client->request('POST', $url, server: ['CONTENT_TYPE' => 'application/json'], content: '{"price":45000}');
         self::assertResponseIsSuccessful();
         self::assertSame(45000, $this->json()[0]['agreedPrice']);
     }
@@ -124,7 +124,7 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         $this->login();
         $url = '/api/owner/booking-requests/'.$request->getId()->toRfc4122().'/accept';
 
-        $this->client->request('POST', $url, content: '{"price":40000}');
+        $this->client->request('POST', $url, server: ['CONTENT_TYPE' => 'application/json'], content: '{"price":40000}');
         self::assertResponseStatusCodeSame(422);
         self::assertSame('price', $this->json()['violations'][0]['propertyPath']);
 
@@ -153,7 +153,7 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         $request = $this->request($this->home, 10, 17, 'Jeanne Martin');
         $this->login();
 
-        $this->client->request('POST', '/api/owner/booking-requests/'.$request->getId()->toRfc4122().'/decline', content: '{"message":"Nous y serons nous-mêmes."}');
+        $this->client->request('POST', '/api/owner/booking-requests/'.$request->getId()->toRfc4122().'/decline', server: ['CONTENT_TYPE' => 'application/json'], content: '{"message":"Nous y serons nous-mêmes."}');
 
         self::assertResponseIsSuccessful();
         self::assertSame('declined', $this->json()[0]['status']);
@@ -163,7 +163,7 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         self::assertEmailTextBodyContains(self::getMailerMessage(0) ?? self::fail(), '&adultes=2');
 
         // Answered once: a second answer is refused.
-        $this->client->request('POST', '/api/owner/booking-requests/'.$request->getId()->toRfc4122().'/accept', content: '{"price":45000}');
+        $this->client->request('POST', '/api/owner/booking-requests/'.$request->getId()->toRfc4122().'/accept', server: ['CONTENT_TYPE' => 'application/json'], content: '{"price":45000}');
         self::assertResponseStatusCodeSame(409);
     }
 
@@ -177,7 +177,7 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(409, 'A pending request is declined, not cancelled.');
 
         $this->client->request('POST', '/api/owner/booking-requests/'.$id.'/accept');
-        $this->client->request('POST', '/api/owner/booking-requests/'.$id.'/cancel', content: '{"message":"Dégât des eaux."}');
+        $this->client->request('POST', '/api/owner/booking-requests/'.$id.'/cancel', server: ['CONTENT_TYPE' => 'application/json'], content: '{"message":"Dégât des eaux."}');
 
         self::assertResponseIsSuccessful();
         self::assertSame('cancelled', $this->json()[0]['status']);
