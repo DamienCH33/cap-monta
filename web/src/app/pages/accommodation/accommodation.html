@@ -131,7 +131,7 @@
         </section>
       </div>
 
-      <aside class="layout__aside">
+      <aside class="layout__aside" id="demande">
         @if (ownedByMe()) {
           <div class="owner-preview">
             <p class="owner-preview__title">Aperçu de votre annonce</p>
@@ -158,6 +158,23 @@
         }
       </aside>
     </div>
+
+    <!-- Téléphone : le formulaire est tout en bas de la fiche, cette barre y mène. -->
+    @if (!ownedByMe()) {
+      <div class="stickybar">
+        <p class="stickybar__price">
+          @if (logement.priceFrom) {
+            <span>À partir de</span>
+            <b>{{ logement.priceFrom / 100 | number: '1.0-0' }} €</b> / semaine
+          } @else {
+            <b>Tarifs sur demande</b>
+          }
+        </p>
+        <a class="stickybar__button" href="#demande" (click)="scrollToRequest($event)"
+          >Demander ces dates</a
+        >
+      </div>
+    }
   } @else {
     <p class="loading">Chargement…</p>
   }

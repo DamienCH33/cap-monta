@@ -207,4 +207,10 @@ export class AccommodationPage implements OnInit {
       })),
     });
   }
+
+  /** Barre du bas sur téléphone : descend jusqu'au formulaire sans changer l'adresse. */
+  scrollToRequest(event: Event): void {
+    event.preventDefault();
+    document.getElementById('demande')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
