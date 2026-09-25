@@ -242,6 +242,38 @@ final class BookingRequestApiTest extends ApiTestCase
         self::assertNotNull($sent[1]->last(\Symfony\Component\Messenger\Stamp\DelayStamp::class));
     }
 
+    /**
+     * @return iterable<string, array{string, int}>
+     */
+    public static function guestPhones(): iterable
+    {
+        yield 'français' => ['06 12 34 56 78', 201];
+        yield 'français international' => ['+33 6 12 34 56 78', 201];
+        yield 'néerlandais' => ['+31 6 12345678', 201];
+        yield 'allemand' => ['+49 151 23456789', 201];
+        yield 'trop court' => ['06 12 34', 422];
+        yield 'étranger sans indicatif' => ['0151 23456789', 422];
+        yield 'lettres' => ['+31 six', 422];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('guestPhones')]
+    public function testForeignGuestsCanLeaveAnInternationalPhoneNumber(string $phone, int $status): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+
+        $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
+            'adults' => 2,
+            'guestName' => 'Anna de Vries',
+            'guestEmail' => 'anna@example.com',
+            'guestPhone' => $phone,
+        ]);
+
+        self::assertResponseStatusCodeSame($status);
+    }
+
     public function testAnArrivalTodayIsRefusedTheOwnerNeedsTimeToAnswer(): void
     {
         $this->createAccommodation('bungalow-ocean');
