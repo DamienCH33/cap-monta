@@ -9,6 +9,7 @@ use ApiPlatform\State\ProcessorInterface;
 use App\ApiResource\OwnerAccommodationResource;
 use App\Dto\UpdateAccommodationInput;
 use App\Entity\District;
+use App\Entity\StayTerms;
 use App\Enum\AccommodationType;
 use App\Enum\PetsPolicy;
 use App\Enum\Resort;
@@ -75,6 +76,9 @@ final readonly class UpdateOwnerAccommodationProcessor implements ProcessorInter
         }
         if (array_key_exists('petsPolicy', $sent)) {
             $accommodation->setPetsPolicy(PetsPolicy::from($data->petsPolicy));
+        }
+        if (array_key_exists('terms', $sent)) {
+            $accommodation->setTerms($data->terms?->toTerms() ?? new StayTerms());
         }
         if (array_key_exists('description', $sent)) {
             $accommodation->setDescription(trim($data->description));

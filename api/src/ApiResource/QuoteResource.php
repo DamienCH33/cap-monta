@@ -34,6 +34,10 @@ use App\State\QuoteProvider;
                     description: 'Nombre de personnes, adultes et enfants',
                     schema: ['type' => 'integer', 'minimum' => 1],
                 ),
+                'adults' => new QueryParameter(
+                    description: 'Dont adultes (taxe de séjour) ; par défaut, toutes les personnes',
+                    schema: ['type' => 'integer', 'minimum' => 0],
+                ),
                 'pets' => new QueryParameter(
                     description: 'Nombre d’animaux : exclut les logements qui ne les acceptent pas',
                     schema: ['type' => 'integer', 'minimum' => 0],
@@ -59,6 +63,16 @@ final class QuoteResource
         public ?string $refusal,
         /** The owner prefers another arrival day on this period: said, never blocking. */
         public bool $outsideRules = false,
+        /**
+         * Fees on top of the rent declared by the owner, for this stay.
+         *
+         * @var list<array{code: string, amount: int, optional: bool}>
+         */
+        public array $extras = [],
+        /** Rent plus the mandatory fees; null while the rent is "à convenir". */
+        public ?int $estimatedTotal = null,
+        /** @var list<string> mandatory fees the owner has not stated: to pay on site, amount unknown */
+        public array $unknownFees = [],
     ) {
     }
 
@@ -80,6 +94,9 @@ final class QuoteResource
             $quote->total,
             $quote->refusal?->value,
             $quote->outsideRules,
+            array_map(static fn ($extra): array => $extra->toArray(), $quote->extras),
+            $quote->estimatedTotal(),
+            $quote->unknownFees,
         );
     }
 }

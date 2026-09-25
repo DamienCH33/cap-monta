@@ -63,7 +63,13 @@ final readonly class QuoteProvider implements ProviderInterface
         /** @var \DateTimeImmutable $departure */
         $departure = $query->departure;
 
-        $quote = $this->quotes->quote($accommodation, $arrival, $departure, $query->guests, $query->pets);
+        $adults = isset($filters['adults']) ? (int) $filters['adults'] : $query->guests;
+
+        if ($adults < 0 || $adults > $query->guests) {
+            throw new BadRequestHttpException('"adults" must be between 0 and "guests".');
+        }
+
+        $quote = $this->quotes->quote($accommodation, $arrival, $departure, $query->guests, $query->pets, $adults);
 
         return QuoteResource::fromQuote($slug, $arrival, $departure, $quote);
     }

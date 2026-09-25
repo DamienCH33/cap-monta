@@ -93,6 +93,9 @@ class Accommodation
     #[ORM\Column(enumType: PetsPolicy::class, options: ['default' => 'on_request'])]
     private PetsPolicy $petsPolicy = PetsPolicy::OnRequest;
 
+    #[ORM\Embedded(class: StayTerms::class, columnPrefix: 'terms_')]
+    private StayTerms $terms;
+
     public function __construct(
         string $slug,
         Resort $resort,
@@ -116,6 +119,7 @@ class Accommodation
         $this->description = $description;
         $this->owner = $owner;
         $this->photos = new ArrayCollection();
+        $this->terms = new StayTerms();
     }
 
     #[ORM\PreUpdate]
@@ -345,6 +349,18 @@ class Accommodation
     public function getStatus(): AccommodationStatus
     {
         return $this->status;
+    }
+
+    public function getTerms(): StayTerms
+    {
+        return $this->terms;
+    }
+
+    public function setTerms(StayTerms $terms): static
+    {
+        $this->terms = $terms;
+
+        return $this;
     }
 
     public function getPetsPolicy(): PetsPolicy

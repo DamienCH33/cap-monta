@@ -61,6 +61,10 @@ final readonly class OwnerAccommodationCreator
         $accommodation->setAmenities(array_values(array_unique($data->amenities)));
         $accommodation->setPetsPolicy(PetsPolicy::from($data->petsPolicy));
 
+        if (null !== $data->terms) {
+            $accommodation->setTerms($data->terms->toTerms());
+        }
+
         $this->em->persist($accommodation);
 
         return $accommodation;
