@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "sh -c 'php bin/console app:booking-requests:expire && php bin/console app:privacy:purge && php bin/console cache:pool:prune'",
+    "cronSchedule": "17 * * * *",
+    "restartPolicyType": "NEVER"
+  }
+}

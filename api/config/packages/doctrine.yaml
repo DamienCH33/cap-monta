@@ -26,6 +26,9 @@ when@test:
         dbal:
             # "TEST_TOKEN" is typically set by ParaTest
             dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+            # En test, les sessions sont simulées (mock_file) : Doctrine ne décrit pas la table
+            # « sessions » que la migration crée, et schema:validate la croirait en trop.
+            schema_filter: '~^(?!sessions$)~'
 
 when@prod:
     doctrine:

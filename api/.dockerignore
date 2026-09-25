@@ -1,0 +1,14 @@
+.env.local
+.env.*.local
+.env.test
+var/
+vendor/
+public/media/
+tests/
+evals/
+phpunit.dist.xml
+phpstan.dist.neon
+.php-cs-fixer*
+.phpunit*
+Dockerfile
+docker-compose*.yml
