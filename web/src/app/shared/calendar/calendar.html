@@ -42,8 +42,11 @@
               class="month__day"
               [class.month__day--busy]="day.busy"
               [class.month__day--past]="day.past"
-              >{{ day.label }}</span
-            >
+              >{{ day.label }}
+              @if (day.busy) {
+                <span class="sr-only" i18n="@@dates.taken-suffix">, déjà pris</span>
+              }
+            </span>
           }
         </div>
       </section>
@@ -51,7 +54,10 @@
   </div>
 
   <div class="calendar__legend">
-    <span><i class="calendar__swatch"></i> <ng-container i18n="@@legend.free">libre</ng-container></span>
+    <span
+      ><i class="calendar__swatch"></i>
+      <ng-container i18n="@@legend.free">libre</ng-container></span
+    >
     <span
       ><i class="calendar__swatch calendar__swatch--busy"></i>
       <ng-container i18n="@@legend.taken">indisponible</ng-container></span

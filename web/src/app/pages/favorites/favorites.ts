@@ -5,7 +5,7 @@ import { catchError, forkJoin, map, of } from 'rxjs';
 
 import { Accommodation } from '../../core/models/accommodation';
 import { AccommodationService } from '../../core/services/accommodation';
-import { Favorites } from '../../core/services/favorites';
+import { Favorites, SLUG } from '../../core/services/favorites';
 import { currentLangOption } from '../../core/i18n/lang';
 import { SeoService } from '../../core/services/seo';
 import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
@@ -49,7 +49,12 @@ export class FavoritesPage implements OnInit {
   ngOnInit(): void {
     const list = this.route.snapshot.queryParamMap.get('liste');
     if (list) {
-      this.shared.set(list.split(',').filter(Boolean).slice(0, 50));
+      this.shared.set(
+        list
+          .split(',')
+          .filter((slug) => SLUG.test(slug))
+          .slice(0, 50),
+      );
     }
     this.load();
   }
@@ -64,9 +69,7 @@ export class FavoritesPage implements OnInit {
     }
 
     forkJoin(
-      slugs.map((slug) =>
-        this.accommodations.getBySlug(slug).pipe(catchError(() => of(null))),
-      ),
+      slugs.map((slug) => this.accommodations.getBySlug(slug).pipe(catchError(() => of(null)))),
     )
       .pipe(map((found) => found.filter((item): item is Accommodation => null !== item)))
       .subscribe((found) => {
@@ -76,11 +79,12 @@ export class FavoritesPage implements OnInit {
       });
   }
 
-  /** Retire de ses favoris et de la liste affichée, sans recharger. */
-  remove(slug: string): void {
-    this.favorites.remove(slug);
-    this.items.update((items) => items.filter((item) => item.slug !== slug));
-  }
+  /** Ses propres favoris : un cœur décoché retire la carte tout de suite. */
+  readonly shown = computed(() =>
+    null !== this.shared()
+      ? this.items()
+      : this.items().filter((item) => this.favorites.list().includes(item.slug)),
+  );
 
   /** Garde la sélection reçue, puis revient à ses propres favoris. */
   keepShared(): void {
@@ -96,7 +100,10 @@ export class FavoritesPage implements OnInit {
     const url = `${location.origin}${currentLangOption().prefix}/favoris?liste=${this.favorites.list().join(',')}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: $localize`:@@favorites.share-title:Ma sélection Cap Monta`, url });
+        await navigator.share({
+          title: $localize`:@@favorites.share-title:Ma sélection Cap Monta`,
+          url,
+        });
 
         return;
       }

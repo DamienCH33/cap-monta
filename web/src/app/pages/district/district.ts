@@ -32,6 +32,8 @@ export class DistrictPage implements OnInit {
 
   readonly district = signal<District | null>(null);
   readonly missing = signal(false);
+  /** L'API ne répond pas : ce n'est pas un quartier introuvable, c'est une panne passagère. */
+  readonly unavailable = signal(false);
   private readonly httpStatus = inject(HttpStatus);
   readonly results = signal<Accommodation[]>([]);
   readonly total = signal(0);
@@ -100,15 +102,34 @@ export class DistrictPage implements OnInit {
                 .searchPage({ districts: [district.slug], page })
                 .pipe(map((found) => ({ district, found }))),
             ),
-            // Slug inconnu ou API injoignable : on affiche une page « introuvable », pas une page vide.
-            catchError(() => of(null)),
+            // Slug inconnu (404) ou API injoignable (autre chose) : jamais une page vide.
+            catchError((error: { status?: number }) =>
+              of(404 === error?.status ? null : ('down' as const)),
+            ),
           ),
         ),
       )
       .subscribe((result) => {
         this.missing.set(null === result);
+        this.unavailable.set('down' === result);
+
+        if ('down' === result) {
+          // 503 et pas 404 : Google réessaie plus tard au lieu de retirer le quartier.
+          this.httpStatus.set(503);
+          this.seo.noindex();
+          this.district.set(null);
+
+          return;
+        }
+
         if (null === result) {
           this.httpStatus.set(404);
+          this.seo.apply({
+            title: $localize`:@@seo.district.missing-title:Quartier introuvable`,
+            description: $localize`:@@seo.district.missing-description:Ce quartier n’existe pas ou n’est pas encore référencé. Voir tous les logements disponibles.`,
+            path: '/recherche',
+            noindex: true,
+          });
         }
 
         if (null === result) {

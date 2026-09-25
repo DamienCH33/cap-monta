@@ -3,7 +3,8 @@ import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core
 
 const KEY = 'cap-monta.favoris';
 const MAX = 50;
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+/** Forme d'un slug de logement : tout le reste (liste partagée trafiquée) est ignoré. */
+export const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
  * Les logements mis de côté par le visiteur, sur cet appareil, sans compte.

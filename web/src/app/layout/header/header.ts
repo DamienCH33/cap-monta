@@ -36,7 +36,7 @@ export class Header {
   readonly overHero = signal(this.isHome(this.router.url));
 
   constructor() {
-    this.auth.restore().subscribe();
+    this.auth.restore({ ifKnown: true }).subscribe({ error: () => undefined });
 
     // Un lien suivi referme le menu : la page suivante s'affiche en entier.
     this.router.events
@@ -60,6 +60,9 @@ export class Header {
 
   logout(): void {
     this.menuOpen.set(false);
-    this.auth.logout().subscribe(() => void this.router.navigateByUrl('/'));
+    this.auth.logout().subscribe({
+      complete: () => void this.router.navigateByUrl('/'),
+      error: () => void this.router.navigateByUrl('/'),
+    });
   }
 }

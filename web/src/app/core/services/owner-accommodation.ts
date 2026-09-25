@@ -72,7 +72,7 @@ export class OwnerAccommodationService {
 
     return this.http.post<OwnerPhoto>(`${this.url(slug)}/photos`, body, {
       withCredentials: true,
-      reportProgress: true,
+      reportUploadProgress: true,
       observe: 'events',
     });
   }
@@ -85,9 +85,13 @@ export class OwnerAccommodationService {
 
   /** Le nouvel ordre complet : la première photo devient la couverture. */
   reorderPhotos(slug: string, ids: string[]): Observable<OwnerPhoto[]> {
-    return this.http.put<OwnerPhoto[]>(`${this.url(slug)}/photos/order`, { ids }, {
-      withCredentials: true,
-    });
+    return this.http.put<OwnerPhoto[]>(
+      `${this.url(slug)}/photos/order`,
+      { ids },
+      {
+        withCredentials: true,
+      },
+    );
   }
 
   /** Les quartiers, pour les listes déroulantes des formulaires. Liste publique. */

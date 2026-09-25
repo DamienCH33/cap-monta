@@ -69,9 +69,9 @@ export class Login {
 
     this.auth.login(email, password).subscribe({
       next: () => {
-        void this.router.navigateByUrl(
-          this.route.snapshot.queryParamMap.get('suite') ?? '/mon-espace',
-        );
+        void this.router
+          .navigateByUrl(this.nextUrl())
+          .catch(() => this.router.navigateByUrl('/mon-espace'));
       },
       error: (error: HttpErrorResponse) => {
         this.submitting.set(false);
@@ -86,5 +86,14 @@ export class Login {
     const control = this.form.controls[field];
 
     return control.invalid && (control.touched || this.submitted());
+  }
+
+  /** Une page du site seulement : « //ailleurs.fr » ou une adresse complète sont ignorés. */
+  private nextUrl(): string {
+    const next = this.route.snapshot.queryParamMap.get('suite') ?? '';
+
+    return next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\')
+      ? next
+      : '/mon-espace';
   }
 }

@@ -1,3 +1,4 @@
+import { currentLangOption } from '../../core/i18n/lang';
 import { isPlatformBrowser } from '@angular/common';
 import { Component, computed, ElementRef, inject, input, PLATFORM_ID, signal } from '@angular/core';
 
@@ -27,10 +28,10 @@ import { Icon } from '../icon/icon';
       </span>
     </button>
     @if (open()) {
-      <div class="share__menu" role="menu">
-        <button type="button" role="menuitem" (click)="copy()" i18n="@@share.copy">Copier le lien</button>
-        <a role="menuitem" [href]="whatsapp()" target="_blank" rel="noopener">WhatsApp</a>
-        <a role="menuitem" [href]="mail()" i18n="@@share.email">Email</a>
+      <div class="share__menu">
+        <button type="button" (click)="copy()" i18n="@@share.copy">Copier le lien</button>
+        <a [href]="whatsapp()" target="_blank" rel="noopener">WhatsApp</a>
+        <a [href]="mail()" i18n="@@share.email">Email</a>
       </div>
     }
   `,
@@ -48,7 +49,7 @@ export class ShareButton {
   readonly copied = signal(false);
 
   private readonly url = computed(() =>
-    this.isBrowser ? `${location.origin}${this.path()}` : this.path(),
+    this.isBrowser ? `${location.origin}${currentLangOption().prefix}${this.path()}` : this.path(),
   );
   readonly whatsapp = computed(
     () => `https://wa.me/?text=${encodeURIComponent(`${this.title()} ${this.url()}`)}`,

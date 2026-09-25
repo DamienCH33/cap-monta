@@ -4,7 +4,15 @@
     <p i18n="@@district.missing">
       Ce quartier n'existe pas, ou il n'est pas encore référencé sur Cap Monta.
     </p>
-    <a class="district__cta" routerLink="/recherche" i18n="@@fiche.back-all">Voir tous les logements</a>
+    <a class="district__cta" routerLink="/recherche" i18n="@@fiche.back-all"
+      >Voir tous les logements</a
+    >
+  </div>
+} @else if (unavailable()) {
+  <div class="container district__empty">
+    <p i18n="@@common.unavailable">
+      Le site ne répond pas pour le moment. Réessayez dans quelques minutes.
+    </p>
   </div>
 } @else if (district(); as quartier) {
   <div class="container">
@@ -51,9 +59,10 @@
     <div class="stats">
       <div class="stat">
         <span class="stat__value">{{ total() }}</span>
-        <span class="stat__label" i18n="@@district.stat-listings"
-          >{total(), plural, =1 {logement} other {logements}}</span
-        >
+        <span class="stat__label" i18n="@@district.stat-listings">{total(), plural,
+          =1 {logement}
+          other {logements}
+        }</span>
       </div>
 
       @if (quartier.priceMin && quartier.priceMax) {
@@ -83,7 +92,10 @@
 
     <cm-pagination [page]="page()" [totalPages]="totalPages()" />
 
-    <a class="district__cta" routerLink="/recherche" [queryParams]="{ quartier: quartier.slug }"
+    <a
+      class="district__cta"
+      routerLink="/recherche"
+      [queryParams]="{ quartier: quartier.slug }"
       i18n="@@district.search-here"
       >Chercher ici sur vos dates</a
     >

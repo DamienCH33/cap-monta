@@ -66,9 +66,10 @@
       @if (currentQuote.available) {
         <div class="summary">
           <div class="summary__line">
-            <span i18n="@@booking.rent"
-              >{currentQuote.nights, plural, =1 {Loyer, 1 nuit} other {Loyer, {{ currentQuote.nights }} nuits}}</span
-            >
+            <span i18n="@@booking.rent">{currentQuote.nights, plural,
+              =1 {Loyer, 1 nuit}
+              other {Loyer, {{ currentQuote.nights }} nuits}
+            }</span>
             <span>
               @if (currentQuote.total) {
                 {{ euros(currentQuote.total) }}
@@ -93,8 +94,7 @@
             <p class="summary__note">
               <ng-container i18n="@@booking.options">En option :</ng-container>
               @for (extra of optionalExtras(); track extra.code; let last = $last) {
-                {{ lower(extra.code) }} {{ euros(extra.amount)
-                }}{{ last ? '.' : ',' }}
+                {{ lower(extra.code) }} {{ euros(extra.amount) }}{{ last ? '.' : ',' }}
               }
             </p>
           }
@@ -129,13 +129,15 @@
         <input
           type="text"
           name="guestName"
+          [attr.aria-invalid]="violations()['guestName'] ? true : null"
+          [attr.aria-describedby]="violations()['guestName'] ? 'err-guestName' : null"
           required
           autocomplete="name"
           [ngModel]="guestName()"
           (ngModelChange)="guestName.set($event); clearViolation('guestName')"
         />
         @if (violations()['guestName']; as violation) {
-          <span class="field__error">{{ violation }}</span>
+          <span class="field__error" id="err-guestName">{{ violation }}</span>
         }
       </label>
 
@@ -144,13 +146,15 @@
         <input
           type="email"
           name="guestEmail"
+          [attr.aria-invalid]="violations()['guestEmail'] ? true : null"
+          [attr.aria-describedby]="violations()['guestEmail'] ? 'err-guestEmail' : null"
           required
           autocomplete="email"
           [ngModel]="guestEmail()"
           (ngModelChange)="guestEmail.set($event); clearViolation('guestEmail')"
         />
         @if (violations()['guestEmail']; as violation) {
-          <span class="field__error">{{ violation }}</span>
+          <span class="field__error" id="err-guestEmail">{{ violation }}</span>
         }
       </label>
 
@@ -159,6 +163,8 @@
         <input
           type="tel"
           name="guestPhone"
+          [attr.aria-invalid]="violations()['guestPhone'] ? true : null"
+          [attr.aria-describedby]="violations()['guestPhone'] ? 'err-guestPhone' : null"
           inputmode="tel"
           autocomplete="tel"
           placeholder="06 12 34 56 78"
@@ -167,7 +173,7 @@
           (ngModelChange)="guestPhone.set($event); clearViolation('guestPhone')"
         />
         @if (violations()['guestPhone']; as violation) {
-          <span class="field__error">{{ violation }}</span>
+          <span class="field__error" id="err-guestPhone">{{ violation }}</span>
         }
       </label>
 
@@ -175,18 +181,20 @@
         <span class="field__label" i18n="@@booking.message">Message</span>
         <textarea
           name="message"
+          [attr.aria-invalid]="violations()['message'] ? true : null"
+          [attr.aria-describedby]="violations()['message'] ? 'err-message' : null"
           rows="3"
           [ngModel]="message()"
           (ngModelChange)="message.set($event); clearViolation('message')"
         ></textarea>
         @if (violations()['message']; as violation) {
-          <span class="field__error">{{ violation }}</span>
+          <span class="field__error" id="err-message">{{ violation }}</span>
         }
       </label>
     </div>
 
     @if (error()) {
-      <p class="error">{{ error() }}</p>
+      <p class="error" role="alert">{{ error() }}</p>
     }
 
     <button class="box__submit" type="submit" [disabled]="sending() || !quote()?.available">
