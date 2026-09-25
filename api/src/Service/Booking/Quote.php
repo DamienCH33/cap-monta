@@ -26,11 +26,27 @@ final readonly class Quote
          * the same, flagged for the owner. Unlike $refusal, it never blocks anything.
          */
         public bool $outsideRules = false,
+        /** @var list<QuoteExtra> fees on top of the rent declared by the owner */
+        public array $extras = [],
+        /** @var list<string> mandatory fees the owner has not stated (QuoteExtra codes) */
+        public array $unknownFees = [QuoteExtra::TOURIST_TAX, QuoteExtra::RESORT_FEE],
     ) {
     }
 
     public function isAvailable(): bool
     {
         return null === $this->refusal;
+    }
+
+    /** Rent plus the mandatory fees; null while the rent is "à convenir". */
+    public function estimatedTotal(): ?int
+    {
+        if (null === $this->total) {
+            return null;
+        }
+
+        $mandatory = array_filter($this->extras, static fn (QuoteExtra $extra): bool => !$extra->optional);
+
+        return $this->total + array_sum(array_map(static fn (QuoteExtra $extra): int => $extra->amount, $mandatory));
     }
 }

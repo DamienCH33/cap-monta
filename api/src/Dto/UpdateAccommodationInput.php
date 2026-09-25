@@ -48,6 +48,10 @@ final class UpdateAccommodationInput
     #[Assert\Choice(callback: 'petsPolicies', message: 'Réponse inconnue pour les animaux.')]
     public string $petsPolicy;
 
+    /** Replaces all the conditions at once; null removes them all. */
+    #[Assert\Valid]
+    public ?StayTermsInput $terms;
+
     /** @return list<string> */
     public static function petsPolicies(): array
     {

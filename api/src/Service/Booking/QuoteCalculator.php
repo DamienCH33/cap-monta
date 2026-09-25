@@ -32,6 +32,7 @@ final class QuoteCalculator
         \DateTimeImmutable $departure,
         int $guests,
         int $pets = 0,
+        ?int $adults = null,
     ): Quote {
         $nights = (new DateRange($arrival, $departure))->nights();
         $maxCapacity = $accommodation->getMaxCapacity();
@@ -52,7 +53,45 @@ final class QuoteCalculator
             ? $this->priceCalculator->calculate($periods, $arrival, $departure)
             : null;
 
-        return new Quote($nights, $guests, $maxCapacity, $minimumNights, $total, $refusal, $this->ignoresArrivalDay($periods, $arrival));
+        [$extras, $unknown] = $this->extras($accommodation, max(0, $nights), $guests, $adults ?? $guests);
+
+        return new Quote($nights, $guests, $maxCapacity, $minimumNights, $total, $refusal, $this->ignoresArrivalDay($periods, $arrival), $extras, $unknown);
+    }
+
+    /**
+     * The fees declared by the owner, for this stay. The tourist tax is due by adults only
+     * (children are exempt); the resort fee and the linen by every guest (babies are never
+     * counted as guests).
+     *
+     * @return array{0: list<QuoteExtra>, 1: list<string>} the fees, and the mandatory ones nobody stated
+     */
+    private function extras(Accommodation $accommodation, int $nights, int $guests, int $adults): array
+    {
+        $terms = $accommodation->getTerms();
+        $extras = [];
+        $unknown = [];
+
+        $mandatory = [
+            QuoteExtra::TOURIST_TAX => [$terms->getTouristTax(), min($adults, $guests)],
+            QuoteExtra::RESORT_FEE => [$terms->getResortFee(), $guests],
+        ];
+
+        foreach ($mandatory as $code => [$rate, $people]) {
+            if (null === $rate) {
+                $unknown[] = $code;
+            } elseif ($rate > 0) {
+                $extras[] = new QuoteExtra($code, $rate * $people * $nights, false);
+            }
+        }
+
+        if (null !== $terms->getCleaningFee() && $terms->getCleaningFee() > 0) {
+            $extras[] = new QuoteExtra(QuoteExtra::CLEANING, $terms->getCleaningFee(), true);
+        }
+        if (null !== $terms->getLinenFee() && $terms->getLinenFee() > 0) {
+            $extras[] = new QuoteExtra(QuoteExtra::LINEN, $terms->getLinenFee() * $guests, true);
+        }
+
+        return [$extras, $unknown];
     }
 
     /**

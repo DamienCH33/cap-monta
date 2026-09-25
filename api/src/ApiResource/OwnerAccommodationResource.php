@@ -104,6 +104,8 @@ final class OwnerAccommodationResource
         /** Same rule as the public badge: checked less than 30 days ago. */
         public bool $calendarUpToDate = false,
         public string $petsPolicy = 'on_request',
+        /** @var array<string, int|string|null> */
+        public array $terms = [],
     ) {
     }
 
@@ -135,6 +137,7 @@ final class OwnerAccommodationResource
             $accommodation->getCalendarCheckedAt(),
             $accommodation->isCalendarUpToDate(new \DateTimeImmutable()),
             $accommodation->getPetsPolicy()->value,
+            $accommodation->getTerms()->toArray(),
         );
     }
 }

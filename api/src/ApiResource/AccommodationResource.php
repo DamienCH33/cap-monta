@@ -112,6 +112,12 @@ final class AccommodationResource
         public bool $calendarUpToDate = false,
         /** allowed, on_request or not_allowed. */
         public string $petsPolicy = 'on_request',
+        /**
+         * The owner's conditions and the fees on top of the rent, every value may be null.
+         *
+         * @var array<string, int|string|null>
+         */
+        public array $terms = [],
     ) {
     }
 
@@ -137,6 +143,7 @@ final class AccommodationResource
             districtArea: $accommodation->getDistrict()?->getArea()?->value,
             calendarUpToDate: $accommodation->isCalendarUpToDate(new \DateTimeImmutable()),
             petsPolicy: $accommodation->getPetsPolicy()->value,
+            terms: $accommodation->getTerms()->toArray(),
         );
     }
 }

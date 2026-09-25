@@ -6,6 +6,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Accommodation;
 use App\Entity\BookingRequest;
+use App\Entity\StayTerms;
 use App\Entity\Unavailability;
 use App\Entity\User;
 use App\Enum\AccommodationStatus;
@@ -125,6 +126,22 @@ final class AppFixtures extends Fixture
                 3 => PetsPolicy::NotAllowed,
                 default => PetsPolicy::OnRequest,
             });
+
+            // Deux logements sur trois donnent leurs conditions : la fiche et le devis complet
+            // ont de quoi se montrer ; le dernier tiers garde le message « non précisé ».
+            if (0 !== $index % 3) {
+                $accommodation->setTerms(new StayTerms(
+                    checkInFrom: '16:00',
+                    checkOutBefore: '10:00',
+                    depositPercent: 30,
+                    securityDeposit: 30000,
+                    cancellationPolicy: "Acompte rendu en cas d'annulation plus de 30 jours avant l'arrivée.",
+                    cleaningFee: 6000,
+                    linenFee: 1500,
+                    touristTax: 88,
+                    resortFee: 1 === $index % 3 ? 450 : null,
+                ));
+            }
 
             // Vraies photos si le dossier FIXTURE_PHOTOS_DIR existe ; sinon, des aplats.
             $this->photos->attachTo($accommodation, $index);

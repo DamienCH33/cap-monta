@@ -56,6 +56,10 @@ final class CreateAccommodationInput
     #[Assert\Choice(callback: 'petsPolicies', message: 'Réponse inconnue pour les animaux.')]
     public string $petsPolicy = 'on_request';
 
+    /** Conditions of the stay and fees on top of the rent, all optional. */
+    #[Assert\Valid]
+    public ?StayTermsInput $terms = null;
+
     /** @return list<string> */
     public static function petsPolicies(): array
     {
