@@ -332,3 +332,24 @@ Corrigé :
 C'est le score de référence de l'import, et il reste la référence : deux défauts du PHP trouvés en lisant ces échecs (« FLORIDE 32 – 3 couchages » pris pour une fourchette, « couchages 2 adultes ») sont corrigés, mais le jeu v2 est désormais « vu » et ne mesure plus rien. Un nouveau score demanderait un jeu v3.
 
 **Décision : on arrête de régler la lecture.** Chaque tour consomme un jeu de contrôle (10 à 12 annonces sur les ~180 de CôtéMonta) pour un gain qui s'amenuise ; le plafond est celui d'un petit modèle gratuit. La règle dure tient sur tous les passages (0 prix inventé), et l'écran de vérification fait le reste : le propriétaire corrige, le texte d'origine sous les yeux, rien n'est enregistré sans lui. L'import est une aide à la saisie, pas une saisie automatique. Pistes si on y revient : un plus gros modèle quand un budget existera, ou mesurer « champs à corriger par le propriétaire » plutôt que « annonce parfaite ».
+
+## 029 — Conditions du séjour et devis complet (25/09/2026)
+
+**Contexte.** Benchmark du 22/09 : CôtéMonta, Airbnb et les sites des domaines disent tous l'acompte, la caution, l'annulation et les horaires ; nos fiches non. Et notre devis annonçait « redevances et taxe de séjour en plus » sans chiffre : le voyageur découvrait le vrai prix à l'arrivée.
+
+**Décision.**
+- **Un objet `StayTerms` intégré au logement** (colonnes `terms_*`) : heures d'arrivée et de départ, acompte en %, caution, annulation **en texte libre** (entre particuliers, aucune politique standard ne s'impose), ménage et linge en option, taxe de séjour par adulte et par nuit, redevance du domaine par personne et par nuit. Montants en centimes. **Tout est facultatif et `null` veut dire « non précisé »**, jamais « gratuit » : on n'invente pas de conditions.
+- **C'est le propriétaire qui donne les montants**, y compris la taxe et la redevance. Les barèmes changent chaque année et d'un domaine à l'autre ; les coder ici, c'est afficher un jour un chiffre faux.
+- **Le devis additionne les frais obligatoires** (taxe : adultes seulement, les mineurs en sont exemptés ; redevance : chaque personne, bébés jamais comptés) dans `estimatedTotal`, liste les options (ménage, linge) sans les ajouter, et dit dans `unknownFees` ce que le propriétaire n'a pas chiffré. Le paramètre `adults` du devis vaut par défaut toutes les personnes.
+- La demande garde `estimatedPrice` = le loyer seul : c'est ce que le propriétaire accepte ; les frais restent affichés, pas négociés.
+- Horaires choisis dans une liste (07:00 → 22:00 par demi-heures) : pas de champ `time` natif, qui s'affiche en AM/PM sur un navigateur anglais.
+
+**Coût.** Une migration, un bloc de plus dans le formulaire. Les annonces existantes affichent « non précisé » tant que le propriétaire ne remplit rien.
+
+## 030 — Favoris et partage sans compte (25/09/2026)
+
+**Contexte.** Une famille compare deux ou trois mobil-homes avant d'écrire. Sans favoris, elle garde des onglets ouverts ; sans partage, elle recopie des liens.
+
+**Décision.** Favoris dans le navigateur (`localStorage`, 50 au plus), comme « Mes demandes » : aucun compte voyageur, rien côté serveur, liste vide en navigation privée. `/favoris?liste=a,b,c` rend une sélection partageable ; le destinataire peut l'ajouter à ses favoris. Sur la fiche, « Partager » ouvre la feuille de partage du téléphone, sinon un menu (copier, WhatsApp, email) ; l'aperçu du lien vient des balises Open Graph. Le cœur change de forme (plein / vide), pas seulement de couleur.
+
+**Coût.** Les favoris ne suivent pas d'un appareil à l'autre sans passer par le lien.
