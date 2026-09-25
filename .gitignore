@@ -9,3 +9,6 @@ Thumbs.db
 # surcharge Docker locale
 /.env
 docs/reprise.md
+
+# Instantané Redis écrit par un redis-server lancé depuis le dépôt
+dump.rdb
