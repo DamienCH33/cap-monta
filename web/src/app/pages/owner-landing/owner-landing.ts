@@ -19,6 +19,7 @@ export class OwnerLanding {
         'Publiez gratuitement votre bungalow, mobil-home, caravane, chalet ou studio. Aucune commission, ' +
         'un calendrier à jour, et vous gardez la main sur vos tarifs et vos réponses.',
       path: '/proprietaire',
+      frenchOnly: true,
     });
 
     seo.setJsonLd({

@@ -14,10 +14,8 @@ export class HowItWorks implements OnInit {
 
   ngOnInit(): void {
     this.seo.apply({
-      title: 'Comment ça marche',
-      description:
-        'Louer un mobil-home ou un bungalow au CHM Montalivet ou à Euronat avec Cap Monta : ' +
-        'calendrier de disponibilités à jour, demande envoyée directement au propriétaire, sans commission.',
+      title: $localize`:@@footer.how:Comment ça marche`,
+      description: $localize`:@@seo.how.description:Louer un mobil-home ou un bungalow au CHM Montalivet ou à Euronat avec Cap Monta : calendrier de disponibilités à jour, demande envoyée directement au propriétaire, sans commission.`,
       path: '/comment-ca-marche',
     });
   }

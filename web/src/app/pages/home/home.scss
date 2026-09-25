@@ -205,6 +205,11 @@
   font-size: 14px;
   color: var(--text-muted);
 
+  // Angular retire l'espace entre « Aussi : » et le premier lien.
+  > span {
+    margin-right: 0.3em;
+  }
+
   a {
     color: var(--text-primary);
   }

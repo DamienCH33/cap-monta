@@ -353,3 +353,18 @@ C'est le score de référence de l'import, et il reste la référence : deux dé
 **Décision.** Favoris dans le navigateur (`localStorage`, 50 au plus), comme « Mes demandes » : aucun compte voyageur, rien côté serveur, liste vide en navigation privée. `/favoris?liste=a,b,c` rend une sélection partageable ; le destinataire peut l'ajouter à ses favoris. Sur la fiche, « Partager » ouvre la feuille de partage du téléphone, sinon un menu (copier, WhatsApp, email) ; l'aperçu du lien vient des balises Open Graph. Le cœur change de forme (plein / vide), pas seulement de couleur.
 
 **Coût.** Les favoris ne suivent pas d'un appareil à l'autre sans passer par le lien.
+
+## 031 — Site en anglais, néerlandais et allemand (25/09/2026)
+
+**Contexte.** Une bonne part de la clientèle du CHM et d'Euronat vient des Pays-Bas, d'Allemagne et du Royaume-Uni. Les concurrents ont au moins l'anglais ; nous, rien.
+
+**Décision.**
+- **i18n d'Angular à la compilation** (`$localize`, attributs `i18n` avec des identifiants `@@` stables), un build par langue : français à la racine, `/en`, `/nl`, `/de`. Pas de bibliothèque de traduction à l'exécution : rien de plus à télécharger, le HTML rendu côté serveur est déjà dans la bonne langue, donc indexable. Une traduction manquante **casse le build** (`i18nMissingTranslation: error`).
+- **Traduit : tout le parcours voyageur** (accueil, recherche, fiche, quartier, demande, suivi, favoris, « comment ça marche »). **Reste en français** : l'espace propriétaire (les propriétaires sont francophones) et les pages légales (le texte qui engage est le français). Ces pages n'ont pas de variantes `hreflang` et le pied de page le dit.
+- **Le texte du propriétaire n'est jamais traduit automatiquement** : il garde `lang="fr"` et un lien « Traduire » ouvre Google Traduction. Cohérent avec la décision de cadrage de ne pas lisser les annonces.
+- Dates et montants au format de la langue (`Intl`), le français garde ses formats maison.
+- SEO : `hreflang` + `x-default` (le français) sur chaque page traduite, canonique dans la langue de la page, `og:locale`, sitemap avec une entrée par langue et ses alternatives.
+- Messages d'erreur de l'API en français : dans les autres langues, le front les remplace par un message traduit plus général.
+- Téléphone du voyageur : le format international est accepté (+31, +49…), sinon un Néerlandais ne pouvait pas envoyer sa demande.
+
+**Coût.** Quatre builds au lieu d'un (≈ 30 s de plus). Chaque nouveau texte doit être traduit trois fois avant de passer la CI : `npm run i18n:extract` puis compléter `src/locale/messages.{en,nl,de}.json`. Les emails envoyés aux voyageurs restent en français pour l'instant.

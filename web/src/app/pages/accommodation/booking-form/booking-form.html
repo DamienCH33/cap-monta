@@ -1,30 +1,34 @@
 @if (sent(); as request) {
   <div class="box box--sent">
-    <h2 class="box__title">Demande envoyée</h2>
+    <h2 class="box__title" i18n="@@booking.sent-title">Demande envoyée</h2>
 
-    <p class="box__text">
+    <p class="box__text" i18n="@@booking.sent-text">
       Le propriétaire a 48 h pour répondre. Un email de confirmation vient de partir à
       {{ request.guestEmail }}, avec un lien pour suivre ou annuler votre demande.
     </p>
 
-    <a class="box__link" [routerLink]="['/demande', request.trackingToken]">Suivre ma demande</a>
+    <a class="box__link" [routerLink]="['/demande', request.trackingToken]" i18n="@@booking.track"
+      >Suivre ma demande</a
+    >
 
     @if (request.estimatedPrice) {
       <p class="box__total">
-        Montant estimé
-        <strong>{{ request.estimatedPrice / 100 | number: '1.0-0' }} €</strong>
+        <ng-container i18n="@@booking.estimated">Montant estimé</ng-container>
+        <strong>{{ euros(request.estimatedPrice) }}</strong>
       </p>
     }
 
-    <p class="box__note">Aucun paiement n'a été demandé, et rien n'est encore réservé.</p>
+    <p class="box__note" i18n="@@booking.no-payment">
+      Aucun paiement n'a été demandé, et rien n'est encore réservé.
+    </p>
   </div>
 } @else {
   <form class="box" (ngSubmit)="submit()">
-    <h2 class="box__title">Demander ces dates</h2>
+    <h2 class="box__title" i18n="@@booking.title">Demander ces dates</h2>
 
     <div class="box__grid">
       <div class="field field--full field--dates">
-        <span class="field__label" id="booking-dates">Dates du séjour</span>
+        <span class="field__label" id="booking-dates" i18n="@@booking.dates">Dates du séjour</span>
         <cm-date-range
           class="field__range"
           aria-labelledby="booking-dates"
@@ -44,7 +48,7 @@
       </div>
 
       <div class="field field--full">
-        <span class="field__label">Voyageurs</span>
+        <span class="field__label" i18n="@@search.guests">Voyageurs</span>
         <cm-guest-picker
           class="field__picker"
           [value]="guests()"
@@ -62,15 +66,14 @@
       @if (currentQuote.available) {
         <div class="summary">
           <div class="summary__line">
-            <span
-              >Loyer, {{ currentQuote.nights }}
-              {{ currentQuote.nights > 1 ? 'nuits' : 'nuit' }}</span
+            <span i18n="@@booking.rent"
+              >{currentQuote.nights, plural, =1 {Loyer, 1 nuit} other {Loyer, {{ currentQuote.nights }} nuits}}</span
             >
             <span>
               @if (currentQuote.total) {
                 {{ euros(currentQuote.total) }}
               } @else {
-                à convenir
+                <ng-container i18n="@@booking.to-agree">à convenir</ng-container>
               }
             </span>
           </div>
@@ -82,33 +85,35 @@
           }
           @if (currentQuote.estimatedTotal && mandatoryExtras().length) {
             <div class="summary__line summary__line--total">
-              <strong>Total estimé</strong>
+              <strong i18n="@@booking.total">Total estimé</strong>
               <strong>{{ euros(currentQuote.estimatedTotal) }}</strong>
             </div>
           }
           @if (optionalExtras().length) {
             <p class="summary__note">
-              En option :
+              <ng-container i18n="@@booking.options">En option :</ng-container>
               @for (extra of optionalExtras(); track extra.code; let last = $last) {
-                {{ extraLabel(extra.code).toLowerCase() }} {{ euros(extra.amount)
+                {{ lower(extra.code) }} {{ euros(extra.amount)
                 }}{{ last ? '.' : ',' }}
               }
             </p>
           }
           @if (currentQuote.unknownFees.length) {
             <p class="summary__note">
-              {{ unknownFeesLabel(currentQuote.unknownFees) }} : montant non précisé par le
-              propriétaire, à régler sur place en plus.
+              <ng-container i18n="@@booking.unknown-fees"
+                >{{ unknownFeesLabel(currentQuote.unknownFees) }} : montant non précisé par le
+                propriétaire, à régler sur place en plus.</ng-container
+              >
             </p>
           }
         </div>
         @if ('on_request' === petsPolicy() && guests().pets > 0) {
-          <p class="preference">
+          <p class="preference" i18n="@@booking.pets-on-request">
             Ce propriétaire accepte les animaux au cas par cas : précisez lequel dans votre message.
           </p>
         }
         @if (currentQuote.outsideRules) {
-          <p class="preference">
+          <p class="preference" i18n="@@booking.saturday">
             Sur cette période, le propriétaire préfère les arrivées le samedi. Votre demande part
             quand même : c'est lui qui décide.
           </p>
@@ -120,7 +125,7 @@
 
     <div class="box__grid box__grid--wide">
       <label class="field">
-        <span class="field__label">Nom et prénom</span>
+        <span class="field__label" i18n="@@booking.name">Nom et prénom</span>
         <input
           type="text"
           name="guestName"
@@ -135,7 +140,7 @@
       </label>
 
       <label class="field">
-        <span class="field__label">Email</span>
+        <span class="field__label" i18n="@@booking.email">Email</span>
         <input
           type="email"
           name="guestEmail"
@@ -150,13 +155,14 @@
       </label>
 
       <label class="field">
-        <span class="field__label">Téléphone</span>
+        <span class="field__label" i18n="@@booking.phone">Téléphone</span>
         <input
           type="tel"
           name="guestPhone"
           inputmode="tel"
           autocomplete="tel"
           placeholder="06 12 34 56 78"
+          i18n-placeholder="@@booking.phone-placeholder"
           [ngModel]="guestPhone()"
           (ngModelChange)="guestPhone.set($event); clearViolation('guestPhone')"
         />
@@ -166,7 +172,7 @@
       </label>
 
       <label class="field">
-        <span class="field__label">Message</span>
+        <span class="field__label" i18n="@@booking.message">Message</span>
         <textarea
           name="message"
           rows="3"
@@ -187,7 +193,7 @@
       {{ submitLabel() }}
     </button>
 
-    <p class="box__note">
+    <p class="box__note" i18n="@@booking.note">
       Sans engagement et sans paiement. Vos coordonnées ne sont transmises au propriétaire qu'en cas
       d'acceptation. Déjà envoyé une demande ? <a routerLink="/mes-demandes">Retrouvez-la ici</a>.
     </p>

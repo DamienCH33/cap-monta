@@ -34,6 +34,8 @@ import { Pagination } from '../../shared/pagination/pagination';
   styleUrl: './search.scss',
 })
 export class Search implements OnInit {
+  readonly removeFilterLabel = $localize`:@@search.remove-filter:Retirer le filtre `;
+
   private readonly route = inject(ActivatedRoute);
   private readonly accommodations = inject(AccommodationService);
   private readonly router = inject(Router);
@@ -75,10 +77,8 @@ export class Search implements OnInit {
 
   ngOnInit(): void {
     this.seo.apply({
-      title: 'Rechercher un logement au CHM Montalivet et à Euronat',
-      description:
-        'Trouvez un mobil-home ou un bungalow libre sur vos dates, avec les disponibilités ' +
-        'affichées directement dans les résultats.',
+      title: $localize`:@@seo.search.title:Rechercher un logement au CHM Montalivet et à Euronat`,
+      description: $localize`:@@seo.search.description:Trouvez un mobil-home ou un bungalow libre sur vos dates, avec les disponibilités affichées directement dans les résultats.`,
       path: '/recherche',
     });
 

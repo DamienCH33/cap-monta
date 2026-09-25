@@ -5,37 +5,47 @@
         <cm-icon name="beach" class="brand-icon" />
         <span>Cap Monta</span>
       </div>
-      <p class="footer__pitch">
+      <p class="footer__pitch" i18n="@@footer.pitch">
         Locations de bungalows, mobil-homes, caravanes, chalets et studios au CHM Montalivet et à
         Euronat. Calendriers tenus par les propriétaires, sans commission.
       </p>
+      <cm-lang-switch class="footer__langs" mode="list" />
     </div>
 
-    <nav class="footer__column" aria-label="Louer">
-      <h2 class="footer__title">Louer</h2>
-      <a routerLink="/recherche">Rechercher un logement</a>
-      <a routerLink="/comment-ca-marche">Comment ça marche</a>
-      <a routerLink="/mes-demandes">Retrouver ma demande</a>
+    <nav class="footer__column" aria-label="Louer" i18n-aria-label="@@footer.rent">
+      <h2 class="footer__title" i18n="@@footer.rent">Louer</h2>
+      <a routerLink="/recherche" i18n="@@footer.search">Rechercher un logement</a>
+      <a routerLink="/comment-ca-marche" i18n="@@footer.how">Comment ça marche</a>
+      <a routerLink="/mes-demandes" i18n="@@footer.find-request">Retrouver ma demande</a>
     </nav>
 
-    <nav class="footer__column" aria-label="Propriétaires">
-      <h2 class="footer__title">Propriétaires</h2>
-      <a routerLink="/proprietaire">Publier un logement</a>
+    <nav class="footer__column" aria-label="Propriétaires" i18n-aria-label="@@footer.owners">
+      <h2 class="footer__title" i18n="@@footer.owners">Propriétaires</h2>
+      @if (french) {
+        <a routerLink="/proprietaire">Publier un logement</a>
+      } @else {
+        <a href="/proprietaire" hreflang="fr" i18n="@@footer.publish">Publier un logement</a>
+      }
     </nav>
 
-    <nav class="footer__column" aria-label="Informations">
-      <h2 class="footer__title">Informations</h2>
-      <a routerLink="/mentions-legales">Mentions légales</a>
-      <a routerLink="/conditions-generales">Conditions générales</a>
-      <a routerLink="/confidentialite">Données personnelles</a>
+    <nav class="footer__column" aria-label="Informations" i18n-aria-label="@@footer.info">
+      <h2 class="footer__title" i18n="@@footer.info">Informations</h2>
+      <a routerLink="/mentions-legales" i18n="@@footer.legal">Mentions légales</a>
+      <a routerLink="/conditions-generales" i18n="@@footer.terms">Conditions générales</a>
+      <a routerLink="/confidentialite" i18n="@@footer.privacy">Données personnelles</a>
     </nav>
   </div>
 
   <div class="container footer__legal">
     <p>© {{ year }} Cap Monta</p>
-    <p>
+    <p i18n="@@footer.disclaimer">
       Site indépendant, sans lien avec la gestion du CHM Montalivet ni celle d'Euronat. Cap Monta
       met en relation propriétaires et locataires et n'est pas partie au contrat de location.
     </p>
+    @if (!french) {
+      <p i18n="@@footer.french-only">
+        Les pages légales et l'espace propriétaire sont en français.
+      </p>
+    }
   </div>
 </footer>

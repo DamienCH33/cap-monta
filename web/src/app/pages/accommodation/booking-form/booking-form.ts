@@ -1,9 +1,9 @@
-import { DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, input, linkedSignal, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { currentLang } from '../../../core/i18n/lang';
 import { BookingRequest } from '../../../core/models/booking-request';
 import { PetsPolicy } from '../../../core/models/accommodation';
 import { Guests, NO_GUESTS, travellerCount } from '../../../core/models/guests';
@@ -18,7 +18,7 @@ import { plusDays, today } from '../../../core/models/stay-dates';
 
 @Component({
   selector: 'cm-booking-form',
-  imports: [FormsModule, DecimalPipe, DateRange, GuestPicker, RouterLink],
+  imports: [FormsModule, DateRange, GuestPicker, RouterLink],
   templateUrl: './booking-form.html',
   styleUrl: './booking-form.scss',
 })
@@ -77,6 +77,8 @@ export class BookingForm implements OnInit {
   readonly violations = signal<Record<string, string>>({});
 
   readonly euros = euros;
+  /** Les messages de l'API sont en français : ailleurs, on les remplace par des messages traduits. */
+  readonly french = 'fr' === currentLang();
   readonly mandatoryExtras = computed(() =>
     (this.quote()?.extras ?? []).filter((e) => !e.optional),
   );
@@ -86,32 +88,35 @@ export class BookingForm implements OnInit {
     return EXTRA_LABELS[code];
   }
 
+  /** Dans une phrase ; les noms allemands gardent leur majuscule. */
+  lower(code: ExtraCode): string {
+    return 'de' === currentLang() ? EXTRA_LABELS[code] : EXTRA_LABELS[code].toLowerCase();
+  }
+
   /** « Taxe de séjour et redevance du domaine » */
   unknownFeesLabel(codes: ExtraCode[]): string {
-    const labels = codes.map((code, i) =>
-      0 === i ? EXTRA_LABELS[code] : EXTRA_LABELS[code].toLowerCase(),
-    );
+    const labels = codes.map((code, i) => (0 === i ? EXTRA_LABELS[code] : this.lower(code)));
 
-    return labels.join(' et ');
+    return labels.join($localize`:@@common.and: et `);
   }
 
   /** Le bouton dit ce qui manque plutôt que de rester grisé sans explication. */
   readonly submitLabel = computed(() => {
     if (this.sending()) {
-      return 'Envoi…';
+      return $localize`:@@common.sending:Envoi…`;
     }
     if ('' === this.arrival() || '' === this.departure()) {
-      return 'Choisissez vos dates';
+      return $localize`:@@booking.btn-dates:Choisissez vos dates`;
     }
     if (0 === travellerCount(this.guests())) {
-      return 'Indiquez les voyageurs';
+      return $localize`:@@booking.btn-guests:Indiquez les voyageurs`;
     }
     const quote = this.quote();
     if (null !== quote && !quote.available) {
-      return 'Dates impossibles';
+      return $localize`:@@booking.btn-impossible:Dates impossibles`;
     }
 
-    return 'Envoyer la demande';
+    return $localize`:@@booking.btn-send:Envoyer la demande`;
   });
 
   ngOnInit(): void {
@@ -176,7 +181,7 @@ export class BookingForm implements OnInit {
         next: (created) => {
           this.guestRequests.remember({
             token: created.trackingToken,
-            title: this.title() || 'Logement',
+            title: this.title() || $localize`:@@type.other:Logement`,
             start: arrival,
             end: departure,
           });
@@ -193,15 +198,15 @@ export class BookingForm implements OnInit {
   refusalLabel(quote: Quote): string {
     switch (quote.refusal) {
       case 'unavailable':
-        return 'Ces dates sont déjà prises.';
+        return $localize`:@@refusal.unavailable:Ces dates sont déjà prises.`;
       case 'too_many_guests':
-        return `Ce logement accueille ${quote.maxCapacity} personnes au maximum, bébés non compris.`;
+        return $localize`:@@refusal.too-many:Ce logement accueille ${quote.maxCapacity}:count: personnes au maximum, bébés non compris.`;
       case 'stay_too_short':
-        return `Le propriétaire demande ${quote.minimumNights} nuits minimum sur cette période.`;
+        return $localize`:@@refusal.too-short:Le propriétaire demande ${quote.minimumNights}:count: nuits minimum sur cette période.`;
       case 'pets_not_allowed':
-        return "Le propriétaire n'accepte pas les animaux dans ce logement.";
+        return $localize`:@@refusal.pets:Le propriétaire n'accepte pas les animaux dans ce logement.`;
       default:
-        return 'Ces dates ne peuvent pas être réservées.';
+        return $localize`:@@refusal.other:Ces dates ne peuvent pas être réservées.`;
     }
   }
 
@@ -221,30 +226,34 @@ export class BookingForm implements OnInit {
   private readError(response: HttpErrorResponse): string {
     // Plafond anti-abus de l'API : 5 demandes par quart d'heure depuis une même connexion.
     if (429 === response.status) {
-      return "Plusieurs demandes viennent d'être envoyées depuis votre connexion. Réessayez dans un quart d'heure.";
+      return $localize`:@@booking.error-429:Plusieurs demandes viennent d'être envoyées depuis votre connexion. Réessayez dans un quart d'heure.`;
     }
 
-    // L'API explique le refus en français : dates prises, demande déjà envoyée…
+    // L'API explique le refus en français : dates prises, demande déjà envoyée… Dans les
+    // autres langues, un message traduit plus général.
     if (409 === response.status) {
-      return (
-        (response.error as { detail?: string } | null)?.detail ??
-        "Ces dates viennent d'être prises. Choisissez-en d'autres."
-      );
+      const detail = (response.error as { detail?: string } | null)?.detail;
+
+      return detail && this.french
+        ? detail
+        : $localize`:@@booking.error-409:Ces dates viennent d'être prises. Choisissez-en d'autres.`;
     }
 
     if (422 === response.status) {
       const violations: Record<string, string> = {};
 
       for (const violation of (response.error?.violations ?? []) as Violation[]) {
-        violations[violation.propertyPath] = violation.message;
+        violations[violation.propertyPath] = this.french
+          ? violation.message
+          : $localize`:@@booking.check-field:Vérifiez ce champ.`;
       }
 
       this.violations.set(violations);
 
-      return 'Certaines informations sont incorrectes.';
+      return $localize`:@@booking.error-422:Certaines informations sont incorrectes.`;
     }
 
-    return "L'envoi a échoué. Réessayez dans un instant.";
+    return $localize`:@@common.send-failed:L'envoi a échoué. Réessayez dans un instant.`;
   }
 }
 

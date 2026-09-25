@@ -228,6 +228,18 @@
   }
 }
 
+.description__lang {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+
+  a {
+    margin-left: 6px;
+    font-weight: 600;
+    color: var(--blue);
+  }
+}
+
 .description {
   margin: 0;
   font-size: 16px;

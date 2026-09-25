@@ -28,7 +28,7 @@
         <circle cx="10" cy="12" r="2" />
         <circle cx="18" cy="18" r="2" />
       </svg>
-      Filtres
+      <ng-container i18n="@@filters.title">Filtres</ng-container>
       @if (activeCount() > 0) {
         <span class="toolbar__badge">{{ activeCount() }}</span>
       }
@@ -38,9 +38,12 @@
       class="toolbar__sort"
       name="order"
       aria-label="Trier les résultats"
+      i18n-aria-label="@@search.sort"
       (change)="onOrderChange($event)"
     >
-      <option value="" [selected]="filters().order === null">Tri par défaut</option>
+      <option value="" [selected]="filters().order === null" i18n="@@search.sort-default">
+        Tri par défaut
+      </option>
       @for (option of sortOptions; track option.value) {
         <option [value]="option.value" [selected]="filters().order === option.value">
           {{ option.label }}
@@ -55,21 +58,27 @@
         <button
           type="button"
           class="chips__chip"
-          [attr.aria-label]="'Retirer le filtre ' + chip.label"
+          [attr.aria-label]="removeFilterLabel + chip.label"
           (click)="applyFilters(chip.without)"
         >
           {{ chip.label }}
           <span aria-hidden="true">×</span>
         </button>
       }
-      <button type="button" class="chips__clear" (click)="clearFilters()">Tout effacer</button>
+      <button type="button" class="chips__clear" (click)="clearFilters()" i18n="@@filters.clear"
+        >Tout effacer</button
+      >
     </div>
   }
 
   <p class="results__count">
-    {{ total() }} {{ total() > 1 ? 'logements' : 'logement' }}
+    <ng-container i18n="@@count.listings"
+      >{total(), plural, =1 {1 logement} other {{{ total() }} logements}}</ng-container
+    >
     @if (totalPages() > 1) {
-      <span class="results__page">· page {{ page() }} sur {{ totalPages() }}</span>
+      <span class="results__page" i18n="@@search.page"
+        >· page {{ page() }} sur {{ totalPages() }}</span
+      >
     }
   </p>
 
@@ -79,20 +88,20 @@
     } @empty {
       <div class="results__empty">
         @if (reversedDates()) {
-          <p>
+          <p i18n="@@search.reversed">
             La date de départ ({{ criteria().departure | date: 'd MMMM' }}) vient avant l'arrivée
             ({{ criteria().arrival | date: 'd MMMM' }}). Corrigez les dates ci-dessus.
           </p>
         } @else if (searchFailed()) {
-          <p>La recherche n'a pas abouti. Réessayez dans un instant.</p>
+          <p i18n="@@search.failed">La recherche n'a pas abouti. Réessayez dans un instant.</p>
         } @else if (criteria().arrival && criteria().departure) {
-          <p>
+          <p i18n="@@search.none-free">
             Aucun logement libre du {{ criteria().arrival | date: 'd MMMM' }} au
             {{ criteria().departure | date: 'd MMMM' }}.
           </p>
 
           @if (suggestions().length > 0) {
-            <p>En décalant un peu vos dates :</p>
+            <p i18n="@@search.shift">En décalant un peu vos dates :</p>
             <ul class="suggestions">
               @for (suggestion of suggestions(); track suggestion.arrival) {
                 <li>
@@ -102,11 +111,15 @@
                     [queryParams]="{ arrivee: suggestion.arrival, depart: suggestion.departure }"
                     queryParamsHandling="merge"
                   >
-                    du {{ suggestion.arrival | date: 'EEE d MMM' }} au
-                    {{ suggestion.departure | date: 'EEE d MMM' }}
+                    <ng-container i18n="@@search.suggestion"
+                      >du {{ suggestion.arrival | date: 'EEE d MMM' }} au
+                      {{ suggestion.departure | date: 'EEE d MMM' }}</ng-container
+                    >
                     <strong>
-                      &nbsp;· {{ suggestion.availableCount }}
-                      {{ suggestion.availableCount > 1 ? 'logements' : 'logement' }}
+                      &nbsp;·
+                      <ng-container i18n="@@count.listings"
+                        >{suggestion.availableCount, plural, =1 {1 logement} other {{{ suggestion.availableCount }} logements}}</ng-container
+                      >
                     </strong>
                   </a>
                 </li>
@@ -114,20 +127,20 @@
             </ul>
           }
         } @else {
-          <p>Aucun logement ne correspond à cette recherche.</p>
+          <p i18n="@@search.none">Aucun logement ne correspond à cette recherche.</p>
         }
 
         @if (filters().districts.length > 0 || otherFilters()) {
           <div class="results__actions">
             @if (filters().districts.length > 0) {
               <button type="button" class="suggestions__widen" (click)="clearDistricts()">
-                Chercher dans tout le domaine
+                <ng-container i18n="@@search.widen">Chercher dans tout le domaine</ng-container>
               </button>
             }
 
             @if (otherFilters()) {
               <button type="button" class="suggestions__widen" (click)="clearFilters()">
-                Retirer tous les filtres
+                <ng-container i18n="@@search.clear-all">Retirer tous les filtres</ng-container>
               </button>
             }
           </div>
@@ -140,8 +153,14 @@
 
   @if (results().length > 0) {
     <div class="legend">
-      <span><i class="legend__swatch legend__swatch--free"></i> libre</span>
-      <span><i class="legend__swatch legend__swatch--taken"></i> indisponible</span>
+      <span
+        ><i class="legend__swatch legend__swatch--free"></i>
+        <ng-container i18n="@@legend.free">libre</ng-container></span
+      >
+      <span
+        ><i class="legend__swatch legend__swatch--taken"></i>
+        <ng-container i18n="@@legend.taken">indisponible</ng-container></span
+      >
     </div>
   }
 

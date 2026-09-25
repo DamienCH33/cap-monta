@@ -37,7 +37,7 @@ export class FilterSheet implements AfterViewInit {
   readonly types = ACCOMMODATION_TYPES;
   readonly amenities = AMENITIES.filter((amenity) => amenity.filter);
   readonly bedroomOptions = [
-    { value: 0, label: 'Toutes' },
+    { value: 0, label: $localize`:@@filters.bedrooms-any:Toutes` },
     ...Array.from({ length: MAX_BEDROOMS_FILTER }, (_, index) => ({
       value: index + 1,
       label: `${index + 1}+`,
@@ -56,7 +56,7 @@ export class FilterSheet implements AfterViewInit {
       })),
       {
         key: 'other',
-        label: 'Autres quartiers',
+        label: $localize`:@@filters.other-districts:Autres quartiers`,
         districts: districts.filter((district) => district.area === null),
       },
     ].filter((zone) => zone.districts.length > 0);

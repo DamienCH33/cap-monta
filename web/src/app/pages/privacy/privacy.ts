@@ -19,6 +19,7 @@ export class Privacy implements OnInit {
         'Quelles données Cap Monta collecte, pourquoi, combien de temps elles sont conservées ' +
         'et comment exercer vos droits.',
       path: '/confidentialite',
+      frenchOnly: true,
     });
   }
 }

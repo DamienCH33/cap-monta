@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, Params, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
@@ -20,6 +20,7 @@ import { BookingForm } from './booking-form/booking-form';
 import { environment } from '../../../environments/environment';
 import { guestsFromQuery, travellerCount } from '../../core/models/guests';
 import { euros, hasTerms, timeLabel } from '../../core/models/stay-terms';
+import { currentLang, currentLangOption } from '../../core/i18n/lang';
 import { FavoriteButton } from '../../shared/favorite-button/favorite-button';
 import { ShareButton } from '../../shared/share-button/share-button';
 import { Icon } from '../../shared/icon/icon';
@@ -36,7 +37,6 @@ import { ReportListing } from './report-listing/report-listing';
     DatePipe,
     FavoriteButton,
     ShareButton,
-    DecimalPipe,
     RouterLink,
     Calendar,
     BookingForm,
@@ -48,6 +48,12 @@ import { ReportListing } from './report-listing/report-listing';
 })
 export class AccommodationPage implements OnInit {
   readonly euros = euros;
+  readonly french = 'fr' === currentLang();
+
+  /** La description reste celle du propriétaire, en français : un lien la fait traduire. */
+  translateUrl(text: string): string {
+    return `https://translate.google.com/?sl=fr&tl=${currentLang()}&op=translate&text=${encodeURIComponent(text.slice(0, 4000))}`;
+  }
   readonly hasTerms = hasTerms;
   readonly timeLabel = timeLabel;
 
@@ -142,8 +148,8 @@ export class AccommodationPage implements OnInit {
           this.notFound.set(true);
           this.httpStatus.set(404);
           this.seo.apply({
-            title: 'Logement introuvable',
-            description: 'Ce logement n’est plus en ligne. Voir les autres logements disponibles.',
+            title: $localize`:@@seo.fiche.missing-title:Logement introuvable`,
+            description: $localize`:@@seo.fiche.missing-description:Ce logement n’est plus en ligne. Voir les autres logements disponibles.`,
             path: '/recherche',
             noindex: true,
           });
@@ -164,20 +170,23 @@ export class AccommodationPage implements OnInit {
     const place = logement.district ? `${logement.district}, ${resort}` : resort;
 
     const facts = [
-      `${logement.bedrooms} ${logement.bedrooms > 1 ? 'chambres' : 'chambre'}`,
-      `${logement.maxCapacity} personnes`,
+      1 >= logement.bedrooms
+        ? $localize`:@@seo.fiche.bedroom.one:${logement.bedrooms}:count: chambre`
+        : $localize`:@@seo.fiche.bedroom.other:${logement.bedrooms}:count: chambres`,
+      $localize`:@@seo.fiche.people:${logement.maxCapacity}:count: personnes`,
       logement.surface ? `${logement.surface} m²` : null,
     ]
       .filter((fact) => null !== fact)
       .join(', ');
 
     const price = logement.priceFrom
-      ? ` À partir de ${Math.round(logement.priceFrom / 100)} € la semaine.`
+      ? ' ' + $localize`:@@seo.fiche.price:À partir de ${euros(logement.priceFrom)}:price: la semaine.`
       : '';
+    const name = $localize`:@@seo.fiche.title:${type}:type: ${logement.maxCapacity}:count: pers. à ${place}:place:`;
 
     this.seo.apply({
-      title: `${type} ${logement.maxCapacity} pers. à ${place}`,
-      description: `${type} à louer à ${place} : ${facts}.${price} Disponibilités à jour.`,
+      title: name,
+      description: $localize`:@@seo.fiche.description:${type}:type: à louer à ${place}:place: : ${facts}:facts:.${price}:price: Disponibilités à jour.`,
       path: `/logement/${logement.slug}`,
       // La couverture sert d'aperçu quand le lien est partagé (Facebook, WhatsApp…).
       image: logement.cover?.url,
@@ -186,9 +195,9 @@ export class AccommodationPage implements OnInit {
     this.seo.setJsonLd({
       '@context': 'https://schema.org',
       '@type': 'VacationRental',
-      name: `${type} ${logement.maxCapacity} pers. à ${place}`,
+      name,
       description: logement.description,
-      url: `${environment.siteUrl}/logement/${logement.slug}`,
+      url: `${environment.siteUrl}${currentLangOption().prefix}/logement/${logement.slug}`,
       image: logement.photos.length ? logement.photos.map((photo) => photo.url) : undefined,
       address: {
         '@type': 'PostalAddress',

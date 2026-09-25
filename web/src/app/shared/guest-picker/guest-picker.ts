@@ -18,6 +18,9 @@ const MAX_INFANTS_OR_PETS = 5;
   },
 })
 export class GuestPicker {
+  readonly addLabel = $localize`:@@guests.add-one:Ajouter : `;
+  readonly removeLabel = $localize`:@@guests.remove-one:Retirer : `;
+
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly value = model<Guests>(NO_GUESTS);
@@ -25,10 +28,26 @@ export class GuestPicker {
   readonly summary = computed(() => guestsSummary(this.value()));
 
   readonly rows: readonly { key: GuestKey; title: string; hint: string }[] = [
-    { key: 'adults', title: 'Adultes', hint: '13 ans et plus' },
-    { key: 'children', title: 'Enfants', hint: 'De 2 à 12 ans' },
-    { key: 'infants', title: 'Bébés', hint: 'Moins de 2 ans' },
-    { key: 'pets', title: 'Animaux', hint: 'À confirmer avec le propriétaire' },
+    {
+      key: 'adults',
+      title: $localize`:@@guests.adults:Adultes`,
+      hint: $localize`:@@guests.adults-hint:13 ans et plus`,
+    },
+    {
+      key: 'children',
+      title: $localize`:@@guests.children:Enfants`,
+      hint: $localize`:@@guests.children-hint:De 2 à 12 ans`,
+    },
+    {
+      key: 'infants',
+      title: $localize`:@@guests.infants:Bébés`,
+      hint: $localize`:@@guests.infants-hint:Moins de 2 ans`,
+    },
+    {
+      key: 'pets',
+      title: $localize`:@@guests.pets:Animaux`,
+      hint: $localize`:@@guests.pets-hint:À confirmer avec le propriétaire`,
+    },
   ];
 
   toggle(): void {

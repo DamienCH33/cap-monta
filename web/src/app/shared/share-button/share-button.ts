@@ -18,13 +18,19 @@ import { Icon } from '../icon/icon';
   template: `
     <button type="button" class="share" [attr.aria-expanded]="open()" (click)="share()">
       <cm-icon name="share" />
-      <span>{{ copied() ? 'Lien copié' : 'Partager' }}</span>
+      <span>
+        @if (copied()) {
+          <ng-container i18n="@@share.copied">Lien copié</ng-container>
+        } @else {
+          <ng-container i18n="@@share.share">Partager</ng-container>
+        }
+      </span>
     </button>
     @if (open()) {
       <div class="share__menu" role="menu">
-        <button type="button" role="menuitem" (click)="copy()">Copier le lien</button>
+        <button type="button" role="menuitem" (click)="copy()" i18n="@@share.copy">Copier le lien</button>
         <a role="menuitem" [href]="whatsapp()" target="_blank" rel="noopener">WhatsApp</a>
-        <a role="menuitem" [href]="mail()">Email</a>
+        <a role="menuitem" [href]="mail()" i18n="@@share.email">Email</a>
       </div>
     }
   `,

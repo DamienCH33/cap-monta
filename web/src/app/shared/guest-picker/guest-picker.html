@@ -2,12 +2,13 @@
   @if (summary()) {
     {{ summary() }}
   } @else {
-    <span class="picker__placeholder">Ajouter des voyageurs</span>
+    <span class="picker__placeholder" i18n="@@guests.add">Ajouter des voyageurs</span>
   }
 </button>
 
 @if (open()) {
-  <div class="picker__panel" role="dialog" aria-label="Choisir les voyageurs">
+  <div class="picker__panel" role="dialog" aria-label="Choisir les voyageurs"
+    i18n-aria-label="@@guests.dialog">
     @for (row of rows; track row.key) {
       <div class="picker__row">
         <div>
@@ -19,7 +20,7 @@
           <button
             type="button"
             [disabled]="!canDecrement(row.key)"
-            [attr.aria-label]="'Retirer : ' + row.title"
+            [attr.aria-label]="removeLabel + row.title"
             (click)="decrement(row.key)"
           >
             −
@@ -28,7 +29,7 @@
           <button
             type="button"
             [disabled]="!canIncrement(row.key)"
-            [attr.aria-label]="'Ajouter : ' + row.title"
+            [attr.aria-label]="addLabel + row.title"
             (click)="increment(row.key)"
           >
             +
@@ -37,11 +38,11 @@
       </div>
     }
 
-    <p class="picker__note">
+    <p class="picker__note" i18n="@@guests.note">
       Les bébés ne comptent pas dans la capacité du logement. Bébés et animaux sont signalés au
       propriétaire dans votre demande.
     </p>
 
-    <button type="button" class="picker__close" (click)="close()">Fermer</button>
+    <button type="button" class="picker__close" (click)="close()" i18n="@@guests.close">Fermer</button>
   </div>
 }

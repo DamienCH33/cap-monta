@@ -11,11 +11,15 @@
         decoding="async"
       />
     } @else {
-      <span class="card__img card__img--empty"><cm-icon name="photo" />Photos à venir</span>
+      <span class="card__img card__img--empty"
+        ><cm-icon name="photo" /><span i18n="@@card.no-photo">Photos à venir</span></span
+      >
     }
     <cm-favorite-button class="card__fav" [slug]="accommodation().slug" />
     @if (accommodation().calendarUpToDate) {
-      <span class="card__badge"><i aria-hidden="true"></i>Calendrier à jour</span>
+      <span class="card__badge"
+        ><i aria-hidden="true"></i><span i18n="@@card.up-to-date">Calendrier à jour</span></span
+      >
     }
     @if (area(); as zone) {
       <span class="card__side"><cm-icon [name]="areaIcons[zone.key]" />{{ zone.label }}</span>
@@ -36,8 +40,11 @@
         </a>
       </h2>
       <p class="card__facts">
-        {{ accommodation().bedrooms }} {{ accommodation().bedrooms > 1 ? 'chambres' : 'chambre' }} ·
-        {{ accommodation().maxCapacity }} pers.
+        <ng-container i18n="@@count.bedrooms"
+          >{accommodation().bedrooms, plural, =0 {0 chambre} =1 {1 chambre} other {{{ accommodation().bedrooms }} chambres}}</ng-container
+        >
+        ·
+        <ng-container i18n="@@count.people-short">{{ accommodation().maxCapacity }} pers.</ng-container>
         @if (accommodation().surface) {
           · {{ accommodation().surface }} m²
         }
@@ -46,11 +53,11 @@
 
     @if (accommodation().priceFrom) {
       <p class="card__price">
-        <b>{{ accommodation().priceFrom! / 100 }} €</b>
-        <span>/ semaine</span>
+        <b>{{ euros(accommodation().priceFrom!) }}</b>
+        <span i18n="@@card.per-week">/ semaine</span>
       </p>
     } @else {
-      <p class="card__price"><span>Nous consulter</span></p>
+      <p class="card__price"><span i18n="@@card.ask">Nous consulter</span></p>
     }
   </div>
 
@@ -61,7 +68,7 @@
           <span
             class="strip__week"
             [class.strip__week--taken]="!week.free"
-            [title]="(week.start | date: 'd MMMM') + (week.free ? ' : libre' : ' : indisponible')"
+            [title]="(week.start | date: 'd MMMM') + (week.free ? freeSuffix : takenSuffix)"
           ></span>
         }
       </div>

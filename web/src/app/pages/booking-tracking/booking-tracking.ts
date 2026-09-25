@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -13,6 +13,7 @@ import {
 import { BookingService } from '../../core/services/booking';
 import { GuestRequests } from '../../core/services/guest-requests';
 import { SeoService } from '../../core/services/seo';
+import { euros } from '../../core/models/stay-terms';
 
 /**
  * La page du voyageur, sans compte : le lien privé reçu par email suffit. Il y suit sa
@@ -20,11 +21,14 @@ import { SeoService } from '../../core/services/seo';
  */
 @Component({
   selector: 'cm-booking-tracking',
-  imports: [DatePipe, DecimalPipe, RouterLink],
+  imports: [DatePipe, RouterLink],
   templateUrl: './booking-tracking.html',
   styleUrl: './booking-tracking.scss',
 })
 export class BookingTracking {
+  readonly euros = euros;
+  readonly expiresFormat = $localize`:@@tracking.expires-format:EEEE d MMMM 'à' HH'h'mm`;
+
   private readonly booking = inject(BookingService);
   private readonly token = inject(ActivatedRoute).snapshot.paramMap.get('token') ?? '';
 
@@ -42,8 +46,8 @@ export class BookingTracking {
     const guestRequests = inject(GuestRequests);
 
     inject(SeoService).apply({
-      title: 'Votre demande de réservation',
-      description: 'Suivez votre demande de réservation.',
+      title: $localize`:@@seo.tracking.title:Votre demande de réservation`,
+      description: $localize`:@@seo.tracking.description:Suivez votre demande de réservation.`,
       path: '/recherche',
       noindex: true,
     });
@@ -75,7 +79,7 @@ export class BookingTracking {
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
-        this.error.set(apiErrorMessage(error, 'L’annulation a échoué. Réessayez.'));
+        this.error.set(apiErrorMessage(error, $localize`:@@tracking.cancel-failed:L’annulation a échoué. Réessayez.`));
       },
     });
   }

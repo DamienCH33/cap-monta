@@ -1,11 +1,13 @@
 <div class="container">
   @if (notFound()) {
     <p class="missing">
-      Ce logement n'existe pas ou n'est plus en ligne.
-      <a routerLink="/recherche">Voir les logements disponibles</a>
+      <span i18n="@@fiche.missing">Ce logement n'existe pas ou n'est plus en ligne.</span>
+      <a routerLink="/recherche" i18n="@@fiche.see-available">Voir les logements disponibles</a>
     </p>
   } @else if (unavailable()) {
-    <p class="missing">Le site ne répond pas pour le moment. Réessayez dans quelques minutes.</p>
+    <p class="missing" i18n="@@common.unavailable">
+      Le site ne répond pas pour le moment. Réessayez dans quelques minutes.
+    </p>
   } @else if (accommodation(); as logement) {
     @if (fromOwnerSpace()) {
       <a class="back" routerLink="/mon-espace/logements">
@@ -15,12 +17,12 @@
     } @else if (cameFromSearch()) {
       <a class="back" routerLink="/recherche" [queryParams]="searchParams()">
         <cm-icon name="arrow-left" />
-        Retour aux résultats
+        <ng-container i18n="@@fiche.back-results">Retour aux résultats</ng-container>
       </a>
     } @else {
       <a class="back" routerLink="/recherche">
         <cm-icon name="arrow-left" />
-        Voir tous les logements
+        <ng-container i18n="@@fiche.back-all">Voir tous les logements</ng-container>
       </a>
     }
 
@@ -29,7 +31,7 @@
     } @else {
       <section class="photo">
         <cm-icon name="photo" />
-        Photos à venir
+        <ng-container i18n="@@card.no-photo">Photos à venir</ng-container>
       </section>
     }
 
@@ -53,8 +55,11 @@
       </h1>
 
       <p class="head__facts">
-        {{ logement.bedrooms }} {{ logement.bedrooms > 1 ? 'chambres' : 'chambre' }} ·
-        {{ logement.maxCapacity }} pers.
+        <ng-container i18n="@@count.bedrooms"
+          >{logement.bedrooms, plural, =0 {0 chambre} =1 {1 chambre} other {{{ logement.bedrooms }} chambres}}</ng-container
+        >
+        ·
+        <ng-container i18n="@@count.people-short">{{ logement.maxCapacity }} pers.</ng-container>
         @if (logement.surface) {
           · {{ logement.surface }} m²
         }
@@ -78,12 +83,12 @@
     <div class="layout">
       <div class="layout__main">
         <section class="block">
-          <h2 class="block__title">Disponibilités</h2>
+          <h2 class="block__title" i18n="@@fiche.availability">Disponibilités</h2>
           <cm-calendar [busy]="busy()" />
         </section>
 
         <section class="block">
-          <h2 class="block__title">Tarifs</h2>
+          <h2 class="block__title" i18n="@@fiche.rates">Tarifs</h2>
 
           @if (logement.pricePeriods.length) {
             <table class="rates">
@@ -96,131 +101,150 @@
                     </td>
                     <td class="rates__price">
                       @if (period.weeklyPrice) {
-                        {{ period.weeklyPrice / 100 | number: '1.0-0' }} €
-                        <span class="rates__unit">/ sem.</span>
+                        {{ euros(period.weeklyPrice) }}
+                        <span class="rates__unit" i18n="@@rates.per-week">/ sem.</span>
                       } @else {
                         —
                       }
                     </td>
                     <td class="rates__price">
                       @if (period.nightlyPrice) {
-                        {{ period.nightlyPrice / 100 | number: '1.0-0' }} €
-                        <span class="rates__unit">/ nuit</span>
+                        {{ euros(period.nightlyPrice) }}
+                        <span class="rates__unit" i18n="@@rates.per-night">/ nuit</span>
                       } @else if (period.weeklyPrice && period.minimumNights < 7) {
-                        ≈ {{ nightlyFromWeek(period.weeklyPrice) / 100 | number: '1.0-0' }} €
-                        <span class="rates__unit">/ nuit</span>
+                        ≈ {{ euros(nightlyFromWeek(period.weeklyPrice)) }}
+                        <span class="rates__unit" i18n="@@rates.per-night">/ nuit</span>
                       } @else {
                         —
                       }
                     </td>
                     <td class="rates__min">
-                      min. {{ period.minimumNights }}
-                      {{ period.minimumNights > 1 ? 'nuits' : 'nuit' }}
+                      <ng-container i18n="@@rates.min-nights"
+                        >{period.minimumNights, plural, =1 {min. 1 nuit} other {min. {{ period.minimumNights }} nuits}}</ng-container
+                      >
                       @if (period.saturdayArrival) {
-                        <span class="rates__saturday">arrivée le samedi de préférence</span>
+                        <span class="rates__saturday" i18n="@@rates.saturday">arrivée le samedi de préférence</span>
                       }
                     </td>
                   </tr>
                 }
               </tbody>
             </table>
-            <p class="rates__note">
+            <p class="rates__note" i18n="@@rates.note">
               Une semaine ou plus : prix à la semaine, les nuits en plus au prorata. Moins d'une
               semaine : prix à la nuit, jamais plus cher qu'une semaine.
             </p>
           } @else {
-            <p class="block__empty">
+            <p class="block__empty" i18n="@@rates.none">
               Le propriétaire n'a pas publié ses tarifs. Envoyez-lui une demande, il vous répondra.
             </p>
           }
         </section>
 
         <section class="block">
-          <h2 class="block__title">Conditions du séjour</h2>
+          <h2 class="block__title" i18n="@@terms.title">Conditions du séjour</h2>
           @if (hasTerms(logement.terms)) {
             <dl class="terms">
               @if (logement.terms.checkInFrom || logement.terms.checkOutBefore) {
                 <div class="terms__row">
-                  <dt>Horaires</dt>
+                  <dt i18n="@@terms.times">Horaires</dt>
                   <dd>
                     @if (logement.terms.checkInFrom) {
-                      Arrivée à partir de {{ timeLabel(logement.terms.checkInFrom) }}
+                      <ng-container i18n="@@terms.check-in"
+                        >Arrivée à partir de {{ timeLabel(logement.terms.checkInFrom) }}</ng-container
+                      >
                     }
                     @if (logement.terms.checkInFrom && logement.terms.checkOutBefore) {
                       ·
                     }
                     @if (logement.terms.checkOutBefore) {
-                      départ avant {{ timeLabel(logement.terms.checkOutBefore) }}
+                      <ng-container i18n="@@terms.check-out"
+                        >départ avant {{ timeLabel(logement.terms.checkOutBefore) }}</ng-container
+                      >
                     }
                   </dd>
                 </div>
               }
               @if (null !== logement.terms.depositPercent) {
                 <div class="terms__row">
-                  <dt>Acompte</dt>
+                  <dt i18n="@@terms.deposit">Acompte</dt>
                   <dd>
                     @if (0 === logement.terms.depositPercent) {
-                      Aucun acompte
+                      <ng-container i18n="@@terms.no-deposit">Aucun acompte</ng-container>
                     } @else {
-                      {{ logement.terms.depositPercent }} % du loyer, à verser au propriétaire quand
-                      il accepte votre demande
+                      <ng-container i18n="@@terms.deposit-text"
+                        >{{ logement.terms.depositPercent }} % du loyer, à verser au propriétaire
+                        quand il accepte votre demande</ng-container
+                      >
                     }
                   </dd>
                 </div>
               }
               @if (null !== logement.terms.securityDeposit) {
                 <div class="terms__row">
-                  <dt>Caution</dt>
+                  <dt i18n="@@terms.security">Caution</dt>
                   <dd>
                     @if (0 === logement.terms.securityDeposit) {
-                      Aucune caution
+                      <ng-container i18n="@@terms.no-security">Aucune caution</ng-container>
                     } @else {
-                      {{ euros(logement.terms.securityDeposit) }}, rendue après l'état des lieux
+                      <ng-container i18n="@@terms.security-text"
+                        >{{ euros(logement.terms.securityDeposit) }}, rendue après l'état des
+                        lieux</ng-container
+                      >
                     }
                   </dd>
                 </div>
               }
               @if (logement.terms.cancellationPolicy) {
                 <div class="terms__row">
-                  <dt>Annulation</dt>
-                  <dd class="terms__text">{{ logement.terms.cancellationPolicy }}</dd>
+                  <dt i18n="@@terms.cancellation">Annulation</dt>
+                  <dd class="terms__text" lang="fr">{{ logement.terms.cancellationPolicy }}</dd>
                 </div>
               }
               @if (null !== logement.terms.touristTax || null !== logement.terms.resortFee) {
                 <div class="terms__row">
-                  <dt>En plus du loyer</dt>
+                  <dt i18n="@@terms.on-top">En plus du loyer</dt>
                   <dd>
                     @if (null !== logement.terms.touristTax) {
-                      Taxe de séjour {{ euros(logement.terms.touristTax) }} par adulte et par nuit
+                      <ng-container i18n="@@terms.tourist-tax"
+                        >Taxe de séjour {{ euros(logement.terms.touristTax) }} par adulte et par
+                        nuit</ng-container
+                      >
                       <br />
                     }
                     @if (null !== logement.terms.resortFee) {
-                      Redevance du domaine {{ euros(logement.terms.resortFee) }} par personne et par
-                      nuit
+                      <ng-container i18n="@@terms.resort-fee"
+                        >Redevance du domaine {{ euros(logement.terms.resortFee) }} par personne et
+                        par nuit</ng-container
+                      >
                     }
                   </dd>
                 </div>
               }
               @if (logement.terms.cleaningFee || logement.terms.linenFee) {
                 <div class="terms__row">
-                  <dt>En option</dt>
+                  <dt i18n="@@terms.optional">En option</dt>
                   <dd>
                     @if (logement.terms.cleaningFee) {
-                      Ménage de fin de séjour {{ euros(logement.terms.cleaningFee) }}
+                      <ng-container i18n="@@terms.cleaning"
+                        >Ménage de fin de séjour {{ euros(logement.terms.cleaningFee) }}</ng-container
+                      >
                       <br />
                     }
                     @if (logement.terms.linenFee) {
-                      Linge {{ euros(logement.terms.linenFee) }} par personne
+                      <ng-container i18n="@@terms.linen"
+                        >Linge {{ euros(logement.terms.linenFee) }} par personne</ng-container
+                      >
                     }
                   </dd>
                 </div>
               }
             </dl>
-            <p class="terms__note">
+            <p class="terms__note" i18n="@@terms.note">
               Tout se règle directement avec le propriétaire : Cap Monta ne prend aucun paiement.
             </p>
           } @else {
-            <p class="block__empty">
+            <p class="block__empty" i18n="@@terms.none">
               Le propriétaire n'a pas encore précisé ses conditions (horaires, acompte, caution,
               annulation). Posez-lui la question dans votre demande.
             </p>
@@ -228,8 +252,22 @@
         </section>
 
         <section class="block">
-          <h2 class="block__title">Le logement</h2>
-          <p class="description">{{ logement.description }}</p>
+          <h2 class="block__title" i18n="@@fiche.description">Le logement</h2>
+          @if (!french) {
+            <p class="description__lang">
+              <ng-container i18n="@@fiche.description-french"
+                >Description écrite par le propriétaire, en français.</ng-container
+              >
+              <a
+                [href]="translateUrl(logement.description)"
+                target="_blank"
+                rel="noopener"
+                i18n="@@fiche.translate"
+                >Traduire</a
+              >
+            </p>
+          }
+          <p class="description" lang="fr">{{ logement.description }}</p>
           <cm-report-listing [slug]="logement.slug" />
         </section>
       </div>
@@ -267,18 +305,20 @@
       <div class="stickybar">
         <p class="stickybar__price">
           @if (logement.priceFrom) {
-            <span>À partir de</span>
-            <b>{{ logement.priceFrom / 100 | number: '1.0-0' }} €</b> / semaine
+            <span i18n="@@sticky.from">À partir de</span>
+            <b>{{ euros(logement.priceFrom) }}</b>
+            <ng-container i18n="@@card.per-week">/ semaine</ng-container>
           } @else {
-            <b>Tarifs sur demande</b>
+            <b i18n="@@sticky.on-request">Tarifs sur demande</b>
           }
         </p>
         <a class="stickybar__button" href="#demande" (click)="scrollToRequest($event)"
+          i18n="@@sticky.request"
           >Demander ces dates</a
         >
       </div>
     }
   } @else {
-    <p class="loading">Chargement…</p>
+    <p class="loading" i18n="@@common.loading">Chargement…</p>
   }
 </div>

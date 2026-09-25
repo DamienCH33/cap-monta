@@ -24,11 +24,11 @@ export class ReportListing {
   readonly slug = input.required<string>();
 
   readonly reasons: { value: Reason; label: string }[] = [
-    { value: 'people_visible', label: 'Une personne est reconnaissable sur une photo' },
-    { value: 'misleading', label: 'Annonce trompeuse (photos, prix, description)' },
-    { value: 'scam', label: "Arnaque ou logement qui n'existe pas" },
-    { value: 'offensive', label: 'Contenu choquant ou illégal' },
-    { value: 'other', label: 'Autre raison' },
+    { value: 'people_visible', label: $localize`:@@report.people:Une personne est reconnaissable sur une photo` },
+    { value: 'misleading', label: $localize`:@@report.misleading:Annonce trompeuse (photos, prix, description)` },
+    { value: 'scam', label: $localize`:@@report.scam:Arnaque ou logement qui n'existe pas` },
+    { value: 'offensive', label: $localize`:@@report.offensive:Contenu choquant ou illégal` },
+    { value: 'other', label: $localize`:@@report.other:Autre raison` },
   ];
 
   readonly reason = signal<Reason | ''>('');
@@ -41,7 +41,7 @@ export class ReportListing {
 
   submit(): void {
     if ('' === this.reason() || this.sending()) {
-      this.error.set('Choisissez la raison du signalement.');
+      this.error.set($localize`:@@report.pick:Choisissez la raison du signalement.`);
 
       return;
     }
@@ -62,7 +62,7 @@ export class ReportListing {
         },
         error: (error: HttpErrorResponse) => {
           this.sending.set(false);
-          this.error.set(apiErrorMessage(error, "L'envoi a échoué. Réessayez dans un instant."));
+          this.error.set(apiErrorMessage(error, $localize`:@@common.send-failed:L'envoi a échoué. Réessayez dans un instant.`));
         },
       });
   }

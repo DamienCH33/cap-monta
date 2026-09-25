@@ -1,35 +1,41 @@
 <div class="container tracking">
   @if (notFound()) {
     <div class="tracking__box">
-      <h1 class="tracking__title">Demande introuvable</h1>
-      <p>Ce lien n'est pas valide. Vérifiez qu'il a été copié en entier depuis l'email reçu.</p>
-      <p>Vous pouvez aussi recevoir à nouveau les liens de vos demandes par email.</p>
-      <a class="button" routerLink="/mes-demandes">Retrouver mes demandes</a>
+      <h1 class="tracking__title" i18n="@@tracking.missing-title">Demande introuvable</h1>
+      <p i18n="@@tracking.missing">
+        Ce lien n'est pas valide. Vérifiez qu'il a été copié en entier depuis l'email reçu.
+      </p>
+      <p i18n="@@tracking.resend">
+        Vous pouvez aussi recevoir à nouveau les liens de vos demandes par email.
+      </p>
+      <a class="button" routerLink="/mes-demandes" i18n="@@tracking.find">Retrouver mes demandes</a>
     </div>
   } @else if (request(); as current) {
-    <h1 class="tracking__title">Votre demande</h1>
+    <h1 class="tracking__title" i18n="@@tracking.title">Votre demande</h1>
 
     <section class="status" [class]="'status status--' + current.status" aria-live="polite">
       <p class="status__label">{{ statusLabel(current.status) }}</p>
       @switch (current.status) {
         @case ('pending') {
-          <p>
+          <p i18n="@@tracking.pending">
             Le propriétaire a jusqu'au
-            <strong>{{ current.expiresAt | date: "EEEE d MMMM 'à' HH'h'mm" }}</strong> pour
-            répondre. Vous recevrez sa réponse par email.
+            <strong>{{ current.expiresAt | date: expiresFormat }}</strong> pour répondre. Vous
+            recevrez sa réponse par email.
           </p>
         }
         @case ('accepted') {
-          <p>Le propriétaire accepte votre séjour. Contactez-le pour l'arrivée et le règlement.</p>
+          <p i18n="@@tracking.accepted">
+            Le propriétaire accepte votre séjour. Contactez-le pour l'arrivée et le règlement.
+          </p>
         }
         @case ('declined') {
-          <p>Le propriétaire ne peut pas vous accueillir à ces dates.</p>
+          <p i18n="@@tracking.declined">Le propriétaire ne peut pas vous accueillir à ces dates.</p>
         }
         @case ('expired') {
-          <p>Le propriétaire n'a pas répondu à temps. Vous ne devez rien.</p>
+          <p i18n="@@tracking.expired">Le propriétaire n'a pas répondu à temps. Vous ne devez rien.</p>
         }
         @case ('cancelled') {
-          <p>Ce séjour est annulé.</p>
+          <p i18n="@@tracking.cancelled">Ce séjour est annulé.</p>
         }
       }
       @if (current.ownerMessage) {
@@ -39,7 +45,7 @@
 
     @if (current.ownerContact; as owner) {
       <section class="tracking__box">
-        <h2 class="tracking__subtitle">Votre hôte</h2>
+        <h2 class="tracking__subtitle" i18n="@@tracking.host">Votre hôte</h2>
         <p class="tracking__contact">
           <strong>{{ owner.name }}</strong>
           <a [href]="'mailto:' + owner.email">{{ owner.email }}</a>
@@ -58,30 +64,39 @@
       </h2>
       <dl class="facts">
         <div>
-          <dt>Séjour</dt>
+          <dt i18n="@@tracking.stay">Séjour</dt>
           <dd>
-            Du {{ current.start | date: 'EEEE d MMMM' }} au
-            {{ current.end | date: 'EEEE d MMMM yyyy' }} · {{ current.nights }}
-            {{ current.nights > 1 ? 'nuits' : 'nuit' }}
+            <ng-container i18n="@@tracking.dates"
+              >Du {{ current.start | date: 'EEEE d MMMM' }} au
+              {{ current.end | date: 'EEEE d MMMM yyyy' }}</ng-container
+            >
+            ·
+            <ng-container i18n="@@count.nights"
+              >{current.nights, plural, =1 {1 nuit} other {{{ current.nights }} nuits}}</ng-container
+            >
           </dd>
         </div>
         <div>
-          <dt>Voyageurs</dt>
+          <dt i18n="@@search.guests">Voyageurs</dt>
           <dd>{{ travellers(current) }}</dd>
         </div>
         <div>
-          <dt>Prix</dt>
+          <dt i18n="@@tracking.price">Prix</dt>
           <dd>
             @if (bookingPrice(current); as price) {
-              {{ price / 100 | number: '1.0-0' }} €
-              {{ current.agreedPrice ? '(convenu)' : '(estimé)' }}
+              {{ euros(price) }}
+              @if (current.agreedPrice) {
+                <ng-container i18n="@@tracking.agreed">(convenu)</ng-container>
+              } @else {
+                <ng-container i18n="@@tracking.estimated">(estimé)</ng-container>
+              }
             } @else {
-              à convenir avec le propriétaire
+              <ng-container i18n="@@tracking.to-agree">à convenir avec le propriétaire</ng-container>
             }
           </dd>
         </div>
       </dl>
-      <p class="tracking__note">
+      <p class="tracking__note" i18n="@@tracking.note">
         Redevances du domaine et taxe de séjour à régler sur place, en plus. Aucun paiement ne passe
         par Cap Monta.
       </p>
@@ -92,13 +107,15 @@
         @if (confirming()) {
           <p>
             <strong>
-              {{
-                'accepted' === current.status
-                  ? 'Annuler votre réservation ?'
-                  : 'Retirer votre demande ?'
-              }}
+              @if ('accepted' === current.status) {
+                <ng-container i18n="@@tracking.cancel-q">Annuler votre réservation ?</ng-container>
+              } @else {
+                <ng-container i18n="@@tracking.withdraw-q">Retirer votre demande ?</ng-container>
+              }
             </strong>
-            Le propriétaire en sera prévenu par email. Ce n'est pas réversible.
+            <ng-container i18n="@@tracking.cancel-warning"
+              >Le propriétaire en sera prévenu par email. Ce n'est pas réversible.</ng-container
+            >
           </p>
           @if (error()) {
             <p class="tracking__error" role="alert">{{ error() }}</p>
@@ -110,15 +127,23 @@
               [disabled]="saving()"
               (click)="cancel()"
             >
-              {{ saving() ? 'Annulation…' : 'Oui, annuler' }}
+              @if (saving()) {
+                <ng-container i18n="@@tracking.cancelling">Annulation…</ng-container>
+              } @else {
+                <ng-container i18n="@@tracking.yes-cancel">Oui, annuler</ng-container>
+              }
             </button>
-            <button type="button" class="button button--ghost" (click)="confirming.set(false)">
+            <button type="button" class="button button--ghost" (click)="confirming.set(false)" i18n="@@tracking.keep">
               Non, garder
             </button>
           </div>
         } @else {
           <button type="button" class="button button--secondary" (click)="confirming.set(true)">
-            {{ 'accepted' === current.status ? 'Annuler ma réservation' : 'Retirer ma demande' }}
+            @if ('accepted' === current.status) {
+              <ng-container i18n="@@tracking.cancel">Annuler ma réservation</ng-container>
+            } @else {
+              <ng-container i18n="@@tracking.withdraw">Retirer ma demande</ng-container>
+            }
           </button>
         }
       </section>
@@ -136,6 +161,7 @@
           bebes: current.infants || null,
           animaux: current.pets || null,
         }"
+        i18n="@@tracking.see-free"
         >Voir les logements libres à ces dates</a
       >
     }

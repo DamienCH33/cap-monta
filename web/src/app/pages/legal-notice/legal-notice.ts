@@ -22,6 +22,7 @@ export class LegalNotice implements OnInit {
       title: 'Mentions légales',
       description: 'Éditeur, hébergeur et informations légales du site Cap Monta.',
       path: '/mentions-legales',
+      frenchOnly: true,
     });
   }
 }

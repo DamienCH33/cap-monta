@@ -19,13 +19,25 @@ export function guestsSummary(guests: Guests): string {
   const travellers = travellerCount(guests);
 
   if (travellers > 0) {
-    parts.push(`${travellers} ${travellers > 1 ? 'voyageurs' : 'voyageur'}`);
+    parts.push(
+      1 === travellers
+        ? $localize`:@@guests.traveller.one:1 voyageur`
+        : $localize`:@@guests.traveller.other:${travellers}:count: voyageurs`,
+    );
   }
   if (guests.infants > 0) {
-    parts.push(`${guests.infants} ${guests.infants > 1 ? 'bébés' : 'bébé'}`);
+    parts.push(
+      1 === guests.infants
+        ? $localize`:@@guests.infant.one:1 bébé`
+        : $localize`:@@guests.infant.other:${guests.infants}:count: bébés`,
+    );
   }
   if (guests.pets > 0) {
-    parts.push(`${guests.pets} ${guests.pets > 1 ? 'animaux' : 'animal'}`);
+    parts.push(
+      1 === guests.pets
+        ? $localize`:@@guests.pet.one:1 animal`
+        : $localize`:@@guests.pet.other:${guests.pets}:count: animaux`,
+    );
   }
 
   return parts.join(', ');

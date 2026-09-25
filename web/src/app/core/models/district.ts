@@ -2,9 +2,9 @@ export type DistrictArea = 'dunes' | 'central' | 'roadside';
 
 /** Libellés des zones, dans l'ordre de la plage vers l'avenue. */
 export const DISTRICT_AREAS: readonly { key: DistrictArea; label: string }[] = [
-  { key: 'dunes', label: 'Près des dunes / Océan' },
-  { key: 'central', label: 'Au cœur du domaine' },
-  { key: 'roadside', label: 'Côté avenue' },
+  { key: 'dunes', label: $localize`:@@area.dunes:Près des dunes / Océan` },
+  { key: 'central', label: $localize`:@@area.central:Au cœur du domaine` },
+  { key: 'roadside', label: $localize`:@@area.roadside:Côté avenue` },
 ];
 
 export interface District {

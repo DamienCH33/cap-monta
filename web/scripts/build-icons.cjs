@@ -27,6 +27,7 @@ const NAMES = [
   'trees',
   'upload',
   'user-circle',
+  'world',
   'x',
 ];
 

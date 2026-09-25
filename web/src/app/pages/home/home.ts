@@ -10,13 +10,26 @@ import { SearchBar } from '../../shared/search-bar/search-bar';
 import { Icon } from '../../shared/icon/icon';
 import { SitePhoto } from '../../shared/site-photo/site-photo';
 import { SITE_PHOTOS } from '../../core/site-photos';
+import { currentLang, currentLangOption } from '../../core/i18n/lang';
 import { SeoService } from '../../core/services/seo';
 import { environment } from '../../../environments/environment';
 
 const ZONES: readonly { key: DistrictArea; title: string; hint: string }[] = [
-  { key: 'dunes', title: 'Côté océan', hint: 'Dunes et plage à pied' },
-  { key: 'central', title: 'Au cœur du domaine', hint: 'Commerces, piscines, thermes' },
-  { key: 'roadside', title: 'Côté avenue', hint: 'Au calme, sous les pins' },
+  {
+    key: 'dunes',
+    title: $localize`:@@zone.dunes:Côté océan`,
+    hint: $localize`:@@zone.dunes-hint:Dunes et plage à pied`,
+  },
+  {
+    key: 'central',
+    title: $localize`:@@zone.central:Au cœur du domaine`,
+    hint: $localize`:@@zone.central-hint:Commerces, piscines, thermes`,
+  },
+  {
+    key: 'roadside',
+    title: $localize`:@@zone.roadside:Côté avenue`,
+    hint: $localize`:@@zone.roadside-hint:Au calme, sous les pins`,
+  },
 ];
 
 @Component({
@@ -31,6 +44,7 @@ export class Home implements OnInit {
   private readonly seo = inject(SeoService);
 
   readonly heroPhoto = SITE_PHOTOS.hero ?? null;
+  readonly french = 'fr' === currentLang();
   readonly ownerPhoto = SITE_PHOTOS.owner ?? null;
 
   readonly highlights = signal<Accommodation[]>([]);
@@ -54,10 +68,8 @@ export class Home implements OnInit {
 
   ngOnInit(): void {
     this.seo.apply({
-      title: 'Location de mobil-homes et bungalows au CHM Montalivet et à Euronat',
-      description:
-        'Louez un bungalow, un mobil-home, une caravane, un chalet ou un studio au CHM Montalivet et à Euronat. ' +
-        'Calendriers tenus à jour par les propriétaires, réponse sous 48 h, aucune commission.',
+      title: $localize`:@@seo.home.title:Location de mobil-homes et bungalows au CHM Montalivet et à Euronat`,
+      description: $localize`:@@seo.home.description:Louez un bungalow, un mobil-home, une caravane, un chalet ou un studio au CHM Montalivet et à Euronat. Calendriers tenus à jour par les propriétaires, réponse sous 48 h, aucune commission.`,
       path: '/',
     });
 
@@ -69,7 +81,7 @@ export class Home implements OnInit {
           '@id': `${environment.siteUrl}/#website`,
           url: environment.siteUrl,
           name: 'Cap Monta',
-          inLanguage: 'fr-FR',
+          inLanguage: currentLangOption().tag,
           publisher: { '@id': `${environment.siteUrl}/#organization` },
         },
         {
@@ -77,9 +89,7 @@ export class Home implements OnInit {
           '@id': `${environment.siteUrl}/#organization`,
           name: 'Cap Monta',
           url: environment.siteUrl,
-          description:
-            'Mise en relation entre propriétaires et locataires de bungalows, mobil-homes, ' +
-            'caravanes, chalets et studios au CHM Montalivet et à Euronat. Sans commission.',
+          description: $localize`:@@seo.org.description:Mise en relation entre propriétaires et locataires de bungalows, mobil-homes, caravanes, chalets et studios au CHM Montalivet et à Euronat. Sans commission.`,
           areaServed: [
             { '@type': 'Place', name: 'CHM Montalivet' },
             { '@type': 'Place', name: 'Euronat' },

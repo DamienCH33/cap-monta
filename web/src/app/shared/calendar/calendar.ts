@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, input, signal } from '@angular/core';
 
 import { BusyPeriod } from '../../core/models/availability';
+import { currentLangOption } from '../../core/i18n/lang';
 import { Icon } from '../icon/icon';
 
 interface Day {
@@ -38,7 +39,12 @@ export class Calendar {
   readonly totalMonths = input(12);
   readonly visibleMonths = input(2);
 
-  readonly weekdays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  // Initiales du lundi au dimanche dans la langue du site (2026-01-05 est un lundi).
+  readonly weekdays = Array.from({ length: 7 }, (_, i) =>
+    new Intl.DateTimeFormat(currentLangOption().tag, { weekday: 'narrow' })
+      .format(new Date(2026, 0, 5 + i))
+      .toUpperCase(),
+  );
 
   /** Premier mois affiché, en nombre de mois depuis le mois courant. */
   private readonly offset = signal(0);
