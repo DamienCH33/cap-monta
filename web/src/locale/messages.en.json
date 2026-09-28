@@ -262,7 +262,7 @@
     "count.listings": "{VAR_PLURAL, plural, =1 {1 home} other {{INTERPOLATION} homes}}",
     "home.also": "Also:",
     "home.free-title": "Still available",
-    "home.free-lead": " The coming weeks at a glance: solid = free, hatched = already taken.",
+    "home.free-lead": "The coming weeks at a glance.",
     "home.see-all": "See all",
     "home.none": "No listing published yet.",
     "home.owner-title": "Do you rent out your home at CHM or Euronat?",

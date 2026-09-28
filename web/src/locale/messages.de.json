@@ -262,7 +262,7 @@
     "count.listings": "{VAR_PLURAL, plural, =1 {1 Unterkunft} other {{INTERPOLATION} Unterkünfte}}",
     "home.also": "Außerdem:",
     "home.free-title": "Noch frei",
-    "home.free-lead": " Die nächsten Wochen auf einen Blick: ausgefüllt = frei, schraffiert = bereits belegt.",
+    "home.free-lead": "Die nächsten Wochen auf einen Blick.",
     "home.see-all": "Alle ansehen",
     "home.none": "Noch keine Anzeige online.",
     "home.owner-title": "Sie vermieten Ihre Unterkunft in CHM oder Euronat?",
