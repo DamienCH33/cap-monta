@@ -9,4 +9,6 @@ when@test:
             locale: fr_FR
         orm:
             reset:
-                mode: !php/enum Zenstruck\Foundry\ORM\ResetDatabase\ResetDatabaseMode::MIGRATE
+                # En texte et pas en !php/enum : ce fichier est lu aussi en production, où Foundry
+                # n'est pas installé (l'enum n'existerait pas et le build Docker échouait).
+                mode: migrate
