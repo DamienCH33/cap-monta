@@ -4,6 +4,7 @@ import {
   isMainModule,
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
+import compression from 'compression';
 import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { join } from 'node:path';
@@ -71,6 +72,9 @@ globalThis.fetch = (input, init) => {
 };
 
 const app = express();
+
+// Pages rendues et relais de l'API compressés (gzip) : Railway ne le fait pas toujours.
+app.use(compression());
 // Derrière le proxy de Railway, l'adresse d'origine (https, domaine) arrive dans ces en-têtes.
 const angularApp = new AngularNodeAppEngine({
   trustProxyHeaders: ['x-forwarded-proto', 'x-forwarded-host'],
