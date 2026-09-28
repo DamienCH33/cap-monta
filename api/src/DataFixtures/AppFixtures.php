@@ -11,7 +11,6 @@ use App\Entity\Unavailability;
 use App\Entity\User;
 use App\Enum\AccommodationStatus;
 use App\Enum\BookingRequestStatus;
-use App\Enum\DistrictArea;
 use App\Enum\PetsPolicy;
 use App\Enum\Resort;
 use App\Enum\UnavailabilitySource;
@@ -19,6 +18,7 @@ use App\Factory\AccommodationFactory;
 use App\Factory\DistrictFactory;
 use App\Factory\PricePeriodFactory;
 use App\Factory\UnavailabilityFactory;
+use App\Reference\ChmDistricts;
 use App\Service\Booking\QuoteCalculator;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -37,34 +37,6 @@ final class AppFixtures extends Fixture
     ) {
     }
 
-    /**
-     * The 21 districts of the official CHM site plan (2024).
-     * Area read visually on the plan: to be confirmed on site. Null = not settled yet.
-     */
-    private const CHM_DISTRICTS = [
-        ['Sables', DistrictArea::Dunes],
-        ['Ajoncs', DistrictArea::Dunes],
-        ['La Lande', DistrictArea::Dunes],
-        ['Europa', DistrictArea::Dunes],
-        ['Floride', DistrictArea::Dunes],
-        ['Pins', null],
-        ['Californie', null],
-        ['Gironde', DistrictArea::Central],
-        ['Écureuils', DistrictArea::Central],
-        ['Bruyères', DistrictArea::Central],
-        ['Atlantique', DistrictArea::Central],
-        ['Clairvie', DistrictArea::Central],
-        ['Soleil', DistrictArea::Central],
-        ['Polynésie', DistrictArea::Central],
-        ['Caraïbe', DistrictArea::Roadside],
-        ['Gascogne', DistrictArea::Roadside],
-        ['Guyane', DistrictArea::Roadside],
-        ['Basque', DistrictArea::Roadside],
-        ['Hawaï', DistrictArea::Roadside],
-        ['Médoc', DistrictArea::Roadside],
-        ['Verdure', DistrictArea::Roadside],
-    ];
-
     public function load(ObjectManager $manager): void
     {
         $damien = new User('proprietaire@example.com', 'Damien C.');
@@ -75,7 +47,7 @@ final class AppFixtures extends Fixture
 
         $districts = [];
 
-        foreach (self::CHM_DISTRICTS as $position => [$name, $area]) {
+        foreach (ChmDistricts::ALL as $position => [$name, $area]) {
             $districts[] = DistrictFactory::createOne([
                 'name' => $name,
                 'resort' => Resort::Chm,
