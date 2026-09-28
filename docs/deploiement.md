@@ -1,6 +1,6 @@
 # Déploiement sur Railway
 
-État au 25/09/2026 : tout est prêt dans le dépôt (Dockerfiles, fichiers `railway*.json`, variables listées ci-dessous). Le site n'est pas encore en ligne. Compte 10 à 15 €/mois.
+État au 25/09/2026 : tout est prêt dans le dépôt (Dockerfiles, fichiers `railway*.json`, variables listées ci-dessous). Le site n'est pas encore en ligne. Compte 5 à 10 $/mois (offre Hobby).
 
 ## Architecture
 
@@ -58,26 +58,27 @@ Les valeurs `${{…}}` sont des références Railway : elles se mettent à jour 
 | `LOCK_DSN` | `${{redis.REDIS_URL}}?timeout=1&read_timeout=1` |
 | `MESSENGER_TRANSPORT_DSN` | `doctrine://default?auto_setup=0` |
 | `TRUSTED_PROXIES` | `PRIVATE_SUBNETS,100.64.0.0/10` |
-| `CORS_ALLOW_ORIGIN` | `^https://(www\.)?cap-monta\.fr$` (avec `^` et `$` : sans eux, `cap-monta.fr.pirate.com` passerait) |
-| `DEFAULT_URI` | `https://cap-monta.fr` |
-| `APP_FRONT_URL` | `https://cap-monta.fr` |
-| `MAILER_DSN` | celui du service d'envoi (Brevo, Scaleway TEM…) |
-| `MAILER_FROM` | `bonjour@cap-monta.fr` (domaine avec SPF, DKIM et DMARC configurés) |
+| `CORS_ALLOW_ORIGIN` | `^https://cap-monta\.damienchauveau-dev\.fr$` (avec `^` et `$` : sans eux, `cap-monta.damienchauveau-dev.fr.pirate.com` passerait) |
+| `DEFAULT_URI` | `https://cap-monta.damienchauveau-dev.fr` |
+| `APP_FRONT_URL` | `https://cap-monta.damienchauveau-dev.fr` |
+| `MAILER_DSN` | `smtp://bb76d4001%40smtp-brevo.com:CLE_SMTP@smtp-relay.brevo.com:587` (clé `cap-monta` de Brevo, jamais dans le dépôt) |
+| `MAILER_FROM` | `noreply@damienchauveau-dev.fr` (domaine authentifié chez Brevo) |
 | `APP_MODERATION_EMAIL` | ton adresse |
 | `HEALTH_TOKEN` | aléatoire, pour voir le détail de `/api/health` |
 | `PHOTOS_DIR` | `public/media/photos` |
-| `PHOTOS_BASE_URL` | `https://cap-monta.fr/media/photos` |
+| `PHOTOS_BASE_URL` | `https://cap-monta.damienchauveau-dev.fr/media/photos` |
 | `MISTRAL_API_KEY` | la clé Mistral |
+| `SUPPORT_URL` | `https://ko-fi.com/capmonta` |
 
 ### web
 
 | Variable | Valeur |
 |---|---|
-| `SITE_URL` | `https://cap-monta.fr` (obligatoire : le serveur refuse de démarrer sans) |
+| `SITE_URL` | `https://cap-monta.damienchauveau-dev.fr` (obligatoire : le serveur refuse de démarrer sans) |
 | `API_URL` | `http://${{api.RAILWAY_PRIVATE_DOMAIN}}:${{api.PORT}}` |
-| `NG_ALLOWED_HOSTS` | `cap-monta.fr,www.cap-monta.fr` (**jamais** `*.up.railway.app` : n'importe qui peut créer un sous-domaine Railway) |
+| `NG_ALLOWED_HOSTS` | `cap-monta.damienchauveau-dev.fr` (**jamais** `*.up.railway.app` : n'importe qui peut créer un sous-domaine Railway) |
 
-Remplacer `cap-monta.fr` partout par le domaine réellement acheté.
+Domaine : sous-domaine `cap-monta` de damienchauveau-dev.fr (DNS chez OVH, un enregistrement CNAME vers Railway).
 
 ## Avant la première mise en ligne
 
@@ -87,7 +88,7 @@ Remplacer `cap-monta.fr` partout par le domaine réellement acheté.
    ```bash
    docker build -t cap-monta-api api && docker build -t cap-monta-web web
    ```
-4. Pages légales : remplacer les `[CROCHETS]` (hébergeur, région, adresse de contact).
+4. Pages légales : remplies le 28/09 (Railway, région EU West, contact@damienchauveau-dev.fr redirigé chez OVH).
 5. Base de données : l'utilisateur fourni par Railway est superutilisateur. Créer un rôle pour l'application, sans ce droit :
    ```sql
    CREATE ROLE capmonta_app LOGIN PASSWORD '…';
@@ -103,7 +104,7 @@ Remplacer `cap-monta.fr` partout par le domaine réellement acheté.
 ## Après chaque mise en ligne : les vérifications
 
 ```bash
-SITE=https://cap-monta.fr
+SITE=https://cap-monta.damienchauveau-dev.fr
 
 # 1. Les pages répondent, dans les 4 langues, et le relais vers l'API marche
 for p in / /en/ /nl/recherche /de/comment-ca-marche /api/districts; do
@@ -141,7 +142,7 @@ Si le test 4 renvoie six 200 : `TRUSTED_PROXIES` est trop large. Si tous les vis
   createdb capmonta_restore && pg_restore -d capmonta_restore sauvegarde.dump
   ```
   Le volume des photos se sauvegarde à part (Railway : *Volume → Backups*).
-- **Surveillance** : UptimeRobot (gratuit) sur `https://cap-monta.fr/api/health`, alerte si le code n'est pas 200 ou si la réponse contient `degraded`.
+- **Surveillance** : UptimeRobot (gratuit) sur `https://cap-monta.damienchauveau-dev.fr/api/health`, alerte si le code n'est pas 200 ou si la réponse contient `degraded`.
 - **Worker** : s'il s'arrête, les emails et les expirations attendent. `/api/health` le signale (`worker`). La tâche horaire rattrape les expirations.
 - **Emails en échec** : `php bin/console messenger:failed:show` (shell Railway sur `worker`). Purgés après 30 jours.
 - **Retour arrière** : Railway → service → *Deployments* → le déploiement précédent → *Redeploy*. Une migration déjà passée ne se défait pas toute seule : `php bin/console doctrine:migrations:migrate prev` (toutes les migrations savent redescendre, testé le 25/09).
