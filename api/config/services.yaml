@@ -30,13 +30,17 @@ services:
             - "../src/Service/Booking/BookingRefusedException.php"
             - "../src/Kernel.php"
             - "../src/Service/Booking/Quote.php"
+            # Données de démo et fabriques de test : leurs bibliothèques (Foundry, Doctrine
+            # Fixtures) ne sont pas installées en production. Déclarées plus bas, hors prod.
+            - "../src/DataFixtures/"
+            - "../src/Factory/"
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
     # Connexion Redis du cache : délais courts. Par défaut, une connexion attend 30 s ; un
     # Redis qui ne répond plus (au lieu de refuser) figerait chaque page. Ici on abandonne en
-    # une seconde et le calendrier est lu dans la base (ADR 014, 021).
+    # 0,3 s et le calendrier est lu dans la base (ADR 014, 021).
     app.redis:
         class: Redis
         factory: ['Symfony\Component\Cache\Adapter\RedisAdapter', 'createConnection']
@@ -45,3 +49,15 @@ services:
             # Délais courts : un Redis qui ne répond plus coûtait jusqu'à 2 s par fiche. Le
             # calendrier se relit alors en base, sans attendre (audit du 25/09).
             - { lazy: true, timeout: 0.3, read_timeout: 0.3, retry_interval: 0 }
+
+when@dev: &dev_only
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+        App\DataFixtures\:
+            resource: "../src/DataFixtures/"
+        App\Factory\:
+            resource: "../src/Factory/"
+
+when@test: *dev_only
