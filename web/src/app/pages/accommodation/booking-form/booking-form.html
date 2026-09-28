@@ -21,6 +21,17 @@
     <p class="box__note" i18n="@@booking.no-payment">
       Aucun paiement n'a été demandé, et rien n'est encore réservé.
     </p>
+
+    @if (supportUrl) {
+      <p class="box__note">
+        <ng-container i18n="@@support.pitch"
+          >Gratuit et sans commission : le serveur est payé par les dons.</ng-container
+        >
+        <a [href]="supportUrl" target="_blank" rel="noopener" i18n="@@support.link"
+          >Soutenir Cap Monta</a
+        >
+      </p>
+    }
   </div>
 } @else {
   <form class="box" (ngSubmit)="submit()">

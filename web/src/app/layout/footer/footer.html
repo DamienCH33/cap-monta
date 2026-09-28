@@ -10,6 +10,16 @@
         Euronat. Calendriers tenus par les propriétaires, sans commission.
       </p>
       <cm-lang-switch class="footer__langs" mode="list" />
+      @if (supportUrl) {
+        <p class="footer__support">
+          <ng-container i18n="@@support.pitch"
+            >Gratuit et sans commission : le serveur est payé par les dons.</ng-container
+          >
+          <a [href]="supportUrl" target="_blank" rel="noopener" i18n="@@support.link"
+            >Soutenir Cap Monta</a
+          >
+        </p>
+      }
     </div>
 
     <nav class="footer__column" aria-label="Louer" i18n-aria-label="@@footer.rent">

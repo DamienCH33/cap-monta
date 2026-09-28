@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { currentLang } from '../../../core/i18n/lang';
+import { environment } from '../../../../environments/environment';
 import { BookingRequest } from '../../../core/models/booking-request';
 import { PetsPolicy } from '../../../core/models/accommodation';
 import { Guests, NO_GUESTS, travellerCount } from '../../../core/models/guests';
@@ -88,6 +89,7 @@ export class BookingForm implements OnInit {
   readonly violations = signal<Record<string, string>>({});
 
   readonly euros = euros;
+  readonly supportUrl = environment.supportUrl;
   /** Les messages de l'API sont en français : ailleurs, on les remplace par des messages traduits. */
   readonly french = 'fr' === currentLang();
   readonly mandatoryExtras = computed(() =>
