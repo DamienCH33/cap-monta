@@ -1,4 +1,50 @@
 // Fichier écrit par `npm run photos` (scripts/build-site-photos.mjs) : ne pas modifier à la main.
 import { SitePhotos } from './models/site-photo';
 
-export const SITE_PHOTOS: SitePhotos = {};
+export const SITE_PHOTOS: SitePhotos = {
+  hero: {
+    widths: [640, 960, 1280, 1920, 2560],
+    ratio: 1.499,
+    alt: 'La plage de Montalivet, la dune et ses ganivelles',
+    focus: '35% 60%',
+    credit: null,
+    license: null,
+    source: null,
+  },
+  dunes: {
+    widths: [480, 800, 1200],
+    ratio: 3.602,
+    alt: 'La dune et ses ganivelles',
+    focus: 'center',
+    credit: 'Damien Chauveau',
+    license: null,
+    source: null,
+  },
+  central: {
+    widths: [480, 800, 1200],
+    ratio: 1.333,
+    alt: 'Pins sylvestres au CHM Montalivet',
+    focus: 'center',
+    credit: 'AUTEUR',
+    license: 'LICENCE',
+    source: 'https://commons.wikimedia.org/wiki/File:Pins_sylvestres_au_CHM-Montalivet.jpg',
+  },
+  roadside: {
+    widths: [480, 800, 1200],
+    ratio: 2,
+    alt: 'La pinède côté avenue',
+    focus: 'center',
+    credit: 'Damien Chauveau',
+    license: null,
+    source: null,
+  },
+  owner: {
+    widths: [480, 800, 1200],
+    ratio: 1.328,
+    alt: "Terrasse d'un bungalow sous les pins",
+    focus: 'center',
+    credit: 'Cristina Alonso',
+    license: 'Licence Pexels',
+    source: 'https://www.pexels.com/photo/17438928/',
+  },
+};

@@ -43,6 +43,3 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-# Photos du site produites par `npm run photos` : gardées hors du dépôt (droits des photos).
-# Elles seront envoyées sur le stockage de production au déploiement.
-/public/photos/
