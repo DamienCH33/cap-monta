@@ -96,3 +96,17 @@
   margin-top: 14px;
   font-size: 13px;
 }
+
+.footer__support {
+  max-width: 320px;
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+
+  a {
+    display: inline-block;
+    margin-top: 2px;
+    color: var(--blue);
+    font-weight: 600;
+  }
+}

@@ -1,5 +1,8 @@
 twig:
     file_name_pattern: '*.twig'
+    globals:
+        # Lien « Soutenir Cap Monta » (Ko-fi) en bas des emails. Vide : rien ne s'affiche.
+        support_url: '%env(default::SUPPORT_URL)%'
 
 when@test:
     twig:
