@@ -1,15 +1,17 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { TrackedBookingRequest } from '../models/booking-answer';
 import { BookingRequest, NewBookingRequest } from '../models/booking-request';
 import { Quote } from '../models/quote';
+import { Analytics } from './analytics';
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
   private readonly http = inject(HttpClient);
+  private readonly analytics = inject(Analytics);
   private readonly baseUrl = `${environment.apiUrl}/api`;
 
   quote(
@@ -56,11 +58,13 @@ export class BookingService {
   }
 
   send(request: NewBookingRequest): Observable<BookingRequest> {
-    return this.http.post<BookingRequest>(`${this.baseUrl}/booking-requests`, request, {
-      headers: {
-        'Content-Type': 'application/ld+json',
-        Accept: 'application/ld+json',
-      },
-    });
+    return this.http
+      .post<BookingRequest>(`${this.baseUrl}/booking-requests`, request, {
+        headers: {
+          'Content-Type': 'application/ld+json',
+          Accept: 'application/ld+json',
+        },
+      })
+      .pipe(tap(() => this.analytics.event('demande-envoyee')));
   }
 }

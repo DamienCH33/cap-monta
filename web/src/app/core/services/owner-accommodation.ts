@@ -1,9 +1,10 @@
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { JsonLdCollection } from '../models/accommodation';
+import { Analytics } from './analytics';
 import {
   AccommodationChanges,
   DistrictOption,
@@ -19,6 +20,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class OwnerAccommodationService {
   private readonly http = inject(HttpClient);
+  private readonly analytics = inject(Analytics);
   private readonly api = environment.apiUrl + '/api/owner/accommodations';
 
   list(): Observable<OwnerAccommodation[]> {
@@ -53,7 +55,9 @@ export class OwnerAccommodationService {
   }
 
   publish(slug: string): Observable<OwnerAccommodation> {
-    return this.transition(slug, 'publish');
+    return this.transition(slug, 'publish').pipe(
+      tap(() => this.analytics.event('annonce-publiee')),
+    );
   }
 
   archive(slug: string): Observable<OwnerAccommodation> {
