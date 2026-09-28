@@ -19,7 +19,12 @@ export class AuthService {
   readonly currentOwner = this.owner.asReadonly();
   readonly isLoggedIn = computed(() => null !== this.owner());
 
-  readonly sessionChecked = this.checked.asReadonly();
+  /**
+   * L'en-tête sait s'il doit afficher « Se connecter » : session vérifiée auprès de l'API, ou
+   * navigateur qui ne s'est jamais connecté (restore({ ifKnown: true }) sans appel).
+   */
+  private readonly probed = signal(false);
+  readonly sessionChecked = computed(() => this.checked() || this.probed());
 
   login(email: string, password: string): Observable<Owner> {
     return this.http
@@ -54,6 +59,10 @@ export class AuthService {
       return of(this.owner());
     }
     if (options.ifKnown && !this.hint()) {
+      // Personne ne s'est connecté ici : « Se connecter » peut s'afficher. La garde de l'espace
+      // propriétaire, elle, interrogera quand même l'API (checked reste faux).
+      this.probed.set(true);
+
       return of(null);
     }
 
