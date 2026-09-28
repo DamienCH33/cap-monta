@@ -27,20 +27,22 @@ Un seul domaine public (décision 009) : seul le service **web** a un domaine. L
 
 ## Services à créer
 
-Tous depuis le même dépôt GitHub. Pour chacun : *Settings → Source → Root Directory*, et *Settings → Config-as-code → Railway Config File*.
+Tous depuis le même dépôt GitHub, région **EU West (Amsterdam)**. Railway a abandonné « Config as Code » : depuis le 28/08/2026 un nouveau service ne peut plus lire `railway*.json`. Ces fichiers restent dans le dépôt comme référence, mais les réglages se saisissent à la main dans *Settings*.
 
-| Service | Root Directory | Config File | Domaine public |
+| Service | Root Directory | Réglages (Settings) | Domaine public |
 |---|---|---|---|
-| `web` | `web` | `web/railway.json` | oui (le domaine du site) |
-| `api` | `api` | `api/railway.json` | **non** |
-| `worker` | `api` | `api/railway.worker.json` | non |
-| `cron` | `api` | `api/railway.cron.json` | non |
-| `postgres` | modèle PostgreSQL de Railway | — | non |
-| `redis` | modèle Redis de Railway | — | non |
+| `web` | `/web` | Healthcheck `/robots.txt`, restart On Failure ×5, variable `PORT=4000` | `cap-monta.up.railway.app`, port 4000 |
+| `api` | `/api` | Pre-deploy `php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration`, healthcheck `/api/health`, restart On Failure ×5, variable `PORT=8080` | **non** |
+| `worker` | `/api` | Start `php bin/console messenger:consume async --time-limit=3600 --memory-limit=200M -vv`, restart Always, pas de healthcheck | non |
+| `cron` | `/api` | Start `sh -c 'php bin/console app:booking-requests:expire && php bin/console app:privacy:purge && php bin/console cache:pool:prune'`, Cron Schedule `17 * * * *`, restart Never | non |
+| `Postgres` | modèle PostgreSQL de Railway | — | non |
+| `Redis` | modèle Redis de Railway | — | non |
 
-`api` : ajouter un **volume** monté sur `/app/public/media` (les photos). Sans volume, toutes les photos disparaissent au déploiement suivant.
+Le Builder passe seul sur « Dockerfile » grâce au Dockerfile du Root Directory.
 
-Les migrations passent avant chaque déploiement de `api` (`preDeployCommand`). Si une migration échoue, l'ancienne version reste en ligne.
+`api` : **volume** monté sur `/app/public/media` (les photos). Sans volume, toutes les photos disparaissent au déploiement suivant.
+
+Les migrations passent avant chaque déploiement de `api` (pre-deploy). Si une migration échoue, l'ancienne version reste en ligne.
 
 ## Variables
 
@@ -53,20 +55,20 @@ Les valeurs `${{…}}` sont des références Railway : elles se mettent à jour 
 | `APP_ENV` | `prod` |
 | `APP_DEBUG` | `0` |
 | `APP_SECRET` | 32 caractères aléatoires, `openssl rand -hex 16`. **Jamais celui de dev** : il signe les liens de mot de passe et de vérification. |
-| `DATABASE_URL` | `${{postgres.DATABASE_URL}}?serverVersion=17&charset=utf8` |
-| `REDIS_URL` | `${{redis.REDIS_URL}}` |
-| `LOCK_DSN` | `${{redis.REDIS_URL}}?timeout=1&read_timeout=1` |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}?serverVersion=17&charset=utf8` |
+| `REDIS_URL` | `${{Redis.REDIS_URL}}` |
+| `LOCK_DSN` | `${{Redis.REDIS_URL}}?timeout=1&read_timeout=1` |
 | `MESSENGER_TRANSPORT_DSN` | `doctrine://default?auto_setup=0` |
 | `TRUSTED_PROXIES` | `PRIVATE_SUBNETS,100.64.0.0/10` |
-| `CORS_ALLOW_ORIGIN` | `^https://cap-monta\.damienchauveau-dev\.fr$` (avec `^` et `$` : sans eux, `cap-monta.damienchauveau-dev.fr.pirate.com` passerait) |
-| `DEFAULT_URI` | `https://cap-monta.damienchauveau-dev.fr` |
-| `APP_FRONT_URL` | `https://cap-monta.damienchauveau-dev.fr` |
+| `CORS_ALLOW_ORIGIN` | `^https://cap-monta\.up\.railway\.app$` (avec `^` et `$` : sans eux, `cap-monta.up.railway.app.pirate.com` passerait) |
+| `DEFAULT_URI` | `https://cap-monta.up.railway.app` |
+| `APP_FRONT_URL` | `https://cap-monta.up.railway.app` |
 | `MAILER_DSN` | `smtp://bb76d4001%40smtp-brevo.com:CLE_SMTP@smtp-relay.brevo.com:587` (clé `cap-monta` de Brevo, jamais dans le dépôt) |
 | `MAILER_FROM` | `noreply@damienchauveau-dev.fr` (domaine authentifié chez Brevo) |
 | `APP_MODERATION_EMAIL` | ton adresse |
 | `HEALTH_TOKEN` | aléatoire, pour voir le détail de `/api/health` |
 | `PHOTOS_DIR` | `public/media/photos` |
-| `PHOTOS_BASE_URL` | `https://cap-monta.damienchauveau-dev.fr/media/photos` |
+| `PHOTOS_BASE_URL` | `https://cap-monta.up.railway.app/media/photos` |
 | `MISTRAL_API_KEY` | la clé Mistral |
 | `SUPPORT_URL` | `https://ko-fi.com/capmonta` |
 
@@ -74,11 +76,11 @@ Les valeurs `${{…}}` sont des références Railway : elles se mettent à jour 
 
 | Variable | Valeur |
 |---|---|
-| `SITE_URL` | `https://cap-monta.damienchauveau-dev.fr` (obligatoire : le serveur refuse de démarrer sans) |
-| `API_URL` | `http://${{api.RAILWAY_PRIVATE_DOMAIN}}:${{api.PORT}}` |
-| `NG_ALLOWED_HOSTS` | `cap-monta.damienchauveau-dev.fr` (**jamais** `*.up.railway.app` : n'importe qui peut créer un sous-domaine Railway) |
+| `SITE_URL` | `https://cap-monta.up.railway.app` (obligatoire : le serveur refuse de démarrer sans) |
+| `API_URL` | `http://${{api.RAILWAY_PRIVATE_DOMAIN}}:8080` |
+| `NG_ALLOWED_HOSTS` | `cap-monta.up.railway.app` (le nom exact seulement, **jamais** `*.up.railway.app` : n'importe qui peut créer un sous-domaine Railway) |
 
-Domaine : sous-domaine `cap-monta` de damienchauveau-dev.fr (DNS chez OVH, un enregistrement CNAME vers Railway).
+Domaine : `cap-monta.up.railway.app`, fourni par Railway (*Networking → Generate Domain*, puis renommé). Pour passer un jour à un domaine acheté : *Custom Domain*, CNAME chez le registrar, puis changer les variables ci-dessus, `web/src/environments/environment.ts`, le canonical de `web/src/index.html` et les pages légales.
 
 ## Avant la première mise en ligne
 
@@ -104,7 +106,7 @@ Domaine : sous-domaine `cap-monta` de damienchauveau-dev.fr (DNS chez OVH, un en
 ## Après chaque mise en ligne : les vérifications
 
 ```bash
-SITE=https://cap-monta.damienchauveau-dev.fr
+SITE=https://cap-monta.up.railway.app
 
 # 1. Les pages répondent, dans les 4 langues, et le relais vers l'API marche
 for p in / /en/ /nl/recherche /de/comment-ca-marche /api/districts; do
@@ -142,7 +144,7 @@ Si le test 4 renvoie six 200 : `TRUSTED_PROXIES` est trop large. Si tous les vis
   createdb capmonta_restore && pg_restore -d capmonta_restore sauvegarde.dump
   ```
   Le volume des photos se sauvegarde à part (Railway : *Volume → Backups*).
-- **Surveillance** : UptimeRobot (gratuit) sur `https://cap-monta.damienchauveau-dev.fr/api/health`, alerte si le code n'est pas 200 ou si la réponse contient `degraded`.
+- **Surveillance** : UptimeRobot (gratuit) sur `https://cap-monta.up.railway.app/api/health`, alerte si le code n'est pas 200 ou si la réponse contient `degraded`.
 - **Worker** : s'il s'arrête, les emails et les expirations attendent. `/api/health` le signale (`worker`). La tâche horaire rattrape les expirations.
 - **Emails en échec** : `php bin/console messenger:failed:show` (shell Railway sur `worker`). Purgés après 30 jours.
 - **Retour arrière** : Railway → service → *Deployments* → le déploiement précédent → *Redeploy*. Une migration déjà passée ne se défait pas toute seule : `php bin/console doctrine:migrations:migrate prev` (toutes les migrations savent redescendre, testé le 25/09).
