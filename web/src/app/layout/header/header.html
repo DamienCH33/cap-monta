@@ -27,13 +27,6 @@
         </a>
       }
 
-      @if (supportUrl) {
-        <a class="header__support" [href]="supportUrl" target="_blank" rel="noopener">
-          <cm-icon name="coffee" />
-          <span i18n="@@header.support">Soutenir</span>
-        </a>
-      }
-
       @if (guestRequests().length && null === owner()) {
         <a routerLink="/mes-demandes" i18n="@@header.my-requests">Mes demandes</a>
       }
@@ -68,6 +61,13 @@
       }
 
       <cm-lang-switch />
+
+      @if (supportUrl) {
+        <a class="header__support" [href]="supportUrl" target="_blank" rel="noopener">
+          <cm-icon name="coffee" />
+          <span i18n="@@header.support">Soutenir</span>
+        </a>
+      }
     </nav>
   </div>
 </header>
