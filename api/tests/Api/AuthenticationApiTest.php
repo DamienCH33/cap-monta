@@ -53,6 +53,18 @@ final class AuthenticationApiTest extends ApiTestCase
         self::assertResponseStatusCodeSame(401);
     }
 
+    /** Refused before the password is even checked: no session opened from another site. */
+    public function testALoginFromAnotherSiteIsRefusedEvenWithTheRightPassword(): void
+    {
+        $this->client->request('POST', '/api/login', server: [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_ORIGIN' => 'https://evil.example',
+        ], content: json_encode(['email' => self::EMAIL, 'password' => self::PASSWORD], \JSON_THROW_ON_ERROR));
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertNull($this->client->getCookieJar()->get('PHPSESSID'));
+    }
+
     public function testTheAddressIsNotCaseSensitive(): void
     {
         $this->login(self::PASSWORD, mb_strtoupper(self::EMAIL));

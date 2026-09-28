@@ -29,18 +29,14 @@ final readonly class ApiRequestGuard
     ) {
     }
 
-    // After the firewall (priority 8): an anonymous visitor gets his 401 first.
-    #[AsEventListener(event: KernelEvents::REQUEST, priority: 6)]
-    public function onRequest(RequestEvent $event): void
+    // Before the firewall (priority 8): the login itself is handled by the firewall, so a
+    // foreign origin must be turned away before it can even try a password.
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: 9)]
+    public function onRequestOrigin(RequestEvent $event): void
     {
         $request = $event->getRequest();
-        $path = $request->getPathInfo();
 
-        if (!$event->isMainRequest() || \in_array($request->getMethod(), self::SAFE_METHODS, true)) {
-            return;
-        }
-
-        if (!str_starts_with($path, '/api/owner') && !\in_array($path, ['/api/login', '/api/logout'], true)) {
+        if (!self::isGuardedWrite($event)) {
             return;
         }
 
@@ -48,7 +44,16 @@ final readonly class ApiRequestGuard
 
         if (null !== $origin && $origin !== $request->getSchemeAndHttpHost() && 1 !== preg_match('#'.$this->allowedOrigins.'#', $origin)) {
             $event->setResponse(self::problem(403, 'Requête refusée : elle ne vient pas du site.'));
+        }
+    }
 
+    // After the firewall (priority 8): an anonymous visitor gets his 401 first.
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: 6)]
+    public function onRequest(RequestEvent $event): void
+    {
+        $request = $event->getRequest();
+
+        if (!self::isGuardedWrite($event)) {
             return;
         }
 
@@ -80,6 +85,18 @@ final readonly class ApiRequestGuard
         if ($event->getRequest()->isSecure() && !$headers->has('Strict-Transport-Security')) {
             $headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }
+    }
+
+    private static function isGuardedWrite(RequestEvent $event): bool
+    {
+        $request = $event->getRequest();
+        $path = $request->getPathInfo();
+
+        if (!$event->isMainRequest() || \in_array($request->getMethod(), self::SAFE_METHODS, true)) {
+            return false;
+        }
+
+        return str_starts_with($path, '/api/owner') || \in_array($path, ['/api/login', '/api/logout'], true);
     }
 
     private static function problem(int $status, string $detail): JsonResponse

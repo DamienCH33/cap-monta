@@ -15,3 +15,6 @@ when@prod:
         # développement, rien à faire en ligne.
         enable_swagger_ui: false
         enable_re_doc: false
+        # Ni /api/docs ni /api/docs.jsonld : ils listeraient aussi les routes propriétaire.
+        # Le front n'en a pas besoin (il ne lit que les réponses et leurs @context).
+        enable_docs: false
