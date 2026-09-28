@@ -262,7 +262,7 @@
     "count.listings": "{VAR_PLURAL, plural, =1 {1 accommodatie} other {{INTERPOLATION} accommodaties}}",
     "home.also": "Ook:",
     "home.free-title": "Nog vrij",
-    "home.free-lead": " De komende weken in één oogopslag: vol = vrij, gearceerd = al bezet.",
+    "home.free-lead": "De komende weken in één oogopslag.",
     "home.see-all": "Alles bekijken",
     "home.none": "Nog geen advertentie geplaatst.",
     "home.owner-title": "Verhuur je je accommodatie op CHM of Euronat?",

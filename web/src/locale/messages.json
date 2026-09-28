@@ -262,7 +262,7 @@
     "count.listings": "{VAR_PLURAL, plural, =1 {1 logement} other {{INTERPOLATION} logements}}",
     "home.also": "Aussi :",
     "home.free-title": "Encore libre",
-    "home.free-lead": " Les semaines à venir d'un coup d'œil : plein = libre, hachuré = déjà pris. ",
+    "home.free-lead": "Les semaines à venir d'un coup d'œil.",
     "home.see-all": "Tout voir",
     "home.none": "Aucune annonce publiée pour le moment.",
     "home.owner-title": "Vous louez votre logement au CHM ou à Euronat ?",

@@ -84,9 +84,16 @@
     <div class="section__head">
       <div>
         <h2 class="section__title" i18n="@@home.free-title">Encore libre</h2>
-        <p class="section__lead" i18n="@@home.free-lead">
-          Les semaines à venir d'un coup d'œil : plein = libre, hachuré = déjà pris.
-        </p>
+        <p class="section__lead" i18n="@@home.free-lead">Les semaines à venir d'un coup d'œil.</p>
+        @if (highlights().length > 0) {
+          <p class="legend">
+            <span><i class="legend__swatch"></i> <ng-container i18n="@@legend.free">libre</ng-container></span>
+            <span
+              ><i class="legend__swatch legend__swatch--taken"></i>
+              <ng-container i18n="@@legend.taken">indisponible</ng-container></span
+            >
+          </p>
+        }
       </div>
       <a class="section__link" routerLink="/recherche" i18n="@@home.see-all">Tout voir</a>
     </div>
