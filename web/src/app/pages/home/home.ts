@@ -80,7 +80,9 @@ export class Home implements OnInit {
           '@type': 'WebSite',
           '@id': `${environment.siteUrl}/#website`,
           url: environment.siteUrl,
+          // Nom affiché par Google au-dessus du résultat (sinon celui de l'hébergeur).
           name: 'Cap Monta',
+          alternateName: ['CapMonta', 'Cap Monta CHM Euronat'],
           inLanguage: currentLangOption().tag,
           publisher: { '@id': `${environment.siteUrl}/#organization` },
         },
