@@ -19,6 +19,7 @@ final class SyncDistrictsCommandTest extends DatabaseTestCase
     public function testFillsAnEmptyDatabaseOnceAndLeavesExistingDistrictsAlone(): void
     {
         DistrictFactory::createOne(['name' => 'Sables', 'resort' => Resort::Chm, 'area' => DistrictArea::Central, 'intro' => 'Écrit à la main.']);
+        DistrictFactory::createOne(['name' => 'Pins', 'resort' => Resort::Chm, 'area' => null]);
 
         $tester = new CommandTester(new Application(self::$kernel)->find('app:districts:sync'));
         self::assertSame(0, $tester->execute([]));
@@ -37,6 +38,8 @@ final class SyncDistrictsCommandTest extends DatabaseTestCase
         self::assertSame('la-lande', $lande?->getSlug());
         self::assertSame(DistrictArea::Dunes, $lande->getArea());
         self::assertSame(2, $lande->getPosition());
+        self::assertSame(DistrictArea::Central, $em->getRepository(District::class)->findOneBy(['name' => 'Pins'])?->getArea(), 'a district without area gets the one from the plan');
+        self::assertSame(DistrictArea::Central, $em->getRepository(District::class)->findOneBy(['name' => 'Californie'])?->getArea());
         self::assertSame('ecureuils', $em->getRepository(District::class)->findOneBy(['name' => 'Écureuils'])?->getSlug());
     }
 }
