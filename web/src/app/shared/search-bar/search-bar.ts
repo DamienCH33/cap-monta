@@ -1,7 +1,8 @@
 import { Component, inject, input, linkedSignal } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Guests, guestsToQuery, NO_GUESTS } from '../../core/models/guests';
+import { Guests, guestsToQuery, NO_GUESTS, travellerCount } from '../../core/models/guests';
+import { Analytics } from '../../core/services/analytics';
 import { departureAfter } from '../../core/models/stay-dates';
 import { DateRange } from '../date-range/date-range';
 import { GuestPicker } from '../guest-picker/guest-picker';
@@ -14,6 +15,7 @@ import { GuestPicker } from '../guest-picker/guest-picker';
 })
 export class SearchBar {
   private readonly router = inject(Router);
+  private readonly analytics = inject(Analytics);
 
   readonly initialArrival = input('');
   readonly initialDeparture = input('');
@@ -33,6 +35,12 @@ export class SearchBar {
     if (this.arrival()) {
       this.departure.set(departureAfter(this.arrival(), this.departure()));
     }
+
+    // Ni dates ni nombre exact : seulement si le visiteur a précisé l'un ou l'autre.
+    this.analytics.event('recherche', {
+      dates: '' !== this.arrival(),
+      voyageurs: travellerCount(this.guests()) > 0,
+    });
 
     this.router.navigate(['/recherche'], {
       queryParams: {

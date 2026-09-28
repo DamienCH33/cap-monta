@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, switchMap, takeWhile, timer } from 'rxjs';
+import { Observable, switchMap, takeWhile, tap, timer } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { AssistantStatus, ListingImportView } from '../models/listing-import';
+import { Analytics } from './analytics';
 
 /** Ce que l'écran renvoie quand le propriétaire valide : voir ImportApplier côté API. */
 export interface ApplyPayload {
@@ -24,6 +25,7 @@ export class ListingImportService {
   static readonly POLL_MS = 2500;
 
   private readonly http = inject(HttpClient);
+  private readonly analytics = inject(Analytics);
   private readonly api = environment.apiUrl + '/api/owner/listing-imports';
 
   assistant(): Observable<AssistantStatus> {
@@ -31,7 +33,9 @@ export class ListingImportService {
   }
 
   create(text: string): Observable<ListingImportView> {
-    return this.http.post<ListingImportView>(this.api, { text }, { withCredentials: true });
+    return this.http
+      .post<ListingImportView>(this.api, { text }, { withCredentials: true })
+      .pipe(tap(() => this.analytics.event('import-annonce')));
   }
 
   get(id: string): Observable<ListingImportView> {

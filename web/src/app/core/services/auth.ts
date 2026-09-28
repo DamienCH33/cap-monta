@@ -6,10 +6,12 @@ import { catchError, finalize, Observable, of, shareReplay, tap, throwError } fr
 
 import { environment } from '../../../environments/environment';
 import { Owner } from '../models/owner';
+import { Analytics } from './analytics';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly analytics = inject(Analytics);
   private readonly api = environment.apiUrl + '/api';
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
@@ -131,7 +133,9 @@ export class AuthService {
   private static readonly HINT = 'cm.owner-session';
 
   register(payload: { email: string; displayName: string; password: string }): Observable<void> {
-    return this.http.post<void>(`${this.api}/register`, payload, { withCredentials: true });
+    return this.http
+      .post<void>(`${this.api}/register`, payload, { withCredentials: true })
+      .pipe(tap(() => this.analytics.event('inscription-proprietaire')));
   }
 
   askPasswordReset(email: string): Observable<void> {
