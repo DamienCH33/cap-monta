@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth';
 import { Favorites } from '../../core/services/favorites';
 import { GuestRequests } from '../../core/services/guest-requests';
@@ -28,6 +29,8 @@ export class Header {
   readonly favoriteCount = inject(Favorites).count;
   /** L'espace propriétaire n'existe qu'en français. */
   readonly french = 'fr' === currentLang();
+  /** Page de dons (Ko-fi) : le lien n'apparaît que si elle est renseignée. */
+  readonly supportUrl = environment.supportUrl;
 
   /** Sur téléphone, les liens sont repliés derrière le bouton « Menu ». */
   readonly menuOpen = signal(false);

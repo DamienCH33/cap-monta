@@ -22,7 +22,21 @@ final readonly class BookingMailer
         private MailerInterface $mailer,
         private MailComposer $composer,
         #[Autowire('%app.front_url%')] private string $frontUrl,
+        #[Autowire(env: 'default::SUPPORT_URL')] private ?string $supportUrl = null,
     ) {
+    }
+
+    /**
+     * Le moment où le site vient de rendre service au propriétaire : une réservation sans
+     * commission. C'est là qu'un lien de dons a du sens. Rien si SUPPORT_URL est vide.
+     */
+    private function supportNote(): string
+    {
+        if (null === $this->supportUrl || '' === $this->supportUrl) {
+            return '';
+        }
+
+        return "Cette réservation ne vous a coûté aucune commission. Cap Monta reste gratuit grâce aux dons : si le site vous rend service, vous pouvez le soutenir.\n\n{$this->supportUrl}\n";
     }
 
     public function received(BookingRequest $request): void
@@ -145,6 +159,7 @@ final readonly class BookingMailer
 
                 {$this->frontUrl}/mon-espace/demandes
 
+                {$this->supportNote()}
                 Cap Monta
                 TXT,
         );

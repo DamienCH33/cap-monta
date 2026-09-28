@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
 import { SeoService } from '../../core/services/seo';
 
 @Component({
@@ -11,6 +12,8 @@ import { SeoService } from '../../core/services/seo';
 })
 export class HowItWorks implements OnInit {
   private readonly seo = inject(SeoService);
+  /** Page de dons : le lien n'apparaît que si elle est renseignée. */
+  readonly supportUrl = environment.supportUrl;
 
   ngOnInit(): void {
     this.seo.apply({
