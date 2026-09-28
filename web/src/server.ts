@@ -104,7 +104,7 @@ app.use((request, response, next) => {
 });
 
 /**
- * Un seul domaine public (décision 009) : « /api/… » (et les photos, « /media/… ») est relayé
+ * Un seul domaine public (décision 009) : « /api/… » (et les photos, « /media/photos/… ») est relayé
  * tel quel vers Symfony.
  * Les cookies de session restent sur le même domaine, sans CORS. X-Forwarded-For est
  * transmis tel que le bord de Railway l'a posé, sans y ajouter d'adresse : Symfony, qui
@@ -112,8 +112,9 @@ app.use((request, response, next) => {
  */
 app.use(
   createProxyMiddleware({
-    // /media : les photos des logements, servies par le serveur de l'API (volume Railway).
-    pathFilter: ['/api', '/media'],
+    // /media/photos : les photos des logements, servies par l'API (volume Railway). Pas tout
+    // « /media » : Angular y range aussi les polices du site, que ce serveur sert lui-même.
+    pathFilter: ['/api', '/media/photos'],
     target: apiUrl,
     changeOrigin: false,
     xfwd: false,
