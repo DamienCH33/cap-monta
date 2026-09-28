@@ -5,7 +5,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "preDeployCommand": ["php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration"],
+    "preDeployCommand": ["sh -c 'php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && php bin/console app:districts:sync'"],
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",

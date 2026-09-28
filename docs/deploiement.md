@@ -32,7 +32,7 @@ Tous depuis le même dépôt GitHub, région **EU West (Amsterdam)**. Railway a 
 | Service | Root Directory | Réglages (Settings) | Domaine public |
 |---|---|---|---|
 | `web` | `/web` | Healthcheck `/robots.txt`, restart On Failure ×5, variable `PORT=4000` | `cap-monta.up.railway.app`, port 4000 |
-| `api` | `/api` | Pre-deploy `php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration`, healthcheck `/api/health`, restart On Failure ×5, variable `PORT=8080` | **non** |
+| `api` | `/api` | Pre-deploy `sh -c 'php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && php bin/console app:districts:sync'`, healthcheck `/api/health`, restart On Failure ×5, variable `PORT=8080` | **non** |
 | `worker` | `/api` | Start `php bin/console messenger:consume async --time-limit=3600 --memory-limit=200M -vv`, restart Always, pas de healthcheck | non |
 | `cron` | `/api` | Start `sh -c 'php bin/console app:booking-requests:expire && php bin/console app:privacy:purge && php bin/console cache:pool:prune'`, Cron Schedule `17 * * * *`, restart Never | non |
 | `Postgres` | modèle PostgreSQL de Railway | — | non |
@@ -42,7 +42,7 @@ Le Builder passe seul sur « Dockerfile » grâce au Dockerfile du Root Director
 
 `api` : **volume** monté sur `/app/public/media` (les photos). Sans volume, toutes les photos disparaissent au déploiement suivant.
 
-Les migrations passent avant chaque déploiement de `api` (pre-deploy). Si une migration échoue, l'ancienne version reste en ligne.
+Les migrations passent avant chaque déploiement de `api` (pre-deploy), suivies de `app:districts:sync` qui crée les quartiers du CHM manquants (sans eux, aucune annonce CHM ne peut être créée ; les fixtures ne tournent jamais en prod). Si une étape échoue, l'ancienne version reste en ligne.
 
 ## Variables
 
