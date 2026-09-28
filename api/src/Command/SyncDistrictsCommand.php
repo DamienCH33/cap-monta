@@ -14,8 +14,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * Creates the CHM districts missing from the database. Runs on every deployment, after the
- * migrations: without districts, no CHM listing can be created. Never changes nor deletes an
- * existing district, so a text or an area corrected by hand stays as it is.
+ * migrations: without districts, no CHM listing can be created. An existing district only gets
+ * its area when it has none yet; a text or an area set by hand is never overwritten.
  */
 #[AsCommand(name: 'app:districts:sync', description: 'Crée les quartiers du CHM absents de la base')]
 final readonly class SyncDistrictsCommand
@@ -31,13 +31,19 @@ final readonly class SyncDistrictsCommand
         $known = [];
 
         foreach ($this->districts->findBy(['resort' => Resort::Chm]) as $district) {
-            $known[$district->getName()] = true;
+            $known[$district->getName()] = $district;
         }
 
         $created = 0;
+        $placed = 0;
 
         foreach (ChmDistricts::ALL as $position => [$name, $area]) {
             if (isset($known[$name])) {
+                if (null === $known[$name]->getArea()) {
+                    $known[$name]->setArea($area);
+                    ++$placed;
+                }
+
                 continue;
             }
 
@@ -48,7 +54,9 @@ final readonly class SyncDistrictsCommand
         }
 
         $this->em->flush();
-        $io->success(0 === $created ? 'Quartiers déjà à jour.' : sprintf('%d quartier(s) créé(s).', $created));
+        $io->success(0 === $created + $placed
+            ? 'Quartiers déjà à jour.'
+            : sprintf('%d quartier(s) créé(s), %d placé(s) dans leur zone.', $created, $placed));
 
         return 0;
     }

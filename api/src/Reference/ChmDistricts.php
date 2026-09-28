@@ -8,20 +8,22 @@ use App\Enum\DistrictArea;
 
 /**
  * The 21 districts of the official CHM site plan (2024), in plan order.
- * Area read visually on the plan: to be confirmed on site. Null = not settled yet.
+ * Area read on the plan: dunes = along the protected dunes, central = between the dunes and
+ * the centre, roadside = along the avenue de l'Europe. Pins (next to Gironde, at the forest
+ * edge) and Californie (from Floride down to Soleil) are central.
  * Shared by the fixtures and by app:districts:sync, which fills the production database.
  */
 final class ChmDistricts
 {
-    /** @var list<array{string, ?DistrictArea}> */
+    /** @var list<array{string, DistrictArea}> */
     public const array ALL = [
         ['Sables', DistrictArea::Dunes],
         ['Ajoncs', DistrictArea::Dunes],
         ['La Lande', DistrictArea::Dunes],
         ['Europa', DistrictArea::Dunes],
         ['Floride', DistrictArea::Dunes],
-        ['Pins', null],
-        ['Californie', null],
+        ['Pins', DistrictArea::Central],
+        ['Californie', DistrictArea::Central],
         ['Gironde', DistrictArea::Central],
         ['Écureuils', DistrictArea::Central],
         ['Bruyères', DistrictArea::Central],
