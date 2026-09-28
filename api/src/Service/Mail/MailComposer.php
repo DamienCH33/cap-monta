@@ -42,6 +42,8 @@ final readonly class MailComposer
         #[Autowire('%app.mail_from%')] private string $from,
         /** Only links to the site itself become clickable inside a sentence. */
         #[Autowire('%app.front_url%')] private string $frontUrl,
+        /** Page de dons (Ko-fi) : son lien devient un bouton « Soutenir Cap Monta ». */
+        #[Autowire(env: 'default::SUPPORT_URL')] private ?string $supportUrl = null,
     ) {
     }
 
@@ -121,7 +123,10 @@ final readonly class MailComposer
             }
 
             if ($isLink) {
-                $blocks[] = MailBlock::button($line, self::label($line));
+                $label = null !== $this->supportUrl && '' !== $this->supportUrl && $line === $this->supportUrl
+                    ? 'Soutenir Cap Monta'
+                    : self::label($line);
+                $blocks[] = MailBlock::button($line, $label);
                 continue;
             }
 

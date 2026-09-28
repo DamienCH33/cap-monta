@@ -118,6 +118,21 @@
       </details>
 
       <details class="faq__item">
+        <summary class="faq__question" i18n="@@how.31">Comment le site est-il financé ?</summary>
+        <p class="faq__answer">
+          <ng-container i18n="@@how.32"
+            >Par les dons. Le site n'a ni publicité ni commission ; le serveur coûte environ 8 € par
+            mois.</ng-container
+          >
+          @if (supportUrl) {
+            <a [href]="supportUrl" target="_blank" rel="noopener" i18n="@@support.link"
+              >Soutenir Cap Monta</a
+            >
+          }
+        </p>
+      </details>
+
+      <details class="faq__item">
         <summary class="faq__question" i18n="@@how.28">
           Puis-je acheter ou vendre un mobil-home ici ?
         </summary>

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
+
 import { typeLabel } from '../../core/models/accommodation';
 import {
   AccommodationStatus,
@@ -31,6 +33,9 @@ interface Stat {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OwnerHome {
+  /** Page de dons : l'encart n'apparaît que si elle est renseignée. */
+  readonly supportUrl = environment.supportUrl;
+
   private readonly auth = inject(AuthService);
 
   readonly owner = this.auth.currentOwner;

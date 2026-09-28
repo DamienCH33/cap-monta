@@ -109,5 +109,19 @@
       </span>
       <span class="owner-home__callout-action">Mon profil</span>
     </a>
+
+    @if (supportUrl) {
+      <!-- Les propriétaires sont ceux à qui le site fait économiser une commission. -->
+      <a class="owner-home__callout" [href]="supportUrl" target="_blank" rel="noopener">
+        <span>
+          Cap Monta est gratuit et ne prend aucune commission sur vos locations.
+          <span class="owner-home__callout-detail">
+            Le serveur coûte environ 8 € par mois et il est payé par les dons. Si le site vous rend
+            service, un petit geste suffit à le garder en ligne.
+          </span>
+        </span>
+        <span class="owner-home__callout-action">Soutenir le site</span>
+      </a>
+    }
   </div>
 }
