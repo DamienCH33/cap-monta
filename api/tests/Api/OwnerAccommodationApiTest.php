@@ -243,6 +243,25 @@ final class OwnerAccommodationApiTest extends WebTestCase
         self::assertSame(['capacity'], array_column($this->json()['violations'], 'propertyPath'));
     }
 
+    public function testAPhoneOrAnEmailTypedInTheDescriptionIsRefused(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-draft', $alice, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->patch('alice-draft', ['description' => 'Joli mobil-home. Réservation au 06 12 34 56 78 ou alice.martin@gmail.com, à bientôt !']);
+
+        self::assertResponseStatusCodeSame(422);
+        $violations = $this->json()['violations'];
+        self::assertSame(['description'], array_column($violations, 'propertyPath'));
+        self::assertStringContainsString('« 06 12 34 56 78 », « alice.martin@gmail.com »', $violations[0]['message']);
+
+        // A distance or a surface is not a phone number.
+        $this->patch('alice-draft', ['description' => 'Plage à 150 m, 32 m² et terrasse de 12 m², arrivée à 16 h.']);
+        self::assertResponseIsSuccessful();
+    }
+
     public function testAnAmenityOutsideTheListIsRejected(): void
     {
         $alice = $this->createOwner('alice@example.com');

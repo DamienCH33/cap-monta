@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dto;
 
 use App\Entity\StayTerms;
+use App\Validator\NoContactDetails;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -28,6 +29,7 @@ final class StayTermsInput
     public ?int $securityDeposit = null;
 
     #[Assert\Length(max: 600, maxMessage: "Les conditions d'annulation ne peuvent pas dépasser {{ limit }} caractères.")]
+    #[NoContactDetails]
     public ?string $cancellationPolicy = null;
 
     #[Assert\Range(notInRangeMessage: 'Le ménage doit être compris entre 0 et 500 €.', min: 0, max: 50_000)]

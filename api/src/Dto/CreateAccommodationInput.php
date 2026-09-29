@@ -8,6 +8,7 @@ use App\Enum\AccommodationType;
 use App\Enum\Amenity;
 use App\Enum\PetsPolicy;
 use App\Enum\Resort;
+use App\Validator\NoContactDetails;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -37,6 +38,7 @@ final class CreateAccommodationInput
 
     /** Optional for a draft, required at publication (3b-5). */
     #[Assert\Length(max: 5000, maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères.')]
+    #[NoContactDetails]
     public string $description = '';
 
     #[Assert\Range(notInRangeMessage: 'La surface doit être comprise entre {{ min }} et {{ max }} m².', min: 5, max: 200)]
