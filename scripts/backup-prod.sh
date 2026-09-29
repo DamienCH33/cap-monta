@@ -37,6 +37,19 @@ if [ -z "$host" ]; then
   exit 1
 fi
 
+# Le port local s'ouvre avant que la liaison SSH soit prête : une connexion trop tôt est
+# coupée net. On attend que Postgres réponde vraiment à travers le tunnel.
+ready=""
+for _ in $(seq 1 45); do
+  if docker run --rm --network host "$IMAGE" pg_isready -q -h "$host" -p "$PORT" -t 3; then ready=1; break; fi
+  kill -0 "$tunnel" 2>/dev/null || break
+  sleep 1
+done
+if [ -z "$ready" ]; then
+  echo "Le tunnel est ouvert mais Postgres ne répond pas derrière. Sortie de Railway :"; sed 's/^/  | /' "$log"
+  exit 1
+fi
+
 mkdir -p backups
 docker run --rm --network host -e PGPASSWORD="$pass" "$IMAGE" \
   pg_dump --host="$host" --port="$PORT" --username="$user" --dbname="$db" \
