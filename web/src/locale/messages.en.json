@@ -419,6 +419,8 @@
     "share.share": "Share",
     "share.copy": "Copy link",
     "share.email": "Email",
-    "lang.code": "en"
+    "lang.code": "en",
+    "filters.euronat-districts": "Euronat",
+    "home.euronat-sectors": "At Euronat:"
   }
 }

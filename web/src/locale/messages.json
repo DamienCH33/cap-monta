@@ -239,7 +239,7 @@
     "count.listing.one": "1 logement",
     "count.listing.other": "{$count} logements",
     "seo.district.title": "Location dans le quartier {$name} — {$resort}",
-    "seo.district.description": "{$count} à louer dans le quartier {$name}, au {$resort}{$area}. Calendriers tenus à jour par les propriétaires, réponse sous 48 h.",
+    "seo.district.description": "{$count} à louer dans le quartier {$name} ({$resort}){$area}. Calendriers tenus à jour par les propriétaires, réponse sous 48 h.",
     "favorites.shared-title": "Une sélection partagée",
     "favorites.title": "Mes favoris",
     "favorites.shared-lead": "Quelqu'un vous a envoyé ces logements. Gardez-les dans vos favoris pour y revenir.",
@@ -419,6 +419,8 @@
     "share.share": "Partager",
     "share.copy": "Copier le lien",
     "share.email": "Email",
-    "lang.code": "fr"
+    "lang.code": "fr",
+    "filters.euronat-districts": "Euronat",
+    "home.euronat-sectors": "À Euronat :"
   }
 }

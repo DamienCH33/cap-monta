@@ -50,10 +50,18 @@ export class Home implements OnInit {
   readonly highlights = signal<Accommodation[]>([]);
   readonly districts = signal<District[]>([]);
 
-  /** Les quartiers regroupés par zone, de la plage vers l'avenue. */
+  /** Les zones (dunes, cœur, avenue) sont celles du plan du CHM : Euronat a ses secteurs à part. */
+  private readonly chmDistricts = computed(() =>
+    this.districts().filter((district) => 'chm' === district.resort),
+  );
+  readonly euronatDistricts = computed(() =>
+    this.districts().filter((district) => 'euronat' === district.resort),
+  );
+
+  /** Les quartiers du CHM regroupés par zone, de la plage vers l'avenue. */
   readonly zones = computed(() =>
     ZONES.map((zone) => {
-      const districts = this.districts().filter((district) => district.area === zone.key);
+      const districts = this.chmDistricts().filter((district) => district.area === zone.key);
 
       return {
         ...zone,
@@ -64,7 +72,9 @@ export class Home implements OnInit {
   );
 
   /** Les quartiers dont la zone n'est pas encore relevée sur le plan. */
-  readonly unplaced = computed(() => this.districts().filter((district) => null === district.area));
+  readonly unplaced = computed(() =>
+    this.chmDistricts().filter((district) => null === district.area),
+  );
 
   ngOnInit(): void {
     this.seo.apply({

@@ -47,9 +47,15 @@ final class ImportProposal
     private static function listing(ExtractedListing $listing, array $contacts, string $text, array $districts): array
     {
         $district = null === $listing->district ? null : ($districts[$listing->district] ?? null);
+        $resort = self::resortIn($text);
+        // A CHM district in a text that only names Euronat ("Polynésie" exists in both): the
+        // text wins, the district is dropped rather than moving the listing to the wrong resort.
+        if (null !== $district && null !== $resort && $district['resort'] !== $resort) {
+            $district = null;
+        }
 
         return [
-            'resort' => $district['resort'] ?? self::resortIn($text),
+            'resort' => $district['resort'] ?? $resort,
             'type' => $listing->type?->value,
             'capacity' => $listing->capacity,
             'bedrooms' => $listing->bedrooms,

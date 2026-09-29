@@ -7,6 +7,7 @@ namespace App\Tests\Api;
 use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
 use App\Enum\DistrictArea;
+use App\Enum\Resort;
 use App\Factory\AccommodationFactory;
 use App\Factory\DistrictFactory;
 use App\Tests\ApiTestCase;
@@ -25,6 +26,8 @@ final class DistrictApiTest extends ApiTestCase
 
     public function testListsEveryDistrictInPlanOrderWithItsCount(): void
     {
+        // Euronat créé en premier et à la même position : l'ordre suit le domaine, puis le plan.
+        DistrictFactory::createOne(['name' => 'Europe', 'slug' => 'euronat-europe', 'resort' => Resort::Euronat, 'area' => null, 'position' => 0]);
         $sables = DistrictFactory::createOne(['name' => 'Sables', 'area' => DistrictArea::Dunes, 'position' => 0]);
         DistrictFactory::createOne(['name' => 'Médoc', 'area' => DistrictArea::Roadside, 'position' => 1]);
         AccommodationFactory::createMany(2, ['district' => $sables]);
@@ -34,7 +37,7 @@ final class DistrictApiTest extends ApiTestCase
 
         // Un quartier sans logement reste dans la liste : sa page existe quand même.
         self::assertSame(
-            [['sables', 'dunes', 2], ['medoc', 'roadside', 0]],
+            [['sables', 'dunes', 2], ['medoc', 'roadside', 0], ['euronat-europe', null, 0]],
             array_map(
                 static fn (array $district): array => [$district['slug'], $district['area'], $district['accommodationCount']],
                 $body['member'],

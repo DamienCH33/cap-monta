@@ -392,3 +392,18 @@ C'est le score de référence de l'import, et il reste la référence : deux dé
 - Images Docker : FrankenPHP pour l'API (une image, trois services : API, worker, tâche horaire), Node pour le front (le serveur est un seul fichier, sans `node_modules`). Détail dans `deploiement.md`.
 
 **Coût.** Une table de plus, et `NG_ALLOWED_HOSTS` / `SITE_URL` à ne pas oublier en production (le serveur refuse de démarrer sans `SITE_URL`).
+
+## 034 — Les secteurs d'Euronat (29/09/2026)
+
+**Contexte.** Les quartiers n'avaient été référencés qu'au CHM (plan officiel, 21 quartiers). Euronat était « pas encore référencé » dans le code, et l'oubli n'était écrit nulle part ailleurs : un propriétaire d'Euronat pouvait publier, mais sans dire où était son logement, et un vacancier ne pouvait pas chercher par secteur.
+
+**Décision.**
+- `EuronatDistricts` : **15 secteurs**, relevés le 29/09 sur le PDF du plan officiel (euronat.com, plan 2025) et la page chalets et villas d'Euronat. Les **8 villages** de chalets et villas, côté plage d'abord (Amérique du Nord, Amérique du Sud, Afrique, Afrique II), puis côté village (Europe, Asie, Océanie), puis Polynésie ; et les **7 parcs de la zone « Mobile Homes »** (Lauriers, Mélèzes, Oyats, Acacias, Mimosas, Châtaigniers, Albizzias), aux lots numérotés. Les propriétaires se situent déjà ainsi dans leurs annonces (« Chalet Europe 29 », « 23 Amérique du Sud »).
+- Laissés de côté : Camping, Camping avec électricité, Ifs et Caravaning, des emplacements loués par le domaine (décision 026).
+- Créés au déploiement par `app:districts:sync`, comme ceux du CHM. Ce que le plan et le site d'Euronat disent de chaque secteur (côté plage, plage Nord à accès direct, zone des mobil-homes…) devient ses points forts, jamais écrasés s'ils ont été retouchés à la main.
+- **Facultatif à Euronat**, obligatoire au CHM : le plan ne dit pas quels lots appartiennent à des particuliers, et un propriétaire qui hésite doit pouvoir publier.
+- Pas de zone (dunes, cœur, avenue) : ces zones sont celles du plan du CHM. Recherche : les secteurs d'Euronat forment leur propre groupe ; accueil : une ligne « À Euronat ».
+- Slugs préfixés `euronat-` : « Polynésie » existe dans les deux domaines, et un slug est unique.
+- **L'import d'annonce ne propose que les quartiers du CHM.** « Europe », « Asie », « Afrique » sont des mots courants qu'un modèle choisirait sur n'importe quel texte, « Europe » est à une lettre d'« Europa » (CHM). Un quartier du CHM trouvé dans un texte qui ne parle que d'Euronat est écarté au lieu de basculer le logement au CHM.
+
+**Coût.** Le propriétaire d'Euronat choisit son secteur à la main après l'import. La liste est à revoir si Euronat change son plan ou si un propriétaire signale un secteur manquant.

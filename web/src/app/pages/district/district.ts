@@ -158,7 +158,7 @@ export class DistrictPage implements OnInit {
 
     this.seo.apply({
       title: $localize`:@@seo.district.title:Location dans le quartier ${district.name}:name: — ${resort}:resort:`,
-      description: $localize`:@@seo.district.description:${count}:count: à louer dans le quartier ${district.name}:name:, au ${resort}:resort:${area ? `, ${area.label.toLowerCase()}` : ''}:area:. Calendriers tenus à jour par les propriétaires, réponse sous 48 h.`,
+      description: $localize`:@@seo.district.description:${count}:count: à louer dans le quartier ${district.name}:name: (${resort}:resort:)${area ? `, ${area.label.toLowerCase()}` : ''}:area:. Calendriers tenus à jour par les propriétaires, réponse sous 48 h.`,
       path: `/quartier/${district.slug}`,
     });
 

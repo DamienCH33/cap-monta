@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Accommodation;
 use App\Entity\District;
+use App\Enum\Resort;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,8 +22,10 @@ class DistrictRepository extends ServiceEntityRepository
     }
 
     /**
-     * Names of every district, CHM first then Euronat, in plan order: the only ones the
-     * listing import may pick.
+     * Names of the CHM districts, in plan order: the only ones the listing import may pick.
+     * Euronat's sectors stay out: "Europe", "Asie", "Afrique" are ordinary words a model would
+     * pick from any text ("clientèle européenne"), "Europe" is one letter away from the CHM's
+     * "Europa", and "Polynésie" exists in both resorts. At Euronat, the owner picks his sector.
      *
      * @return list<string>
      */
@@ -30,7 +33,7 @@ class DistrictRepository extends ServiceEntityRepository
     {
         return array_map(
             static fn (District $district): string => $district->getName(),
-            $this->findBy([], ['resort' => 'ASC', 'position' => 'ASC']),
+            $this->findBy(['resort' => Resort::Chm], ['position' => 'ASC']),
         );
     }
 
@@ -46,7 +49,9 @@ class DistrictRepository extends ServiceEntityRepository
             ->select('d', 'COUNT(a.id) AS accommodationCount')
             ->leftJoin(Accommodation::class, 'a', Join::WITH, 'a.district = d')
             ->groupBy('d.id')
-            ->orderBy('d.position', 'ASC')
+            // CHM first, then Euronat, each in plan order: positions restart at 0 per resort.
+            ->orderBy('d.resort', 'ASC')
+            ->addOrderBy('d.position', 'ASC')
             ->addOrderBy('d.name', 'ASC')
             ->getQuery()
             ->getResult();

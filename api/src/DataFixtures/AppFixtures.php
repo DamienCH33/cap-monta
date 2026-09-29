@@ -19,6 +19,7 @@ use App\Factory\DistrictFactory;
 use App\Factory\PricePeriodFactory;
 use App\Factory\UnavailabilityFactory;
 use App\Reference\ChmDistricts;
+use App\Reference\EuronatDistricts;
 use App\Service\Booking\QuoteCalculator;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -73,14 +74,27 @@ final class AppFixtures extends Fixture
             'slug' => 'brouillon-europa',
             'status' => AccommodationStatus::Draft,
         ]);
-        // Les quartiers d'Euronat ne sont pas encore référencés.
 
         $damiensListings = AccommodationFactory::createMany(3, [
             'owner' => $damien,
             'district' => $districts[3],
         ]);
         array_push($accommodations, ...$damiensListings);
-        array_push($accommodations, ...AccommodationFactory::createMany(3, ['resort' => Resort::Euronat]));
+        $euronat = [];
+        foreach (EuronatDistricts::ALL as $position => [$name, $highlights]) {
+            $euronat[] = DistrictFactory::createOne([
+                'name' => $name,
+                'slug' => EuronatDistricts::slug($name),
+                'resort' => Resort::Euronat,
+                'area' => null,
+                'highlights' => $highlights,
+                'position' => $position,
+            ]);
+        }
+        // Un logement côté plage, un côté village, un sans secteur : le secteur y est facultatif.
+        array_push($accommodations, ...AccommodationFactory::createMany(1, ['resort' => Resort::Euronat, 'district' => $euronat[0]]));
+        array_push($accommodations, ...AccommodationFactory::createMany(1, ['resort' => Resort::Euronat, 'district' => $euronat[4]]));
+        array_push($accommodations, ...AccommodationFactory::createMany(1, ['resort' => Resort::Euronat]));
 
         foreach ($accommodations as $index => $accommodation) {
             // Le premier reste sans tarif publié : la carte doit afficher

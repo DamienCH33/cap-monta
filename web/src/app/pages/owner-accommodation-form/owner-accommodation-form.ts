@@ -227,7 +227,7 @@ export class OwnerAccommodationForm {
   readonly timeLabel = timeLabel;
 
   private readonly districts = signal<DistrictOption[]>([]);
-  private readonly resort = toSignal(this.form.controls.resort.valueChanges, { initialValue: '' });
+  readonly resort = toSignal(this.form.controls.resort.valueChanges, { initialValue: '' });
   private readonly petsPolicy = toSignal(this.form.controls.petsPolicy.valueChanges, {
     initialValue: this.form.controls.petsPolicy.value,
   });
@@ -238,10 +238,11 @@ export class OwnerAccommodationForm {
   );
 
   /** Le quartier n'a de sens qu'au CHM : Euronat n'a pas encore de quartiers référencés. */
-  readonly showDistrict = computed(() => 'chm' === this.resort());
   readonly resortDistricts = computed(() =>
     this.districts().filter((district) => district.resort === this.resort()),
   );
+  /** Obligatoire au CHM pour publier ; à Euronat, le secteur aide mais reste facultatif. */
+  readonly showDistrict = computed(() => this.resortDistricts().length > 0);
 
   readonly descriptionLength = toSignal(
     this.form.controls.description.valueChanges.pipe(map((text) => text.trim().length)),

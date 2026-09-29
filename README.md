@@ -63,7 +63,7 @@ Un seul domaine public : l'API n'est joignable que par le réseau privé, via le
 
 ## Les choix qui comptent
 
-Chaque décision est écrite avec son contexte et son coût dans [`docs/decisions.md`](docs/decisions.md) (33 ADR). Les principales :
+Chaque décision est écrite avec son contexte et son coût dans [`docs/decisions.md`](docs/decisions.md) (34 ADR). Les principales :
 
 **Une double réservation est impossible, et c'est la base qui le garantit** (ADR 003, 010). Les indisponibilités portent une contrainte d'exclusion PostgreSQL sur `daterange(arrivée, départ, '[)')` : deux séjours qui se chevauchent sur le même logement sont refusés par la base elle-même, quelle que soit la course entre deux requêtes. Départ exclu : le samedi du départ est libre pour l'arrivée suivante. Le verrou Redis par logement ne sert qu'à transformer une course en 409 propre.
 

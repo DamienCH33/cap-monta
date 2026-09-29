@@ -241,9 +241,11 @@
                       (ngModelChange)="patchListing({ surface: $event })"
                     />
                   </label>
-                  @if ('chm' === draft.resort) {
+                  @if (resortDistricts().length) {
                     <label class="import__field">
-                      <span class="import__label">Quartier</span>
+                      <span class="import__label">{{
+                        'chm' === draft.resort ? 'Quartier' : 'Secteur'
+                      }}</span>
                       <select
                         name="district"
                         [ngModel]="draft.district"
