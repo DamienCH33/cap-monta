@@ -44,20 +44,29 @@ export class FilterSheet implements AfterViewInit {
     })),
   ];
 
-  /** Les quartiers groupés de la plage vers l'avenue, puis ceux dont la zone n'est pas établie. */
+  /**
+   * Les quartiers du CHM groupés de la plage vers l'avenue, puis ceux dont la zone n'est pas
+   * établie, puis les secteurs d'Euronat, dans l'ordre du plan (côté plage, côté village, parcs).
+   */
   readonly zones = computed(() => {
-    const districts = this.districts();
+    const chm = this.districts().filter((district) => 'chm' === district.resort);
 
     return [
       ...DISTRICT_AREAS.map((area) => ({
         key: area.key as string,
-        label: area.label,
-        districts: districts.filter((district) => district.area === area.key),
+        // Nom propre, identique dans toutes les langues : les deux domaines se distinguent.
+        label: `CHM · ${area.label}`,
+        districts: chm.filter((district) => district.area === area.key),
       })),
       {
         key: 'other',
-        label: $localize`:@@filters.other-districts:Autres quartiers`,
-        districts: districts.filter((district) => district.area === null),
+        label: `CHM · ${$localize`:@@filters.other-districts:Autres quartiers`}`,
+        districts: chm.filter((district) => district.area === null),
+      },
+      {
+        key: 'euronat',
+        label: $localize`:@@filters.euronat-districts:Euronat`,
+        districts: this.districts().filter((district) => 'euronat' === district.resort),
       },
     ].filter((zone) => zone.districts.length > 0);
   });

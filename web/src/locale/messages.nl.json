@@ -419,6 +419,8 @@
     "share.share": "Delen",
     "share.copy": "Link kopiëren",
     "share.email": "E-mail",
-    "lang.code": "nl"
+    "lang.code": "nl",
+    "filters.euronat-districts": "Euronat",
+    "home.euronat-sectors": "In Euronat:"
   }
 }

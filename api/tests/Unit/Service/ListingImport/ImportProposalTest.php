@@ -103,6 +103,22 @@ final class ImportProposalTest extends TestCase
         self::assertSame(['kayak de mer'], $proposal['listing']['otherFeatures']);
     }
 
+    public function testACHMDistrictInAnEuronatTextIsDroppedInsteadOfMovingTheListing(): void
+    {
+        $proposal = ImportProposal::build(
+            ListingExtraction::fromArray(['periods' => [], 'unavailable' => [], 'listing' => [
+                'type' => 'mobile_home', 'district' => 'Polynésie',
+            ]]),
+            [],
+            'Mobil-home à Euronat, secteur Polynésie, 4 personnes.',
+            ['Polynésie' => ['resort' => 'chm', 'slug' => 'polynesie']],
+            new \DateTimeImmutable('2026-09-24'),
+        );
+
+        self::assertSame('euronat', $proposal['listing']['resort']);
+        self::assertNull($proposal['listing']['district'], 'the owner picks his Euronat sector himself');
+    }
+
     /**
      * @param list<array<string, mixed>>              $periods
      * @param list<array{start: string, end: string}> $unavailable

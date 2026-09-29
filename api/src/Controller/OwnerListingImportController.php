@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\ListingImport;
 use App\Entity\User;
 use App\Enum\ListingImportStatus;
+use App\Enum\Resort;
 use App\Message\RunListingImport;
 use App\Repository\AccommodationRepository;
 use App\Repository\DistrictRepository;
@@ -198,7 +199,8 @@ final readonly class OwnerListingImportController
         }
 
         $districts = [];
-        foreach ($this->districts->findAll() as $district) {
+        // The CHM districts only, the ones the import can name (DistrictRepository::names()).
+        foreach ($this->districts->findBy(['resort' => Resort::Chm]) as $district) {
             $districts[$district->getName()] = ['resort' => $district->getResort()->value, 'slug' => $district->getSlug()];
         }
         $contacts = array_values(array_filter(\is_array($result['contacts'] ?? null) ? $result['contacts'] : [], \is_string(...)));

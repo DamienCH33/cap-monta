@@ -157,7 +157,7 @@
                     [class.pill--dunes]="zone.key === 'dunes'"
                     [class.pill--central]="zone.key === 'central'"
                     [class.pill--roadside]="zone.key === 'roadside'"
-                    [class.pill--other]="zone.key === 'other'"
+                    [class.pill--other]="zone.key === 'other' || zone.key === 'euronat'"
                     [attr.aria-pressed]="isDistrictSelected(district)"
                     (click)="toggleDistrict(district)"
                   >

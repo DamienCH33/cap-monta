@@ -78,6 +78,16 @@
         }
       </p>
     }
+
+    @if (euronatDistricts().length) {
+      <p class="zones__more">
+        <span i18n="@@home.euronat-sectors">À Euronat :</span>
+        @for (district of euronatDistricts(); track district.slug; let last = $last) {
+          <a [routerLink]="['/quartier', district.slug]">{{ district.name }}</a
+          >{{ last ? '' : ' · ' }}
+        }
+      </p>
+    }
   </section>
 
   <section class="section">
