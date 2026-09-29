@@ -15,6 +15,8 @@ import {
   AMENITIES,
   MAX_BEDROOMS_FILTER,
   NO_FILTERS,
+  RESORTS,
+  ResortKey,
   SearchFilters,
   toggle,
 } from '../../core/models/search-filters';
@@ -34,6 +36,7 @@ export class FilterSheet implements AfterViewInit {
 
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 
+  readonly resorts = RESORTS;
   readonly types = ACCOMMODATION_TYPES;
   readonly amenities = AMENITIES.filter((amenity) => amenity.filter);
   readonly bedroomOptions = [
@@ -49,7 +52,10 @@ export class FilterSheet implements AfterViewInit {
    * établie, puis les secteurs d'Euronat, dans l'ordre du plan (côté plage, côté village, parcs).
    */
   readonly zones = computed(() => {
-    const chm = this.districts().filter((district) => 'chm' === district.resort);
+    const resort = this.filters().resort;
+    // Un domaine choisi : seuls ses quartiers restent proposés.
+    const chm = 'euronat' === resort ? [] : this.districts().filter((d) => 'chm' === d.resort);
+    const euronat = 'chm' === resort ? [] : this.districts().filter((d) => 'euronat' === d.resort);
 
     return [
       ...DISTRICT_AREAS.map((area) => ({
@@ -66,7 +72,7 @@ export class FilterSheet implements AfterViewInit {
       {
         key: 'euronat',
         label: $localize`:@@filters.euronat-districts:Euronat`,
-        districts: this.districts().filter((district) => 'euronat' === district.resort),
+        districts: euronat,
       },
     ].filter((zone) => zone.districts.length > 0);
   });
@@ -85,6 +91,24 @@ export class FilterSheet implements AfterViewInit {
 
     // Un ancien lien peut porter le nom (« Europa ») au lieu du slug (« europa »).
     return selected.includes(district.slug) || selected.includes(district.name);
+  }
+
+  /**
+   * Choisir un domaine retire les quartiers de l'autre : « Euronat » avec « Sables » ne
+   * donnerait jamais rien. Un second clic sur le même domaine le désélectionne.
+   */
+  toggleResort(key: ResortKey): void {
+    const resort = this.filters().resort === key ? null : key;
+    const kept = new Set(
+      this.districts()
+        .filter((district) => null === resort || district.resort === resort)
+        .flatMap((district) => [district.slug, district.name]),
+    );
+
+    this.update({
+      resort,
+      districts: this.filters().districts.filter((value) => kept.has(value)),
+    });
   }
 
   toggleType(key: AccommodationTypeKey): void {

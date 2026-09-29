@@ -537,7 +537,8 @@ export class OwnerAccommodationForm {
       amenities: value.amenities,
       petsPolicy: value.petsPolicy,
       description: value.description.trim(),
-      district: 'chm' === value.resort && '' !== value.district ? value.district : null,
+      // Quartier au CHM, secteur à Euronat (facultatif) : envoyé dès qu'il est choisi.
+      district: '' !== value.district ? value.district : null,
       terms: formToTerms(value.terms),
     };
   }
@@ -546,7 +547,7 @@ export class OwnerAccommodationForm {
   private changes(existing: OwnerAccommodation): AccommodationChanges {
     const value = this.form.getRawValue();
     const changes: AccommodationChanges = {};
-    const district = 'chm' === value.resort && '' !== value.district ? value.district : null;
+    const district = '' !== value.district ? value.district : null;
     const description = value.description.trim();
 
     if (value.type !== existing.type) {

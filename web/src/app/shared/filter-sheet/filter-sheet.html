@@ -28,6 +28,22 @@
 
     <div class="sheet__body">
       <section class="sec">
+        <h3 class="sec__title" i18n="@@filters.resort">Domaine</h3>
+        <div class="zone__pills">
+          @for (resort of resorts; track resort.key) {
+            <button
+              type="button"
+              class="pill pill--other"
+              [attr.aria-pressed]="filters().resort === resort.key"
+              (click)="toggleResort(resort.key)"
+            >
+              {{ resort.label }}
+            </button>
+          }
+        </div>
+      </section>
+
+      <section class="sec">
         <h3 class="sec__title" i18n="@@filters.type">Type de logement</h3>
         <p class="sec__hint" i18n="@@filters.type-hint">Plusieurs choix possibles.</p>
         <div class="types">

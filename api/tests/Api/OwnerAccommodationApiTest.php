@@ -10,6 +10,7 @@ use App\Entity\Photo;
 use App\Entity\User;
 use App\Enum\AccommodationType;
 use App\Enum\Resort;
+use App\Factory\DistrictFactory;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -138,6 +139,20 @@ final class OwnerAccommodationApiTest extends WebTestCase
         $this->post(['resort' => 'chm', 'type' => 'bungalow', 'capacity' => 8, 'bedrooms' => 3, 'district' => 'atlantide']);
 
         self::assertResponseStatusCodeSame(422);
+    }
+
+    public function testAnEuronatListingTakesAnEuronatSectorButNotACHMDistrict(): void
+    {
+        DistrictFactory::createOne(['name' => 'Europe', 'slug' => 'euronat-europe', 'resort' => Resort::Euronat, 'area' => null]);
+        DistrictFactory::createOne(['name' => 'Sables', 'resort' => Resort::Chm]);
+        $this->client->loginUser($this->createOwnerAndFlush(), 'main');
+
+        $this->post([...self::VALID_PAYLOAD, 'district' => 'euronat-europe']);
+        self::assertResponseStatusCodeSame(201);
+        self::assertSame('Europe', $this->json()['district']);
+
+        $this->post([...self::VALID_PAYLOAD, 'district' => 'sables']);
+        self::assertResponseStatusCodeSame(422, 'a CHM district cannot hold an Euronat listing');
     }
 
     /**

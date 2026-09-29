@@ -421,6 +421,7 @@
     "share.email": "E-mail",
     "lang.code": "nl",
     "filters.euronat-districts": "Euronat",
-    "home.euronat-sectors": "In Euronat:"
+    "home.euronat-sectors": "In Euronat:",
+    "filters.resort": "Vakantiepark"
   }
 }
