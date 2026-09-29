@@ -69,7 +69,7 @@ db-test: ## Recrée la base de test et joue les migrations
 	$(CONSOLE) doctrine:migrations:migrate -n --allow-no-migration --env=test
 
 ## —— Production ———————————————————————————————————————————
-backup-prod: ## Sauvegarde la base de prod dans backups/ (tunnel Railway, rien d'exposé)
+backup-prod: ## Sauvegarde la base de prod dans backups/ (pg_dump par railway ssh, rien d'exposé)
 	scripts/backup-prod.sh
 
 restore-check: ## Restaure la dernière sauvegarde dans un Postgres jetable et compte les lignes
