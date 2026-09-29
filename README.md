@@ -127,3 +127,5 @@ Makefile      commandes du quotidien
 ```
 
 Mise en production pas à pas : [`docs/deploiement.md`](docs/deploiement.md).
+
+
