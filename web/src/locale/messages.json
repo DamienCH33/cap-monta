@@ -418,6 +418,7 @@
     "search.submit": "Rechercher",
     "share.share": "Partager",
     "share.copy": "Copier le lien",
-    "share.email": "Email"
+    "share.email": "Email",
+    "lang.code": "fr"
   }
 }

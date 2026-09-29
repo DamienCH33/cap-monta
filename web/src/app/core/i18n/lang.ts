@@ -22,10 +22,14 @@ export const LANGS: readonly LangOption[] = [
   { code: 'de', label: 'Deutsch', prefix: '/de', tag: 'de-DE' },
 ];
 
-/** La langue du build en cours ($localize.locale est posé par le build de chaque langue). */
+/**
+ * La langue du build en cours. Chaîne traduite, donc remplacée à la compilation dans chaque
+ * build : jamais lue dans `$localize.locale`, qui est une variable globale que les quatre
+ * builds se partagent dans le même serveur Node (une page française rendue pendant une page
+ * néerlandaise recevait l'adresse canonique et le titre néerlandais).
+ */
 export function currentLang(): Lang {
-  const locale = (globalThis as { $localize?: { locale?: string } }).$localize?.locale ?? 'fr';
-  const code = locale.slice(0, 2) as Lang;
+  const code = $localize`:@@lang.code:fr` as Lang;
 
   return LANGS.some((lang) => lang.code === code) ? code : 'fr';
 }

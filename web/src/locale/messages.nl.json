@@ -418,6 +418,7 @@
     "search.submit": "Zoeken",
     "share.share": "Delen",
     "share.copy": "Link kopiëren",
-    "share.email": "E-mail"
+    "share.email": "E-mail",
+    "lang.code": "nl"
   }
 }
