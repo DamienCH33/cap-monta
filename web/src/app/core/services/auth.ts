@@ -138,6 +138,13 @@ export class AuthService {
       .pipe(tap(() => this.analytics.event('inscription-proprietaire')));
   }
 
+  /** Nouveau lien de confirmation, pour un propriétaire connecté dont le premier email s'est perdu. */
+  resendVerification(): Observable<void> {
+    return this.http.post<void>(`${this.api}/owner/me/verification`, null, {
+      withCredentials: true,
+    });
+  }
+
   askPasswordReset(email: string): Observable<void> {
     return this.http.post<void>(
       `${this.api}/password/forgotten`,

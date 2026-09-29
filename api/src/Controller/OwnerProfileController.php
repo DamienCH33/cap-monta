@@ -11,6 +11,7 @@ use App\Dto\UpdateOwnerProfileRequest;
 use App\Entity\User;
 use App\Service\Account\AccountDeleter;
 use App\Service\Account\AccountDeletionRefused;
+use App\Service\Account\AccountMailer;
 use App\Service\Http\FloodGuard;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -38,6 +39,7 @@ final class OwnerProfileController
         private readonly RateLimiterFactoryInterface $passwordResetsLimiter,
         private readonly AccountDeleter $deleter,
         private readonly TokenStorageInterface $tokens,
+        private readonly AccountMailer $accountMailer,
     ) {
     }
 
@@ -56,6 +58,23 @@ final class OwnerProfileController
         $this->em->flush();
 
         return new JsonResponse(OwnerProfile::of($user));
+    }
+
+    /**
+     * A new confirmation link, for an owner whose first email never arrived (spam folder,
+     * mail outage). Nothing is sent once the address is confirmed; same ceiling as the
+     * forgotten password, so the button cannot be used to flood a mailbox.
+     */
+    #[Route('/api/owner/me/verification', name: 'api_owner_me_verification', methods: ['POST'])]
+    public function resendVerification(#[CurrentUser] User $user): JsonResponse
+    {
+        $this->floodGuard->check($this->passwordResetsLimiter);
+
+        if (!$user->isVerified()) {
+            $this->accountMailer->sendVerificationLink($user);
+        }
+
+        return new JsonResponse(null, Response::HTTP_ACCEPTED);
     }
 
     #[Route('/api/owner/me/password', name: 'api_owner_me_password', methods: ['POST'])]
