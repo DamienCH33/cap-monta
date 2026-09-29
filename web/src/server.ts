@@ -200,6 +200,7 @@ app.get('/sitemap.xml', async (_request, response) => {
   // Espace propriétaire et pages légales : en français seulement.
   const frenchOnly = [
     '/proprietaire',
+    '/proprietaire/guide',
     '/mentions-legales',
     '/conditions-generales',
     '/confidentialite',
