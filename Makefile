@@ -69,29 +69,11 @@ db-test: ## Recrée la base de test et joue les migrations
 	$(CONSOLE) doctrine:migrations:migrate -n --allow-no-migration --env=test
 
 ## —— Production ———————————————————————————————————————————
-# L'adresse publique de la base de prod (Railway : Postgres → Variables → DATABASE_PUBLIC_URL)
-# vit dans ce fichier, hors du dépôt et de l'historique du terminal.
-PROD_DB_FILE := $(HOME)/.config/cap-monta/prod-db-url
-BACKUP       := backups/cap-monta-$(shell date +%F).dump
+backup-prod: ## Sauvegarde la base de prod dans backups/ (tunnel Railway, rien d'exposé)
+	scripts/backup-prod.sh
 
-backup-prod: ## Sauvegarde la base de prod dans backups/ (pg_dump 17 du conteneur de dev)
-	@test -s $(PROD_DB_FILE) || { echo "Adresse manquante : mets DATABASE_PUBLIC_URL dans $(PROD_DB_FILE) (voir docs/deploiement.md)"; exit 1; }
-	@mkdir -p backups
-	@docker compose up -d --wait database >/dev/null
-	@docker compose exec -T database pg_dump --format=custom --no-owner --no-acl "$$(cat $(PROD_DB_FILE))" > $(BACKUP).part
-	@mv $(BACKUP).part $(BACKUP)
-	@echo "Sauvegarde : $(BACKUP) ($$(du -h $(BACKUP) | cut -f1))"
-	@ls -1t backups/*.dump | tail -n +13 | xargs -r rm --
-	@echo "Les 12 dernières sont gardées. Vérifier qu'elle se restaure : make restore-check"
-
-restore-check: ## Restaure la dernière sauvegarde dans une base jetable et compte les lignes
-	@f=$$(ls -1t backups/*.dump 2>/dev/null | head -1); test -n "$$f" || { echo "Aucune sauvegarde : make backup-prod"; exit 1; }; \
-	docker compose up -d --wait database >/dev/null; \
-	docker compose exec -T database sh -c 'dropdb -U app --if-exists capmonta_restore && createdb -U app capmonta_restore'; \
-	docker compose exec -T database pg_restore -U app -d capmonta_restore --no-owner --no-acl < "$$f" && \
-	docker compose exec -T database psql -U app -d capmonta_restore -c \
-	  "SELECT (SELECT count(*) FROM \"user\") AS comptes, (SELECT count(*) FROM accommodation) AS logements, (SELECT count(*) FROM booking_request) AS demandes" && \
-	echo "$$f se restaure (base capmonta_restore, à jeter : docker compose exec database dropdb -U app capmonta_restore)"
+restore-check: ## Restaure la dernière sauvegarde dans un Postgres jetable et compte les lignes
+	scripts/restore-check.sh
 
 ## —— Qualité ——————————————————————————————————————————————
 test: ## Tests de l'API

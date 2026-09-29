@@ -32,7 +32,7 @@ Cap Monta fait l'inverse : chaque logement a un vrai calendrier, les semaines li
 | Couche | Techno |
 | --- | --- |
 | API | PHP 8.4, Symfony 8.1, API Platform 4, Doctrine ORM |
-| Base | PostgreSQL 17 |
+| Base | PostgreSQL 18 en prod (17 en dev et CI) |
 | Front | Angular 22, rendu serveur (SSR), `$localize` en 4 langues |
 | Asynchrone | Symfony Messenger (emails), tâche planifiée horaire |
 | IA | Symfony AI + Mistral (`ministral-14b`, formule gratuite) |
@@ -55,7 +55,7 @@ Cap Monta fait l'inverse : chaque logement a un vrai calendrier, les semaines li
  └──────┬───────┘  └──────┬──────┘  └──────────┬───────────┘
         └─────────────────┼────────────────────┘
                  ┌────────▼───────┐   ┌─────────┐
-                 │ PostgreSQL 17  │   │  Redis  │
+                 │ PostgreSQL 18  │   │  Redis  │
                  └────────────────┘   └─────────┘
 ```
 
