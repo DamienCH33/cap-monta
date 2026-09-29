@@ -240,3 +240,29 @@
     text-decoration: underline;
   }
 }
+
+.owner-home__verify {
+  display: grid;
+  gap: 0.6rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+.owner-home__verify-button {
+  justify-self: start;
+  padding: 0.5rem 1rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}

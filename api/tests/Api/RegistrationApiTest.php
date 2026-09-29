@@ -97,6 +97,44 @@ final class RegistrationApiTest extends ApiTestCase
     }
 
     /**
+     * The first email can be lost (spam folder, mail outage on launch day): a connected owner
+     * asks for a new link, and that link verifies the account.
+     */
+    public function testAConnectedOwnerCanAskForANewLinkThatWorks(): void
+    {
+        $this->register('perdu@example.com');
+        $this->client->loginUser($this->reload('perdu@example.com'), 'main');
+
+        $this->client->request('POST', '/api/owner/me/verification');
+
+        self::assertResponseStatusCodeSame(202);
+        self::assertEmailCount(1);
+        $this->client->request('GET', $this->verificationLinkFrom($this->lastEmail()));
+        self::assertTrue($this->reload('perdu@example.com')->isVerified());
+    }
+
+    public function testNoLinkIsSentOnceTheAddressIsConfirmed(): void
+    {
+        $owner = new User('confirme@example.com', 'Deja Confirme');
+        $owner->verifyEmail(new \DateTimeImmutable());
+        $this->em->persist($owner);
+        $this->em->flush();
+        $this->client->loginUser($owner, 'main');
+
+        $this->client->request('POST', '/api/owner/me/verification');
+
+        self::assertResponseStatusCodeSame(202);
+        self::assertEmailCount(0);
+    }
+
+    public function testAnAnonymousVisitorCannotAskForALink(): void
+    {
+        $this->client->request('POST', '/api/owner/me/verification');
+
+        self::assertResponseStatusCodeSame(401);
+    }
+
+    /**
      * The display name is repeated in « Bonjour … » of the emails sent to the address given at
      * sign-up. With a line break and a link, it became a button in a genuine Cap Monta email
      * sent to someone else's address (audit of 25/09).

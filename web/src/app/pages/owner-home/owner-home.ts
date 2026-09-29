@@ -40,6 +40,17 @@ export class OwnerHome {
 
   readonly owner = this.auth.currentOwner;
 
+  /** Lien de confirmation redemandé depuis le bandeau. */
+  readonly resend = signal<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  resendVerification(): void {
+    this.resend.set('sending');
+    this.auth.resendVerification().subscribe({
+      next: () => this.resend.set('sent'),
+      error: () => this.resend.set('error'),
+    });
+  }
+
   /** null tant que la liste n'est pas arrivée. */
   private readonly accommodations = signal<OwnerAccommodation[] | null>(null);
 

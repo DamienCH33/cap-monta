@@ -11,10 +11,30 @@
 
   <div class="container owner-home__body">
     @if (!me.verified) {
-      <p class="auth__notice auth__notice--warn">
-        Votre adresse email n'est pas encore confirmée. Vous pourrez publier un logement dès qu'elle
-        le sera : le lien vous a été envoyé à cette adresse.
-      </p>
+      <div class="auth__notice auth__notice--warn owner-home__verify" role="status">
+        <p>
+          Votre adresse email n'est pas encore confirmée. Vous pourrez publier un logement dès
+          qu'elle le sera : le lien vous a été envoyé à {{ me.email }}.
+        </p>
+        @switch (resend()) {
+          @case ('sent') {
+            <p><b>Nouveau lien envoyé.</b> Regardez aussi dans les indésirables.</p>
+          }
+          @case ('error') {
+            <p>L'envoi n'a pas abouti. Réessayez dans quelques minutes.</p>
+          }
+          @default {
+            <button
+              type="button"
+              class="owner-home__verify-button"
+              [disabled]="'sending' === resend()"
+              (click)="resendVerification()"
+            >
+              {{ 'sending' === resend() ? 'Envoi…' : 'Renvoyer le lien' }}
+            </button>
+          }
+        }
+      </div>
     }
 
     @if (requestNotice(); as notice) {
