@@ -130,6 +130,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/owner-landing/owner-landing').then((m) => m.OwnerLanding),
   },
   {
+    path: 'proprietaire/guide',
+    loadComponent: () => import('./pages/owner-guide/owner-guide').then((m) => m.OwnerGuide),
+  },
+  {
     path: '**',
     loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFound),
   },

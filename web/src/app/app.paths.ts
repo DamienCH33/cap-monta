@@ -30,4 +30,5 @@ export const APP_PATHS: readonly string[] = [
   'mot-de-passe-oublie',
   'nouveau-mot-de-passe',
   'proprietaire',
+  'proprietaire/guide',
 ];

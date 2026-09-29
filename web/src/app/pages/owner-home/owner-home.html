@@ -119,6 +119,15 @@
     }
 
     <h2 class="owner-home__section-title">Mon compte</h2>
+    <a class="owner-home__callout" routerLink="/proprietaire/guide">
+      <span>
+        Besoin d'aide pour publier ?
+        <span class="owner-home__callout-detail">
+          Les six étapes, et que faire si un message vous bloque.
+        </span>
+      </span>
+      <span class="owner-home__callout-action">Le guide pas à pas</span>
+    </a>
     <a class="owner-home__callout" routerLink="/mon-espace/profil">
       <span>
         {{ me.displayName }} · {{ me.email }}
