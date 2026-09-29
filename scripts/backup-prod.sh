@@ -16,19 +16,30 @@ get() { sed -n "s/^$1=//p" <<<"$vars" | head -1; }
 user=$(get PGUSER); pass=$(get PGPASSWORD); db=$(get PGDATABASE)
 [ -n "$user" ] && [ -n "$pass" ] && [ -n "$db" ] || { echo "Variables PGUSER / PGPASSWORD / PGDATABASE introuvables sur le service Postgres"; exit 1; }
 
-railway connect Postgres --tunnel-only -P "$PORT" >/dev/null 2>&1 &
-tunnel=$!
-trap 'kill "$tunnel" 2>/dev/null || true; rm -f "$out.part"' EXIT
+docker image inspect "$IMAGE" >/dev/null 2>&1 || docker pull -q "$IMAGE" >/dev/null   # avant le tunnel
 
-for _ in $(seq 1 30); do
-  (exec 3<>"/dev/tcp/127.0.0.1/$PORT") 2>/dev/null && break
-  kill -0 "$tunnel" 2>/dev/null || { echo "Le tunnel Railway ne s'est pas ouvert (essaie : railway connect Postgres --tunnel-only)"; exit 1; }
+log=$(mktemp)
+railway connect Postgres --tunnel-only -P "$PORT" >"$log" 2>&1 &
+tunnel=$!
+trap 'kill "$tunnel" 2>/dev/null || true; rm -f "$out.part" "$log"' EXIT
+
+# Le tunnel passe par SSH : il peut mettre plusieurs secondes, et écouter en IPv4 ou en IPv6.
+host=""
+for _ in $(seq 1 60); do
+  for h in 127.0.0.1 ::1; do
+    if (exec 3<>"/dev/tcp/$h/$PORT") 2>/dev/null; then host=$h; break 2; fi
+  done
+  kill -0 "$tunnel" 2>/dev/null || break
   sleep 1
 done
+if [ -z "$host" ]; then
+  echo "Le tunnel Railway ne s'est pas ouvert. Sa sortie :"; sed 's/^/  | /' "$log"
+  exit 1
+fi
 
 mkdir -p backups
 docker run --rm --network host -e PGPASSWORD="$pass" "$IMAGE" \
-  pg_dump --host=127.0.0.1 --port="$PORT" --username="$user" --dbname="$db" \
+  pg_dump --host="$host" --port="$PORT" --username="$user" --dbname="$db" \
   --format=custom --no-owner --no-acl > "$out.part"
 mv "$out.part" "$out"
 
