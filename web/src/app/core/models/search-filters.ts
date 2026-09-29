@@ -2,8 +2,16 @@ import { ParamMap, Params } from '@angular/router';
 
 export type AccommodationTypeKey = 'caravan' | 'mobile_home' | 'bungalow' | 'chalet' | 'studio';
 export type SortOrder = 'price_asc' | 'price_desc';
+export type ResortKey = 'chm' | 'euronat';
+
+/** Noms propres, identiques dans toutes les langues ; la clé sert aussi dans l'URL. */
+export const RESORTS: readonly { key: ResortKey; label: string }[] = [
+  { key: 'chm', label: 'CHM Montalivet' },
+  { key: 'euronat', label: 'Euronat' },
+];
 
 export interface SearchFilters {
+  resort: ResortKey | null;
   types: AccommodationTypeKey[];
   districts: string[];
   bedrooms: number;
@@ -19,6 +27,7 @@ export interface FilterChip {
 }
 
 export const NO_FILTERS: SearchFilters = {
+  resort: null,
   types: [],
   districts: [],
   bedrooms: 0,
@@ -99,6 +108,7 @@ export const MAX_BEDROOMS_FILTER = 3;
 
 export function activeFilterCount(filters: SearchFilters): number {
   return (
+    (filters.resort ? 1 : 0) +
     filters.types.length +
     filters.districts.length +
     (filters.bedrooms > 0 ? 1 : 0) +
@@ -123,6 +133,7 @@ export function filtersFromQuery(params: ParamMap): SearchFilters {
   );
 
   return {
+    resort: RESORTS.find((resort) => resort.key === params.get('domaine'))?.key ?? null,
     types: unique(types),
     districts: unique(values(params, 'quartier')),
     bedrooms: Math.min(Math.max(bedrooms, 0), MAX_BEDROOMS_FILTER),
@@ -133,6 +144,7 @@ export function filtersFromQuery(params: ParamMap): SearchFilters {
 
 export function filtersToQuery(filters: SearchFilters): Params {
   return {
+    domaine: filters.resort,
     type:
       filters.types.length > 0
         ? filters.types.map(
@@ -151,6 +163,15 @@ export function filterChips(
   districtLabel: (value: string) => string = (value) => value,
 ): FilterChip[] {
   return [
+    ...(filters.resort
+      ? [
+          {
+            key: 'resort',
+            label: RESORTS.find((resort) => resort.key === filters.resort)?.label ?? filters.resort,
+            without: { ...filters, resort: null },
+          },
+        ]
+      : []),
     ...filters.types.map((key) => ({
       key: `type-${key}`,
       label: ACCOMMODATION_TYPES.find((type) => type.key === key)?.label ?? key,

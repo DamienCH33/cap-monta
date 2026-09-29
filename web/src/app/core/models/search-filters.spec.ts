@@ -1,6 +1,7 @@
 import { convertToParamMap } from '@angular/router';
 
 import {
+  activeFilterCount,
   amenityLabel,
   filterChips,
   filtersFromQuery,
@@ -23,6 +24,7 @@ describe('search filters', () => {
     );
 
     expect(filters).toEqual({
+      resort: null,
       types: ['caravan'],
       districts: ['Europa'],
       bedrooms: 3,
@@ -40,6 +42,7 @@ describe('search filters', () => {
 
   it("écrit une URL qui se relit à l'identique", () => {
     const filters: SearchFilters = {
+      resort: null,
       types: ['mobile_home', 'bungalow'],
       districts: ['Europa', 'Lalande'],
       bedrooms: 2,
@@ -68,5 +71,12 @@ describe('amenityLabel', () => {
   it('shows the label, or the key itself when it is unknown', () => {
     expect(amenityLabel('television')).toBe('Télévision');
     expect(amenityLabel('sauna')).toBe('sauna');
+  });
+
+  it('reads and writes the resort, and ignores an unknown one', () => {
+    expect(filtersFromQuery(convertToParamMap({ domaine: 'euronat' })).resort).toBe('euronat');
+    expect(filtersFromQuery(convertToParamMap({ domaine: 'atlantide' })).resort).toBeNull();
+    expect(filtersToQuery({ ...NO_FILTERS, resort: 'chm' })['domaine']).toBe('chm');
+    expect(activeFilterCount({ ...NO_FILTERS, resort: 'chm' })).toBe(1);
   });
 });

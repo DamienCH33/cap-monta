@@ -421,6 +421,7 @@
     "share.email": "Email",
     "lang.code": "en",
     "filters.euronat-districts": "Euronat",
-    "home.euronat-sectors": "At Euronat:"
+    "home.euronat-sectors": "At Euronat:",
+    "filters.resort": "Resort"
   }
 }

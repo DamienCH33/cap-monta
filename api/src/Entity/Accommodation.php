@@ -419,7 +419,7 @@ class Accommodation
             $missing[] = 'description';
         }
 
-        // Every CHM accommodation sits in a district; Euronat's are not referenced yet.
+        // Every CHM accommodation sits in a district; at Euronat the sector stays optional (ADR 034).
         if (Resort::Chm === $this->resort && null === $this->district) {
             $missing[] = 'district';
         }
