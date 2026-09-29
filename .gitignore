@@ -10,5 +10,8 @@ Thumbs.db
 /.env
 docs/reprise.md
 
+# Sauvegardes de la base de prod (make backup-prod) : données personnelles, jamais dans Git
+/backups/
+
 # Instantané Redis écrit par un redis-server lancé depuis le dépôt
 dump.rdb

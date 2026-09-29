@@ -7,7 +7,7 @@ CONSOLE  := cd $(API) && php bin/console
 API_PORT := 8001
 API_URL  := http://127.0.0.1:$(API_PORT)
 
-.PHONY: help up down api wait-api stop status web preview start migrate fixtures db db-test test test-web cs stan qa
+.PHONY: help up down api wait-api stop status web preview start migrate fixtures db db-test backup-prod restore-check test test-web cs stan qa
 
 help: ## Liste des commandes
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -67,6 +67,31 @@ db-test: ## Recrée la base de test et joue les migrations
 	$(CONSOLE) doctrine:database:drop --force --if-exists --env=test
 	$(CONSOLE) doctrine:database:create --env=test
 	$(CONSOLE) doctrine:migrations:migrate -n --allow-no-migration --env=test
+
+## —— Production ———————————————————————————————————————————
+# L'adresse publique de la base de prod (Railway : Postgres → Variables → DATABASE_PUBLIC_URL)
+# vit dans ce fichier, hors du dépôt et de l'historique du terminal.
+PROD_DB_FILE := $(HOME)/.config/cap-monta/prod-db-url
+BACKUP       := backups/cap-monta-$(shell date +%F).dump
+
+backup-prod: ## Sauvegarde la base de prod dans backups/ (pg_dump 17 du conteneur de dev)
+	@test -s $(PROD_DB_FILE) || { echo "Adresse manquante : mets DATABASE_PUBLIC_URL dans $(PROD_DB_FILE) (voir docs/deploiement.md)"; exit 1; }
+	@mkdir -p backups
+	@docker compose up -d --wait database >/dev/null
+	@docker compose exec -T database pg_dump --format=custom --no-owner --no-acl "$$(cat $(PROD_DB_FILE))" > $(BACKUP).part
+	@mv $(BACKUP).part $(BACKUP)
+	@echo "Sauvegarde : $(BACKUP) ($$(du -h $(BACKUP) | cut -f1))"
+	@ls -1t backups/*.dump | tail -n +13 | xargs -r rm --
+	@echo "Les 12 dernières sont gardées. Vérifier qu'elle se restaure : make restore-check"
+
+restore-check: ## Restaure la dernière sauvegarde dans une base jetable et compte les lignes
+	@f=$$(ls -1t backups/*.dump 2>/dev/null | head -1); test -n "$$f" || { echo "Aucune sauvegarde : make backup-prod"; exit 1; }; \
+	docker compose up -d --wait database >/dev/null; \
+	docker compose exec -T database sh -c 'dropdb -U app --if-exists capmonta_restore && createdb -U app capmonta_restore'; \
+	docker compose exec -T database pg_restore -U app -d capmonta_restore --no-owner --no-acl < "$$f" && \
+	docker compose exec -T database psql -U app -d capmonta_restore -c \
+	  "SELECT (SELECT count(*) FROM \"user\") AS comptes, (SELECT count(*) FROM accommodation) AS logements, (SELECT count(*) FROM booking_request) AS demandes" && \
+	echo "$$f se restaure (base capmonta_restore, à jeter : docker compose exec database dropdb -U app capmonta_restore)"
 
 ## —— Qualité ——————————————————————————————————————————————
 test: ## Tests de l'API

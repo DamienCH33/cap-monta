@@ -138,12 +138,17 @@ Si le test 4 renvoie six 200 : `TRUSTED_PROXIES` est trop large. Si tous les vis
 
 ## Exploitation
 
-- **Sauvegardes** : activer les sauvegardes du service PostgreSQL. **Tester une restauration** sur une base jetable avant d'en avoir besoin :
+- **Sauvegardes** : l'offre Hobby de Railway n'en fait pas (réservé à Pro). Elles se font depuis le PC, **une fois par semaine** et avant toute migration délicate :
   ```bash
-  pg_dump "$DATABASE_URL" -Fc -f sauvegarde.dump
-  createdb capmonta_restore && pg_restore -d capmonta_restore sauvegarde.dump
+  # Une seule fois : Railway → Postgres → Variables → copier DATABASE_PUBLIC_URL
+  mkdir -p ~/.config/cap-monta && nano ~/.config/cap-monta/prod-db-url   # coller, enregistrer
+  chmod 600 ~/.config/cap-monta/prod-db-url
+
+  make backup-prod     # backups/cap-monta-AAAA-MM-JJ.dump, les 12 dernières gardées
+  make restore-check   # restaure dans une base jetable et compte comptes / logements / demandes
   ```
-  Le volume des photos se sauvegarde à part (Railway : *Volume → Backups*).
+  Restaurer en prod (seulement en cas de perte) : `pg_restore --clean --if-exists --no-owner --no-acl -d "$DATABASE_PUBLIC_URL" backups/…dump`. `backups/` est ignoré par Git : ces fichiers contiennent des données personnelles, ils ne quittent pas le PC.
+  Les photos (volume de `api`) ne sont pas dans cette sauvegarde : un propriétaire peut les renvoyer, pas ses demandes.
 - **Surveillance** : UptimeRobot (gratuit) sur `https://cap-monta.up.railway.app/api/health`, alerte si le code n'est pas 200 ou si la réponse contient `degraded`.
 - **Worker** : s'il s'arrête, les emails et les expirations attendent. `/api/health` le signale (`worker`). La tâche horaire rattrape les expirations.
 - **Emails en échec** : `php bin/console messenger:failed:show` (shell Railway sur `worker`). Purgés après 30 jours.
