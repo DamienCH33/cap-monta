@@ -19,7 +19,7 @@
    └──────────┬───────────┘   └────────┬────────┘   └───────────┬────────────┘
               └────────────────────────┼────────────────────────┘
                               ┌────────▼───────┐   ┌──────────┐
-                              │  PostgreSQL 17 │   │  Redis   │
+                              │  PostgreSQL 18 │   │  Redis   │
                               └────────────────┘   └──────────┘
 ```
 
@@ -138,16 +138,16 @@ Si le test 4 renvoie six 200 : `TRUSTED_PROXIES` est trop large. Si tous les vis
 
 ## Exploitation
 
-- **Sauvegardes** : l'offre Hobby de Railway n'en fait pas (réservé à Pro). Elles se font depuis le PC, **une fois par semaine** et avant toute migration délicate :
+- **Sauvegardes** : l'offre Hobby de Railway n'en fait pas (réservé à Pro). Elles se font depuis le PC, **une fois par semaine** et avant toute migration délicate, par le tunnel chiffré de la CLI Railway : la base n'a **pas** d'accès public (ne pas activer *Public Access*).
   ```bash
-  # Une seule fois : Railway → Postgres → Variables → copier DATABASE_PUBLIC_URL
-  mkdir -p ~/.config/cap-monta && nano ~/.config/cap-monta/prod-db-url   # coller, enregistrer
-  chmod 600 ~/.config/cap-monta/prod-db-url
+  # Une seule fois
+  npm install -g @railway/cli && railway login
+  railway link            # à la racine du dépôt : projet aware-heart, environnement production
 
-  make backup-prod     # backups/cap-monta-AAAA-MM-JJ.dump, les 12 dernières gardées
-  make restore-check   # restaure dans une base jetable et compte comptes / logements / demandes
+  make backup-prod        # backups/cap-monta-AAAA-MM-JJ.dump, les 12 dernières gardées
+  make restore-check      # restaure dans un Postgres 18 jetable et compte comptes / logements / demandes
   ```
-  Restaurer en prod (seulement en cas de perte) : `pg_restore --clean --if-exists --no-owner --no-acl -d "$DATABASE_PUBLIC_URL" backups/…dump`. `backups/` est ignoré par Git : ces fichiers contiennent des données personnelles, ils ne quittent pas le PC.
+  La prod est en **PostgreSQL 18** (image `postgres-ssl:18`) : `pg_dump` et `pg_restore` doivent être en 18, d'où les conteneurs `postgres:18-alpine` des scripts. Restaurer en prod (seulement en cas de perte) : ouvrir `railway connect Postgres --tunnel-only -P 54329`, puis `pg_restore --clean --if-exists --no-owner --no-acl` vers ce port. `backups/` est ignoré par Git : données personnelles, elles ne quittent pas le PC.
   Les photos (volume de `api`) ne sont pas dans cette sauvegarde : un propriétaire peut les renvoyer, pas ses demandes.
 - **Surveillance** : UptimeRobot (gratuit) sur `https://cap-monta.up.railway.app/api/health`, alerte si le code n'est pas 200 ou si la réponse contient `degraded`.
 - **Worker** : s'il s'arrête, les emails et les expirations attendent. `/api/health` le signale (`worker`). La tâche horaire rattrape les expirations.
