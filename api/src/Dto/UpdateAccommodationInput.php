@@ -7,6 +7,7 @@ namespace App\Dto;
 use App\Enum\AccommodationType;
 use App\Enum\Amenity;
 use App\Enum\PetsPolicy;
+use App\Validator\NoContactDetails;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -40,6 +41,7 @@ final class UpdateAccommodationInput
     public array $amenities;
 
     #[Assert\Length(max: 5000, maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères.')]
+    #[NoContactDetails]
     public string $description;
 
     /** District slug, or null to remove it. */

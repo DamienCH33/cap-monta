@@ -73,6 +73,17 @@ final class StayTermsApiTest extends WebTestCase
         self::assertNull($this->json()['terms']['checkInFrom'], 'null removes every condition.');
     }
 
+    public function testTheCancellationTermsCannotCarryAPhoneNumber(): void
+    {
+        $this->listing('bungalow-alice', new StayTerms());
+        $this->client->loginUser($this->owner, 'main');
+
+        $this->patch('bungalow-alice', ['terms' => ['cancellationPolicy' => 'Appelez le +32 470 12 34 56 pour annuler.']]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame(['terms.cancellationPolicy'], array_column($this->json()['violations'], 'propertyPath'));
+    }
+
     public function testImpossibleConditionsAreRefusedInFrench(): void
     {
         $this->listing('bungalow-alice', new StayTerms());
