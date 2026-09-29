@@ -1,59 +1,47 @@
 #!/usr/bin/env bash
-# Sauvegarde la base de prod sans l'exposer sur Internet : tunnel chiffré de la CLI Railway
-# (railway connect --tunnel-only), pg_dump 18 (version de la prod) dans un conteneur jetable.
-# Prérequis une seule fois : CLI Railway installée, `railway login`, `railway link` à la racine.
+# Sauvegarde la base de prod sans l'exposer sur Internet : pg_dump tourne DANS le conteneur
+# Postgres de Railway (railway ssh), la sauvegarde revient en base64 par la liaison SSH.
+# Même version de pg_dump que le serveur, aucun mot de passe manipulé ni affiché.
+# Prérequis une seule fois : CLI Railway, `railway login`, `railway link`, clé SSH enregistrée.
+#
+# Pourquoi pas `railway connect --tunnel-only` : Railway refuse la redirection de port
+# des sessions SSH sans commande (« port forwarding rides your dev.new session… not -N »).
 set -euo pipefail
 
-PORT=54329                     # port local du tunnel, loin du 5432 de la base de dev
-IMAGE=postgres:18-alpine       # même version majeure que la prod (postgres-ssl:18)
+IMAGE=postgres:18-alpine       # pour contrôler la sauvegarde en local (même version que la prod)
 KEEP=12
 out="backups/cap-monta-$(date +%F).dump"
 
-command -v railway >/dev/null || { echo "CLI Railway absente : npm install -g @railway/cli, puis railway login et railway link"; exit 1; }
+command -v railway >/dev/null || { echo "CLI Railway absente : voir docs/deploiement.md"; exit 1; }
 
-vars=$(railway variables --service Postgres --kv) || { echo "Projet non lié : lance railway link à la racine du dépôt"; exit 1; }
-get() { sed -n "s/^$1=//p" <<<"$vars" | head -1; }
-user=$(get PGUSER); pass=$(get PGPASSWORD); db=$(get PGDATABASE)
-[ -n "$user" ] && [ -n "$pass" ] && [ -n "$db" ] || { echo "Variables PGUSER / PGPASSWORD / PGDATABASE introuvables sur le service Postgres"; exit 1; }
+raw=$(mktemp)
+trap 'rm -f "$raw" "$out.part"' EXIT
 
-docker image inspect "$IMAGE" >/dev/null 2>&1 || docker pull -q "$IMAGE" >/dev/null   # avant le tunnel
-
-log=$(mktemp)
-railway connect Postgres --tunnel-only -P "$PORT" >"$log" 2>&1 &
-tunnel=$!
-trap 'kill "$tunnel" 2>/dev/null || true; rm -f "$out.part" "$log"' EXIT
-
-# Le tunnel passe par SSH : il peut mettre plusieurs secondes, et écouter en IPv4 ou en IPv6.
-host=""
-for _ in $(seq 1 60); do
-  for h in 127.0.0.1 ::1; do
-    if (exec 3<>"/dev/tcp/$h/$PORT") 2>/dev/null; then host=$h; break 2; fi
-  done
-  kill -0 "$tunnel" 2>/dev/null || break
-  sleep 1
-done
-if [ -z "$host" ]; then
-  echo "Le tunnel Railway ne s'est pas ouvert. Sa sortie :"; sed 's/^/  | /' "$log"
-  exit 1
+# Le script distant arrive par l'entrée standard : pas de souci de guillemets, pas de terminal
+# alloué (sortie propre). Connexion par le socket local, sans mot de passe.
+railway ssh --service Postgres -- sh >"$raw" 2>&1 <<'REMOTE' || true
+f=/tmp/cap-monta-backup.dump
+if pg_dump -h /var/run/postgresql -U "${PGUSER:-postgres}" -d "${PGDATABASE:-railway}" \
+     --format=custom --no-owner --no-acl >"$f" 2>"$f.err"; then
+  echo @@DEBUT@@; base64 "$f"; echo @@FIN@@
+else
+  echo "pg_dump a échoué :"; cat "$f.err"
 fi
+rm -f "$f" "$f.err"
+REMOTE
 
-# Le port local s'ouvre avant que la liaison SSH soit prête : une connexion trop tôt est
-# coupée net. On attend que Postgres réponde vraiment à travers le tunnel.
-ready=""
-for _ in $(seq 1 45); do
-  if docker run --rm --network host "$IMAGE" pg_isready -q -h "$host" -p "$PORT" -t 3; then ready=1; break; fi
-  kill -0 "$tunnel" 2>/dev/null || break
-  sleep 1
-done
-if [ -z "$ready" ]; then
-  echo "Le tunnel est ouvert mais Postgres ne répond pas derrière. Sortie de Railway :"; sed 's/^/  | /' "$log"
+if ! grep -q '^@@FIN@@' "$raw"; then
+  echo "La sauvegarde n'a pas abouti. Réponse de Railway :"
+  sed -E 's/(PASSWORD[=:] *|postgresql:\/\/[^:]*:)[^@ ]*/\1***/Ig; s/^/  | /' "$raw"
   exit 1
 fi
 
 mkdir -p backups
-docker run --rm --network host -e PGPASSWORD="$pass" "$IMAGE" \
-  pg_dump --host="$host" --port="$PORT" --username="$user" --dbname="$db" \
-  --format=custom --no-owner --no-acl > "$out.part"
+sed -n '/^@@DEBUT@@/,/^@@FIN@@/p' "$raw" | sed '1d;$d' | tr -d '\r' | base64 -d > "$out.part"
+
+# Une sauvegarde illisible ne doit pas remplacer les bonnes.
+docker run --rm -i "$IMAGE" pg_restore --list < "$out.part" >/dev/null \
+  || { echo "Sauvegarde reçue mais illisible par pg_restore : rien n'est gardé."; exit 1; }
 mv "$out.part" "$out"
 
 echo "Sauvegarde : $out ($(du -h "$out" | cut -f1))"
