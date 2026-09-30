@@ -257,7 +257,7 @@
     "home.promise-calendar": "{$START_BOLD_TEXT}Calendriers tenus à jour{$CLOSE_BOLD_TEXT}Chaque fiche dit quand le propriétaire l'a vérifié.",
     "home.promise-48h": "{$START_BOLD_TEXT}Réponse sous 48 heures{$CLOSE_BOLD_TEXT}Sinon la demande expire et vous êtes prévenu.",
     "home.promise-fees": "{$START_BOLD_TEXT}Sans commission{$CLOSE_BOLD_TEXT}Vous réglez le propriétaire, comme d'habitude.",
-    "home.zones-title": "Trois façons de vivre le domaine",
+    "home.zones-title": "Au CHM, trois façons de vivre le domaine",
     "home.zones-lead": "Chaque quartier a sa distance à la plage et son ambiance.",
     "count.listings": "{VAR_PLURAL, plural, =1 {1 logement} other {{INTERPOLATION} logements}}",
     "home.also": "Aussi :",
@@ -421,7 +421,14 @@
     "share.email": "Email",
     "lang.code": "fr",
     "filters.euronat-districts": "Euronat",
-    "home.euronat-sectors": "À Euronat :",
-    "filters.resort": "Domaine"
+    "filters.resort": "Domaine",
+    "home.euronat-title": "À Euronat, des villages dans la pinède",
+    "home.euronat-lead": "Côté plage, côté village ou côté camping, comme le découpe le domaine.",
+    "zone.euronat-beach": "Côté plage",
+    "zone.euronat-beach-hint": "Plage Nord ou Sud à pied",
+    "zone.euronat-village": "Côté village",
+    "zone.euronat-village-hint": "Près des commerces",
+    "zone.euronat-camping": "Côté camping",
+    "zone.euronat-camping-hint": "Près de l'accueil"
   }
 }

@@ -32,6 +32,47 @@ const ZONES: readonly { key: DistrictArea; title: string; hint: string }[] = [
   },
 ];
 
+/**
+ * Les secteurs d'Euronat regroupés comme le fait le domaine dans sa grille tarifaire 2026 :
+ * « côté plage & Afrique » (Afrique II avec Afrique), « côté village Europe, Asie, Océanie »,
+ * « côté camping Polynésie, Mélèzes » (Polynésie et les parcs des mobil-homes). Un secteur ajouté
+ * plus tard et rangé nulle part s'affiche sous les cartes. Par slug, pour ne pas dépendre des textes.
+ */
+const EURONAT_ZONES: readonly { key: string; title: string; hint: string; slugs: string[] }[] = [
+  {
+    key: 'euronat-beach',
+    title: $localize`:@@zone.euronat-beach:Côté plage`,
+    hint: $localize`:@@zone.euronat-beach-hint:Plage Nord ou Sud à pied`,
+    slugs: [
+      'euronat-amerique-du-nord',
+      'euronat-amerique-du-sud',
+      'euronat-afrique',
+      'euronat-afrique-ii',
+    ],
+  },
+  {
+    key: 'euronat-village',
+    title: $localize`:@@zone.euronat-village:Côté village`,
+    hint: $localize`:@@zone.euronat-village-hint:Près des commerces`,
+    slugs: ['euronat-europe', 'euronat-asie', 'euronat-oceanie'],
+  },
+  {
+    key: 'euronat-camping',
+    title: $localize`:@@zone.euronat-camping:Côté camping`,
+    hint: $localize`:@@zone.euronat-camping-hint:Près de l'accueil`,
+    slugs: [
+      'euronat-polynesie',
+      'euronat-parc-des-lauriers',
+      'euronat-parc-des-melezes',
+      'euronat-parc-des-oyats',
+      'euronat-parc-des-acacias',
+      'euronat-parc-des-mimosas',
+      'euronat-parc-des-chataigniers',
+      'euronat-parc-des-albizzias',
+    ],
+  },
+];
+
 @Component({
   selector: 'cm-home',
   imports: [RouterLink, SearchBar, AccommodationCard, Icon, SitePhoto],
@@ -70,6 +111,28 @@ export class Home implements OnInit {
       };
     }).filter((zone) => zone.districts.length > 0),
   );
+
+  /** Les secteurs d'Euronat en trois cartes, dans l'ordre du plan. */
+  readonly euronatZones = computed(() =>
+    EURONAT_ZONES.map((zone) => {
+      const districts = this.euronatDistricts().filter((district) =>
+        zone.slugs.includes(district.slug),
+      );
+
+      return {
+        ...zone,
+        districts,
+        count: districts.reduce((sum, district) => sum + district.accommodationCount, 0),
+      };
+    }).filter((zone) => zone.districts.length > 0),
+  );
+
+  /** Les secteurs d'Euronat rangés dans aucune carte (Afrique II, Polynésie, un ajout futur). */
+  readonly euronatOthers = computed(() => {
+    const placed = new Set(EURONAT_ZONES.flatMap((zone) => zone.slugs));
+
+    return this.euronatDistricts().filter((district) => !placed.has(district.slug));
+  });
 
   /** Les quartiers dont la zone n'est pas encore relevée sur le plan. */
   readonly unplaced = computed(() =>

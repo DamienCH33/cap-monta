@@ -257,7 +257,7 @@
     "home.promise-calendar": "{$START_BOLD_TEXT}Aktuelle Kalender{$CLOSE_BOLD_TEXT}Jede Anzeige zeigt, wann der Eigentümer sie geprüft hat.",
     "home.promise-48h": "{$START_BOLD_TEXT}Antwort innerhalb von 48 Stunden{$CLOSE_BOLD_TEXT}Sonst läuft die Anfrage ab und Sie werden benachrichtigt.",
     "home.promise-fees": "{$START_BOLD_TEXT}Ohne Provision{$CLOSE_BOLD_TEXT}Sie bezahlen den Eigentümer direkt, wie gewohnt.",
-    "home.zones-title": "Drei Arten, das Gelände zu erleben",
+    "home.zones-title": "Im CHM: drei Arten, das Gelände zu erleben",
     "home.zones-lead": "Jedes Viertel hat seine eigene Entfernung zum Strand und seine eigene Atmosphäre.",
     "count.listings": "{VAR_PLURAL, plural, =1 {1 Unterkunft} other {{INTERPOLATION} Unterkünfte}}",
     "home.also": "Außerdem:",
@@ -421,7 +421,14 @@
     "share.email": "E-Mail",
     "lang.code": "de",
     "filters.euronat-districts": "Euronat",
-    "home.euronat-sectors": "In Euronat:",
-    "filters.resort": "Ferienanlage"
+    "filters.resort": "Ferienanlage",
+    "home.euronat-title": "In Euronat: Dörfer im Kiefernwald",
+    "home.euronat-lead": "Strandseite, Dorfseite oder Campingseite, wie das Gelände selbst eingeteilt ist.",
+    "zone.euronat-beach": "Strandseite",
+    "zone.euronat-beach-hint": "Nord- oder Südstrand zu Fuß",
+    "zone.euronat-village": "Dorfseite",
+    "zone.euronat-village-hint": "In der Nähe der Geschäfte",
+    "zone.euronat-camping": "Campingseite",
+    "zone.euronat-camping-hint": "Nahe der Rezeption"
   }
 }

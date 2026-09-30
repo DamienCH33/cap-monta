@@ -257,7 +257,7 @@
     "home.promise-calendar": "{$START_BOLD_TEXT}Calendars kept up to date{$CLOSE_BOLD_TEXT}Each listing shows when the owner last checked it.",
     "home.promise-48h": "{$START_BOLD_TEXT}Reply within 48 hours{$CLOSE_BOLD_TEXT}Otherwise the request expires and you are told.",
     "home.promise-fees": "{$START_BOLD_TEXT}No commission{$CLOSE_BOLD_TEXT}You pay the owner directly, as usual.",
-    "home.zones-title": "Three ways to enjoy the resort",
+    "home.zones-title": "At the CHM, three ways to enjoy the resort",
     "home.zones-lead": "Each area has its own distance to the beach and its own feel.",
     "count.listings": "{VAR_PLURAL, plural, =1 {1 home} other {{INTERPOLATION} homes}}",
     "home.also": "Also:",
@@ -421,7 +421,14 @@
     "share.email": "Email",
     "lang.code": "en",
     "filters.euronat-districts": "Euronat",
-    "home.euronat-sectors": "At Euronat:",
-    "filters.resort": "Resort"
+    "filters.resort": "Resort",
+    "home.euronat-title": "At Euronat, villages in the pine forest",
+    "home.euronat-lead": "Beach side, village side or camping side, as the resort divides itself.",
+    "zone.euronat-beach": "Beach side",
+    "zone.euronat-beach-hint": "North or South beach on foot",
+    "zone.euronat-village": "Village side",
+    "zone.euronat-village-hint": "Close to the shops",
+    "zone.euronat-camping": "Camping side",
+    "zone.euronat-camping-hint": "Near the reception"
   }
 }

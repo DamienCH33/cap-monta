@@ -222,6 +222,11 @@
   }
 }
 
+// Euronat : pas encore de photo du domaine, la carte commence par un liseré vert pin.
+.zone--text {
+  border-top: 4px solid var(--pine);
+}
+
 .zones__more {
   margin: 14px 0 0;
   font-size: 14px;
