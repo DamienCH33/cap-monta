@@ -257,7 +257,7 @@
     "home.promise-calendar": "{$START_BOLD_TEXT}Actuele kalenders{$CLOSE_BOLD_TEXT}Elke advertentie laat zien wanneer de eigenaar hem heeft gecontroleerd.",
     "home.promise-48h": "{$START_BOLD_TEXT}Antwoord binnen 48 uur{$CLOSE_BOLD_TEXT}Anders verloopt de aanvraag en krijg je bericht.",
     "home.promise-fees": "{$START_BOLD_TEXT}Zonder commissie{$CLOSE_BOLD_TEXT}Je betaalt de eigenaar rechtstreeks, zoals gewoonlijk.",
-    "home.zones-title": "Drie manieren om het domein te beleven",
+    "home.zones-title": "In het CHM: drie manieren om het domein te beleven",
     "home.zones-lead": "Elke wijk heeft zijn eigen afstand tot het strand en zijn eigen sfeer.",
     "count.listings": "{VAR_PLURAL, plural, =1 {1 accommodatie} other {{INTERPOLATION} accommodaties}}",
     "home.also": "Ook:",
@@ -421,7 +421,14 @@
     "share.email": "E-mail",
     "lang.code": "nl",
     "filters.euronat-districts": "Euronat",
-    "home.euronat-sectors": "In Euronat:",
-    "filters.resort": "Vakantiepark"
+    "filters.resort": "Vakantiepark",
+    "home.euronat-title": "In Euronat: dorpen tussen de dennen",
+    "home.euronat-lead": "Strandkant, dorpskant of campingkant, zoals het domein zelf is ingedeeld.",
+    "zone.euronat-beach": "Strandkant",
+    "zone.euronat-beach-hint": "Noord- of Zuidstrand te voet",
+    "zone.euronat-village": "Dorpskant",
+    "zone.euronat-village-hint": "Dicht bij de winkels",
+    "zone.euronat-camping": "Campingkant",
+    "zone.euronat-camping-hint": "Bij de receptie"
   }
 }

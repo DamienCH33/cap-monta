@@ -35,7 +35,7 @@
   <section class="section">
     <div class="section__head">
       <div>
-        <h2 class="section__title" i18n="@@home.zones-title">Trois façons de vivre le domaine</h2>
+        <h2 class="section__title" i18n="@@home.zones-title">Au CHM, trois façons de vivre le domaine</h2>
         <p class="section__lead" i18n="@@home.zones-lead">Chaque quartier a sa distance à la plage et son ambiance.</p>
       </div>
     </div>
@@ -79,16 +79,51 @@
       </p>
     }
 
-    @if (euronatDistricts().length) {
-      <p class="zones__more">
-        <span i18n="@@home.euronat-sectors">À Euronat :</span>
-        @for (district of euronatDistricts(); track district.slug; let last = $last) {
-          <a [routerLink]="['/quartier', district.slug]">{{ district.name }}</a
-          >{{ last ? '' : ' · ' }}
-        }
-      </p>
-    }
   </section>
+
+  @if (euronatZones().length) {
+    <section class="section">
+      <div class="section__head">
+        <div>
+          <h2 class="section__title" i18n="@@home.euronat-title">À Euronat, des villages dans la pinède</h2>
+          <p class="section__lead" i18n="@@home.euronat-lead">Côté plage, côté village ou côté camping, comme le découpe le domaine.</p>
+        </div>
+      </div>
+
+      <div class="zones">
+        @for (zone of euronatZones(); track zone.key) {
+          <article class="zone zone--text">
+            <div class="zone__body">
+              <h3 class="zone__title">{{ zone.title }}</h3>
+              <p class="zone__meta">
+                {{ zone.hint }} ·
+                <ng-container i18n="@@count.listings"
+                  >{zone.count, plural, =1 {1 logement} other {{{ zone.count }} logements}}</ng-container
+                >
+              </p>
+              <ul class="zone__districts">
+                @for (district of zone.districts; track district.slug) {
+                  <li>
+                    <a [routerLink]="['/quartier', district.slug]">{{ district.name }}</a>
+                  </li>
+                }
+              </ul>
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (euronatOthers().length) {
+        <p class="zones__more">
+          <span i18n="@@home.also">Aussi :</span>
+          @for (district of euronatOthers(); track district.slug; let last = $last) {
+            <a [routerLink]="['/quartier', district.slug]">{{ district.name }}</a
+            >{{ last ? '' : ' · ' }}
+          }
+        </p>
+      }
+    </section>
+  }
 
   <section class="section">
     <div class="section__head">
