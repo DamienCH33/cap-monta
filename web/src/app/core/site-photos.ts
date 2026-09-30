@@ -25,8 +25,8 @@ export const SITE_PHOTOS: SitePhotos = {
     ratio: 1.333,
     alt: 'Pins sylvestres au CHM Montalivet',
     focus: 'center',
-    credit: 'AUTEUR',
-    license: 'LICENCE',
+    credit: 'Deafart',
+    license: 'CC BY-SA 4.0',
     source: 'https://commons.wikimedia.org/wiki/File:Pins_sylvestres_au_CHM-Montalivet.jpg',
   },
   roadside: {
