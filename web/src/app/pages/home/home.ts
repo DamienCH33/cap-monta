@@ -129,7 +129,6 @@ export class Home implements OnInit {
         ...zone,
         districts,
         count: districts.reduce((sum, district) => sum + district.accommodationCount, 0),
-        illustration: SITE_PHOTOS[zone.key]?.illustration ?? false,
       };
     }).filter((zone) => zone.districts.length > 0),
   );

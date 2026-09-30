@@ -128,7 +128,6 @@ for (const { slot, entry, data, width, height } of jobs) {
     credit: entry.credit?.trim() || null,
     license: entry.license?.trim() || null,
     source: entry.source?.trim() || null,
-    illustration: true === entry.illustration,
   };
   console.log(`✓ ${slot} : ${entry.file} (${width} × ${height}) → ${widths.join(', ')} px`);
 }

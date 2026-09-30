@@ -10,7 +10,6 @@ export const SITE_PHOTOS: SitePhotos = {
     credit: null,
     license: null,
     source: null,
-    illustration: false,
   },
   dunes: {
     widths: [480, 800, 1200],
@@ -20,7 +19,6 @@ export const SITE_PHOTOS: SitePhotos = {
     credit: 'Damien Chauveau',
     license: null,
     source: null,
-    illustration: false,
   },
   central: {
     widths: [480, 800, 1200],
@@ -30,7 +28,6 @@ export const SITE_PHOTOS: SitePhotos = {
     credit: 'AUTEUR',
     license: 'LICENCE',
     source: 'https://commons.wikimedia.org/wiki/File:Pins_sylvestres_au_CHM-Montalivet.jpg',
-    illustration: false,
   },
   roadside: {
     widths: [480, 800, 1200],
@@ -40,7 +37,6 @@ export const SITE_PHOTOS: SitePhotos = {
     credit: 'Damien Chauveau',
     license: null,
     source: null,
-    illustration: false,
   },
   owner: {
     widths: [480, 800, 1200],
@@ -50,7 +46,6 @@ export const SITE_PHOTOS: SitePhotos = {
     credit: 'Cristina Alonso',
     license: 'Licence Pexels',
     source: 'https://www.pexels.com/photo/17438928/',
-    illustration: false,
   },
   'euronat-beach': {
     widths: [480, 800, 1020],
@@ -60,7 +55,6 @@ export const SITE_PHOTOS: SitePhotos = {
     credit: null,
     license: null,
     source: null,
-    illustration: false,
   },
   'euronat-village': {
     widths: [480, 800, 1200],
@@ -70,7 +64,6 @@ export const SITE_PHOTOS: SitePhotos = {
     credit: 'Illustration générée par IA',
     license: null,
     source: null,
-    illustration: true,
   },
   'euronat-camping': {
     widths: [480, 800, 1200],
@@ -80,6 +73,5 @@ export const SITE_PHOTOS: SitePhotos = {
     credit: 'Illustration générée par IA',
     license: null,
     source: null,
-    illustration: true,
   },
 };

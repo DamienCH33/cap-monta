@@ -21,11 +21,6 @@ export interface SitePhoto {
   credit: string | null;
   license: string | null;
   source: string | null;
-  /**
-   * Image générée (IA) ou dessinée, pas une photo du lieu : la carte l'annonce par la mention
-   * « Illustration », pour qu'un vacancier ne la prenne pas pour le vrai domaine.
-   */
-  illustration: boolean;
 }
 
 export type SitePhotos = Partial<Record<SitePhotoSlot, SitePhoto>>;
