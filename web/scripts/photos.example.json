@@ -24,5 +24,11 @@
     "file": "terrasse.jpg",
     "alt": "Terrasse d'un bungalow sous les pins",
     "credit": "Damien Chauveau"
+  },
+  "euronat-village": {
+    "file": "euronat-village.png",
+    "alt": "Une place de village sous les pins, avec terrasses",
+    "credit": "Illustration générée par IA",
+    "illustration": true
   }
 }

@@ -429,6 +429,7 @@
     "zone.euronat-village": "Village side",
     "zone.euronat-village-hint": "Close to the shops",
     "zone.euronat-camping": "Camping side",
-    "zone.euronat-camping-hint": "Near the reception"
+    "zone.euronat-camping-hint": "Near the reception",
+    "zone.illustration": "Illustration"
   }
 }
