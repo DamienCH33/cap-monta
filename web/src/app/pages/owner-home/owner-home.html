@@ -1,162 +1,163 @@
 @if (owner(); as me) {
-  <section class="owner-home__hero">
-    <div class="container owner-home__hero-inner">
+  <section class="hero">
+    <div class="container hero__inner">
       <div>
-        <p class="owner-home__eyebrow">Espace propriétaire</p>
-        <h1 class="owner-home__heading">Bonjour {{ me.displayName }}</h1>
+        <p class="hero__eyebrow">Espace propriétaire</p>
+        <h1 class="hero__heading">Bonjour {{ me.displayName }}</h1>
+        @if (summary(); as line) {
+          <p class="hero__summary">{{ line }}</p>
+        }
       </div>
       @if (!noListing()) {
-        <a class="owner-home__primary" routerLink="/mon-espace/logements">Gérer mes logements</a>
+        <div class="hero__actions">
+          <a class="button" routerLink="/mon-espace/logements">Gérer mes logements</a>
+          <a class="button button--light" routerLink="/mon-espace/logements/nouveau">
+            + Ajouter un logement
+          </a>
+        </div>
       }
     </div>
   </section>
 
-  <div class="container owner-home__body">
-    @if (!me.verified) {
-      <div class="auth__notice auth__notice--warn owner-home__verify" role="status">
-        <p>
-          Votre adresse email n'est pas encore confirmée. Vous pourrez publier un logement dès
-          qu'elle le sera : le lien vous a été envoyé à {{ me.email }}.
-        </p>
-        @switch (resend()) {
-          @case ('sent') {
-            <p><b>Nouveau lien envoyé.</b> Regardez aussi dans les indésirables.</p>
-          }
-          @case ('error') {
-            <p>L'envoi n'a pas abouti. Réessayez dans quelques minutes.</p>
-          }
-          @default {
-            <button
-              type="button"
-              class="owner-home__verify-button"
-              [disabled]="'sending' === resend()"
-              (click)="resendVerification()"
-            >
-              {{ 'sending' === resend() ? 'Envoi…' : 'Renvoyer le lien' }}
-            </button>
-          }
-        }
-      </div>
-    }
-
-    @if (requestNotice(); as notice) {
-      <a class="owner-home__callout owner-home__callout--urgent" routerLink="/mon-espace/demandes">
-        <span>
-          {{ notice.text }}
-          <span class="owner-home__callout-detail">{{ notice.detail }}</span>
-        </span>
-        <span class="owner-home__callout-action">Répondre</span>
-      </a>
-    }
-
-    @if (draftNotice(); as notice) {
-      <a class="owner-home__callout" routerLink="/mon-espace/logements">
-        <span>{{ notice }}</span>
-        <span class="owner-home__callout-action">Continuer</span>
-      </a>
-    }
-
-    @if (!me.phone) {
-      <a class="owner-home__callout" routerLink="/mon-espace/profil">
-        <span>
-          Ajoutez un numéro de téléphone.
-          <span class="owner-home__callout-detail"
-            >Il n'est donné qu'au voyageur dont vous acceptez la demande.</span
-          >
-        </span>
-        <span class="owner-home__callout-action">Mon profil</span>
-      </a>
-    }
-
-    @if (!noListing()) {
-      <h2 class="owner-home__section-title">Mes logements</h2>
-      <ul class="owner-home__stats">
-        @for (stat of stats(); track stat.status) {
-          <li>
-            <a
-              class="owner-home__stat"
-              [class]="'owner-home__stat--' + stat.status"
-              routerLink="/mon-espace/logements"
-              [queryParams]="{ statut: stat.param }"
-            >
-              <span class="owner-home__stat-count">{{ stat.count ?? '–' }}</span>
-              <span class="owner-home__stat-label">{{ stat.label }}</span>
-            </a>
-          </li>
-        }
-      </ul>
-    } @else {
-      <cm-first-listing />
-    }
-
-    @if (calendars().length) {
-      <h2 class="owner-home__section-title">Calendriers et tarifs</h2>
-      <section class="owner-home__calendars">
-        <p class="owner-home__calendars-summary">{{ calendarSummary() }}</p>
-        <ul class="owner-home__calendar-list">
-          @for (item of calendars(); track item.slug) {
-            <li class="owner-home__calendar">
-              <span class="owner-home__calendar-name">{{ name(item) }}</span>
-              <span
-                class="owner-home__pill"
-                [class.owner-home__pill--stale]="!item.calendarUpToDate"
+  <div class="container layout">
+    <div class="layout__main">
+      @if (!me.verified) {
+        <div class="auth__notice auth__notice--warn verify" role="status">
+          <p>
+            Votre adresse email n'est pas encore confirmée. Vous pourrez publier un logement dès
+            qu'elle le sera : le lien vous a été envoyé à {{ me.email }}.
+          </p>
+          @switch (resend()) {
+            @case ('sent') {
+              <p><b>Nouveau lien envoyé.</b> Regardez aussi dans les indésirables.</p>
+            }
+            @case ('error') {
+              <p>L'envoi n'a pas abouti. Réessayez dans quelques minutes.</p>
+            }
+            @default {
+              <button
+                type="button"
+                class="verify__button"
+                [disabled]="'sending' === resend()"
+                (click)="resendVerification()"
               >
-                {{ item.calendarUpToDate ? 'À jour' : 'À vérifier' }}
-              </span>
-              <span class="owner-home__calendar-date">{{
-                checkedLabel(item.calendarCheckedAt)
-              }}</span>
-              <span class="owner-home__calendar-links">
-                <a
-                  class="owner-home__calendar-link"
-                  [routerLink]="['/mon-espace/logements', item.slug, 'calendrier']"
-                  >Calendrier</a
-                >
-                <a
-                  class="owner-home__calendar-link"
-                  [routerLink]="['/mon-espace/logements', item.slug, 'tarifs']"
-                  >Tarifs</a
-                >
-              </span>
-            </li>
+                {{ 'sending' === resend() ? 'Envoi…' : 'Renvoyer le lien' }}
+              </button>
+            }
           }
-        </ul>
-      </section>
-    }
+        </div>
+      }
 
-    <h2 class="owner-home__section-title">Mon compte</h2>
-    <a class="owner-home__callout" routerLink="/proprietaire/guide">
-      <span>
-        Besoin d'aide pour publier ?
-        <span class="owner-home__callout-detail">
-          Les six étapes, et que faire si un message vous bloque.
-        </span>
-      </span>
-      <span class="owner-home__callout-action">Le guide pas à pas</span>
-    </a>
-    <a class="owner-home__callout" routerLink="/mon-espace/profil">
-      <span>
-        {{ me.displayName }} · {{ me.email }}
-        <span class="owner-home__callout-detail">
-          Téléphone : {{ me.phone ?? 'non renseigné' }}. Nom affiché, téléphone et mot de passe se
-          modifient ici.
-        </span>
-      </span>
-      <span class="owner-home__callout-action">Mon profil</span>
-    </a>
+      @if (requestNotice() || draftNotice() || !me.phone) {
+        <section class="section" aria-labelledby="todo-title">
+          <h2 id="todo-title" class="section__title">À faire</h2>
+          <div class="tasks">
+            @if (requestNotice(); as notice) {
+              <a class="task task--urgent" routerLink="/mon-espace/demandes">
+                <cm-icon name="clock" class="task__icon" />
+                <span class="task__text">
+                  <strong>{{ notice.text }}</strong>
+                  <span class="task__detail">{{ notice.detail }}</span>
+                </span>
+                <span class="task__action">Répondre →</span>
+              </a>
+            }
+            @if (draftNotice(); as notice) {
+              <a
+                class="task"
+                routerLink="/mon-espace/logements"
+                [queryParams]="{ statut: draftParam }"
+              >
+                <cm-icon name="pencil" class="task__icon" />
+                <span class="task__text">
+                  <strong>{{ notice }}</strong>
+                  <span class="task__detail"
+                    >Photos, description et quartier : il ne manque souvent pas grand-chose.</span
+                  >
+                </span>
+                <span class="task__action">Continuer →</span>
+              </a>
+            }
+            @if (!me.phone) {
+              <a class="task" routerLink="/mon-espace/profil">
+                <cm-icon name="user-circle" class="task__icon" />
+                <span class="task__text">
+                  <strong>Ajoutez un numéro de téléphone.</strong>
+                  <span class="task__detail"
+                    >Il n'est donné qu'au voyageur dont vous acceptez la demande.</span
+                  >
+                </span>
+                <span class="task__action">Mon profil →</span>
+              </a>
+            }
+          </div>
+        </section>
+      }
 
-    @if (supportUrl) {
-      <!-- Les propriétaires sont ceux à qui le site fait économiser une commission. -->
-      <a class="owner-home__callout" [href]="supportUrl" target="_blank" rel="noopener">
-        <span>
-          Cap Monta est gratuit et ne prend aucune commission sur vos locations.
-          <span class="owner-home__callout-detail">
-            Le serveur coûte environ 8 € par mois et il est payé par les dons. Si le site vous rend
-            service, un petit geste suffit à le garder en ligne.
-          </span>
-        </span>
-        <span class="owner-home__callout-action">Soutenir le site</span>
+      @if (!noListing()) {
+        <section class="section" aria-labelledby="stats-title">
+          <h2 id="stats-title" class="section__title">Mes logements</h2>
+          <ul class="stats">
+            @for (stat of stats(); track stat.status) {
+              <li>
+                <a
+                  class="stat"
+                  [class]="'stat stat--' + stat.status"
+                  routerLink="/mon-espace/logements"
+                  [queryParams]="{ statut: stat.param }"
+                >
+                  <span class="stat__count">{{ stat.count ?? '–' }}</span>
+                  <span class="stat__label">{{ stat.label }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+      } @else {
+        <cm-first-listing />
+      }
+
+      @if (calendars().length) {
+        <section class="section" aria-labelledby="calendars-title">
+          <h2 id="calendars-title" class="section__title">Calendriers et tarifs</h2>
+          <div class="panel">
+            <p class="panel__summary">{{ calendarSummary() }}</p>
+            <cm-calendar-list [items]="calendars()" />
+          </div>
+        </section>
+      }
+    </div>
+
+    <aside class="layout__aside" aria-label="Mon compte">
+      <a class="side" routerLink="/mon-espace/profil">
+        <cm-icon name="user-circle" class="side__icon" />
+        <span class="side__title">{{ me.displayName }}</span>
+        <span class="side__text">{{ me.email }}</span>
+        <span class="side__text">Téléphone : {{ me.phone ?? 'non renseigné' }}</span>
+        <span class="side__action">Modifier mon profil →</span>
       </a>
-    }
+
+      <a class="side" routerLink="/proprietaire/guide">
+        <cm-icon name="alert-circle" class="side__icon" />
+        <span class="side__title">Besoin d'aide ?</span>
+        <span class="side__text"
+          >Les six étapes pour publier, et que faire si un message vous bloque.</span
+        >
+        <span class="side__action">Le guide pas à pas →</span>
+      </a>
+
+      @if (supportUrl) {
+        <!-- Les propriétaires sont ceux à qui le site fait économiser une commission. -->
+        <a class="side side--support" [href]="supportUrl" target="_blank" rel="noopener">
+          <cm-icon name="coffee" class="side__icon" />
+          <span class="side__title">Gratuit, sans commission</span>
+          <span class="side__text">
+            Le serveur coûte environ 8 € par mois, payés par les dons. Si le site vous rend service,
+            un petit geste suffit à le garder en ligne.
+          </span>
+          <span class="side__action">Soutenir le site →</span>
+        </a>
+      }
+    </aside>
   </div>
 }

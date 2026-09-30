@@ -3,11 +3,9 @@ import { RouterLink } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
 
-import { typeLabel } from '../../core/models/accommodation';
 import {
   AccommodationStatus,
   byCalendarUrgency,
-  checkedLabel,
   OwnerAccommodation,
   STATUS_PARAMS,
 } from '../../core/models/owner-accommodation';
@@ -17,6 +15,8 @@ import { OwnerBookingRequestService } from '../../core/services/owner-booking-re
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { SeoService } from '../../core/services/seo';
 import { FirstListing } from '../../shared/first-listing/first-listing';
+import { Icon } from '../../shared/icon/icon';
+import { CalendarList } from './calendar-list/calendar-list';
 
 interface Stat {
   status: AccommodationStatus;
@@ -28,7 +28,7 @@ interface Stat {
 
 @Component({
   selector: 'cm-owner-home',
-  imports: [RouterLink, FirstListing],
+  imports: [RouterLink, FirstListing, Icon, CalendarList],
   templateUrl: './owner-home.html',
   styleUrl: './owner-home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -123,6 +123,28 @@ export class OwnerHome {
     (this.accommodations() ?? []).filter((a) => 'published' === a.status).sort(byCalendarUrgency),
   );
 
+  /** Le filtre « Brouillons » de Mes logements, pour le lien de la tâche. */
+  readonly draftParam = STATUS_PARAMS.draft;
+
+  /** Sous le bonjour : l'essentiel en une ligne, vide tant que rien n'est chargé. */
+  readonly summary = computed(() => {
+    const list = this.accommodations();
+
+    if (null === list || 0 === list.length) {
+      return null;
+    }
+
+    const online = list.filter((a) => 'published' === a.status).length;
+    const pending = this.requests().filter((r) => 'pending' === r.status).length;
+    const parts = [online > 1 ? `${online} logements en ligne` : `${online} logement en ligne`];
+
+    if (pending > 0) {
+      parts.push(pending > 1 ? `${pending} demandes à traiter` : '1 demande à traiter');
+    }
+
+    return parts.join(' · ');
+  });
+
   readonly calendarSummary = computed(() => {
     const list = this.calendars();
     const fresh = list.filter((a) => a.calendarUpToDate).length;
@@ -133,12 +155,6 @@ export class OwnerHome {
 
     return `${fresh} ${list.length > 1 ? 'calendriers' : 'calendrier'} à jour sur ${list.length}. Sans vérification depuis 30 jours, le badge « Calendrier à jour » disparaît de l'annonce.`;
   });
-
-  readonly checkedLabel = checkedLabel;
-
-  name(item: OwnerAccommodation): string {
-    return `${typeLabel(item.type)} · ${item.district ?? ('chm' === item.resort ? 'CHM Montalivet' : 'Euronat')}`;
-  }
 
   constructor() {
     inject(SeoService).apply({

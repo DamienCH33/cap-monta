@@ -1,26 +1,25 @@
+// Couleurs : les jetons globaux de styles.scss.
 :host {
-  --oh-sand: #9a7440;
-
   display: block;
   color: var(--text-primary);
 }
 
 // Bandeau d'accueil : la mer domine, un reflet de pinède en bas à droite.
-.owner-home__hero {
+.hero {
   border-bottom: 1px solid rgb(29 111 151 / 12%);
   background: linear-gradient(120deg, #e2eef6 0%, #eaf3f6 60%, #e8f1ec 100%);
 }
 
-.owner-home__hero-inner {
+.hero__inner {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  align-items: center;
+  gap: 1.25rem 2rem;
+  align-items: flex-end;
   justify-content: space-between;
-  padding-block: 2.5rem;
+  padding-block: 2.25rem;
 }
 
-.owner-home__eyebrow {
+.hero__eyebrow {
   margin: 0 0 0.35rem;
   color: var(--blue);
   font-size: 0.8rem;
@@ -29,124 +28,156 @@
   text-transform: uppercase;
 }
 
-.owner-home__heading {
+.hero__heading {
   margin: 0;
 }
 
-.owner-home__primary {
-  padding: 0.75rem 1.4rem;
+.hero__summary {
+  margin: 0.4rem 0 0;
+  color: var(--text-secondary);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.button {
+  padding: 0.7rem 1.3rem;
+  border: 1px solid var(--ocean);
   border-radius: 999px;
   background: var(--ocean);
   color: #fff;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.15s ease;
 
   &:hover {
     background: var(--blue);
   }
 
-  &:focus-visible {
-    outline: 3px solid rgb(29 111 151 / 35%);
-    outline-offset: 2px;
+  &--light {
+    background: #fff;
+    color: var(--ocean);
+
+    &:hover {
+      background: var(--blue-soft);
+    }
   }
 }
 
-.owner-home__body {
+// Deux colonnes sur grand écran : le travail à gauche, le compte à droite.
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: 2rem;
+  align-items: start;
   padding-block: 2rem 3rem;
-}
 
-// Un brouillon attend : bandeau cliquable, avant tout le reste.
-.owner-home__callout {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 56rem;
-  margin-bottom: 2rem;
-  padding: 1rem 1.25rem;
-  border: 1px solid rgb(29 111 151 / 25%);
-  border-radius: 0.875rem;
-  background: #fff;
-  color: var(--text-primary);
-  font-weight: 600;
-  text-decoration: none;
-
-  &:hover {
-    border-color: rgb(29 111 151 / 45%);
-    text-decoration: none;
+  @media (max-width: 60rem) {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
-.owner-home__callout-action {
-  color: var(--blue);
+.section {
+  margin-bottom: 2rem;
 }
 
-// Des voyageurs attendent une réponse : le bandeau le plus visible de la page.
-.owner-home__callout--urgent {
-  border-color: rgb(133 79 11 / 35%);
-  background: var(--amber-bg);
-}
-
-.owner-home__callout-detail {
-  display: block;
-  margin-top: 0.15rem;
-  color: var(--amber-text);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.owner-home__calendar-links {
-  display: inline-flex;
-  gap: 1rem;
-}
-
-.owner-home__section-title {
-  margin: 0 0 1rem;
+.section__title {
+  margin: 0 0 0.75rem;
   color: var(--text-secondary);
+  font-family: var(--font-sans);
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-// Trois chiffres, chacun avec la couleur de son statut (comme les cartes de la liste).
-.owner-home__stats {
+// « À faire » : une ligne par action, icône + phrase + lien. L'urgent se lit aussi au mot.
+.tasks {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  max-width: 56rem;
-  margin: 0 0 2.5rem;
-  padding: 0;
-  list-style: none;
+  gap: 0.6rem;
+}
+
+.task {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.25rem 0.9rem;
+  align-items: center;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: #fff;
+  color: var(--text-primary);
+  text-decoration: none;
+
+  &:hover {
+    border-color: var(--blue);
+    box-shadow: 0 4px 14px rgb(0 0 0 / 6%);
+  }
+
+  &--urgent {
+    border-color: rgb(133 79 11 / 35%);
+    background: var(--amber-bg);
+
+    .task__icon,
+    .task__action {
+      color: var(--amber-text);
+    }
+  }
 
   @media (max-width: 36rem) {
-    grid-template-columns: 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
+
+    .task__action {
+      grid-column: 2;
+    }
   }
 }
 
-.owner-home__stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 1.25rem 1.5rem;
+.task__icon {
+  color: var(--blue);
+  font-size: 1.4rem;
+}
+
+.task__text {
+  display: grid;
+}
+
+.task__detail {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.task__action {
+  color: var(--blue);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+// Trois chiffres, chacun avec la bande de son statut (comme les cartes de la liste).
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stat {
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem 1.25rem;
   border: 1px solid var(--border);
   border-left: 4px solid #aab4be;
   border-radius: 0.875rem;
   background: #fff;
   color: var(--text-primary);
   text-decoration: none;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
-  transition: box-shadow 0.15s ease;
 
   &:hover {
     box-shadow: 0 4px 14px rgb(0 0 0 / 7%);
-  }
-
-  &:focus-visible {
-    outline: 3px solid rgb(29 111 151 / 35%);
-    outline-offset: 2px;
   }
 
   &--published {
@@ -154,103 +185,98 @@
   }
 
   &--archived {
-    border-left-color: var(--oh-sand);
+    border-left-color: #9a7440;
   }
 }
 
-.owner-home__stat-count {
+.stat__count {
+  font-family: var(--font-display);
   font-size: 2rem;
-  font-weight: 600;
   line-height: 1;
 }
 
-.owner-home__stat-label {
+.stat__label {
   color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
-// Un calendrier par logement en ligne ; ceux à vérifier en premier.
-.owner-home__calendars {
-  max-width: 56rem;
-  margin: 0 0 2.5rem;
+.panel {
   padding: 1rem 1.25rem;
   border: 1px solid var(--border);
   border-radius: 0.875rem;
   background: #fff;
 }
 
-.owner-home__calendars-summary {
-  margin: 0 0 0.5rem;
+.panel__summary {
+  margin: 0 0 0.75rem;
   color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
-.owner-home__calendar-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.owner-home__calendar {
+// Colonne de droite : trois petites cartes, texte gris, action en bleu.
+.layout__aside {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto auto;
-  gap: 0.35rem 1rem;
-  align-items: center;
-  padding: 0.7rem 0;
-  border-top: 1px solid var(--border);
-
-  &:first-child {
-    border-top: none;
-  }
-
-  @media (max-width: 36rem) {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
+  gap: 0.75rem;
 }
 
-.owner-home__calendar-name {
-  font-weight: 600;
-}
-
-.owner-home__pill {
-  justify-self: start;
-  padding: 0.15rem 0.6rem;
-  border-radius: 1rem;
-  background: var(--success-bg);
-  color: var(--success-text);
-  font-size: 0.8rem;
-  font-weight: 600;
-
-  &--stale {
-    background: var(--amber-bg);
-    color: var(--amber-text);
-  }
-}
-
-.owner-home__calendar-date {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-}
-
-.owner-home__calendar-link {
-  color: var(--blue);
-  font-weight: 600;
+.side {
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: #fff;
+  color: var(--text-primary);
   text-decoration: none;
 
   &:hover {
-    text-decoration: underline;
+    border-color: var(--blue);
+  }
+
+  &--support {
+    background: #f7faf8;
   }
 }
 
-.owner-home__verify {
+.side__icon {
+  margin-bottom: 0.2rem;
+  color: var(--blue);
+  font-size: 1.4rem;
+}
+
+.side__title {
+  font-weight: 700;
+}
+
+.side__text {
+  overflow-wrap: anywhere;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.side__action {
+  margin-top: 0.35rem;
+  color: var(--blue);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+a:focus-visible {
+  outline: 3px solid rgb(29 111 151 / 35%);
+  outline-offset: 2px;
+}
+
+.verify {
   display: grid;
   gap: 0.6rem;
+  margin-bottom: 1.5rem;
 
   p {
     margin: 0;
   }
 }
 
-.owner-home__verify-button {
+.verify__button {
   justify-self: start;
   padding: 0.5rem 1rem;
   border: 1px solid currentColor;
