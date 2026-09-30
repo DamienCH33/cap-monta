@@ -1,4 +1,5 @@
 import { Component, inject, input, linkedSignal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Guests, guestsToQuery, NO_GUESTS, travellerCount } from '../../core/models/guests';
@@ -9,7 +10,9 @@ import { GuestPicker } from '../guest-picker/guest-picker';
 
 @Component({
   selector: 'cm-search-bar',
-  imports: [DateRange, GuestPicker],
+  // FormsModule branche (ngSubmit) : sans lui, le navigateur envoie le formulaire lui-même
+  // et recharge la page au lieu d'ouvrir la recherche.
+  imports: [FormsModule, DateRange, GuestPicker],
   templateUrl: './search-bar.html',
   styleUrl: './search-bar.scss',
 })
