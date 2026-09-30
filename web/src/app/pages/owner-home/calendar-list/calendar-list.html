@@ -1,0 +1,35 @@
+<ul class="list">
+  @for (item of items(); track item.slug) {
+    <li class="row">
+      <span class="row__photo" aria-hidden="true">
+        @if (item.photos[0]; as photo) {
+          <img [src]="photo.thumbUrl" alt="" loading="lazy" width="64" height="48" />
+        } @else {
+          <cm-icon name="photo" />
+        }
+      </span>
+
+      <span class="row__identity">
+        <span class="row__name">{{ name(item) }}</span>
+        <span class="row__details">{{ details(item) }}</span>
+      </span>
+
+      <span class="row__state">
+        <span class="pill" [class.pill--stale]="!item.calendarUpToDate">
+          <cm-icon [name]="item.calendarUpToDate ? 'calendar-check' : 'alert-circle'" />
+          {{ item.calendarUpToDate ? 'À jour' : 'À vérifier' }}
+        </span>
+        <span class="row__date">{{ checkedLabel(item.calendarCheckedAt) }}</span>
+      </span>
+
+      <span class="row__tools">
+        <a class="tool" [routerLink]="['/mon-espace/logements', item.slug, 'calendrier']">
+          <cm-icon name="calendar" /> Calendrier
+        </a>
+        <a class="tool" [routerLink]="['/mon-espace/logements', item.slug, 'tarifs']">
+          <cm-icon name="currency-euro" /> Tarifs
+        </a>
+      </span>
+    </li>
+  }
+</ul>
