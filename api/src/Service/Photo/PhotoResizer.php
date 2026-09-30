@@ -33,6 +33,33 @@ final class PhotoResizer
         return new ResizedPhoto($large, $thumb, $width, $height);
     }
 
+    /**
+     * Turns an already stored photo by a quarter or half turn, clockwise: for the photos
+     * uploaded while the orientation was ignored. One more WebP encoding, invisible at 80.
+     *
+     * @param 90|180|270 $clockwise
+     */
+    public function rotate(ResizedPhoto $photo, int $clockwise): ResizedPhoto
+    {
+        [$large, $width, $height] = $this->encode($this->turn($photo->large, $clockwise), \PHP_INT_MAX);
+        [$thumb] = $this->encode($this->turn($photo->thumb, $clockwise), \PHP_INT_MAX);
+
+        return new ResizedPhoto($large, $thumb, $width, $height);
+    }
+
+    private function turn(string $webp, int $clockwise): \GdImage
+    {
+        $image = @imagecreatefromstring($webp);
+        // Angles are counter-clockwise for imagerotate().
+        $rotated = false === $image ? false : imagerotate($image, 360 - $clockwise, 0);
+
+        if (false === $rotated) {
+            throw new InvalidPhotoException('Cette photo n’a pas pu être tournée.');
+        }
+
+        return $rotated;
+    }
+
     private function open(string $path): \GdImage
     {
         $info = @getimagesize($path);

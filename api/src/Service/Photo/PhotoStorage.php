@@ -17,6 +17,9 @@ interface PhotoStorage
 
     public function delete(Photo $photo): void;
 
+    /** The stored files, to transform them (a rotation) into a new photo. */
+    public function read(Photo $photo): ResizedPhoto;
+
     /** Public address of the large version, for the accommodation page. */
     public function url(Photo $photo): string;
 

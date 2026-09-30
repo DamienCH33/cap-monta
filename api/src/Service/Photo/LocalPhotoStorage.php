@@ -49,6 +49,16 @@ final readonly class LocalPhotoStorage implements PhotoStorage
         $this->filesystem->remove([$this->path($photo, self::LARGE), $this->path($photo, self::THUMB)]);
     }
 
+    public function read(Photo $photo): ResizedPhoto
+    {
+        return new ResizedPhoto(
+            $this->filesystem->readFile($this->path($photo, self::LARGE)),
+            $this->filesystem->readFile($this->path($photo, self::THUMB)),
+            $photo->getWidth(),
+            $photo->getHeight(),
+        );
+    }
+
     public function url(Photo $photo): string
     {
         return $this->baseUrl.'/'.self::name($photo, self::LARGE);
