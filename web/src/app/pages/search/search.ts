@@ -19,6 +19,7 @@ import { StaySuggestion } from '../../core/models/stay-suggestion';
 import { isReversed } from '../../core/models/stay-dates';
 import { AccommodationService } from '../../core/services/accommodation';
 import { SeoService } from '../../core/services/seo';
+import { currentLang } from '../../core/i18n/lang';
 import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
 
 import { SearchBar } from '../../shared/search-bar/search-bar';
@@ -34,6 +35,9 @@ import { Pagination } from '../../shared/pagination/pagination';
   styleUrl: './search.scss',
 })
 export class Search implements OnInit {
+  /** L'espace propriétaire n'existe qu'en français : ailleurs, lien simple vers /proprietaire. */
+  readonly french = 'fr' === currentLang();
+
   readonly removeFilterLabel = $localize`:@@search.remove-filter:Retirer le filtre `;
 
   private readonly route = inject(ActivatedRoute);

@@ -351,6 +351,8 @@
     "search.none": "Keine Unterkunft entspricht dieser Suche.",
     "search.widen": "Im ganzen Gelände suchen",
     "search.clear-all": "Alle Filter entfernen",
+    "search.owners": "Vermieten Sie eine Unterkunft im CHM oder in Euronat?",
+    "search.owners-link": "Kostenlos inserieren (auf Französisch)",
     "legend.free": "frei",
     "legend.taken": "belegt",
     "search.remove-filter": "Filter entfernen:",

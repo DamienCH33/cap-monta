@@ -351,6 +351,8 @@
     "search.none": "Aucun logement ne correspond à cette recherche.",
     "search.widen": "Chercher dans tout le domaine",
     "search.clear-all": "Retirer tous les filtres",
+    "search.owners": "Vous louez un logement au CHM ou à Euronat ?",
+    "search.owners-link": "Publiez-le gratuitement",
     "legend.free": "libre",
     "legend.taken": "indisponible",
     "search.remove-filter": "Retirer le filtre ",

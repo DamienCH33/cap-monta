@@ -351,6 +351,8 @@
     "search.none": "No home matches this search.",
     "search.widen": "Search the whole resort",
     "search.clear-all": "Remove all filters",
+    "search.owners": "Do you rent out a home at CHM or Euronat?",
+    "search.owners-link": "List it for free (in French)",
     "legend.free": "free",
     "legend.taken": "unavailable",
     "search.remove-filter": "Remove filter",
