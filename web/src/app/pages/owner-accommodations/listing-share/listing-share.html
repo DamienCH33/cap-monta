@@ -45,14 +45,9 @@
       Imprimez-le et collez-le sur la vitre ou la porte : les passants voient vos dates libres avec
       leur téléphone.
     </p>
-    <div class="share__qr" [attr.aria-busy]="null === qrSvg()">
-      @if (qrSvg(); as svg) {
-        <div
-          class="share__qr-image"
-          role="img"
-          aria-label="QR code de l'annonce"
-          [innerHTML]="svg"
-        ></div>
+    <div class="share__qr" [attr.aria-busy]="null === qrImage()">
+      @if (qrImage(); as src) {
+        <img class="share__qr-image" [src]="src" alt="QR code de l'annonce" />
       }
     </div>
     <button type="button" class="share__button share__button--secondary" (click)="download()">
