@@ -1,0 +1,60 @@
+<button type="button" class="share__trigger" (click)="open()">Partager</button>
+
+<dialog
+  #dialog
+  class="share"
+  aria-labelledby="share-title"
+  (click)="onBackdrop($event)"
+  (close)="copied.set(false)"
+>
+  <div class="share__header">
+    <h2 id="share-title" class="share__title">Partager mon annonce</h2>
+    <button type="button" class="share__close" aria-label="Fermer" (click)="close()">×</button>
+  </div>
+
+  <section class="share__section">
+    <h3 class="share__subtitle">Le lien</h3>
+    <p class="share__text">
+      À coller dans votre post Facebook, un message ou un email : l'aperçu montre la photo et le
+      logement.
+    </p>
+    <div class="share__row">
+      <input
+        class="share__url"
+        type="text"
+        readonly
+        [value]="url()"
+        aria-label="Lien de l'annonce"
+      />
+      <button type="button" class="share__button" (click)="copy()">
+        {{ copied() ? '✓ Lien copié' : 'Copier le lien' }}
+      </button>
+    </div>
+    @if (copyFailed()) {
+      <p class="share__text" role="alert">
+        Copie impossible dans ce navigateur : sélectionnez le lien ci-dessus et copiez-le.
+      </p>
+    }
+  </section>
+
+  <section class="share__section">
+    <h3 class="share__subtitle">Le QR code</h3>
+    <p class="share__text">
+      Imprimez-le et collez-le sur la vitre ou la porte : les passants voient vos dates libres avec
+      leur téléphone.
+    </p>
+    <div class="share__qr" [attr.aria-busy]="null === qrSvg()">
+      @if (qrSvg(); as svg) {
+        <div
+          class="share__qr-image"
+          role="img"
+          aria-label="QR code de l'annonce"
+          [innerHTML]="svg"
+        ></div>
+      }
+    </div>
+    <button type="button" class="share__button share__button--secondary" (click)="download()">
+      Télécharger le QR code à imprimer
+    </button>
+  </section>
+</dialog>

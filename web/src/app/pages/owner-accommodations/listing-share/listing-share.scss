@@ -1,0 +1,129 @@
+// Couleurs : les jetons globaux de styles.scss.
+.share__trigger {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.share {
+  width: min(28rem, calc(100vw - 2rem));
+  padding: 1.25rem 1.5rem 1.5rem;
+  border: 0;
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-float);
+
+  &::backdrop {
+    background: rgb(8 30 44 / 45%);
+  }
+}
+
+.share__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.share__title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.share__close {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--blue-soft);
+  }
+}
+
+.share__section {
+  margin-top: 1.25rem;
+}
+
+.share__subtitle {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.share__text {
+  margin: 0 0 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.share__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.share__url {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.share__button {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  background: var(--ocean);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--blue);
+  }
+}
+
+.share__button--secondary {
+  background: #fff;
+  color: var(--blue);
+
+  &:hover {
+    background: var(--blue-soft);
+  }
+}
+
+.share__qr {
+  display: grid;
+  place-items: center;
+  width: 11rem;
+  aspect-ratio: 1;
+  margin: 0 auto 0.75rem;
+}
+
+.share__qr-image {
+  width: 100%;
+
+  // Le SVG de la bibliothèque est « scalable » : il prend la largeur de son conteneur.
+  ::ng-deep svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}

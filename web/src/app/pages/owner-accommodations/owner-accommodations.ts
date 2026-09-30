@@ -20,6 +20,7 @@ import { NavigationOrigin } from '../../core/services/navigation-origin';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { OwnerFlash } from '../../core/services/owner-flash';
 import { SeoService } from '../../core/services/seo';
+import { ListingShare } from './listing-share/listing-share';
 
 /** Les brouillons d'abord : ce sont eux qui attendent une action. */
 const STATUS_ORDER: Record<AccommodationStatus, number> = { draft: 0, published: 1, archived: 2 };
@@ -51,7 +52,7 @@ interface Filter {
 
 @Component({
   selector: 'cm-owner-accommodations',
-  imports: [RouterLink],
+  imports: [RouterLink, ListingShare],
   templateUrl: './owner-accommodations.html',
   styleUrl: './owner-accommodations.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
