@@ -10,6 +10,7 @@ import { SearchBar } from '../../shared/search-bar/search-bar';
 import { Icon } from '../../shared/icon/icon';
 import { SitePhoto } from '../../shared/site-photo/site-photo';
 import { SITE_PHOTOS } from '../../core/site-photos';
+import { SitePhotoSlot } from '../../core/models/site-photo';
 import { currentLang, currentLangOption } from '../../core/i18n/lang';
 import { SeoService } from '../../core/services/seo';
 import { environment } from '../../../environments/environment';
@@ -38,7 +39,12 @@ const ZONES: readonly { key: DistrictArea; title: string; hint: string }[] = [
  * « côté camping Polynésie, Mélèzes » (Polynésie et les parcs des mobil-homes). Un secteur ajouté
  * plus tard et rangé nulle part s'affiche sous les cartes. Par slug, pour ne pas dépendre des textes.
  */
-const EURONAT_ZONES: readonly { key: string; title: string; hint: string; slugs: string[] }[] = [
+const EURONAT_ZONES: readonly {
+  key: SitePhotoSlot;
+  title: string;
+  hint: string;
+  slugs: string[];
+}[] = [
   {
     key: 'euronat-beach',
     title: $localize`:@@zone.euronat-beach:Côté plage`,
@@ -123,6 +129,7 @@ export class Home implements OnInit {
         ...zone,
         districts,
         count: districts.reduce((sum, district) => sum + district.accommodationCount, 0),
+        illustration: SITE_PHOTOS[zone.key]?.illustration ?? false,
       };
     }).filter((zone) => zone.districts.length > 0),
   );

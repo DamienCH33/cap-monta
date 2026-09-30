@@ -429,6 +429,7 @@
     "zone.euronat-village": "Côté village",
     "zone.euronat-village-hint": "Près des commerces",
     "zone.euronat-camping": "Côté camping",
-    "zone.euronat-camping-hint": "Près de l'accueil"
+    "zone.euronat-camping-hint": "Près de l'accueil",
+    "zone.illustration": "Illustration"
   }
 }

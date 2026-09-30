@@ -31,6 +31,9 @@ const SLOTS = {
   central: { minWidth: 1000, widths: [480, 800, 1200] },
   roadside: { minWidth: 1000, widths: [480, 800, 1200] },
   owner: { minWidth: 1000, widths: [480, 800, 1200] },
+  'euronat-beach': { minWidth: 1000, widths: [480, 800, 1200] },
+  'euronat-village': { minWidth: 1000, widths: [480, 800, 1200] },
+  'euronat-camping': { minWidth: 1000, widths: [480, 800, 1200] },
 };
 
 function fail(message) {
@@ -125,6 +128,7 @@ for (const { slot, entry, data, width, height } of jobs) {
     credit: entry.credit?.trim() || null,
     license: entry.license?.trim() || null,
     source: entry.source?.trim() || null,
+    illustration: true === entry.illustration,
   };
   console.log(`✓ ${slot} : ${entry.file} (${width} × ${height}) → ${widths.join(', ')} px`);
 }
