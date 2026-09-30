@@ -4,8 +4,9 @@
 
 FROM dunglas/frankenphp:1-php8.4 AS base
 
-# gd : redimensionnement des photos (JPEG, PNG, WebP). redis : cache du calendrier et verrous.
-RUN install-php-extensions pdo_pgsql intl redis zip gd opcache apcu
+# gd : redimensionnement des photos (JPEG, PNG, WebP). exif : sens des photos de téléphone
+# (sans elle, elles arrivent couchées). redis : cache du calendrier et verrous.
+RUN install-php-extensions pdo_pgsql intl redis zip gd exif opcache apcu
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
