@@ -297,6 +297,14 @@ class Accommodation
         $this->photos->add($photo);
     }
 
+    /** The new photo takes the place of the old one: same position, the cover stays the cover. */
+    public function replacePhoto(Photo $old, Photo $new): void
+    {
+        $new->moveTo($old->getPosition());
+        $this->photos->removeElement($old);
+        $this->photos->add($new);
+    }
+
     public function removePhoto(Photo $photo): void
     {
         $this->photos->removeElement($photo);
