@@ -16,6 +16,7 @@ import { AuthService } from '../../core/services/auth';
 import { OwnerBookingRequestService } from '../../core/services/owner-booking-request';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { SeoService } from '../../core/services/seo';
+import { FirstListing } from '../../shared/first-listing/first-listing';
 
 interface Stat {
   status: AccommodationStatus;
@@ -27,7 +28,7 @@ interface Stat {
 
 @Component({
   selector: 'cm-owner-home',
-  imports: [RouterLink],
+  imports: [RouterLink, FirstListing],
   templateUrl: './owner-home.html',
   styleUrl: './owner-home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,6 +54,9 @@ export class OwnerHome {
 
   /** null tant que la liste n'est pas arrivée. */
   private readonly accommodations = signal<OwnerAccommodation[] | null>(null);
+
+  /** Aucun logement du tout : le tableau de bord montre le premier pas au lieu de trois zéros. */
+  readonly noListing = computed(() => 0 === this.accommodations()?.length);
 
   /** Les trois chiffres du tableau de bord ; null pendant le chargement. */
   readonly stats = computed<Stat[]>(() => {

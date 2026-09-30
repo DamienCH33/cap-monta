@@ -1,0 +1,100 @@
+// Couleurs : les jetons globaux de styles.scss.
+// Même largeur que les encadrés du tableau de bord et les cartes de Mes logements.
+:host {
+  display: block;
+  max-width: 56rem;
+  margin-bottom: 2rem;
+}
+
+.first {
+  padding: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  color: var(--text-primary);
+
+  @media (max-width: 40rem) {
+    padding: 1.25rem;
+  }
+}
+
+.first__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 500;
+}
+
+.first__lead {
+  max-width: 44rem;
+  margin: 0.4rem 0 1.25rem;
+  color: var(--text-secondary);
+}
+
+.first__choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.first__choice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: var(--blue);
+    box-shadow: 0 4px 14px rgb(0 0 0 / 7%);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(29 111 151 / 35%);
+    outline-offset: 2px;
+  }
+}
+
+// Le chemin le plus rapide : fond bleu très clair, bordure pleine.
+.first__choice--main {
+  border: 2px solid var(--blue);
+  background: var(--blue-soft);
+}
+
+.first__icon {
+  color: var(--blue);
+  font-size: 1.75rem;
+}
+
+.first__choice-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.first__choice-text {
+  flex: 1;
+  color: var(--text-secondary);
+}
+
+.first__go {
+  margin-top: 0.4rem;
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.first__help {
+  margin: 1.1rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+
+  a {
+    color: var(--blue);
+    font-weight: 600;
+  }
+}

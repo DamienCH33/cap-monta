@@ -93,10 +93,6 @@
 
 // Même bord gauche que l'en-tête ; les cartes ne s'étirent pas sur tout l'écran.
 .owner-accommodations__list,
-.owner-accommodations__empty {
-  max-width: 56rem;
-}
-
 .owner-accommodations__list {
   display: grid;
   gap: 1rem;
@@ -105,9 +101,6 @@
   list-style: none;
 }
 
-// La carte : bande de couleur à gauche selon le statut, lisible d'un coup d'œil.
-// Pied de carte : aide sur le statut, ou retour de la dernière action.
-// Les messages de l'API peuvent tenir sur plusieurs lignes (un manque par ligne).
 .owner-accommodations__empty {
   padding: 2.5rem 2rem;
   border: 1px dashed rgb(0 0 0 / 18%);
@@ -152,10 +145,6 @@
     outline: 3px solid rgb(29 111 151 / 35%);
     outline-offset: 2px;
   }
-}
-
-.owner-accommodations__empty .owner-accommodations__add {
-  margin-top: 1rem;
 }
 
 // Liens en forme de bouton : la couleur des liens de la page ne doit pas les écraser.

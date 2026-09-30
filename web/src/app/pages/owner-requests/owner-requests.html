@@ -39,7 +39,21 @@
     }
 
     @if (0 === visible().length) {
-      <p class="inbox__empty">{{ emptyMessage() }}</p>
+      <div class="inbox__empty">
+        @if (false === online()) {
+          <p>Les demandes arriveront ici dès qu'un de vos logements sera en ligne.</p>
+          <a routerLink="/mon-espace/logements">Voir mes logements →</a>
+        } @else {
+          <p>{{ emptyMessage() }}</p>
+          @if (online() && 'pending' === tab()) {
+            <p>
+              Pour recevoir vos premières demandes, partagez votre annonce : bouton « Partager »
+              dans <a routerLink="/mon-espace/logements">Mes logements</a>, à coller dans un groupe
+              Facebook ou à imprimer en QR code pour la vitre.
+            </p>
+          }
+        }
+      </div>
     }
 
     <ul class="inbox__list">

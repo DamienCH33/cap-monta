@@ -85,4 +85,34 @@ describe('OwnerRequests', () => {
     page.confirm(toPrice, 'accept');
     expect(http.expectOne(`${api}/b/accept`).request.body).toEqual({ price: 48000, message: null });
   });
+
+  describe('with no request at all', () => {
+    const empty = (online: boolean): HTMLElement => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
+      });
+      const fixture = TestBed.createComponent(OwnerRequests);
+      http = TestBed.inject(HttpTestingController);
+      http.expectOne(api).flush([]);
+      http
+        .expectOne(`${environment.apiUrl}/api/owner/accommodations`)
+        .flush({ member: [{ status: online ? 'published' : 'draft' }], totalItems: 1 });
+      fixture.detectChanges();
+
+      return fixture.nativeElement;
+    };
+
+    it('says requests come once a listing is online', () => {
+      expect(empty(false).querySelector('.inbox__empty')?.textContent).toContain(
+        "dès qu'un de vos logements sera en ligne",
+      );
+    });
+
+    it('suggests sharing the listing once it is online', () => {
+      expect(empty(true).querySelector('.inbox__empty')?.textContent).toContain(
+        'partagez votre annonce',
+      );
+    });
+  });
 });

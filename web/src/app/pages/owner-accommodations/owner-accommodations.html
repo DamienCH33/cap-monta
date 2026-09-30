@@ -33,20 +33,7 @@
     </p>
   } @else if (accommodations(); as list) {
     @if (0 === list.length) {
-      <div class="owner-accommodations__empty">
-        <p class="owner-accommodations__empty-title">Vous n'avez pas encore de logement.</p>
-        <p>Quatre informations suffisent pour commencer : vous compléterez le reste ensuite.</p>
-        <a class="owner-accommodations__add" routerLink="/mon-espace/logements/nouveau">
-          + Ajouter mon premier logement
-        </a>
-        @if (assistantAvailable()) {
-          <p>
-            Vous avez déjà une annonce ailleurs ?
-            <a routerLink="/mon-espace/importer">Collez son texte</a> : logement, tarifs et dates
-            prises sont remplis pour vous.
-          </p>
-        }
-      </div>
+      <cm-first-listing />
     } @else {
       <nav class="owner-accommodations__filters" aria-label="Filtrer par statut">
         @for (filter of filters(); track filter.label) {

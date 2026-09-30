@@ -5,7 +5,9 @@
         <p class="owner-home__eyebrow">Espace propriétaire</p>
         <h1 class="owner-home__heading">Bonjour {{ me.displayName }}</h1>
       </div>
-      <a class="owner-home__primary" routerLink="/mon-espace/logements">Gérer mes logements</a>
+      @if (!noListing()) {
+        <a class="owner-home__primary" routerLink="/mon-espace/logements">Gérer mes logements</a>
+      }
     </div>
   </section>
 
@@ -66,22 +68,26 @@
       </a>
     }
 
-    <h2 class="owner-home__section-title">Mes logements</h2>
-    <ul class="owner-home__stats">
-      @for (stat of stats(); track stat.status) {
-        <li>
-          <a
-            class="owner-home__stat"
-            [class]="'owner-home__stat--' + stat.status"
-            routerLink="/mon-espace/logements"
-            [queryParams]="{ statut: stat.param }"
-          >
-            <span class="owner-home__stat-count">{{ stat.count ?? '–' }}</span>
-            <span class="owner-home__stat-label">{{ stat.label }}</span>
-          </a>
-        </li>
-      }
-    </ul>
+    @if (!noListing()) {
+      <h2 class="owner-home__section-title">Mes logements</h2>
+      <ul class="owner-home__stats">
+        @for (stat of stats(); track stat.status) {
+          <li>
+            <a
+              class="owner-home__stat"
+              [class]="'owner-home__stat--' + stat.status"
+              routerLink="/mon-espace/logements"
+              [queryParams]="{ statut: stat.param }"
+            >
+              <span class="owner-home__stat-count">{{ stat.count ?? '–' }}</span>
+              <span class="owner-home__stat-label">{{ stat.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    } @else {
+      <cm-first-listing />
+    }
 
     @if (calendars().length) {
       <h2 class="owner-home__section-title">Calendriers et tarifs</h2>
