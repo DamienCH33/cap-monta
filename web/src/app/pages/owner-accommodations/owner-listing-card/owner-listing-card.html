@@ -1,0 +1,89 @@
+@let listing = item();
+
+<a
+  class="card__photo"
+  [routerLink]="['/mon-espace/logements', listing.slug, 'modifier']"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  @if (cover(); as src) {
+    <img [src]="src" alt="" loading="lazy" width="120" height="90" />
+  } @else {
+    <cm-icon name="photo" />
+    <span>Pas de photo</span>
+  }
+</a>
+
+<div class="card__body">
+  <span class="card__badge" [class]="'card__badge card__badge--' + listing.status">{{
+    status()
+  }}</span>
+  <h2 class="card__title">{{ title() }}</h2>
+  <p class="card__details">{{ details() }}</p>
+  <div aria-live="polite">
+    @if (error(); as message) {
+      <p class="card__message card__message--error" role="alert">{{ message }}</p>
+    } @else if (notice(); as message) {
+      <p class="card__message card__message--ok">✓ {{ message }}</p>
+    } @else {
+      <p class="card__hint">{{ hint() }}</p>
+    }
+  </div>
+</div>
+
+<div class="card__primary">
+  @switch (listing.status) {
+    @case ('draft') {
+      <a class="card__button" [routerLink]="['/mon-espace/logements', listing.slug, 'modifier']">
+        Continuer l'annonce
+      </a>
+      <button
+        type="button"
+        class="card__button card__button--secondary"
+        [disabled]="locked()"
+        (click)="publish.emit()"
+      >
+        {{ working() ? 'Publication…' : 'Publier' }}
+      </button>
+    }
+    @case ('published') {
+      <a class="card__button" [routerLink]="['/mon-espace/logements', listing.slug, 'modifier']">
+        <cm-icon name="pencil" /> Modifier
+      </a>
+    }
+    @case ('archived') {
+      <button type="button" class="card__button" [disabled]="locked()" (click)="publish.emit()">
+        {{ working() ? 'Publication…' : 'Remettre en ligne' }}
+      </button>
+      <a
+        class="card__button card__button--secondary"
+        [routerLink]="['/mon-espace/logements', listing.slug, 'modifier']"
+      >
+        Modifier
+      </a>
+    }
+  }
+</div>
+
+<nav class="card__tools" [attr.aria-label]="'Outils : ' + title()">
+  <a class="card__tool" [routerLink]="['/mon-espace/logements', listing.slug, 'calendrier']">
+    <cm-icon name="calendar" /> Calendrier
+  </a>
+  <a class="card__tool" [routerLink]="['/mon-espace/logements', listing.slug, 'tarifs']">
+    <cm-icon name="currency-euro" /> Tarifs
+  </a>
+  @if ('published' === listing.status) {
+    <a
+      class="card__tool"
+      [routerLink]="['/logement', listing.slug]"
+      (click)="origin.openedFromOwnerSpace(listing.slug)"
+    >
+      <cm-icon name="eye" /> Voir l'annonce
+    </a>
+    <cm-listing-share [slug]="listing.slug" [label]="title()" />
+
+    <button type="button" class="card__retire" [disabled]="locked()" (click)="archive.emit()">
+      {{ working() ? 'Retrait…' : 'Retirer du site' }}
+    </button>
+  }
+</nav>

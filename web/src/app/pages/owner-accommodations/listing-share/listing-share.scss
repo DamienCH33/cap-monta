@@ -1,18 +1,4 @@
-// Couleurs : les jetons globaux de styles.scss.
-.share__trigger {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--blue);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
+// Couleurs : les jetons globaux de styles.scss. Le bouton « Partager » est habillé par la carte.
 .share {
   width: min(28rem, calc(100vw - 2rem));
   padding: 1.25rem 1.5rem 1.5rem;

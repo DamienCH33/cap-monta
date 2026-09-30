@@ -1,0 +1,261 @@
+// Couleurs : les jetons globaux de styles.scss.
+// Trois zones : photo + identité, action principale, outils. Une colonne sur téléphone.
+:host {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+  grid-template-areas:
+    'photo body primary'
+    'tools tools tools';
+  gap: 0 1.25rem;
+  align-items: start;
+  padding: 1rem 1.25rem 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid #aab4be;
+  border-radius: 0.875rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 4px 14px rgb(0 0 0 / 7%);
+  }
+
+  @media (max-width: 40rem) {
+    grid-template-columns: 5rem minmax(0, 1fr);
+    grid-template-areas:
+      'photo body'
+      'primary primary'
+      'tools tools';
+    gap: 0 0.9rem;
+    padding: 0.9rem 0.9rem 0.6rem;
+  }
+}
+
+:host(.card--published) {
+  border-left-color: var(--pine);
+}
+
+:host(.card--archived) {
+  border-left-color: #9a7440;
+  background: #fcfbf9;
+}
+
+// Le logement qui vient d'être enregistré : un halo bleu mer, pour le repérer tout de suite.
+:host(.card--new),
+:host(.card--new:hover) {
+  box-shadow: 0 0 0 3px rgb(29 111 151 / 25%);
+}
+
+.card__photo {
+  grid-area: photo;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.2rem;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 0.6rem;
+  background: var(--blue-soft);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-decoration: none;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  cm-icon {
+    font-size: 1.5rem;
+  }
+}
+
+.card__body {
+  grid-area: body;
+  min-width: 0;
+}
+
+.card__badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &--draft {
+    background: #eef1f4;
+    color: #44505c;
+  }
+
+  &--published {
+    background: #e4f1e9;
+    color: var(--pine);
+  }
+
+  &--archived {
+    background: #f5eee4;
+    color: #7a5a2e;
+  }
+}
+
+.card__title {
+  margin: 0.35rem 0 0.1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.card__details,
+.card__hint,
+.card__message {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.card__hint,
+.card__message {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+}
+
+// Les messages de l'API peuvent tenir sur plusieurs lignes (un manque par ligne).
+.card__message {
+  white-space: pre-line;
+
+  &--error {
+    color: #a3261d;
+  }
+
+  &--ok {
+    color: var(--pine);
+    font-weight: 600;
+  }
+}
+
+.card__primary {
+  grid-area: primary;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+
+  @media (max-width: 40rem) {
+    margin-top: 0.75rem;
+
+    > * {
+      flex: 1;
+    }
+  }
+}
+
+.card__button {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.2rem;
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  background: var(--ocean);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--blue);
+  }
+
+  &--secondary {
+    background: #fff;
+    color: var(--blue);
+
+    &:hover:not(:disabled) {
+      background: var(--blue-soft);
+    }
+  }
+}
+
+// Les outils : une rangée de boutons icône + libellé, séparée de l'identité par un filet.
+.card__tools {
+  grid-area: tools;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+
+  @media (max-width: 40rem) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card__tool,
+.card__tools ::ng-deep .share__trigger {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+
+  cm-icon {
+    color: var(--blue);
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    border-color: var(--blue);
+    background: var(--blue-soft);
+    text-decoration: none;
+  }
+}
+
+.card__tools ::ng-deep .share__trigger {
+  width: 100%;
+}
+
+// Rare, et l'annonce disparaît des recherches : en retrait, au bout de la rangée.
+.card__retire {
+  margin-left: auto;
+  padding: 0.45rem 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: #a3261d;
+  }
+
+  @media (max-width: 40rem) {
+    grid-column: 1 / -1;
+    margin: 0.25rem auto 0;
+  }
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid rgb(29 111 151 / 35%);
+  outline-offset: 2px;
+}
