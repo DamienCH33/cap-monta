@@ -192,6 +192,19 @@ cm-search-bar {
   margin-top: 1.25rem;
 }
 
+.results__owners {
+  margin: 1.5rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+
+  a {
+    margin-left: 0.35rem;
+    color: var(--blue);
+    font-weight: 600;
+  }
+}
+
 .suggestions__widen {
   padding: 0.5rem 1.1rem;
   border: 1px solid var(--blue);
