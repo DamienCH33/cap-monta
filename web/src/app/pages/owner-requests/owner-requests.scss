@@ -47,6 +47,19 @@
     background: var(--surface-2);
     border: 1px dashed var(--border-strong);
     border-radius: var(--radius-lg);
+
+    p {
+      margin: 0 0 0.5rem;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    a {
+      color: var(--blue);
+      font-weight: 600;
+    }
   }
 
   &__list {

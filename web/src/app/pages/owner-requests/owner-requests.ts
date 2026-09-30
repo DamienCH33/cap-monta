@@ -18,6 +18,7 @@ import {
 import { isoDay } from '../../core/models/owner-calendar';
 import { OwnerBookingRequestService } from '../../core/services/owner-booking-request';
 import { SeoService } from '../../core/services/seo';
+import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 
 type Action = 'accept' | 'decline' | 'cancel';
 
@@ -58,6 +59,7 @@ const DONE: Record<Action, string> = {
 export class OwnerRequests {
   private readonly service = inject(OwnerBookingRequestService);
   private readonly router = inject(Router);
+  private readonly accommodations = inject(OwnerAccommodationService);
 
   readonly requests = signal<OwnerBookingRequest[] | null>(null);
   readonly loadFailed = signal(false);
@@ -99,6 +101,9 @@ export class OwnerRequests {
 
   readonly emptyMessage = computed(() => EMPTY[this.tab()]);
 
+  /** Un logement au moins est en ligne ; null tant qu'on ne l'a pas demandé (des demandes existent). */
+  readonly online = signal<boolean | null>(null);
+
   readonly statusLabel = bookingStatusLabel;
   readonly travellers = travellers;
   readonly bookingPrice = bookingPrice;
@@ -119,7 +124,15 @@ export class OwnerRequests {
     this.tab.set(fromParam ?? 'pending');
 
     this.service.list().subscribe({
-      next: (list) => this.requests.set(list),
+      next: (list) => {
+        this.requests.set(list);
+        // Aucune demande du tout : savoir si un logement est en ligne change le conseil affiché.
+        if (0 === list.length) {
+          this.accommodations.list().subscribe({
+            next: (mine) => this.online.set(mine.some((one) => 'published' === one.status)),
+          });
+        }
+      },
       error: () => this.loadFailed.set(true),
     });
   }

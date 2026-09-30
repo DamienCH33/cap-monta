@@ -1,0 +1,35 @@
+<section class="first" aria-labelledby="first-title">
+  <h2 id="first-title" class="first__title">Publiez votre premier logement</h2>
+  <p class="first__lead">
+    Gratuit et sans commission. Comptez une dizaine de minutes : votre annonce reste en brouillon,
+    visible par vous seul, jusqu'à ce que vous la publiiez.
+  </p>
+
+  <div class="first__choices">
+    @if (assistantAvailable()) {
+      <a class="first__choice first__choice--main" routerLink="/mon-espace/importer">
+        <cm-icon name="upload" class="first__icon" />
+        <span class="first__choice-title">J'ai déjà une annonce ailleurs</span>
+        <span class="first__choice-text">
+          Collez son texte : logement, tarifs et dates prises sont remplis pour vous. Vous relisez
+          tout avant d'enregistrer.
+        </span>
+        <span class="first__go">Importer mon annonce →</span>
+      </a>
+    }
+    <a class="first__choice" routerLink="/mon-espace/logements/nouveau">
+      <cm-icon name="pencil" class="first__icon" />
+      <span class="first__choice-title">Je pars de zéro</span>
+      <span class="first__choice-text">
+        Quatre informations suffisent pour commencer. Photos, tarifs et calendrier se complètent
+        ensuite, à votre rythme.
+      </span>
+      <span class="first__go">Créer mon logement →</span>
+    </a>
+  </div>
+
+  <p class="first__help">
+    Une question en route ? <a routerLink="/proprietaire/guide">Le guide pas à pas</a>, étape par
+    étape.
+  </p>
+</section>
