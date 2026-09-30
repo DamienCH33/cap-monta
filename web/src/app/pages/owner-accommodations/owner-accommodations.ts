@@ -5,22 +5,18 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, map, Observable, of } from 'rxjs';
 
 import { apiErrorMessage } from '../../core/http/api-error';
-import { typeLabel } from '../../core/models/accommodation';
 import {
   AccommodationStatus,
   OwnerAccommodation,
-  plural,
   STATUS_PARAMS,
   statusFromParam,
-  statusLabel,
   summarize,
 } from '../../core/models/owner-accommodation';
 import { ListingImportService } from '../../core/services/listing-import';
-import { NavigationOrigin } from '../../core/services/navigation-origin';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
 import { OwnerFlash } from '../../core/services/owner-flash';
 import { SeoService } from '../../core/services/seo';
-import { ListingShare } from './listing-share/listing-share';
+import { OwnerListingCard } from './owner-listing-card/owner-listing-card';
 
 /** Les brouillons d'abord : ce sont eux qui attendent une action. */
 const STATUS_ORDER: Record<AccommodationStatus, number> = { draft: 0, published: 1, archived: 2 };
@@ -29,12 +25,6 @@ const SUCCESS: Record<AccommodationStatus, string> = {
   draft: '',
   published: 'Votre annonce est en ligne.',
   archived: 'Annonce retirée du site. Vous pourrez la remettre en ligne à tout moment.',
-};
-
-const HINTS: Record<AccommodationStatus, string> = {
-  draft: "Visible uniquement par vous. Publiez-le pour qu'il apparaisse dans les recherches.",
-  published: 'Visible par tous les visiteurs du site.',
-  archived: 'Retiré du site. Son adresse et ses demandes passées sont conservées.',
 };
 
 const EMPTY_FILTER: Record<AccommodationStatus, string> = {
@@ -52,7 +42,7 @@ interface Filter {
 
 @Component({
   selector: 'cm-owner-accommodations',
-  imports: [RouterLink, ListingShare],
+  imports: [RouterLink, OwnerListingCard],
   templateUrl: './owner-accommodations.html',
   styleUrl: './owner-accommodations.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -119,12 +109,6 @@ export class OwnerAccommodations {
 
   readonly summary = computed(() => summarize(this.accommodations() ?? []));
 
-  readonly statusLabel = statusLabel;
-  readonly typeLabel = typeLabel;
-
-  /** « Voir l'annonce » le note : le lien de retour de la fiche ramènera ici. */
-  readonly origin = inject(NavigationOrigin);
-
   /** Le lien d'import n'apparaît que si l'assistant peut lire tout de suite (ADR 027). */
   readonly assistantAvailable = toSignal(
     inject(ListingImportService)
@@ -171,28 +155,6 @@ export class OwnerAccommodations {
   /** Paramètres d'adresse d'un filtre : null retire le paramètre (tous les logements). */
   filterParams(status: AccommodationStatus | null): { statut: string | null } {
     return { statut: null === status ? null : STATUS_PARAMS[status] };
-  }
-
-  place(item: OwnerAccommodation): string {
-    return item.district ?? ('chm' === item.resort ? 'CHM Montalivet' : 'Euronat');
-  }
-
-  details(item: OwnerAccommodation): string {
-    const parts = [
-      plural(item.capacity, 'personne', 'personnes'),
-      plural(item.bedrooms, 'chambre', 'chambres'),
-    ];
-
-    if (item.surface) {
-      parts.push(`${item.surface} m²`);
-    }
-
-    return parts.join(' · ');
-  }
-
-  /** Ce que veut dire le statut, pour un propriétaire qui découvre le site. */
-  hint(item: OwnerAccommodation): string {
-    return HINTS[item.status];
   }
 
   publish(item: OwnerAccommodation): void {

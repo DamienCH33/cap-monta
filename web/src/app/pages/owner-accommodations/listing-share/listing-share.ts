@@ -13,6 +13,7 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { environment } from '../../../../environments/environment';
+import { Icon } from '../../../shared/icon/icon';
 
 /** Le QR code d'une vitre : lisible à un mètre, donc de gros modules. */
 const PNG_CELL = 24;
@@ -25,6 +26,7 @@ const PNG_MARGIN = 4;
  */
 @Component({
   selector: 'cm-listing-share',
+  imports: [Icon],
   templateUrl: './listing-share.html',
   styleUrl: './listing-share.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
