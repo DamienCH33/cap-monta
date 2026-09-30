@@ -104,12 +104,9 @@
 }
 
 .share__qr-image {
+  display: block;
   width: 100%;
-
-  // Le SVG de la bibliothèque est « scalable » : il prend la largeur de son conteneur.
-  ::ng-deep svg {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
+  height: auto;
+  // Des modules nets, pas flous, une fois agrandis.
+  image-rendering: pixelated;
 }

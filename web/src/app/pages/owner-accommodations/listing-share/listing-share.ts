@@ -10,7 +10,6 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { environment } from '../../../../environments/environment';
 import { Icon } from '../../../shared/icon/icon';
@@ -33,7 +32,6 @@ const PNG_MARGIN = 4;
 })
 export class ListingShare {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-  private readonly sanitizer = inject(DomSanitizer);
 
   readonly slug = input.required<string>();
   /** « Mobil-home · Les Pins » : repris sous le QR code imprimé. */
@@ -44,7 +42,8 @@ export class ListingShare {
   readonly url = computed(() => `${environment.siteUrl}/logement/${this.slug()}`);
   private readonly qrUrl = computed(() => `${this.url()}?utm_source=qrcode`);
 
-  readonly qrSvg = signal<SafeHtml | null>(null);
+  /** Image du QR code (data:image/gif), sans innerHTML : Angular la contrôle comme toute URL. */
+  readonly qrImage = signal<string | null>(null);
   readonly copied = signal(false);
   readonly copyFailed = signal(false);
 
@@ -66,14 +65,8 @@ export class ListingShare {
     this.copyFailed.set(false);
     this.dialog().nativeElement.showModal();
 
-    if (null === this.qrSvg()) {
-      const qr = await this.qrcode();
-      // SVG produit par la bibliothèque à partir de notre propre adresse : rien de l'utilisateur.
-      this.qrSvg.set(
-        this.sanitizer.bypassSecurityTrustHtml(
-          qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }),
-        ),
-      );
+    if (null === this.qrImage()) {
+      this.qrImage.set((await this.qrcode()).createDataURL(8, 2));
     }
   }
 
