@@ -28,7 +28,6 @@
   "euronat-village": {
     "file": "euronat-village.png",
     "alt": "Une place de village sous les pins, avec terrasses",
-    "credit": "Illustration générée par IA",
-    "illustration": true
+    "credit": "Illustration générée par IA"
   }
 }

@@ -107,17 +107,12 @@
       <div class="zones">
         @for (zone of euronatZones(); track zone.key) {
           <article class="zone">
-            <div class="zone__figure">
-              <cm-site-photo
-                class="zone__photo"
-                [slot]="zone.key"
-                sizes="(max-width: 719px) 100vw, 400px"
-                [decorative]="true"
-              />
-              @if (zone.illustration) {
-                <span class="zone__tag" i18n="@@zone.illustration">Illustration</span>
-              }
-            </div>
+            <cm-site-photo
+              class="zone__photo"
+              [slot]="zone.key"
+              sizes="(max-width: 719px) 100vw, 400px"
+              [decorative]="true"
+            />
             <div class="zone__body">
               <h3 class="zone__title">{{ zone.title }}</h3>
               <p class="zone__meta">
