@@ -55,15 +55,22 @@
       </h1>
 
       <p class="head__facts">
-        <ng-container i18n="@@count.bedrooms"
-          >{logement.bedrooms, plural, =0 {0 chambre} =1 {1 chambre} other {{{ logement.bedrooms }} chambres}}</ng-container
-        >
+        <ng-container i18n="@@count.bedrooms">{logement.bedrooms, plural,
+          =0 {0 chambre}
+          =1 {1 chambre}
+          other {{{ logement.bedrooms }} chambres}
+        }</ng-container>
         ·
         <ng-container i18n="@@count.people-short">{{ logement.maxCapacity }} pers.</ng-container>
         @if (logement.surface) {
           · {{ logement.surface }} m²
         }
-        · {{ logement.resort === 'chm' ? 'CHM Montalivet' : 'Euronat' }}
+        ·
+        {{
+          logement.resort === 'chm'
+            ? 'CHM Montalivet · Domaine naturiste'
+            : 'Euronat · Village naturiste'
+        }}
       </p>
     </header>
 
@@ -119,11 +126,14 @@
                       }
                     </td>
                     <td class="rates__min">
-                      <ng-container i18n="@@rates.min-nights"
-                        >{period.minimumNights, plural, =1 {min. 1 nuit} other {min. {{ period.minimumNights }} nuits}}</ng-container
-                      >
+                      <ng-container i18n="@@rates.min-nights">{period.minimumNights, plural,
+                        =1 {min. 1 nuit}
+                        other {min. {{ period.minimumNights }} nuits}
+                      }</ng-container>
                       @if (period.saturdayArrival) {
-                        <span class="rates__saturday" i18n="@@rates.saturday">arrivée le samedi de préférence</span>
+                        <span class="rates__saturday" i18n="@@rates.saturday"
+                          >arrivée le samedi de préférence</span
+                        >
                       }
                     </td>
                   </tr>
@@ -151,7 +161,8 @@
                   <dd>
                     @if (logement.terms.checkInFrom) {
                       <ng-container i18n="@@terms.check-in"
-                        >Arrivée à partir de {{ timeLabel(logement.terms.checkInFrom) }}</ng-container
+                        >Arrivée à partir de
+                        {{ timeLabel(logement.terms.checkInFrom) }}</ng-container
                       >
                     }
                     @if (logement.terms.checkInFrom && logement.terms.checkOutBefore) {
@@ -227,7 +238,8 @@
                   <dd>
                     @if (logement.terms.cleaningFee) {
                       <ng-container i18n="@@terms.cleaning"
-                        >Ménage de fin de séjour {{ euros(logement.terms.cleaningFee) }}</ng-container
+                        >Ménage de fin de séjour
+                        {{ euros(logement.terms.cleaningFee) }}</ng-container
                       >
                       <br />
                     }
@@ -312,7 +324,10 @@
             <b i18n="@@sticky.on-request">Tarifs sur demande</b>
           }
         </p>
-        <a class="stickybar__button" href="#demande" (click)="scrollToRequest($event)"
+        <a
+          class="stickybar__button"
+          href="#demande"
+          (click)="scrollToRequest($event)"
           i18n="@@sticky.request"
           >Demander ces dates</a
         >
