@@ -187,7 +187,10 @@ export class AccommodationPage implements OnInit {
 
   private applySeo(logement: Accommodation): void {
     const type = typeLabel(logement.type);
-    const resort = 'chm' === logement.resort ? 'CHM Montalivet' : 'Euronat';
+    const resort =
+      'chm' === logement.resort
+        ? 'CHM Montalivet · Domaine naturiste'
+        : 'Euronat · Village naturiste';
     // « à Pins, CHM Montalivet », mais « à Euronat (Europe) » : un secteur d'Euronat porte le
     // nom d'un continent, « à Europe » ne se lit pas.
     const place = !logement.district
