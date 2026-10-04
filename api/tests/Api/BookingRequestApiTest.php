@@ -175,11 +175,11 @@ final class BookingRequestApiTest extends ApiTestCase
         self::assertEmailAddressContains($mail, 'To', 'damien@example.com');
         self::assertEmailTextBodyContains($mail, '/demande/'.$created['trackingToken']);
 
-        // Unknown address: exactly the same answer; only that mailbox learns there is nothing.
+        // Unknown address: exactly the same answer, and no email at all (no mail to strangers).
         $this->recover('personne@example.com');
         self::assertResponseStatusCodeSame(202);
         self::assertSame('{}', (string) $this->client->getResponse()->getContent());
-        self::assertEmailTextBodyContains(self::getMailerMessage(0) ?? self::fail(), "Aucune n'est en cours");
+        self::assertEmailCount(0);
 
         $this->recover('pas-une-adresse');
         self::assertResponseStatusCodeSame(422);

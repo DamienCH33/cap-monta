@@ -34,11 +34,10 @@ final class ForgottenPasswordController
         $email = mb_strtolower(trim($payload->email));
         $user = $this->users->findOneBy(['email' => $email]);
 
-        // Même réponse dans les deux cas : le formulaire ne doit pas révéler
-        // quelles adresses ont un compte. C'est la boîte mail qui informe.
-        if (null === $user) {
-            $this->mailer->sendNoAccountToReset($email);
-        } else {
+        // Même réponse dans les deux cas : le formulaire ne doit pas révéler quelles adresses ont
+        // un compte. Et aucun email vers une adresse sans compte : sinon n'importe qui ferait
+        // écrire le site à des inconnus, et le serveur d'envoi finirait sur liste noire.
+        if (null !== $user) {
             $this->mailer->sendPasswordReset($user);
         }
 
