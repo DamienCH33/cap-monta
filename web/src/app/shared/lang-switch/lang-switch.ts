@@ -6,6 +6,10 @@ import { filter, map } from 'rxjs';
 import { currentLang, LANGS, pathIn } from '../../core/i18n/lang';
 import { Icon } from '../icon/icon';
 
+/** Pages en français seulement : même liste que la redirection du serveur (server.ts). */
+const OWNER_ONLY =
+  /^\/(connexion|inscription|mot-de-passe-oublie|nouveau-mot-de-passe|mon-espace|proprietaire)(\/|\?|$)/;
+
 /**
  * Changer de langue en gardant la page : « /recherche?arrivee=… » devient
  * « /en/recherche?arrivee=… ». Chaque langue est un site à part (un build par langue) :
@@ -88,7 +92,11 @@ export class LangSwitch {
   href(code: string): string {
     const lang = LANGS.find((item) => item.code === code) ?? LANGS[0];
 
-    return pathIn(lang, this.path());
+    // L'espace propriétaire n'existe qu'en français (le serveur y renvoie) : depuis ces pages,
+    // une autre langue mène à son accueil plutôt qu'à la même page, toujours en français.
+    const path = OWNER_ONLY.test(this.path()) && 'fr' !== code ? '/' : this.path();
+
+    return pathIn(lang, path);
   }
 
   onDocumentClick(event: MouseEvent): void {

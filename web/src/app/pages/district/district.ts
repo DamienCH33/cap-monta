@@ -16,6 +16,20 @@ import { currentLang, currentLangOption } from '../../core/i18n/lang';
 import { euros } from '../../core/models/stay-terms';
 import { SitePhoto } from '../../shared/site-photo/site-photo';
 
+/**
+ * Les points forts des secteurs d'Euronat arrivent de l'API en français (EuronatDistricts) :
+ * traduits ici. Un point inconnu (ajouté côté API) s'affiche tel quel.
+ */
+const HIGHLIGHTS: Record<string, string> = {
+  'Côté plage': $localize`:@@district.highlight.beach-side:Côté plage`,
+  'Accès direct à la plage Nord': $localize`:@@district.highlight.north-beach:Accès direct à la plage Nord`,
+  'La plage Sud à quelques pas': $localize`:@@district.highlight.south-beach:La plage Sud à quelques pas`,
+  'Côté village': $localize`:@@district.highlight.village-side:Côté village`,
+  'Près des commerces': $localize`:@@district.highlight.shops:Près des commerces`,
+  "Près de l'accueil": $localize`:@@district.highlight.reception:Près de l'accueil`,
+  'Zone des mobil-homes': $localize`:@@district.highlight.mobile-homes:Zone des mobil-homes`,
+};
+
 @Component({
   selector: 'cm-district',
   imports: [AccommodationCard, Pagination, RouterLink, SitePhoto],
@@ -23,6 +37,10 @@ import { SitePhoto } from '../../shared/site-photo/site-photo';
   styleUrl: './district.scss',
 })
 export class DistrictPage implements OnInit {
+  highlight(point: string): string {
+    return HIGHLIGHTS[point] ?? point;
+  }
+
   readonly euros = euros;
 
   private readonly route = inject(ActivatedRoute);

@@ -40,7 +40,7 @@
         @if (quartier.highlights && quartier.highlights.length > 0) {
           <ul class="points">
             @for (point of quartier.highlights; track point) {
-              <li>{{ point }}</li>
+              <li>{{ highlight(point) }}</li>
             }
           </ul>
         }

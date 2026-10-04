@@ -66,11 +66,7 @@
           · {{ logement.surface }} m²
         }
         ·
-        {{
-          logement.resort === 'chm'
-            ? 'CHM Montalivet · Domaine naturiste'
-            : 'Euronat · Village naturiste'
-        }}
+        {{ resortName(logement) }} · {{ resortKind(logement) }}
       </p>
     </header>
 

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { currentLang } from '../../core/i18n/lang';
 import { SeoService } from '../../core/services/seo';
 
 @Component({
@@ -10,6 +11,10 @@ import { SeoService } from '../../core/services/seo';
   styleUrl: './terms.scss',
 })
 export class Terms implements OnInit {
+  /** Ces pages ne sont qu'en français : ailleurs, un mot pour le dire dans la langue du visiteur. */
+  readonly french = 'fr' === currentLang();
+  readonly lang = currentLang();
+
   private readonly seo = inject(SeoService);
 
   ngOnInit(): void {

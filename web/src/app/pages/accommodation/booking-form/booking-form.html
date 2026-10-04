@@ -208,6 +208,11 @@
       <p class="error" role="alert">{{ error() }}</p>
     }
 
+    <p class="box__note" i18n="@@booking.naturist">
+      Le CHM Montalivet et Euronat sont des domaines naturistes : le règlement du domaine s'applique
+      pendant le séjour.
+    </p>
+
     <button class="box__submit" type="submit" [disabled]="sending() || !quote()?.available">
       {{ submitLabel() }}
     </button>
