@@ -1,5 +1,10 @@
-<article class="static-page">
+<article class="static-page" lang="fr">
   <header class="static-page__header">
+    @if (!french) {
+      <p class="auth__notice" lang="{{ lang }}" i18n="@@legal.french-only">
+        Cette page n'existe qu'en français : c'est la version qui fait foi.
+      </p>
+    }
     <h1 class="static-page__title">Conditions générales d'utilisation</h1>
     <p class="static-page__lead">
       Ces conditions régissent l'utilisation du site cap-monta.up.railway.app. Elles s'appliquent à

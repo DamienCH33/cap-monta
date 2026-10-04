@@ -51,6 +51,17 @@ export class AccommodationPage implements OnInit {
   readonly french = 'fr' === currentLang();
 
   /** La description reste celle du propriétaire, en français : un lien la fait traduire. */
+  resortName(logement: Accommodation): string {
+    return 'chm' === logement.resort ? 'CHM Montalivet' : 'Euronat';
+  }
+
+  /** Les deux domaines sont naturistes : dit sur chaque fiche, dans la langue de la page. */
+  resortKind(logement: Accommodation): string {
+    return 'chm' === logement.resort
+      ? $localize`:@@resort.chm.kind:domaine naturiste`
+      : $localize`:@@resort.euronat.kind:village naturiste`;
+  }
+
   translateUrl(text: string): string {
     return `https://translate.google.com/?sl=fr&tl=${currentLang()}&op=translate&text=${encodeURIComponent(text.slice(0, 4000))}`;
   }
@@ -187,10 +198,7 @@ export class AccommodationPage implements OnInit {
 
   private applySeo(logement: Accommodation): void {
     const type = typeLabel(logement.type);
-    const resort =
-      'chm' === logement.resort
-        ? 'CHM Montalivet · Domaine naturiste'
-        : 'Euronat · Village naturiste';
+    const resort = this.resortName(logement);
     // « à Pins, CHM Montalivet », mais « à Euronat (Europe) » : un secteur d'Euronat porte le
     // nom d'un continent, « à Europe » ne se lit pas.
     const place = !logement.district
@@ -217,7 +225,7 @@ export class AccommodationPage implements OnInit {
 
     this.seo.apply({
       title: name,
-      description: $localize`:@@seo.fiche.description:${type}:type: à louer à ${place}:place: : ${facts}:facts:.${price}:price: Disponibilités à jour.`,
+      description: $localize`:@@seo.fiche.description:${type}:type: à louer à ${place}:place:, ${this.resortKind(logement)}:kind: : ${facts}:facts:.${price}:price: Disponibilités à jour.`,
       path: `/logement/${logement.slug}`,
       // La couverture sert d'aperçu quand le lien est partagé (Facebook, WhatsApp…).
       image: logement.cover?.url,

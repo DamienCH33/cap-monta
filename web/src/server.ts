@@ -76,6 +76,21 @@ const app = express();
 
 // Pages rendues et relais de l'API compressés (gzip) : Railway ne le fait pas toujours.
 app.use(compression());
+
+/**
+ * L'espace propriétaire (connexion, inscription, mot de passe, Mon espace, pages propriétaires)
+ * n'existe qu'en français. Sous /en/, /nl/ ou /de/, il s'affichait en français dans une page
+ * marquée anglaise : on renvoie directement vers l'adresse française, paramètres compris.
+ */
+app.get(
+  /^\/(en|nl|de)\/(connexion|inscription|mot-de-passe-oublie|nouveau-mot-de-passe|mon-espace|proprietaire)(\/.*)?$/,
+  (request, response) => {
+    const query = request.originalUrl.includes('?')
+      ? request.originalUrl.slice(request.originalUrl.indexOf('?'))
+      : '';
+    response.redirect(302, request.path.replace(/^\/(en|nl|de)/, '') + query);
+  },
+);
 // Derrière le proxy de Railway, l'adresse d'origine (https, domaine) arrive dans ces en-têtes.
 const angularApp = new AngularNodeAppEngine({
   trustProxyHeaders: ['x-forwarded-proto', 'x-forwarded-host'],

@@ -148,7 +148,7 @@ export class Home implements OnInit {
   ngOnInit(): void {
     this.seo.apply({
       title: $localize`:@@seo.home.title:Location de mobil-homes et bungalows au CHM Montalivet et à Euronat`,
-      description: $localize`:@@seo.home.description:Louez un bungalow, un mobil-home, une caravane, un chalet ou un studio au CHM Montalivet et à Euronat. Calendriers tenus à jour par les propriétaires, réponse sous 48 h, aucune commission.`,
+      description: $localize`:@@seo.home.description:Louez un bungalow, un mobil-home, une caravane, un chalet ou un studio au CHM Montalivet et à Euronat, deux domaines naturistes. Calendriers tenus à jour par les propriétaires, réponse sous 48 h, aucune commission.`,
       path: '/',
     });
 
