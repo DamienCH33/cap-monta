@@ -357,20 +357,9 @@ final readonly class BookingMailer
      */
     public function recovery(string $email, array $requests): void
     {
+        // Aucune demande en cours : aucun email. Écrire à une adresse inconnue laisserait
+        // n'importe qui faire envoyer des messages par le site (et le mettre sur liste noire).
         if ([] === $requests) {
-            $this->send($email, 'Vos demandes de réservation', <<<TXT
-                Bonjour,
-
-                Quelqu'un (vous, sans doute) a demandé à retrouver les demandes de réservation
-                envoyées depuis cette adresse. Aucune n'est en cours.
-
-                Si vous pensez en avoir envoyé une, elle a peut-être été faite avec une autre
-                adresse email. Pour chercher un logement :
-                {$this->frontUrl}/recherche
-
-                Cap Monta
-                TXT);
-
             return;
         }
 

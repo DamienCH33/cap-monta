@@ -106,24 +106,6 @@ final readonly class AccountMailer
         );
     }
 
-    public function sendNoAccountToReset(string $email): void
-    {
-        $signup = $this->frontUrl.'/inscription';
-
-        $this->mailer->send(
-            $this->composer->compose($email, 'Votre compte Cap Monta', <<<TXT
-                        Bonjour,
-
-                        Une réinitialisation de mot de passe a été demandée pour cette adresse,
-                        mais aucun compte Cap Monta n'y est associé.
-
-                        Vous pouvez en créer un ici : {$signup}
-
-                        Cap Monta
-                        TXT),
-        );
-    }
-
     /**
      * Empreinte du mot de passe actuel. Elle entre dans la signature du lien :
      * dès que le mot de passe change, les liens émis avant deviennent caducs.
