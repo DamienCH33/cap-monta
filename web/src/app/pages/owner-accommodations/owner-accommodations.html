@@ -1,13 +1,17 @@
 <div class="container owner-accommodations">
-  <nav class="owner-accommodations__breadcrumb" aria-label="Fil d'Ariane">
-    <a routerLink="/mon-espace">Mon espace</a>
+  <nav
+    class="owner-accommodations__breadcrumb"
+    aria-label="Fil d'Ariane"
+    i18n-aria-label="@@owner.common.breadcrumb"
+  >
+    <a routerLink="/mon-espace" i18n="@@owner.common.my-space">Mon espace</a>
     <span aria-hidden="true">›</span>
-    <span aria-current="page">Mes logements</span>
+    <span aria-current="page" i18n="@@owner.common.my-listings">Mes logements</span>
   </nav>
 
   <header class="owner-accommodations__header">
     <div>
-      <h1 class="owner-accommodations__heading">Mes logements</h1>
+      <h1 class="owner-accommodations__heading" i18n="@@owner.common.my-listings">Mes logements</h1>
       @if (accommodations()?.length) {
         <p class="owner-accommodations__summary">{{ summary() }}</p>
       }
@@ -16,11 +20,19 @@
       <!-- Styles en ligne : la feuille de la page est déjà au plafond de son budget. -->
       <div style="display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; align-items: center">
         @if (assistantAvailable()) {
-          <a class="owner-accommodations__import" routerLink="/mon-espace/importer">
+          <a
+            class="owner-accommodations__import"
+            routerLink="/mon-espace/importer"
+            i18n="@@owner.listings.import"
+          >
             Importer une annonce existante
           </a>
         }
-        <a class="owner-accommodations__add" routerLink="/mon-espace/logements/nouveau">
+        <a
+          class="owner-accommodations__add"
+          routerLink="/mon-espace/logements/nouveau"
+          i18n="@@owner.common.add-listing"
+        >
           + Ajouter un logement
         </a>
       </div>
@@ -28,14 +40,18 @@
   </header>
 
   @if (loadFailed()) {
-    <p class="auth__notice auth__notice--error" role="alert">
+    <p class="auth__notice auth__notice--error" role="alert" i18n="@@owner.listings.load-failed">
       Impossible de charger vos logements. Rechargez la page.
     </p>
   } @else if (accommodations(); as list) {
     @if (0 === list.length) {
       <cm-first-listing />
     } @else {
-      <nav class="owner-accommodations__filters" aria-label="Filtrer par statut">
+      <nav
+        class="owner-accommodations__filters"
+        aria-label="Filtrer par statut"
+        i18n-aria-label="@@owner.listings.filters-label"
+      >
         @for (filter of filters(); track filter.label) {
           <a
             class="owner-accommodations__filter"
@@ -53,7 +69,11 @@
       @if (0 === visible().length) {
         <div class="owner-accommodations__empty">
           <p class="owner-accommodations__empty-title">{{ emptyFilterMessage() }}</p>
-          <p><a routerLink="/mon-espace/logements">Voir tous mes logements</a></p>
+          <p>
+            <a routerLink="/mon-espace/logements" i18n="@@owner.listings.see-all"
+              >Voir tous mes logements</a
+            >
+          </p>
         </div>
       }
 
@@ -74,7 +94,12 @@
       </ul>
     }
   } @else {
-    <ul class="owner-accommodations__list" aria-busy="true" aria-label="Chargement">
+    <ul
+      class="owner-accommodations__list"
+      aria-busy="true"
+      aria-label="Chargement"
+      i18n-aria-label="@@owner.common.loading"
+    >
       <li class="owner-accommodations__skeleton cm-shimmer"></li>
       <li class="owner-accommodations__skeleton cm-shimmer"></li>
       <li class="owner-accommodations__skeleton cm-shimmer"></li>

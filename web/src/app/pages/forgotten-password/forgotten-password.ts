@@ -27,8 +27,8 @@ export class ForgottenPassword {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Mot de passe oublié',
-      description: 'Recevez un lien pour choisir un nouveau mot de passe.',
+      title: $localize`:@@owner.entry.forgotten-title:Mot de passe oublié`,
+      description: $localize`:@@owner.entry.seo-forgotten-description:Recevez un lien pour choisir un nouveau mot de passe.`,
       path: '/mot-de-passe-oublie',
       noindex: true,
     });

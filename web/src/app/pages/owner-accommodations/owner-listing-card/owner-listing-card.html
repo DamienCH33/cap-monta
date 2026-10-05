@@ -10,7 +10,7 @@
     <img [src]="src" alt="" loading="lazy" width="120" height="90" />
   } @else {
     <cm-icon name="photo" />
-    <span>Pas de photo</span>
+    <span i18n="@@owner.listings.no-photo">Pas de photo</span>
   }
 </a>
 
@@ -34,7 +34,11 @@
 <div class="card__primary">
   @switch (listing.status) {
     @case ('draft') {
-      <a class="card__button" [routerLink]="['/mon-espace/logements', listing.slug, 'modifier']">
+      <a
+        class="card__button"
+        [routerLink]="['/mon-espace/logements', listing.slug, 'modifier']"
+        i18n="@@owner.listings.continue"
+      >
         Continuer l'annonce
       </a>
       <button
@@ -43,21 +47,34 @@
         [disabled]="locked()"
         (click)="publish.emit()"
       >
-        {{ working() ? 'Publication…' : 'Publier' }}
+        @if (working()) {
+          <ng-container i18n="@@owner.listings.publishing">Publication…</ng-container>
+        } @else {
+          <ng-container i18n="@@owner.listings.publish">Publier</ng-container>
+        }
       </button>
     }
     @case ('published') {
-      <a class="card__button" [routerLink]="['/mon-espace/logements', listing.slug, 'modifier']">
+      <a
+        class="card__button"
+        [routerLink]="['/mon-espace/logements', listing.slug, 'modifier']"
+        i18n="@@owner.listings.edit-with-icon"
+      >
         <cm-icon name="pencil" /> Modifier
       </a>
     }
     @case ('archived') {
       <button type="button" class="card__button" [disabled]="locked()" (click)="publish.emit()">
-        {{ working() ? 'Publication…' : 'Remettre en ligne' }}
+        @if (working()) {
+          <ng-container i18n="@@owner.listings.publishing">Publication…</ng-container>
+        } @else {
+          <ng-container i18n="@@owner.listings.republish">Remettre en ligne</ng-container>
+        }
       </button>
       <a
         class="card__button card__button--secondary"
         [routerLink]="['/mon-espace/logements', listing.slug, 'modifier']"
+        i18n="@@owner.listings.edit"
       >
         Modifier
       </a>
@@ -65,11 +82,19 @@
   }
 </div>
 
-<nav class="card__tools" [attr.aria-label]="'Outils : ' + title()">
-  <a class="card__tool" [routerLink]="['/mon-espace/logements', listing.slug, 'calendrier']">
+<nav class="card__tools" [attr.aria-label]="toolsLabel()">
+  <a
+    class="card__tool"
+    [routerLink]="['/mon-espace/logements', listing.slug, 'calendrier']"
+    i18n="@@owner.common.tool-calendar"
+  >
     <cm-icon name="calendar" /> Calendrier
   </a>
-  <a class="card__tool" [routerLink]="['/mon-espace/logements', listing.slug, 'tarifs']">
+  <a
+    class="card__tool"
+    [routerLink]="['/mon-espace/logements', listing.slug, 'tarifs']"
+    i18n="@@owner.common.tool-rates"
+  >
     <cm-icon name="currency-euro" /> Tarifs
   </a>
   @if ('published' === listing.status) {
@@ -77,13 +102,18 @@
       class="card__tool"
       [routerLink]="['/logement', listing.slug]"
       (click)="origin.openedFromOwnerSpace(listing.slug)"
+      i18n="@@owner.listings.view-listing"
     >
       <cm-icon name="eye" /> Voir l'annonce
     </a>
     <cm-listing-share [slug]="listing.slug" [label]="title()" />
 
     <button type="button" class="card__retire" [disabled]="locked()" (click)="archive.emit()">
-      {{ working() ? 'Retrait…' : 'Retirer du site' }}
+      @if (working()) {
+        <ng-container i18n="@@owner.listings.retiring">Retrait…</ng-container>
+      } @else {
+        <ng-container i18n="@@owner.listings.retire">Retirer du site</ng-container>
+      }
     </button>
   }
 </nav>

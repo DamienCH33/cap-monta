@@ -1,4 +1,4 @@
-<button type="button" class="share__trigger" (click)="open()">
+<button type="button" class="share__trigger" (click)="open()" i18n="@@owner.listings.share">
   <cm-icon name="share" /> Partager
 </button>
 
@@ -10,13 +10,23 @@
   (close)="copied.set(false)"
 >
   <div class="share__header">
-    <h2 id="share-title" class="share__title">Partager mon annonce</h2>
-    <button type="button" class="share__close" aria-label="Fermer" (click)="close()">×</button>
+    <h2 id="share-title" class="share__title" i18n="@@owner.listings.share-title">
+      Partager mon annonce
+    </h2>
+    <button
+      type="button"
+      class="share__close"
+      aria-label="Fermer"
+      i18n-aria-label="@@owner.common.close"
+      (click)="close()"
+    >
+      ×
+    </button>
   </div>
 
   <section class="share__section">
-    <h3 class="share__subtitle">Le lien</h3>
-    <p class="share__text">
+    <h3 class="share__subtitle" i18n="@@owner.listings.share-link-title">Le lien</h3>
+    <p class="share__text" i18n="@@owner.listings.share-link-text">
       À coller dans votre post Facebook, un message ou un email : l'aperçu montre la photo et le
       logement.
     </p>
@@ -27,30 +37,45 @@
         readonly
         [value]="url()"
         aria-label="Lien de l'annonce"
+        i18n-aria-label="@@owner.listings.share-link-label"
       />
       <button type="button" class="share__button" (click)="copy()">
-        {{ copied() ? '✓ Lien copié' : 'Copier le lien' }}
+        @if (copied()) {
+          <ng-container i18n="@@owner.listings.share-copied">✓ Lien copié</ng-container>
+        } @else {
+          <ng-container i18n="@@owner.listings.share-copy">Copier le lien</ng-container>
+        }
       </button>
     </div>
     @if (copyFailed()) {
-      <p class="share__text" role="alert">
+      <p class="share__text" role="alert" i18n="@@owner.listings.share-copy-failed">
         Copie impossible dans ce navigateur : sélectionnez le lien ci-dessus et copiez-le.
       </p>
     }
   </section>
 
   <section class="share__section">
-    <h3 class="share__subtitle">Le QR code</h3>
-    <p class="share__text">
+    <h3 class="share__subtitle" i18n="@@owner.listings.share-qr-title">Le QR code</h3>
+    <p class="share__text" i18n="@@owner.listings.share-qr-text">
       Imprimez-le et collez-le sur la vitre ou la porte : les passants voient vos dates libres avec
       leur téléphone.
     </p>
     <div class="share__qr" [attr.aria-busy]="null === qrImage()">
       @if (qrImage(); as src) {
-        <img class="share__qr-image" [src]="src" alt="QR code de l'annonce" />
+        <img
+          class="share__qr-image"
+          [src]="src"
+          alt="QR code de l'annonce"
+          i18n-alt="@@owner.listings.share-qr-alt"
+        />
       }
     </div>
-    <button type="button" class="share__button share__button--secondary" (click)="download()">
+    <button
+      type="button"
+      class="share__button share__button--secondary"
+      (click)="download()"
+      i18n="@@owner.listings.share-qr-download"
+    >
       Télécharger le QR code à imprimer
     </button>
   </section>

@@ -126,7 +126,7 @@ export class ListingShare {
     context.fillStyle = '#0f3b55';
     context.font = `700 ${Math.round(PNG_CELL * 2.2)}px Helvetica, Arial, sans-serif`;
     context.fillText(
-      'Dates libres et tarifs',
+      $localize`:@@owner.listings.qr-caption:Dates libres et tarifs`,
       size / 2,
       size + PNG_CELL * 1.5,
       size - 2 * PNG_CELL,

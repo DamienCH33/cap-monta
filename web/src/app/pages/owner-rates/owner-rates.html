@@ -1,35 +1,49 @@
 <div class="container rates-page">
-  <nav class="rates-page__breadcrumb" aria-label="Fil d'Ariane">
-    <a routerLink="/mon-espace">Mon espace</a>
+  <nav
+    class="rates-page__breadcrumb"
+    aria-label="Fil d'Ariane"
+    i18n-aria-label="@@owner.rates.breadcrumb-label"
+  >
+    <a routerLink="/mon-espace" i18n="@@owner.rates.breadcrumb-space">Mon espace</a>
     <span aria-hidden="true">›</span>
-    <a routerLink="/mon-espace/logements">Mes logements</a>
+    <a routerLink="/mon-espace/logements" i18n="@@owner.rates.breadcrumb-accommodations"
+      >Mes logements</a
+    >
     <span aria-hidden="true">›</span>
-    <span aria-current="page">Tarifs</span>
+    <span aria-current="page" i18n="@@owner.rates.title">Tarifs</span>
   </nav>
 
   <header class="rates-page__header">
     <div>
-      <h1 class="rates-page__heading">Tarifs</h1>
+      <h1 class="rates-page__heading" i18n="@@owner.rates.title">Tarifs</h1>
       <p class="rates-page__subtitle">{{ title() }}</p>
     </div>
     <div class="rates-page__links">
       @if (assistantAvailable()) {
-        <a routerLink="/mon-espace/importer" [queryParams]="{ logement: slug }">
+        <a
+          routerLink="/mon-espace/importer"
+          [queryParams]="{ logement: slug }"
+          i18n="@@owner.rates.import-link"
+        >
           Importer depuis mon annonce
         </a>
       }
-      <a class="rates-page__calendar" [routerLink]="['/mon-espace/logements', slug, 'calendrier']">
+      <a
+        class="rates-page__calendar"
+        [routerLink]="['/mon-espace/logements', slug, 'calendrier']"
+        i18n="@@owner.rates.calendar-link"
+      >
         Voir le calendrier
       </a>
     </div>
   </header>
 
   @if (loadFailed()) {
-    <p class="auth__notice auth__notice--error" role="alert">
+    <p class="auth__notice auth__notice--error" role="alert" i18n="@@owner.rates.load-failed">
       Impossible de charger vos tarifs. Rechargez la page.
     </p>
   } @else if (rates(); as current) {
-    <p class="rates-page__help">
+    <p class="rates-page__help" i18n="@@owner.rates.help">
       Un prix à la semaine, à la nuit, ou les deux. Le minimum de nuits est une règle : une demande
       plus courte est refusée. La préférence du samedi est un souhait : la demande part quand même,
       signalée « hors de vos règles ». Entre deux périodes, le prix est « à convenir » : vous le
@@ -45,7 +59,7 @@
 
     @if (copy(); as suggestion) {
       <section class="copy">
-        <p class="copy__text">
+        <p class="copy__text" i18n="@@owner.rates.copy-text">
           <strong>Vos tarifs {{ suggestion.to }} ne sont pas encore saisis.</strong>
           Reprenez ceux de {{ suggestion.from }} en un clic : les dates glissent d'un an en gardant
           les mêmes jours de la semaine (un samedi reste un samedi).
@@ -55,6 +69,7 @@
           class="button button--secondary"
           [disabled]="saving()"
           (click)="copyYear(suggestion.from, suggestion.to)"
+          i18n="@@owner.rates.copy-button"
         >
           Reprendre les tarifs de {{ suggestion.from }}
         </button>
@@ -72,33 +87,38 @@
               </div>
               <div class="period__prices">
                 @if (period.weeklyPrice) {
-                  <span
+                  <span i18n="@@owner.rates.weekly-price"
                     ><strong>{{ toEuros(period.weeklyPrice) }} €</strong> / semaine</span
                   >
                 }
                 @if (period.nightlyPrice) {
-                  <span
+                  <span i18n="@@owner.rates.nightly-price"
                     ><strong>{{ toEuros(period.nightlyPrice) }} €</strong> / nuit</span
                   >
                 }
               </div>
               <div class="period__rules">
-                <span
-                  >min. {{ period.minimumNights }}
-                  {{ period.minimumNights > 1 ? 'nuits' : 'nuit' }}</span
-                >
+                <span i18n="@@owner.rates.minimum-nights">{period.minimumNights, plural,
+                  =1 {min. 1 nuit}
+                  other {min. {{ period.minimumNights }} nuits}
+                }</span>
                 @if (period.saturdayArrival) {
-                  <span class="period__badge">arrivée le samedi</span>
+                  <span class="period__badge" i18n="@@owner.rates.saturday-badge"
+                    >arrivée le samedi</span
+                  >
                 }
               </div>
               <div class="period__actions">
                 @if (confirmDelete() === period.id) {
-                  <span class="period__confirm">Supprimer ?</span>
+                  <span class="period__confirm" i18n="@@owner.rates.delete-confirm"
+                    >Supprimer ?</span
+                  >
                   <button
                     type="button"
                     class="button button--danger button--small"
                     [disabled]="saving()"
                     (click)="remove(period)"
+                    i18n="@@owner.rates.delete-yes"
                   >
                     Oui
                   </button>
@@ -106,17 +126,24 @@
                     type="button"
                     class="button button--ghost button--small"
                     (click)="confirmDelete.set(null)"
+                    i18n="@@owner.rates.delete-no"
                   >
                     Non
                   </button>
                 } @else {
-                  <button type="button" class="button button--link" (click)="edit(period)">
+                  <button
+                    type="button"
+                    class="button button--link"
+                    (click)="edit(period)"
+                    i18n="@@owner.rates.edit"
+                  >
                     Modifier
                   </button>
                   <button
                     type="button"
                     class="button button--link button--muted"
                     (click)="confirmDelete.set(period.id)"
+                    i18n="@@owner.rates.delete"
                   >
                     Supprimer
                   </button>
@@ -127,7 +154,7 @@
         </ul>
       </section>
     } @empty {
-      <p class="rates-page__empty">
+      <p class="rates-page__empty" i18n="@@owner.rates.empty">
         Aucun tarif pour l'instant : les demandes arrivent avec un prix « à convenir ». Ajoutez vos
         périodes, votre annonce affichera un prix « à partir de » dans la recherche.
       </p>
@@ -135,11 +162,17 @@
 
     @if (draft(); as current) {
       <form class="editor" (ngSubmit)="save()">
-        <h2 class="editor__title">{{ current.id ? 'Modifier la période' : 'Nouvelle période' }}</h2>
+        <h2 class="editor__title">
+          @if (current.id) {
+            <ng-container i18n="@@owner.rates.editor-title-edit">Modifier la période</ng-container>
+          } @else {
+            <ng-container i18n="@@owner.rates.editor-title-new">Nouvelle période</ng-container>
+          }
+        </h2>
 
         <div class="editor__grid">
           <label class="field">
-            <span class="field__label">Du</span>
+            <span class="field__label" i18n="@@owner.rates.field-start">Du</span>
             <input
               type="date"
               name="start"
@@ -149,7 +182,7 @@
             />
           </label>
           <label class="field">
-            <span class="field__label">Au (jour du départ)</span>
+            <span class="field__label" i18n="@@owner.rates.field-end">Au (jour du départ)</span>
             <input
               type="date"
               name="end"
@@ -159,7 +192,9 @@
             />
           </label>
           <label class="field">
-            <span class="field__label">Prix à la semaine (€)</span>
+            <span class="field__label" i18n="@@owner.rates.field-weekly"
+              >Prix à la semaine (€)</span
+            >
             <input
               type="number"
               name="weekly"
@@ -167,12 +202,13 @@
               step="1"
               inputmode="numeric"
               placeholder="ex. 650"
+              i18n-placeholder="@@owner.rates.weekly-placeholder"
               [ngModel]="current.weekly"
               (ngModelChange)="patch({ weekly: $event })"
             />
           </label>
           <label class="field">
-            <span class="field__label">Prix à la nuit (€)</span>
+            <span class="field__label" i18n="@@owner.rates.field-nightly">Prix à la nuit (€)</span>
             <input
               type="number"
               name="nightly"
@@ -180,12 +216,15 @@
               step="1"
               inputmode="numeric"
               placeholder="facultatif"
+              i18n-placeholder="@@owner.rates.nightly-placeholder"
               [ngModel]="current.nightly"
               (ngModelChange)="patch({ nightly: $event })"
             />
           </label>
           <label class="field">
-            <span class="field__label">Minimum de nuits</span>
+            <span class="field__label" i18n="@@owner.rates.field-minimum-nights"
+              >Minimum de nuits</span
+            >
             <input
               type="number"
               name="minimumNights"
@@ -201,13 +240,13 @@
         </div>
 
         @if (current.weekly && !current.nightly) {
-          <p class="editor__hint">
+          <p class="editor__hint" i18n="@@owner.rates.nightly-derived-hint">
             Sans prix à la nuit, une nuit coûte 1/7 de la semaine, soit
             {{ nightlyEuros(current.weekly) }} € : un séjour de 4 nuits revient à
             {{ nightlyEuros(current.weekly) * 4 }} € environ.
           </p>
         }
-        <p class="editor__hint">
+        <p class="editor__hint" i18n="@@owner.rates.departure-day-hint">
           Le jour du départ n'est pas compté : du samedi 3 au samedi 10, c'est une semaine. Deux
           périodes peuvent se suivre sur le même samedi.
         </p>
@@ -220,8 +259,8 @@
             (ngModelChange)="patch({ saturdayArrival: $event })"
           />
           <span>
-            <strong>Arrivée le samedi de préférence</strong>
-            <span class="check__hint">
+            <strong i18n="@@owner.rates.saturday-label">Arrivée le samedi de préférence</strong>
+            <span class="check__hint" i18n="@@owner.rates.saturday-hint">
               Les voyageurs le voient. Une demande qui arrive un autre jour est envoyée quand même,
               signalée « hors de vos règles ».
             </span>
@@ -234,13 +273,24 @@
 
         <div class="editor__actions">
           <button type="submit" class="button" [disabled]="saving()">
-            {{ saving() ? 'Enregistrement…' : 'Enregistrer la période' }}
+            @if (saving()) {
+              <ng-container i18n="@@owner.rates.saving">Enregistrement…</ng-container>
+            } @else {
+              <ng-container i18n="@@owner.rates.save">Enregistrer la période</ng-container>
+            }
           </button>
-          <button type="button" class="button button--ghost" (click)="cancel()">Annuler</button>
+          <button
+            type="button"
+            class="button button--ghost"
+            (click)="cancel()"
+            i18n="@@owner.rates.cancel"
+          >
+            Annuler
+          </button>
         </div>
       </form>
     } @else {
-      <button type="button" class="button rates-page__add" (click)="add()">
+      <button type="button" class="button rates-page__add" (click)="add()" i18n="@@owner.rates.add">
         + Ajouter une période
       </button>
     }
@@ -252,12 +302,20 @@
           class="button button--link button--muted"
           (click)="showPast.set(!showPast())"
         >
-          {{ showPast() ? 'Masquer' : 'Afficher' }} les périodes passées ({{ past().length }})
+          @if (showPast()) {
+            <ng-container i18n="@@owner.rates.past-hide"
+              >Masquer les périodes passées ({{ past().length }})</ng-container
+            >
+          } @else {
+            <ng-container i18n="@@owner.rates.past-show"
+              >Afficher les périodes passées ({{ past().length }})</ng-container
+            >
+          }
         </button>
         @if (showPast()) {
           <ul class="past__list">
             @for (period of past(); track period.id) {
-              <li>
+              <li i18n="@@owner.rates.past-item">
                 {{ period.start | date: 'd MMM yyyy' }} → {{ period.end | date: 'd MMM yyyy' }} ·
                 @if (period.weeklyPrice) {
                   {{ toEuros(period.weeklyPrice) }} € / sem.

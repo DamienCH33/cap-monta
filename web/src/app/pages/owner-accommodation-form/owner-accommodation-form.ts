@@ -19,7 +19,6 @@ import {
   DistrictOption,
   NewAccommodation,
   OwnerAccommodation,
-  plural,
   statusLabel,
 } from '../../core/models/owner-accommodation';
 import { PETS_POLICIES, PetsPolicy } from '../../core/models/accommodation';
@@ -117,23 +116,22 @@ const MIN_DESCRIPTION = 50;
 
 /** Messages du navigateur : les mêmes que ceux de l'API, pour ne pas surprendre. */
 const MESSAGES: Record<Field, string> = {
-  resort: 'Choisissez le domaine.',
-  type: 'Choisissez le type de logement.',
-  capacity: 'La capacité doit être comprise entre 1 et 12 personnes.',
-  bedrooms: 'Le nombre de chambres doit être compris entre 0 et 6.',
-  district: 'Quartier inconnu pour ce domaine.',
-  surface: 'Indiquez une surface en m² entiers, entre 5 et 200 (par exemple 40).',
-  amenities: 'Pas plus de 20 équipements.',
-  petsPolicy: 'Choisissez une règle pour les animaux.',
-  terms:
-    'Vérifiez les conditions : montants en euros (par exemple 0,88), acompte entre 0 et 100 %.',
-  description: 'La description ne peut pas dépasser 5000 caractères.',
+  resort: $localize`:@@owner.form.error.resort:Choisissez le domaine.`,
+  type: $localize`:@@owner.form.error.type:Choisissez le type de logement.`,
+  capacity: $localize`:@@owner.form.error.capacity:La capacité doit être comprise entre 1 et 12 personnes.`,
+  bedrooms: $localize`:@@owner.form.error.bedrooms:Le nombre de chambres doit être compris entre 0 et 6.`,
+  district: $localize`:@@owner.form.error.district:Quartier inconnu pour ce domaine.`,
+  surface: $localize`:@@owner.form.error.surface:Indiquez une surface en m² entiers, entre 5 et 200 (par exemple 40).`,
+  amenities: $localize`:@@owner.form.error.amenities:Pas plus de 20 équipements.`,
+  petsPolicy: $localize`:@@owner.form.error.pets-policy:Choisissez une règle pour les animaux.`,
+  terms: $localize`:@@owner.form.error.terms:Vérifiez les conditions : montants en euros (par exemple 0,88), acompte entre 0 et 100 %.`,
+  description: $localize`:@@owner.form.error.description-too-long:La description ne peut pas dépasser 5000 caractères.`,
 };
 
 const SUCCESS: Record<Intent, string> = {
-  publish: 'Votre annonce est en ligne.',
-  draft: 'Brouillon enregistré. Vous pourrez le reprendre à tout moment.',
-  save: 'Modifications enregistrées.',
+  publish: $localize`:@@owner.form.success.publish:Votre annonce est en ligne.`,
+  draft: $localize`:@@owner.form.success.draft:Brouillon enregistré. Vous pourrez le reprendre à tout moment.`,
+  save: $localize`:@@owner.form.success.save:Modifications enregistrées.`,
 };
 
 const LIMITS = {
@@ -171,11 +169,11 @@ export class OwnerAccommodationForm {
   ];
 
   readonly types = [
-    { value: 'mobile_home', label: 'Mobil-home' },
-    { value: 'bungalow', label: 'Bungalow' },
-    { value: 'caravan', label: 'Caravane' },
-    { value: 'chalet', label: 'Chalet' },
-    { value: 'studio', label: 'Studio' },
+    { value: 'mobile_home', label: $localize`:@@owner.form.type.mobile-home:Mobil-home` },
+    { value: 'bungalow', label: $localize`:@@owner.form.type.bungalow:Bungalow` },
+    { value: 'caravan', label: $localize`:@@owner.form.type.caravan:Caravane` },
+    { value: 'chalet', label: $localize`:@@owner.form.type.chalet:Chalet` },
+    { value: 'studio', label: $localize`:@@owner.form.type.studio:Studio` },
   ];
 
   /** La même liste que le filtre de la recherche : une annonce doit être trouvée par ce filtre. */
@@ -187,7 +185,6 @@ export class OwnerAccommodationForm {
   readonly petsPolicies = PETS_POLICIES;
   readonly limits = LIMITS;
   readonly minDescription = MIN_DESCRIPTION;
-  readonly plural = plural;
   readonly statusLabel = statusLabel;
 
   readonly form = inject(FormBuilder).nonNullable.group({
@@ -256,23 +253,33 @@ export class OwnerAccommodationForm {
 
   readonly title = computed(() => {
     if (null === this.slug) {
-      return 'Ajouter un logement';
+      return $localize`:@@owner.form.title.add:Ajouter un logement`;
     }
 
-    return 'draft' === this.status() ? "Continuer l'annonce" : "Modifier l'annonce";
+    return 'draft' === this.status()
+      ? $localize`:@@owner.form.title.continue:Continuer l'annonce`
+      : $localize`:@@owner.form.title.edit:Modifier l'annonce`;
   });
 
   /** Le bouton principal, selon l'état de l'annonce. */
   readonly primary = computed<{ intent: Intent; label: string } | null>(() => {
     switch (this.status()) {
       case 'published':
-        return { intent: 'save', label: 'Enregistrer les modifications' };
+        return {
+          intent: 'save',
+          label: $localize`:@@owner.form.action.save-changes:Enregistrer les modifications`,
+        };
       case 'archived':
         return this.canPublish()
-          ? { intent: 'publish', label: 'Enregistrer et remettre en ligne' }
+          ? {
+              intent: 'publish',
+              label: $localize`:@@owner.form.action.save-republish:Enregistrer et remettre en ligne`,
+            }
           : null;
       default:
-        return this.canPublish() ? { intent: 'publish', label: "Publier l'annonce" } : null;
+        return this.canPublish()
+          ? { intent: 'publish', label: $localize`:@@owner.form.action.publish:Publier l'annonce` }
+          : null;
     }
   });
 
@@ -282,9 +289,12 @@ export class OwnerAccommodationForm {
       case 'published':
         return null;
       case 'archived':
-        return { intent: 'save', label: 'Enregistrer' };
+        return { intent: 'save', label: $localize`:@@owner.form.action.save:Enregistrer` };
       default:
-        return { intent: 'draft', label: 'Enregistrer le brouillon' };
+        return {
+          intent: 'draft',
+          label: $localize`:@@owner.form.action.save-draft:Enregistrer le brouillon`,
+        };
     }
   });
 
@@ -308,7 +318,7 @@ export class OwnerAccommodationForm {
   /** Message sous la section Photos quand la publication est demandée sans photo. */
   readonly photosError = computed(() =>
     this.submitted() && this.checkPublication() && 0 === this.photoCount()
-      ? 'Ajoutez au moins une photo pour publier.'
+      ? $localize`:@@owner.form.error.photos-required:Ajoutez au moins une photo pour publier.`
       : null,
   );
 
@@ -334,7 +344,7 @@ export class OwnerAccommodationForm {
       return throwError(
         () =>
           new Error(
-            "Choisissez d'abord le domaine et le type de logement : l'annonce est enregistrée en brouillon pour recevoir vos photos.",
+            $localize`:@@owner.form.error.photos-need-basics:Choisissez d'abord le domaine et le type de logement : l'annonce est enregistrée en brouillon pour recevoir vos photos.`,
           ),
       );
     }
@@ -345,7 +355,9 @@ export class OwnerAccommodationForm {
         this.form.controls.resort.disable();
         // L'adresse devient celle du brouillon, sans recharger la page ni perdre la saisie.
         this.location.replaceState(`/mon-espace/logements/${created.slug}/modifier`);
-        this.notice.set('Brouillon enregistré automatiquement pour recevoir vos photos.');
+        this.notice.set(
+          $localize`:@@owner.form.notice.draft-autosaved:Brouillon enregistré automatiquement pour recevoir vos photos.`,
+        );
       }),
       map((created) => created.slug),
     );
@@ -353,8 +365,11 @@ export class OwnerAccommodationForm {
 
   constructor() {
     inject(SeoService).apply({
-      title: null === this.slug ? 'Ajouter un logement' : "Modifier l'annonce",
-      description: 'Décrivez votre logement et publiez votre annonce.',
+      title:
+        null === this.slug
+          ? $localize`:@@owner.form.title.add:Ajouter un logement`
+          : $localize`:@@owner.form.title.edit:Modifier l'annonce`,
+      description: $localize`:@@owner.form.seo-description:Décrivez votre logement et publiez votre annonce.`,
       path: '/mon-espace/logements',
       noindex: true,
     });
@@ -446,7 +461,7 @@ export class OwnerAccommodationForm {
 
     if (FIELDS.some((field) => null !== this.error(field)) || null !== this.photosError()) {
       this.generalError.set(
-        'Certaines informations sont à compléter : voir les messages en rouge.',
+        $localize`:@@owner.form.error.incomplete:Certaines informations sont à compléter : voir les messages en rouge.`,
       );
       return;
     }
@@ -516,10 +531,10 @@ export class OwnerAccommodationForm {
     const value = this.form.getRawValue();
 
     if ('description' === field && value.description.trim().length < MIN_DESCRIPTION) {
-      return `Ajoutez une description d'au moins ${MIN_DESCRIPTION} caractères pour publier.`;
+      return $localize`:@@owner.form.error.description-too-short:Ajoutez une description d'au moins ${MIN_DESCRIPTION}:minLength: caractères pour publier.`;
     }
     if ('district' === field && 'chm' === value.resort && '' === value.district) {
-      return 'Choisissez le quartier pour publier.';
+      return $localize`:@@owner.form.error.district-required:Choisissez le quartier pour publier.`;
     }
 
     return null;
@@ -593,7 +608,11 @@ export class OwnerAccommodationForm {
     error: HttpErrorResponse,
     created: boolean,
   ): void {
-    const message = `Votre annonce est enregistrée en brouillon, mais n'a pas pu être publiée : ${apiErrorMessage(error, 'réessayez dans un instant.')}`;
+    const reason = apiErrorMessage(
+      error,
+      $localize`:@@owner.form.error.publish-retry:réessayez dans un instant.`,
+    );
+    const message = $localize`:@@owner.form.error.publish-refused:Votre annonce est enregistrée en brouillon, mais n'a pas pu être publiée : ${reason}:reason:`;
 
     if (created) {
       // Le brouillon existe maintenant : on continue sur sa page, sans rien perdre.
@@ -618,9 +637,16 @@ export class OwnerAccommodationForm {
           Record<Field, string>
         >,
       );
-      this.generalError.set('Certaines informations sont à corriger : voir les messages en rouge.');
+      this.generalError.set(
+        $localize`:@@owner.form.error.invalid:Certaines informations sont à corriger : voir les messages en rouge.`,
+      );
     } else {
-      this.generalError.set(apiErrorMessage(error, "L'enregistrement n'a pas abouti. Réessayez."));
+      this.generalError.set(
+        apiErrorMessage(
+          error,
+          $localize`:@@owner.form.error.save-failed:L'enregistrement n'a pas abouti. Réessayez.`,
+        ),
+      );
     }
   }
 }

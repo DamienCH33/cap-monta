@@ -1,10 +1,10 @@
 <div class="photos">
   <label class="photos__consent">
     <input type="checkbox" [checked]="noPeople()" (change)="onConsent($event)" />
-    <span>
+    <span i18n="@@owner.form.photos.consent">
       <strong>Aucune personne n'apparaît sur ces photos.</strong>
-      Les domaines sont naturistes : par respect pour la vie privée de chacun, seules les photos
-      du logement et de ses abords sont acceptées.
+      Les domaines sont naturistes : par respect pour la vie privée de chacun, seules les photos du
+      logement et de ses abords sont acceptées.
     </span>
   </label>
 
@@ -18,12 +18,18 @@
   >
     <cm-icon class="photos__drop-icon" name="upload" />
     @if (full()) {
-      <p class="photos__drop-title">{{ max }} photos : c'est le maximum.</p>
-      <p class="photos__drop-hint">Supprimez-en une pour en ajouter une autre.</p>
+      <p class="photos__drop-title" i18n="@@owner.form.photos.full">
+        {{ max }} photos : c'est le maximum.
+      </p>
+      <p class="photos__drop-hint" i18n="@@owner.form.photos.full-hint">
+        Supprimez-en une pour en ajouter une autre.
+      </p>
     } @else {
-      <p class="photos__drop-title">Glissez vos photos ici</p>
+      <p class="photos__drop-title" i18n="@@owner.form.photos.drop">Glissez vos photos ici</p>
       <label class="photos__pick" [class.photos__pick--disabled]="!canAdd()">
-        ou choisissez-les sur votre appareil
+        <ng-container i18n="@@owner.form.photos.pick"
+          >ou choisissez-les sur votre appareil</ng-container
+        >
         <input
           type="file"
           multiple
@@ -34,9 +40,13 @@
       </label>
       <p class="photos__drop-hint">
         @if (noPeople()) {
-          JPEG, PNG ou WebP · 10 Mo maximum par photo
+          <ng-container i18n="@@owner.form.photos.formats"
+            >JPEG, PNG ou WebP · 10 Mo maximum par photo</ng-container
+          >
         } @else {
-          Cochez d'abord la case ci-dessus.
+          <ng-container i18n="@@owner.form.photos.consent-first"
+            >Cochez d'abord la case ci-dessus.</ng-container
+          >
         }
       </p>
     }
@@ -47,9 +57,11 @@
   }
 
   <p class="photos__count" aria-live="polite">
-    {{ total() }} / {{ max }} photos
+    <ng-container i18n="@@owner.form.photos.count">{{ total() }} / {{ max }} photos</ng-container>
     @if (total() < recommended) {
-      <span class="photos__tip">· {{ recommended }} photos ou plus rendent une annonce bien plus attractive</span>
+      <span class="photos__tip" i18n="@@owner.form.photos.tip"
+        >· {{ recommended }} photos ou plus rendent une annonce bien plus attractive</span
+      >
     }
   </p>
 
@@ -62,21 +74,39 @@
             [src]="photo.thumbUrl"
             [attr.width]="photo.width"
             [attr.height]="photo.height"
-            [alt]="'Photo ' + (i + 1) + ' du logement'"
+            [alt]="photoAlt(i)"
             loading="lazy"
           />
           @if (first) {
-            <span class="photos__cover">Couverture</span>
+            <span class="photos__cover" i18n="@@owner.form.photos.cover">Couverture</span>
           }
 
           @if (confirming() === photo.id) {
-            <div class="photos__overlay" role="group" aria-label="Confirmer la suppression">
-              <p>Supprimer cette photo ?</p>
+            <div
+              class="photos__overlay"
+              role="group"
+              aria-label="Confirmer la suppression"
+              i18n-aria-label="@@owner.form.photos.confirm-delete-label"
+            >
+              <p i18n="@@owner.form.photos.confirm-delete">Supprimer cette photo ?</p>
               <div class="photos__overlay-actions">
-                <button type="button" class="photos__confirm-yes" [disabled]="busy()" (click)="remove(photo)">
+                <button
+                  type="button"
+                  class="photos__confirm-yes"
+                  [disabled]="busy()"
+                  (click)="remove(photo)"
+                  i18n="@@owner.form.photos.delete"
+                >
                   Supprimer
                 </button>
-                <button type="button" class="photos__confirm-no" (click)="confirming.set(null)">Garder</button>
+                <button
+                  type="button"
+                  class="photos__confirm-no"
+                  (click)="confirming.set(null)"
+                  i18n="@@owner.form.photos.keep"
+                >
+                  Garder
+                </button>
               </div>
             </div>
           } @else {
@@ -86,10 +116,11 @@
                   type="button"
                   class="photos__tool photos__tool--wide"
                   [disabled]="busy()"
-                  [attr.aria-label]="'Mettre la photo ' + (i + 1) + ' en couverture'"
+                  [attr.aria-label]="coverLabel(i)"
                   (click)="makeCover(i)"
                 >
-                  <cm-icon name="star" /> Couverture
+                  <cm-icon name="star" />
+                  <ng-container i18n="@@owner.form.photos.cover">Couverture</ng-container>
                 </button>
               }
               <span class="photos__spacer"></span>
@@ -97,8 +128,9 @@
                 type="button"
                 class="photos__tool"
                 [disabled]="busy() || first"
-                [attr.aria-label]="'Avancer la photo ' + (i + 1)"
+                [attr.aria-label]="forwardLabel(i)"
                 title="Avancer"
+                i18n-title="@@owner.form.photos.forward"
                 (click)="move(i, -1)"
               >
                 <cm-icon name="chevron-left" />
@@ -107,8 +139,9 @@
                 type="button"
                 class="photos__tool"
                 [disabled]="busy() || last"
-                [attr.aria-label]="'Reculer la photo ' + (i + 1)"
+                [attr.aria-label]="backwardLabel(i)"
                 title="Reculer"
+                i18n-title="@@owner.form.photos.backward"
                 (click)="move(i, 1)"
               >
                 <cm-icon name="chevron-right" />
@@ -117,8 +150,9 @@
                 type="button"
                 class="photos__tool photos__tool--danger"
                 [disabled]="busy()"
-                [attr.aria-label]="'Supprimer la photo ' + (i + 1)"
+                [attr.aria-label]="deleteLabel(i)"
                 title="Supprimer"
+                i18n-title="@@owner.form.photos.delete"
                 (click)="confirming.set(photo.id)"
               >
                 <cm-icon name="trash" />
@@ -139,10 +173,18 @@
               <div class="photos__overlay-actions">
                 @if (upload.retryable) {
                   <button type="button" class="photos__confirm-yes" (click)="retry(upload)">
-                    <cm-icon name="refresh" /> Réessayer
+                    <cm-icon name="refresh" />
+                    <ng-container i18n="@@owner.form.photos.retry">Réessayer</ng-container>
                   </button>
                 }
-                <button type="button" class="photos__confirm-no" (click)="discard(upload)">Retirer</button>
+                <button
+                  type="button"
+                  class="photos__confirm-no"
+                  (click)="discard(upload)"
+                  i18n="@@owner.form.photos.discard"
+                >
+                  Retirer
+                </button>
               </div>
             </div>
           } @else {
@@ -151,6 +193,7 @@
                 class="photos__bar"
                 role="progressbar"
                 aria-label="Envoi de la photo"
+                i18n-aria-label="@@owner.form.photos.progress-label"
                 aria-valuemin="0"
                 aria-valuemax="100"
                 [attr.aria-valuenow]="upload.progress"
@@ -158,7 +201,15 @@
                 <span [style.width.%]="upload.progress"></span>
               </div>
               <span class="photos__progress-label">
-                {{ !upload.sending ? 'En attente…' : upload.progress < 100 ? 'Envoi… ' + upload.progress + ' %' : 'Préparation…' }}
+                @if (!upload.sending) {
+                  <ng-container i18n="@@owner.form.photos.waiting">En attente…</ng-container>
+                } @else if (upload.progress < 100) {
+                  <ng-container i18n="@@owner.form.photos.sending"
+                    >Envoi… {{ upload.progress }} %</ng-container
+                  >
+                } @else {
+                  <ng-container i18n="@@owner.form.photos.processing">Préparation…</ng-container>
+                }
               </span>
             </div>
           }

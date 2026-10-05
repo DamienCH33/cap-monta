@@ -32,8 +32,8 @@ export class ResetPassword {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Nouveau mot de passe',
-      description: 'Choisissez un nouveau mot de passe pour votre compte.',
+      title: $localize`:@@owner.entry.reset-title:Nouveau mot de passe`,
+      description: $localize`:@@owner.entry.seo-reset-description:Choisissez un nouveau mot de passe pour votre compte.`,
       path: '/nouveau-mot-de-passe',
       noindex: true,
     });

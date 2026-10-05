@@ -17,16 +17,28 @@
       <span class="row__state">
         <span class="pill" [class.pill--stale]="!item.calendarUpToDate">
           <cm-icon [name]="item.calendarUpToDate ? 'calendar-check' : 'alert-circle'" />
-          {{ item.calendarUpToDate ? 'À jour' : 'À vérifier' }}
+          @if (item.calendarUpToDate) {
+            <ng-container i18n="@@owner.home.calendar-up-to-date">À jour</ng-container>
+          } @else {
+            <ng-container i18n="@@owner.home.calendar-to-check">À vérifier</ng-container>
+          }
         </span>
         <span class="row__date">{{ checkedLabel(item.calendarCheckedAt) }}</span>
       </span>
 
       <span class="row__tools">
-        <a class="tool" [routerLink]="['/mon-espace/logements', item.slug, 'calendrier']">
+        <a
+          class="tool"
+          [routerLink]="['/mon-espace/logements', item.slug, 'calendrier']"
+          i18n="@@owner.common.tool-calendar"
+        >
           <cm-icon name="calendar" /> Calendrier
         </a>
-        <a class="tool" [routerLink]="['/mon-espace/logements', item.slug, 'tarifs']">
+        <a
+          class="tool"
+          [routerLink]="['/mon-espace/logements', item.slug, 'tarifs']"
+          i18n="@@owner.common.tool-rates"
+        >
           <cm-icon name="currency-euro" /> Tarifs
         </a>
       </span>

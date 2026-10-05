@@ -81,8 +81,8 @@ export class OwnerRates {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Tarifs',
-      description: 'Vos tarifs par période.',
+      title: $localize`:@@owner.rates.title:Tarifs`,
+      description: $localize`:@@owner.rates.seo-description:Vos tarifs par période.`,
       path: '/mon-espace/logements',
       noindex: true,
     });
@@ -171,7 +171,9 @@ export class OwnerRates {
 
     // Rien à envoyer : on le dit ici plutôt que d'attendre le refus de l'API.
     if (null === input.weeklyPrice && null === input.nightlyPrice) {
-      this.error.set('Indiquez au moins un prix : à la semaine ou à la nuit.');
+      this.error.set(
+        $localize`:@@owner.rates.price-required:Indiquez au moins un prix : à la semaine ou à la nuit.`,
+      );
 
       return;
     }
@@ -185,8 +187,8 @@ export class OwnerRates {
       this.draft.set(null);
       this.notice.set(
         null === draft.id
-          ? 'Période ajoutée : elle apparaît déjà sur votre annonce.'
-          : 'Période modifiée.',
+          ? $localize`:@@owner.rates.notice-added:Période ajoutée : elle apparaît déjà sur votre annonce.`
+          : $localize`:@@owner.rates.notice-updated:Période modifiée.`,
       );
     });
   }
@@ -195,7 +197,7 @@ export class OwnerRates {
     this.run(this.service.remove(this.slug, period.id), () => {
       this.confirmDelete.set(null);
       this.notice.set(
-        'Période supprimée. Sur ces dates, les demandes arriveront avec un prix « à convenir ».',
+        $localize`:@@owner.rates.notice-removed:Période supprimée. Sur ces dates, les demandes arriveront avec un prix « à convenir ».`,
       );
     });
   }
@@ -204,13 +206,18 @@ export class OwnerRates {
     this.run(this.service.copy(this.slug, from), (rates) => {
       const copied = rates.copied ?? 0;
       const skipped = rates.skipped ?? 0;
+      const done =
+        1 === copied
+          ? $localize`:@@owner.rates.copy-done-one:1 période de ${from}:fromYear: recopiée sur ${to}:toYear:, aux mêmes jours de la semaine. Ajustez les prix si besoin.`
+          : $localize`:@@owner.rates.copy-done-other:${copied}:count: périodes de ${from}:fromYear: recopiées sur ${to}:toYear:, aux mêmes jours de la semaine. Ajustez les prix si besoin.`;
+      const ignored =
+        1 === skipped
+          ? $localize`:@@owner.rates.copy-skipped-one:1 ignorée (déjà couverte ou passée).`
+          : $localize`:@@owner.rates.copy-skipped-other:${skipped}:count: ignorées (déjà couvertes ou passées).`;
       this.notice.set(
         0 === copied
-          ? `Rien à recopier : les dates de ${to} sont déjà couvertes.`
-          : `${copied} période${copied > 1 ? 's' : ''} de ${from} recopiée${copied > 1 ? 's' : ''} sur ${to}, aux mêmes jours de la semaine. Ajustez les prix si besoin.` +
-              (skipped
-                ? ` ${skipped} ignorée${skipped > 1 ? 's' : ''} (déjà couverte${skipped > 1 ? 's' : ''} ou passée${skipped > 1 ? 's' : ''}).`
-                : ''),
+          ? $localize`:@@owner.rates.copy-none:Rien à recopier : les dates de ${to}:toYear: sont déjà couvertes.`
+          : done + (skipped ? ` ${ignored}` : ''),
       );
     });
   }
@@ -234,7 +241,12 @@ export class OwnerRates {
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
-        this.error.set(apiErrorMessage(error, 'L’enregistrement a échoué. Réessayez.'));
+        this.error.set(
+          apiErrorMessage(
+            error,
+            $localize`:@@owner.rates.save-failed:L’enregistrement a échoué. Réessayez.`,
+          ),
+        );
       },
     });
   }

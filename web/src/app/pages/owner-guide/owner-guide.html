@@ -1,7 +1,7 @@
 <div class="static-page">
   <header class="static-page__header">
-    <h1 class="static-page__title">Publier votre logement, pas à pas</h1>
-    <p class="static-page__lead">
+    <h1 class="static-page__title" i18n="@@owner.guide.title">Publier votre logement, pas à pas</h1>
+    <p class="static-page__lead" i18n="@@owner.guide.lead">
       Comptez 10 minutes, sur ordinateur ou sur téléphone. Préparez le texte de votre annonce
       actuelle (Leboncoin, un autre site, un groupe Facebook…) et quelques photos du logement, sans
       personne dessus.
@@ -9,28 +9,32 @@
   </header>
 
   <section class="static-page__section">
-    <h2>Les six étapes</h2>
+    <h2 i18n="@@owner.guide.steps-title">Les six étapes</h2>
 
     <ol class="steps steps--list">
       <li class="steps__item">
-        <h3 class="steps__title">Créez votre compte</h3>
-        <p class="steps__text">
+        <h3 class="steps__title" i18n="@@owner.guide.step-account-title">Créez votre compte</h3>
+        <p class="steps__text" i18n="@@owner.guide.step-account-text">
           Sur la page <a routerLink="/inscription">Créer un compte propriétaire</a>, indiquez le nom
           affiché sur votre annonce (par exemple « Famille Martin »), votre adresse email et un mot
           de passe de 10 caractères au moins, puis cliquez sur <strong>Créer mon compte</strong>.
         </p>
       </li>
       <li class="steps__item">
-        <h3 class="steps__title">Confirmez votre adresse email</h3>
-        <p class="steps__text">
+        <h3 class="steps__title" i18n="@@owner.guide.step-confirm-email-title">
+          Confirmez votre adresse email
+        </h3>
+        <p class="steps__text" i18n="@@owner.guide.step-confirm-email-text">
           Vous recevez un email « Confirmez votre adresse — Cap Monta ». Cliquez sur son lien.
           Regardez dans les indésirables s'il n'arrive pas. Sans cette étape, vous pouvez tout
           préparer, mais pas publier.
         </p>
       </li>
       <li class="steps__item">
-        <h3 class="steps__title">Collez votre annonce actuelle</h3>
-        <p class="steps__text">
+        <h3 class="steps__title" i18n="@@owner.guide.step-paste-title">
+          Collez votre annonce actuelle
+        </h3>
+        <p class="steps__text" i18n="@@owner.guide.step-paste-text">
           Dans <strong>Mon espace → Mes logements</strong>, cliquez sur
           <strong>Collez son texte</strong> (ou <strong>Importer une annonce existante</strong> si
           vous avez déjà un logement), collez tout le texte de votre annonce, puis cliquez sur
@@ -40,8 +44,10 @@
         </p>
       </li>
       <li class="steps__item">
-        <h3 class="steps__title">Vérifiez ce qui a été rempli</h3>
-        <p class="steps__text">
+        <h3 class="steps__title" i18n="@@owner.guide.step-check-title">
+          Vérifiez ce qui a été rempli
+        </h3>
+        <p class="steps__text" i18n="@@owner.guide.step-check-text">
           Votre texte reste affiché pour comparer. Vérifiez surtout la
           <strong>capacité</strong> (obligatoire), le <strong>quartier</strong> au CHM (nécessaire
           pour publier) ou le <strong>secteur</strong> à Euronat (facultatif), vos
@@ -53,8 +59,8 @@
         </p>
       </li>
       <li class="steps__item">
-        <h3 class="steps__title">Ajoutez vos photos</h3>
-        <p class="steps__text">
+        <h3 class="steps__title" i18n="@@owner.guide.step-photos-title">Ajoutez vos photos</h3>
+        <p class="steps__text" i18n="@@owner.guide.step-photos-text">
           Vous arrivez sur la page de votre logement. Dans <strong>Photos</strong>, cochez d'abord
           <strong>Aucune personne n'apparaît sur ces photos</strong>, puis glissez vos photos ou
           choisissez-les sur votre appareil : 12 au plus, 10 Mo au plus chacune, en JPEG, PNG ou
@@ -63,8 +69,8 @@
         </p>
       </li>
       <li class="steps__item">
-        <h3 class="steps__title">Publiez</h3>
-        <p class="steps__text">
+        <h3 class="steps__title" i18n="@@owner.guide.step-publish-title">Publiez</h3>
+        <p class="steps__text" i18n="@@owner.guide.step-publish-text">
           Dans <strong>Mon espace → Mes logements</strong>, cliquez sur <strong>Publier</strong>.
           Votre logement apparaît aussitôt dans la recherche, avec ses semaines libres.
         </p>
@@ -73,43 +79,55 @@
   </section>
 
   <section class="static-page__section">
-    <h2>Si un message vous bloque</h2>
+    <h2 i18n="@@owner.guide.blocked-title">Si un message vous bloque</h2>
 
     <dl>
-      <dt>« Confirmez d'abord votre adresse email »</dt>
-      <dd>
+      <dt i18n="@@owner.guide.blocked-unverified-title">
+        « Confirmez d'abord votre adresse email »
+      </dt>
+      <dd i18n="@@owner.guide.blocked-unverified-text">
         Cliquez sur le lien de l'email reçu à l'inscription. Plus d'email ? Dans
         <strong>Mon espace</strong>, cliquez sur <strong>Renvoyer le lien</strong>.
       </dd>
 
-      <dt>« Il manque la capacité »</dt>
-      <dd>Indiquez le nombre de personnes avec les boutons − et + de <strong>Capacité</strong>.</dd>
+      <dt i18n="@@owner.guide.blocked-capacity-title">« Il manque la capacité »</dt>
+      <dd i18n="@@owner.guide.blocked-capacity-text">
+        Indiquez le nombre de personnes avec les boutons − et + de <strong>Capacité</strong>.
+      </dd>
 
-      <dt>« Choisissez le quartier du logement »</dt>
-      <dd>Au CHM, choisissez-le dans la liste <strong>Quartier</strong> de la page du logement.</dd>
+      <dt i18n="@@owner.guide.blocked-district-title">« Choisissez le quartier du logement »</dt>
+      <dd i18n="@@owner.guide.blocked-district-text">
+        Au CHM, choisissez-le dans la liste <strong>Quartier</strong> de la page du logement.
+      </dd>
 
-      <dt>« Ajoutez une description d'au moins 50 caractères »</dt>
-      <dd>Deux ou trois phrases suffisent : le logement, l'emplacement, ce qui le distingue.</dd>
+      <dt i18n="@@owner.guide.blocked-description-title">
+        « Ajoutez une description d'au moins 50 caractères »
+      </dt>
+      <dd i18n="@@owner.guide.blocked-description-text">
+        Deux ou trois phrases suffisent : le logement, l'emplacement, ce qui le distingue.
+      </dd>
 
-      <dt>« Retirez … de ce texte : il est public »</dt>
-      <dd>
+      <dt i18n="@@owner.guide.blocked-contact-title">« Retirez … de ce texte : il est public »</dt>
+      <dd i18n="@@owner.guide.blocked-contact-text">
         Votre description contient un numéro de téléphone ou une adresse email. Enlevez-les : les
         voyageurs vous écrivent par une demande, et votre téléphone (dans
         <strong>Mon profil</strong>) n'est donné qu'à celui dont vous acceptez la demande.
       </dd>
 
-      <dt>« Ajoutez au moins une photo »</dt>
-      <dd>Revenez à l'étape 5.</dd>
+      <dt i18n="@@owner.guide.blocked-photo-title">« Ajoutez au moins une photo »</dt>
+      <dd i18n="@@owner.guide.blocked-photo-text">Revenez à l'étape 5.</dd>
 
-      <dt>« Aucun tarif n'a été trouvé dans votre annonce »</dt>
-      <dd>
+      <dt i18n="@@owner.guide.blocked-no-rates-title">
+        « Aucun tarif n'a été trouvé dans votre annonce »
+      </dt>
+      <dd i18n="@@owner.guide.blocked-no-rates-text">
         Normal si votre annonce ne donne pas de prix. Ajoutez vos périodes avec
         <strong>+ Ajouter une période</strong>, maintenant ou plus tard dans
         <strong>Tarifs</strong>.
       </dd>
 
-      <dt>« Photo trop lourde : 10 Mo maximum »</dt>
-      <dd>
+      <dt i18n="@@owner.guide.blocked-photo-size-title">« Photo trop lourde : 10 Mo maximum »</dt>
+      <dd i18n="@@owner.guide.blocked-photo-size-text">
         Envoyez-vous la photo par email ou par message depuis votre téléphone : elle arrive réduite.
         Ajoutez ensuite cette version.
       </dd>
@@ -117,31 +135,31 @@
   </section>
 
   <section class="static-page__section">
-    <h2>Une fois en ligne</h2>
+    <h2 i18n="@@owner.guide.online-title">Une fois en ligne</h2>
 
     <dl>
-      <dt>Les demandes arrivent par email</dt>
-      <dd>
+      <dt i18n="@@owner.guide.online-requests-title">Les demandes arrivent par email</dt>
+      <dd i18n="@@owner.guide.online-requests-text">
         Avec les dates, le nombre de personnes et le prix. Dans <strong>Mon espace</strong>, cliquez
         sur <strong>Répondre</strong>, puis sur <strong>Accepter</strong> ou
         <strong>Refuser</strong>. Sans réponse sous 48 heures, la demande expire et le voyageur en
         est prévenu.
       </dd>
 
-      <dt>Votre téléphone, pour le voyageur accepté</dt>
-      <dd>
+      <dt i18n="@@owner.guide.online-phone-title">Votre téléphone, pour le voyageur accepté</dt>
+      <dd i18n="@@owner.guide.online-phone-text">
         Ajoutez-le dans <strong>Mon espace → Mon profil</strong>. Il n'est donné qu'au voyageur dont
         vous acceptez la demande, jamais affiché sur l'annonce.
       </dd>
 
-      <dt>Votre calendrier reste à jour</dt>
-      <dd>
+      <dt i18n="@@owner.guide.online-calendar-title">Votre calendrier reste à jour</dt>
+      <dd i18n="@@owner.guide.online-calendar-text">
         Une demande acceptée bloque ses dates toute seule. Une semaine louée ailleurs ? Bloquez-la
         dans <strong>Calendrier</strong>, pour ne pas recevoir de demande dessus.
       </dd>
 
-      <dt>Vous gardez la main</dt>
-      <dd>
+      <dt i18n="@@owner.guide.online-control-title">Vous gardez la main</dt>
+      <dd i18n="@@owner.guide.online-control-text">
         Tarifs, photos et description se modifient à tout moment.
         <strong>Retirer du site</strong> met l'annonce en pause,
         <strong>Remettre en ligne</strong> la republie.
@@ -151,7 +169,7 @@
 
   <section class="static-page__section">
     <div class="static-page__note">
-      <p>
+      <p i18n="@@owner.guide.still-blocked">
         <strong>Toujours bloqué ?</strong> Écrivez à
         <a href="mailto:contact@damienchauveau-dev.fr">contact&#64;damienchauveau-dev.fr</a> avec
         une capture d'écran du message : vous aurez une réponse rapidement. Ne nous envoyez jamais
@@ -160,7 +178,9 @@
     </div>
 
     <p class="static-page__cta">
-      <a class="static-page__button" routerLink="/inscription">Créer mon compte propriétaire</a>
+      <a class="static-page__button" routerLink="/inscription" i18n="@@owner.landing.cta"
+        >Créer mon compte propriétaire</a
+      >
     </p>
   </section>
 </div>

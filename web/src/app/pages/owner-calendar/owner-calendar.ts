@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -57,15 +57,21 @@ const MORE_MONTHS = 18;
 })
 export class OwnerCalendar {
   private readonly service = inject(OwnerCalendarService);
+  private readonly locale = inject(LOCALE_ID);
 
   readonly slug = inject(ActivatedRoute).snapshot.paramMap.get('slug') ?? '';
-  readonly weekdays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  // Initiales du lundi au dimanche dans la langue de la page (2026-01-05 est un lundi).
+  readonly weekdays = Array.from({ length: 7 }, (_, i) =>
+    new Intl.DateTimeFormat(this.locale, { weekday: 'narrow' })
+      .format(new Date(2026, 0, 5 + i))
+      .toLocaleUpperCase(this.locale),
+  );
   readonly sourceLabel = sourceLabel;
   readonly lastDay = lastDay;
   readonly dayCount = dayCount;
 
   readonly calendar = signal<Calendar | null>(null);
-  readonly title = signal('Calendrier');
+  readonly title = signal($localize`:@@owner.calendar.title:Calendrier`);
   readonly loadFailed = signal(false);
   readonly monthCount = signal(MONTHS);
 
@@ -154,8 +160,8 @@ export class OwnerCalendar {
     const accommodations = inject(OwnerAccommodationService);
 
     inject(SeoService).apply({
-      title: 'Calendrier',
-      description: 'Bloquez les dates où votre logement n’est pas disponible.',
+      title: $localize`:@@owner.calendar.title:Calendrier`,
+      description: $localize`:@@owner.calendar.seo-description:Bloquez les dates où votre logement n’est pas disponible.`,
       path: '/mon-espace/logements',
       noindex: true,
     });
@@ -185,13 +191,15 @@ export class OwnerCalendar {
   }
 
   dayLabel(day: Day): string {
-    const date = localDate(day.key).toLocaleDateString('fr-FR', {
+    const date = localDate(day.key).toLocaleDateString(this.locale, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
     });
 
-    return `${date}, ${null === day.period ? 'libre' : sourceLabel(day.period.source).toLowerCase()}`;
+    return null === day.period
+      ? $localize`:@@owner.calendar.day-label-free:${date}:date:, libre`
+      : $localize`:@@owner.calendar.day-label-taken:${date}:date:, ${sourceLabel(day.period.source).toLocaleLowerCase(this.locale)}:status:`;
   }
 
   pick(day: Day): void {
@@ -260,20 +268,26 @@ export class OwnerCalendar {
 
     this.run(this.service.block(this.slug, selection, this.note()), () => {
       this.clearSelection();
-      this.notice.set('Dates bloquées. Votre annonce est à jour.');
+      this.notice.set(
+        $localize`:@@owner.calendar.notice-blocked:Dates bloquées. Votre annonce est à jour.`,
+      );
     });
   }
 
   unblock(period: OwnerPeriod): void {
     this.run(this.service.unblock(this.slug, period.id), () => {
       this.selectedPeriod.set(null);
-      this.notice.set('Ces dates sont de nouveau libres.');
+      this.notice.set(
+        $localize`:@@owner.calendar.notice-unblocked:Ces dates sont de nouveau libres.`,
+      );
     });
   }
 
   confirm(): void {
     this.run(this.service.confirm(this.slug), () =>
-      this.notice.set('Merci : le badge « Calendrier à jour » s’affiche sur votre annonce.'),
+      this.notice.set(
+        $localize`:@@owner.calendar.notice-confirmed:Merci : le badge « Calendrier à jour » s’affiche sur votre annonce.`,
+      ),
     );
   }
 
@@ -293,7 +307,12 @@ export class OwnerCalendar {
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
-        this.error.set(apiErrorMessage(error, 'L’enregistrement a échoué. Réessayez.'));
+        this.error.set(
+          apiErrorMessage(
+            error,
+            $localize`:@@owner.calendar.save-failed:L’enregistrement a échoué. Réessayez.`,
+          ),
+        );
       },
     });
   }

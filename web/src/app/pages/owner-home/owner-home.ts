@@ -68,14 +68,19 @@ export class OwnerHome {
       {
         status: 'published',
         param: STATUS_PARAMS.published,
-        label: 'En ligne',
+        label: $localize`:@@owner.home.stat-published:En ligne`,
         count: count('published'),
       },
-      { status: 'draft', param: STATUS_PARAMS.draft, label: 'Brouillons', count: count('draft') },
+      {
+        status: 'draft',
+        param: STATUS_PARAMS.draft,
+        label: $localize`:@@owner.home.stat-drafts:Brouillons`,
+        count: count('draft'),
+      },
       {
         status: 'archived',
         param: STATUS_PARAMS.archived,
-        label: 'Retirés du site',
+        label: $localize`:@@owner.home.stat-archived:Retirés du site`,
         count: count('archived'),
       },
     ];
@@ -90,8 +95,8 @@ export class OwnerHome {
     }
 
     return drafts > 1
-      ? `${drafts} brouillons attendent d'être publiés.`
-      : "1 brouillon attend d'être publié.";
+      ? $localize`:@@owner.home.draft-notice.other:${drafts}:count: brouillons attendent d'être publiés.`
+      : $localize`:@@owner.home.draft-notice.one:1 brouillon attend d'être publié.`;
   });
 
   /** Les logements en ligne : c'est sur eux que le badge « Calendrier à jour » se voit. */
@@ -110,12 +115,12 @@ export class OwnerHome {
     return {
       text:
         pending.length > 1
-          ? `${pending.length} demandes de réservation attendent votre réponse.`
-          : 'Une demande de réservation attend votre réponse.',
+          ? $localize`:@@owner.home.request-notice.other:${pending.length}:count: demandes de réservation attendent votre réponse.`
+          : $localize`:@@owner.home.request-notice.one:Une demande de réservation attend votre réponse.`,
       detail:
         soonest < 1
-          ? 'La plus urgente expire dans moins d’une heure.'
-          : `La plus urgente expire dans ${soonest} h.`,
+          ? $localize`:@@owner.home.request-expiry-soon:La plus urgente expire dans moins d’une heure.`
+          : $localize`:@@owner.home.request-expiry-hours:La plus urgente expire dans ${soonest}:hours: h.`,
     };
   });
 
@@ -136,10 +141,18 @@ export class OwnerHome {
 
     const online = list.filter((a) => 'published' === a.status).length;
     const pending = this.requests().filter((r) => 'pending' === r.status).length;
-    const parts = [online > 1 ? `${online} logements en ligne` : `${online} logement en ligne`];
+    const parts = [
+      online > 1
+        ? $localize`:@@owner.home.summary-online.other:${online}:count: logements en ligne`
+        : $localize`:@@owner.home.summary-online.one:${online}:count: logement en ligne`,
+    ];
 
     if (pending > 0) {
-      parts.push(pending > 1 ? `${pending} demandes à traiter` : '1 demande à traiter');
+      parts.push(
+        pending > 1
+          ? $localize`:@@owner.home.summary-pending.other:${pending}:count: demandes à traiter`
+          : $localize`:@@owner.home.summary-pending.one:1 demande à traiter`,
+      );
     }
 
     return parts.join(' · ');
@@ -150,16 +163,22 @@ export class OwnerHome {
     const fresh = list.filter((a) => a.calendarUpToDate).length;
 
     if (fresh === list.length) {
-      return list.length > 1 ? 'Tous vos calendriers sont à jour.' : 'Votre calendrier est à jour.';
+      return list.length > 1
+        ? $localize`:@@owner.home.calendars-all-fresh:Tous vos calendriers sont à jour.`
+        : $localize`:@@owner.home.calendar-fresh:Votre calendrier est à jour.`;
     }
 
-    return `${fresh} ${list.length > 1 ? 'calendriers' : 'calendrier'} à jour sur ${list.length}. Sans vérification depuis 30 jours, le badge « Calendrier à jour » disparaît de l'annonce.`;
+    const total = list.length;
+
+    return total > 1
+      ? $localize`:@@owner.home.calendars-stale.other:${fresh}:fresh: calendriers à jour sur ${total}:total:. Sans vérification depuis 30 jours, le badge « Calendrier à jour » disparaît de l'annonce.`
+      : $localize`:@@owner.home.calendars-stale.one:${fresh}:fresh: calendrier à jour sur ${total}:total:. Sans vérification depuis 30 jours, le badge « Calendrier à jour » disparaît de l'annonce.`;
   });
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Mon espace',
-      description: 'Gérez vos logements, votre calendrier et vos demandes.',
+      title: $localize`:@@owner.home.seo-title:Mon espace`,
+      description: $localize`:@@owner.home.seo-description:Gérez vos logements, votre calendrier et vos demandes.`,
       path: '/mon-espace',
       noindex: true,
     });

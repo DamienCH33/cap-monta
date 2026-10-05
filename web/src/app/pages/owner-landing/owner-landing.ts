@@ -14,12 +14,9 @@ export class OwnerLanding {
     const seo = inject(SeoService);
 
     seo.apply({
-      title: 'Louer son mobil-home au CHM Montalivet ou à Euronat',
-      description:
-        'Publiez gratuitement votre bungalow, mobil-home, caravane, chalet ou studio. Aucune commission, ' +
-        'un calendrier à jour, et vous gardez la main sur vos tarifs et vos réponses.',
+      title: $localize`:@@owner.landing.seo-title:Louer son mobil-home au CHM Montalivet ou à Euronat`,
+      description: $localize`:@@owner.landing.seo-description:Publiez gratuitement votre bungalow, mobil-home, caravane, chalet ou studio. Aucune commission, un calendrier à jour, et vous gardez la main sur vos tarifs et vos réponses.`,
       path: '/proprietaire',
-      frenchOnly: true,
     });
 
     seo.setJsonLd({
@@ -28,26 +25,26 @@ export class OwnerLanding {
       mainEntity: [
         {
           '@type': 'Question',
-          name: "Combien coûte la publication d'une annonce ?",
+          name: $localize`:@@owner.landing.faq-cost-q: Combien coûte la publication d'une annonce ? `.trim(),
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Rien. Aucun abonnement, aucune commission sur vos locations.',
+            text: $localize`:@@owner.landing.faq-cost-a: Rien. Aucun abonnement, aucune commission sur vos locations. `.trim(),
           },
         },
         {
           '@type': 'Question',
-          name: 'Faut-il être propriétaire au CHM Montalivet ou à Euronat ?',
+          name: $localize`:@@owner.landing.faq-domains-q: Faut-il être propriétaire au CHM Montalivet ou à Euronat ? `.trim(),
           acceptedAnswer: {
             '@type': 'Answer',
-            text: "Oui. Cap Monta ne référence que ces deux domaines, et c'est volontaire : un site qui connaît les quartiers, les distances à la plage et les usages du lieu est plus utile qu'un annuaire généraliste.",
+            text: $localize`:@@owner.landing.faq-domains-a: Oui. Cap Monta ne référence que ces deux domaines, et c'est volontaire : un site qui connaît les quartiers, les distances à la plage et les usages du lieu est plus utile qu'un annuaire généraliste. `.trim(),
           },
         },
         {
           '@type': 'Question',
-          name: 'Puis-je publier plusieurs logements ?',
+          name: $localize`:@@owner.landing.faq-several-q: Puis-je publier plusieurs logements ? `.trim(),
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Oui. Un même compte gère autant de logements et de calendriers que nécessaire.',
+            text: $localize`:@@owner.landing.faq-several-a: Oui. Un même compte gère autant de logements et de calendriers que nécessaire. `.trim(),
           },
         },
       ],

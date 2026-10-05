@@ -1,21 +1,30 @@
 <div class="container import" [class.import--wide]="'check' === step()">
-  <nav class="import__breadcrumb" aria-label="Fil d'Ariane">
-    <a routerLink="/mon-espace">Mon espace</a>
+  <nav
+    class="import__breadcrumb"
+    aria-label="Fil d'Ariane"
+    i18n-aria-label="@@owner.import.breadcrumb"
+  >
+    <a routerLink="/mon-espace" i18n="@@owner.import.crumb-space">Mon espace</a>
     <span aria-hidden="true">›</span>
-    <a routerLink="/mon-espace/logements">Mes logements</a>
+    <a routerLink="/mon-espace/logements" i18n="@@owner.import.crumb-listings">Mes logements</a>
     <span aria-hidden="true">›</span>
-    <span aria-current="page">Importer mon annonce</span>
+    <span aria-current="page" i18n="@@owner.import.heading">Importer mon annonce</span>
   </nav>
 
-  <h1 class="import__heading">Importer mon annonce</h1>
+  <h1 class="import__heading" i18n="@@owner.import.heading">Importer mon annonce</h1>
   @if (null !== target) {
-    <p class="import__intro">
+    <p class="import__intro" i18n="@@owner.import.intro-target">
       Les tarifs et les dates déjà prises iront dans
-      <strong>{{ targetTitle() ?? 'votre logement' }}</strong
+      <strong>
+        @if (targetTitle(); as title) {
+          {{ title }}
+        } @else {
+          votre logement
+        }</strong
       >. Ce qui est déjà dans vos tarifs et votre calendrier n'est pas modifié.
     </p>
   } @else {
-    <p class="import__intro">
+    <p class="import__intro" i18n="@@owner.import.intro-new">
       Collez le texte de l'annonce que vous publiez déjà (sur un autre site, un groupe…). On en tire
       le logement, les tarifs et les dates prises ; vous vérifiez tout avant d'enregistrer. Rien
       n'est publié : votre annonce reste en brouillon jusqu'à ce que vous ajoutiez vos photos.
@@ -31,23 +40,26 @@
     @case ('paste') {
       @if (assistant(); as status) {
         @if (!status.available) {
-          <p class="import__notice">
+          <p class="import__notice" i18n="@@owner.import.unavailable">
             L'assistant n'est pas disponible pour le moment.
             <a routerLink="/mon-espace/logements/nouveau">Remplir le formulaire moi-même</a>
           </p>
         }
       }
       <form class="import__card" (ngSubmit)="read()">
-        <label class="import__label" for="import-text">Le texte de votre annonce</label>
+        <label class="import__label" for="import-text" i18n="@@owner.import.text-label"
+          >Le texte de votre annonce</label
+        >
         <textarea
           id="import-text"
           name="text"
           rows="14"
           [ngModel]="text()"
           (ngModelChange)="text.set($event)"
+          i18n-placeholder="@@owner.import.text-placeholder"
           placeholder="Mobil-home 3 chambres, quartier La Lande…&#10;Juin : 450 € la semaine&#10;Juillet : déjà loué du 11 au 25"
         ></textarea>
-        <p class="import__muted">
+        <p class="import__muted" i18n="@@owner.import.text-count">
           {{ length() }} / {{ maxText }} caractères. Vos numéros de téléphone et emails ne sont pas
           envoyés à l'assistant.
         </p>
@@ -57,9 +69,13 @@
             class="import__primary"
             [disabled]="!canSend() || false === assistant()?.available"
           >
-            {{ sending() ? 'Envoi…' : 'Lire mon annonce' }}
+            @if (sending()) {
+              <ng-container i18n="@@owner.import.sending">Envoi…</ng-container>
+            } @else {
+              <ng-container i18n="@@owner.import.read">Lire mon annonce</ng-container>
+            }
           </button>
-          <a routerLink="/mon-espace/logements">Annuler</a>
+          <a routerLink="/mon-espace/logements" i18n="@@owner.import.cancel">Annuler</a>
         </div>
       </form>
     }
@@ -67,8 +83,16 @@
     @case ('reading') {
       <div class="import__card import__waiting" role="status" aria-live="polite">
         <span class="import__spinner" aria-hidden="true"></span>
-        <p>{{ view()?.message ?? 'Lecture de votre annonce en cours…' }}</p>
-        <p class="import__muted">
+        <p>
+          @if (view()?.message; as message) {
+            {{ message }}
+          } @else {
+            <ng-container i18n="@@owner.import.reading"
+              >Lecture de votre annonce en cours…</ng-container
+            >
+          }
+        </p>
+        <p class="import__muted" i18n="@@owner.import.reading-hint">
           En général moins d'une minute. Vous pouvez quitter cette page : votre texte est gardé, et
           cette adresse vous ramène ici.
         </p>
@@ -78,20 +102,37 @@
     @case ('failed') {
       <div class="import__card">
         <p class="import__alert import__alert--flat">
-          {{ view()?.message ?? 'L’assistant n’a pas pu lire votre annonce.' }}
+          @if (view()?.message; as message) {
+            {{ message }}
+          } @else {
+            <ng-container i18n="@@owner.import.failed"
+              >L’assistant n’a pas pu lire votre annonce.</ng-container
+            >
+          }
         </p>
-        <label class="import__label" for="import-kept">Votre texte, gardé tel quel</label>
+        <label class="import__label" for="import-kept" i18n="@@owner.import.kept-label"
+          >Votre texte, gardé tel quel</label
+        >
         <textarea id="import-kept" rows="8" readonly [value]="text()"></textarea>
         <div class="import__actions">
-          <button type="button" class="import__primary" (click)="restart()">Réessayer</button>
-          <a routerLink="/mon-espace/logements/nouveau">Remplir le formulaire moi-même</a>
+          <button
+            type="button"
+            class="import__primary"
+            (click)="restart()"
+            i18n="@@owner.import.retry"
+          >
+            Réessayer
+          </button>
+          <a routerLink="/mon-espace/logements/nouveau" i18n="@@owner.import.fill-myself"
+            >Remplir le formulaire moi-même</a
+          >
         </div>
       </div>
     }
 
     @case ('check') {
       @if (appliedTo(); as slug) {
-        <p class="import__notice">
+        <p class="import__notice" i18n="@@owner.import.already-applied">
           Cette lecture a déjà été enregistrée.
           <a [routerLink]="appliedLink(slug)">Ouvrir le logement</a>
         </p>
@@ -100,21 +141,32 @@
       @if (proposal(); as found) {
         <div class="import__layout">
           <details class="import__source" [open]="wide()">
-            <summary>Le texte de votre annonce</summary>
+            <summary i18n="@@owner.import.text-label">Le texte de votre annonce</summary>
             <p>{{ text() }}</p>
           </details>
           <form class="import__form" (ngSubmit)="save()">
             @if (found.questions.length) {
               <section class="import__card import__card--warn" aria-labelledby="questions-title">
-                <h2 id="questions-title" class="import__title">
-                  {{ found.questions.length }} point{{ found.questions.length > 1 ? 's' : '' }} à
-                  vérifier
+                <h2
+                  id="questions-title"
+                  class="import__title"
+                  i18n="@@owner.import.questions-title"
+                >
+                  {found.questions.length, plural,
+                    =1 {1 point à vérifier}
+                    other {{{ found.questions.length }} points à vérifier}
+                  }
                 </h2>
                 <ul class="import__list">
                   @for (question of found.questions; track $index) {
                     <li>
                       {{ question }}
-                      <button type="button" class="import__link" (click)="goTo(question)">
+                      <button
+                        type="button"
+                        class="import__link"
+                        (click)="goTo(question)"
+                        i18n="@@owner.import.see"
+                      >
                         Voir
                       </button>
                     </li>
@@ -123,7 +175,7 @@
               </section>
             }
             @if (found.contacts.length) {
-              <p class="import__notice">
+              <p class="import__notice" i18n="@@owner.import.contacts-removed">
                 Vos coordonnées ({{ found.contacts.join(', ') }}) ont été retirées de la description
                 : sur Cap Monta, le voyageur les reçoit quand vous acceptez sa demande.
               </p>
@@ -131,13 +183,15 @@
 
             @if (null === target && listing(); as draft) {
               <section class="import__card" aria-labelledby="listing-title">
-                <h2 id="listing-title" class="import__title">Le logement</h2>
+                <h2 id="listing-title" class="import__title" i18n="@@owner.import.listing-title">
+                  Le logement
+                </h2>
 
                 <fieldset
                   class="import__field"
                   [class.import__field--missing]="'' === draft.resort"
                 >
-                  <legend class="import__label">Domaine</legend>
+                  <legend class="import__label" i18n="@@owner.import.resort">Domaine</legend>
                   <div class="import__tiles">
                     @for (option of resorts; track option.value) {
                       <label class="import__tile">
@@ -155,7 +209,7 @@
                 </fieldset>
 
                 <fieldset class="import__field" [class.import__field--missing]="'' === draft.type">
-                  <legend class="import__label">Type de logement</legend>
+                  <legend class="import__label" i18n="@@owner.import.type">Type de logement</legend>
                   <div class="import__tiles">
                     @for (option of types; track option.value) {
                       <label class="import__tile">
@@ -177,22 +231,32 @@
                     class="import__field"
                     [class.import__field--missing]="null === draft.capacity"
                   >
-                    <span class="import__label" id="capacity-label">Capacité</span>
+                    <span class="import__label" id="capacity-label" i18n="@@owner.import.capacity"
+                      >Capacité</span
+                    >
                     <div class="import__stepper" role="group" aria-labelledby="capacity-label">
                       <button
                         type="button"
                         aria-label="Une personne de moins"
+                        i18n-aria-label="@@owner.import.capacity-less"
                         [disabled]="(draft.capacity ?? 1) <= 1"
                         (click)="nudge('capacity', -1)"
                       >
                         −
                       </button>
-                      <output aria-live="polite">{{
-                        null === draft.capacity ? 'À compléter' : draft.capacity + ' pers.'
-                      }}</output>
+                      <output aria-live="polite">
+                        @if (null === draft.capacity) {
+                          <ng-container i18n="@@owner.import.to-complete">À compléter</ng-container>
+                        } @else {
+                          <ng-container i18n="@@owner.import.capacity-value"
+                            >{{ draft.capacity }} pers.</ng-container
+                          >
+                        }
+                      </output>
                       <button
                         type="button"
                         aria-label="Une personne de plus"
+                        i18n-aria-label="@@owner.import.capacity-more"
                         [disabled]="(draft.capacity ?? 0) >= 12"
                         (click)="nudge('capacity', 1)"
                       >
@@ -204,22 +268,32 @@
                     class="import__field"
                     [class.import__field--missing]="null === draft.bedrooms"
                   >
-                    <span class="import__label" id="bedrooms-label">Chambres</span>
+                    <span class="import__label" id="bedrooms-label" i18n="@@owner.import.bedrooms"
+                      >Chambres</span
+                    >
                     <div class="import__stepper" role="group" aria-labelledby="bedrooms-label">
                       <button
                         type="button"
                         aria-label="Une chambre de moins"
+                        i18n-aria-label="@@owner.import.bedrooms-less"
                         [disabled]="(draft.bedrooms ?? 0) <= 0"
                         (click)="nudge('bedrooms', -1)"
                       >
                         −
                       </button>
-                      <output aria-live="polite">{{
-                        null === draft.bedrooms ? 'À compléter' : draft.bedrooms + ' ch.'
-                      }}</output>
+                      <output aria-live="polite">
+                        @if (null === draft.bedrooms) {
+                          <ng-container i18n="@@owner.import.to-complete">À compléter</ng-container>
+                        } @else {
+                          <ng-container i18n="@@owner.import.bedrooms-value"
+                            >{{ draft.bedrooms }} ch.</ng-container
+                          >
+                        }
+                      </output>
                       <button
                         type="button"
                         aria-label="Une chambre de plus"
+                        i18n-aria-label="@@owner.import.bedrooms-more"
                         [disabled]="(draft.bedrooms ?? 0) >= 6"
                         (click)="nudge('bedrooms', 1)"
                       >
@@ -228,7 +302,7 @@
                     </div>
                   </div>
                   <label class="import__field">
-                    <span class="import__label"
+                    <span class="import__label" i18n="@@owner.import.surface"
                       >Surface <span class="import__muted">(facultatif)</span></span
                     >
                     <input
@@ -243,15 +317,21 @@
                   </label>
                   @if (resortDistricts().length) {
                     <label class="import__field">
-                      <span class="import__label">{{
-                        'chm' === draft.resort ? 'Quartier' : 'Secteur'
-                      }}</span>
+                      <span class="import__label">
+                        @if ('chm' === draft.resort) {
+                          <ng-container i18n="@@owner.import.district">Quartier</ng-container>
+                        } @else {
+                          <ng-container i18n="@@owner.import.sector">Secteur</ng-container>
+                        }
+                      </span>
                       <select
                         name="district"
                         [ngModel]="draft.district"
                         (ngModelChange)="patchListing({ district: $event })"
                       >
-                        <option value="">Je le préciserai plus tard</option>
+                        <option value="" i18n="@@owner.import.district-later">
+                          Je le préciserai plus tard
+                        </option>
                         @for (district of resortDistricts(); track district.slug) {
                           <option [value]="district.slug">{{ district.name }}</option>
                         }
@@ -261,7 +341,7 @@
                 </div>
 
                 <fieldset class="import__field">
-                  <legend class="import__label">Animaux</legend>
+                  <legend class="import__label" i18n="@@owner.import.pets">Animaux</legend>
                   <div class="import__tiles">
                     @for (policy of petsPolicies; track policy.value) {
                       <label class="import__tile">
@@ -277,14 +357,16 @@
                     }
                   </div>
                   @if (null === found.listing.petsPolicy) {
-                    <p class="import__muted">
+                    <p class="import__muted" i18n="@@owner.import.pets-default">
                       Votre annonce n'en parle pas : « sur demande » par défaut.
                     </p>
                   }
                 </fieldset>
 
                 <fieldset class="import__field">
-                  <legend class="import__label">Équipements repérés</legend>
+                  <legend class="import__label" i18n="@@owner.import.amenities">
+                    Équipements repérés
+                  </legend>
                   @for (group of amenityGroups; track group.key) {
                     <p class="import__muted">{{ group.label }}</p>
                     <div class="import__pills">
@@ -301,7 +383,7 @@
                     </div>
                   }
                   @if (found.listing.otherFeatures.length) {
-                    <p class="import__muted">
+                    <p class="import__muted" i18n="@@owner.import.other-features">
                       Repéré aussi, à garder dans votre description :
                       {{ found.listing.otherFeatures.join(' · ') }}
                     </p>
@@ -309,7 +391,7 @@
                 </fieldset>
 
                 <label class="import__field">
-                  <span class="import__label">Description</span>
+                  <span class="import__label" i18n="@@owner.import.description">Description</span>
                   <textarea
                     name="description"
                     rows="8"
@@ -323,13 +405,15 @@
 
             <section class="import__card" aria-labelledby="rates-title">
               <h2 id="rates-title" class="import__title">
-                Vos tarifs
-                <span class="import__muted"
-                  >({{ keptRates() }} gardé{{ keptRates() > 1 ? 's' : '' }})</span
-                >
+                <ng-container i18n="@@owner.import.rates-title">Vos tarifs</ng-container>
+                <span class="import__muted" i18n="@@owner.import.rates-kept">{keptRates(), plural,
+                  =0 {(0 gardé)}
+                  =1 {(1 gardé)}
+                  other {({{ keptRates() }} gardés)}
+                }</span>
               </h2>
               @if (0 === rates().length) {
-                <p class="import__muted">
+                <p class="import__muted" i18n="@@owner.import.no-rates">
                   Aucun tarif trouvé dans votre annonce : ajoutez-les ici, ou plus tard sur la page
                   Tarifs.
                 </p>
@@ -348,12 +432,12 @@
                         [ngModel]="row.keep"
                         (ngModelChange)="patchRate(i, { keep: $event })"
                       />
-                      <strong>« {{ row.label }} »</strong>
+                      <strong i18n="@@owner.import.rate-label">« {{ row.label }} »</strong>
                     </label>
                   </legend>
                   <div class="import__fields">
                     <label>
-                      Arrivée
+                      <ng-container i18n="@@owner.import.arrival">Arrivée</ng-container>
                       <input
                         type="date"
                         [name]="'start-' + i"
@@ -362,7 +446,7 @@
                       />
                     </label>
                     <label>
-                      Départ
+                      <ng-container i18n="@@owner.import.departure">Départ</ng-container>
                       <input
                         type="date"
                         [name]="'end-' + i"
@@ -371,7 +455,7 @@
                       />
                     </label>
                     <label>
-                      € / semaine
+                      <ng-container i18n="@@owner.import.weekly">€ / semaine</ng-container>
                       <input
                         type="number"
                         min="1"
@@ -381,7 +465,7 @@
                       />
                     </label>
                     <label>
-                      € / nuit
+                      <ng-container i18n="@@owner.import.nightly">€ / nuit</ng-container>
                       <input
                         type="number"
                         min="1"
@@ -391,7 +475,7 @@
                       />
                     </label>
                     <label>
-                      Nuits min.
+                      <ng-container i18n="@@owner.import.min-nights">Nuits min.</ng-container>
                       <input
                         type="number"
                         min="1"
@@ -408,7 +492,9 @@
                         [ngModel]="row.saturdayArrival"
                         (ngModelChange)="patchRate(i, { saturdayArrival: $event })"
                       />
-                      Arrivée le samedi de préférence
+                      <ng-container i18n="@@owner.import.saturday"
+                        >Arrivée le samedi de préférence</ng-container
+                      >
                     </label>
                   </div>
                   @for (hint of row.hints; track hint) {
@@ -419,15 +505,22 @@
                   }
                 </fieldset>
               }
-              <button type="button" class="import__add" (click)="addRate()">
+              <button
+                type="button"
+                class="import__add"
+                (click)="addRate()"
+                i18n="@@owner.import.add-rate"
+              >
                 + Ajouter une période
               </button>
             </section>
 
             <section class="import__card" aria-labelledby="ranges-title">
-              <h2 id="ranges-title" class="import__title">Dates déjà prises</h2>
+              <h2 id="ranges-title" class="import__title" i18n="@@owner.import.ranges-title">
+                Dates déjà prises
+              </h2>
               @if (0 === ranges().length) {
-                <p class="import__muted">
+                <p class="import__muted" i18n="@@owner.import.no-ranges">
                   Aucune date à venir écrite comme prise. Des dates « libres » ne suffisent pas :
                   ajoutez ici celles qui sont louées, ou bloquez-les plus tard sur votre calendrier.
                 </p>
@@ -441,10 +534,10 @@
                       [ngModel]="row.keep"
                       (ngModelChange)="patchRange(i, { keep: $event })"
                     />
-                    Indisponible
+                    <ng-container i18n="@@owner.import.unavailable-row">Indisponible</ng-container>
                   </label>
                   <label>
-                    du
+                    <ng-container i18n="@@owner.import.range-from">du</ng-container>
                     <input
                       type="date"
                       [name]="'range-start-' + i"
@@ -453,7 +546,7 @@
                     />
                   </label>
                   <label>
-                    au
+                    <ng-container i18n="@@owner.import.range-to">au</ng-container>
                     <input
                       type="date"
                       [name]="'range-end-' + i"
@@ -469,7 +562,12 @@
                   }
                 </div>
               }
-              <button type="button" class="import__add" (click)="addRange()">
+              <button
+                type="button"
+                class="import__add"
+                (click)="addRange()"
+                i18n="@@owner.import.add-range"
+              >
                 + Ajouter des dates prises
               </button>
             </section>
@@ -484,26 +582,44 @@
                 class="import__primary"
                 [disabled]="saving() || !!appliedTo() || missing().length > 0"
               >
-                {{
-                  saving()
-                    ? 'Enregistrement…'
-                    : null === target
-                      ? 'Créer le brouillon'
-                      : 'Ajouter à mon logement'
-                }}
+                @if (saving()) {
+                  <ng-container i18n="@@owner.import.saving">Enregistrement…</ng-container>
+                } @else if (null === target) {
+                  <ng-container i18n="@@owner.import.create-draft">Créer le brouillon</ng-container>
+                } @else {
+                  <ng-container i18n="@@owner.import.add-to-listing"
+                    >Ajouter à mon logement</ng-container
+                  >
+                }
               </button>
-              <button type="button" class="import__secondary" (click)="restart()">
+              <button
+                type="button"
+                class="import__secondary"
+                (click)="restart()"
+                i18n="@@owner.import.paste-other"
+              >
                 Coller un autre texte
               </button>
               <p class="import__muted import__summary">
                 @if (missing().length) {
-                  Il manque {{ missing().join(', ') }}.
+                  <ng-container i18n="@@owner.import.missing"
+                    >Il manque {{ missing().join(', ') }}.</ng-container
+                  >
                 } @else {
-                  {{ keptRates() }} tarif{{ keptRates() > 1 ? 's' : '' }} et
-                  {{ keptRanges() }} période{{ keptRanges() > 1 ? 's' : '' }} indisponible{{
-                    keptRanges() > 1 ? 's' : ''
-                  }}
-                  seront enregistrés. Rien n'est publié.
+                  <ng-container i18n="@@owner.import.summary"
+                    >{keptRates(), plural,
+                      =0 {0 tarif}
+                      =1 {1 tarif}
+                      other {{{ keptRates() }} tarifs}
+                    }
+                    et
+                    {keptRanges(), plural,
+                      =0 {0 période indisponible}
+                      =1 {1 période indisponible}
+                      other {{{ keptRanges() }} périodes indisponibles}
+                    }
+                    seront enregistrés. Rien n'est publié.</ng-container
+                  >
                 }
               </p>
             </div>

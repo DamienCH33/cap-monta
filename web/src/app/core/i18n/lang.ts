@@ -1,7 +1,7 @@
 /**
  * Les langues du site visiteur. Le français est la langue source, servie à la racine ;
  * les autres sont des builds à part, servies sous /en, /nl et /de (angular.json, « i18n »).
- * L'espace propriétaire et les pages légales restent en français.
+ * Les pages légales restent en français ; l'espace propriétaire existe dans les 4 langues.
  */
 export type Lang = 'fr' | 'en' | 'nl' | 'de';
 

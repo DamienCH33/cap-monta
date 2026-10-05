@@ -30,8 +30,8 @@ export class Register {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Créer un compte propriétaire',
-      description: 'Publiez gratuitement votre logement au CHM Montalivet ou à Euronat.',
+      title: $localize`:@@owner.entry.register-title:Créer un compte propriétaire`,
+      description: $localize`:@@owner.entry.seo-register-description:Publiez gratuitement votre logement au CHM Montalivet ou à Euronat.`,
       path: '/inscription',
       noindex: true,
     });
@@ -70,11 +70,14 @@ export class Register {
   /** L'API connaît ses règles : on affiche ce qu'elle dit plutôt que de le redire ici. */
   private static messageFor(error: HttpErrorResponse): string {
     if (429 === error.status) {
-      return 'Trop de tentatives depuis cette adresse. Réessayez dans une heure.';
+      return $localize`:@@owner.entry.register-throttled:Trop de tentatives depuis cette adresse. Réessayez dans une heure.`;
     }
 
     const body = error.error as { violations?: { title?: string }[] } | null;
 
-    return body?.violations?.[0]?.title ?? "Une information n'a pas été acceptée.";
+    return (
+      body?.violations?.[0]?.title ??
+      $localize`:@@owner.entry.register-rejected:Une information n'a pas été acceptée.`
+    );
   }
 }

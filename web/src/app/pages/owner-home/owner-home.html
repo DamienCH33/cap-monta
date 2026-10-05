@@ -2,16 +2,22 @@
   <section class="hero">
     <div class="container hero__inner">
       <div>
-        <p class="hero__eyebrow">Espace propriétaire</p>
-        <h1 class="hero__heading">Bonjour {{ me.displayName }}</h1>
+        <p class="hero__eyebrow" i18n="@@owner.home.eyebrow">Espace propriétaire</p>
+        <h1 class="hero__heading" i18n="@@owner.home.greeting">Bonjour {{ me.displayName }}</h1>
         @if (summary(); as line) {
           <p class="hero__summary">{{ line }}</p>
         }
       </div>
       @if (!noListing()) {
         <div class="hero__actions">
-          <a class="button" routerLink="/mon-espace/logements">Gérer mes logements</a>
-          <a class="button button--light" routerLink="/mon-espace/logements/nouveau">
+          <a class="button" routerLink="/mon-espace/logements" i18n="@@owner.home.manage-listings"
+            >Gérer mes logements</a
+          >
+          <a
+            class="button button--light"
+            routerLink="/mon-espace/logements/nouveau"
+            i18n="@@owner.common.add-listing"
+          >
             + Ajouter un logement
           </a>
         </div>
@@ -23,16 +29,20 @@
     <div class="layout__main">
       @if (!me.verified) {
         <div class="auth__notice auth__notice--warn verify" role="status">
-          <p>
+          <p i18n="@@owner.home.verify-notice">
             Votre adresse email n'est pas encore confirmée. Vous pourrez publier un logement dès
             qu'elle le sera : le lien vous a été envoyé à {{ me.email }}.
           </p>
           @switch (resend()) {
             @case ('sent') {
-              <p><b>Nouveau lien envoyé.</b> Regardez aussi dans les indésirables.</p>
+              <p i18n="@@owner.home.verify-sent">
+                <b>Nouveau lien envoyé.</b> Regardez aussi dans les indésirables.
+              </p>
             }
             @case ('error') {
-              <p>L'envoi n'a pas abouti. Réessayez dans quelques minutes.</p>
+              <p i18n="@@owner.home.verify-failed">
+                L'envoi n'a pas abouti. Réessayez dans quelques minutes.
+              </p>
             }
             @default {
               <button
@@ -41,7 +51,11 @@
                 [disabled]="'sending' === resend()"
                 (click)="resendVerification()"
               >
-                {{ 'sending' === resend() ? 'Envoi…' : 'Renvoyer le lien' }}
+                @if ('sending' === resend()) {
+                  <ng-container i18n="@@owner.home.verify-sending">Envoi…</ng-container>
+                } @else {
+                  <ng-container i18n="@@owner.home.verify-resend">Renvoyer le lien</ng-container>
+                }
               </button>
             }
           }
@@ -50,7 +64,7 @@
 
       @if (requestNotice() || draftNotice() || !me.phone) {
         <section class="section" aria-labelledby="todo-title">
-          <h2 id="todo-title" class="section__title">À faire</h2>
+          <h2 id="todo-title" class="section__title" i18n="@@owner.home.todo-title">À faire</h2>
           <div class="tasks">
             @if (requestNotice(); as notice) {
               <a class="task task--urgent" routerLink="/mon-espace/demandes">
@@ -59,7 +73,7 @@
                   <strong>{{ notice.text }}</strong>
                   <span class="task__detail">{{ notice.detail }}</span>
                 </span>
-                <span class="task__action">Répondre →</span>
+                <span class="task__action" i18n="@@owner.home.task-answer">Répondre →</span>
               </a>
             }
             @if (draftNotice(); as notice) {
@@ -71,23 +85,23 @@
                 <cm-icon name="pencil" class="task__icon" />
                 <span class="task__text">
                   <strong>{{ notice }}</strong>
-                  <span class="task__detail"
+                  <span class="task__detail" i18n="@@owner.home.task-drafts-detail"
                     >Photos, description et quartier : il ne manque souvent pas grand-chose.</span
                   >
                 </span>
-                <span class="task__action">Continuer →</span>
+                <span class="task__action" i18n="@@owner.home.task-continue">Continuer →</span>
               </a>
             }
             @if (!me.phone) {
               <a class="task" routerLink="/mon-espace/profil">
                 <cm-icon name="user-circle" class="task__icon" />
                 <span class="task__text">
-                  <strong>Ajoutez un numéro de téléphone.</strong>
-                  <span class="task__detail"
+                  <strong i18n="@@owner.home.task-phone">Ajoutez un numéro de téléphone.</strong>
+                  <span class="task__detail" i18n="@@owner.home.task-phone-detail"
                     >Il n'est donné qu'au voyageur dont vous acceptez la demande.</span
                   >
                 </span>
-                <span class="task__action">Mon profil →</span>
+                <span class="task__action" i18n="@@owner.home.task-profile">Mon profil →</span>
               </a>
             }
           </div>
@@ -96,7 +110,9 @@
 
       @if (!noListing()) {
         <section class="section" aria-labelledby="stats-title">
-          <h2 id="stats-title" class="section__title">Mes logements</h2>
+          <h2 id="stats-title" class="section__title" i18n="@@owner.common.my-listings">
+            Mes logements
+          </h2>
           <ul class="stats">
             @for (stat of stats(); track stat.status) {
               <li>
@@ -119,7 +135,9 @@
 
       @if (calendars().length) {
         <section class="section" aria-labelledby="calendars-title">
-          <h2 id="calendars-title" class="section__title">Calendriers et tarifs</h2>
+          <h2 id="calendars-title" class="section__title" i18n="@@owner.home.calendars-title">
+            Calendriers et tarifs
+          </h2>
           <div class="panel">
             <p class="panel__summary">{{ calendarSummary() }}</p>
             <cm-calendar-list [items]="calendars()" />
@@ -128,34 +146,44 @@
       }
     </div>
 
-    <aside class="layout__aside" aria-label="Mon compte">
+    <aside class="layout__aside" aria-label="Mon compte" i18n-aria-label="@@owner.home.aside-label">
       <a class="side" routerLink="/mon-espace/profil">
         <cm-icon name="user-circle" class="side__icon" />
         <span class="side__title">{{ me.displayName }}</span>
         <span class="side__text">{{ me.email }}</span>
-        <span class="side__text">Téléphone : {{ me.phone ?? 'non renseigné' }}</span>
-        <span class="side__action">Modifier mon profil →</span>
+        @if (me.phone) {
+          <span class="side__text" i18n="@@owner.home.side-phone">Téléphone : {{ me.phone }}</span>
+        } @else {
+          <span class="side__text" i18n="@@owner.home.side-phone-none"
+            >Téléphone : non renseigné</span
+          >
+        }
+        <span class="side__action" i18n="@@owner.home.side-edit-profile"
+          >Modifier mon profil →</span
+        >
       </a>
 
       <a class="side" routerLink="/proprietaire/guide">
         <cm-icon name="alert-circle" class="side__icon" />
-        <span class="side__title">Besoin d'aide ?</span>
-        <span class="side__text"
+        <span class="side__title" i18n="@@owner.home.side-help-title">Besoin d'aide ?</span>
+        <span class="side__text" i18n="@@owner.home.side-help-text"
           >Les six étapes pour publier, et que faire si un message vous bloque.</span
         >
-        <span class="side__action">Le guide pas à pas →</span>
+        <span class="side__action" i18n="@@owner.home.side-help-action">Le guide pas à pas →</span>
       </a>
 
       @if (supportUrl) {
         <!-- Les propriétaires sont ceux à qui le site fait économiser une commission. -->
         <a class="side side--support" [href]="supportUrl" target="_blank" rel="noopener">
           <cm-icon name="coffee" class="side__icon" />
-          <span class="side__title">Gratuit, sans commission</span>
-          <span class="side__text">
+          <span class="side__title" i18n="@@owner.home.support-title"
+            >Gratuit, sans commission</span
+          >
+          <span class="side__text" i18n="@@owner.home.support-text">
             Le serveur coûte environ 8 € par mois, payés par les dons. Si le site vous rend service,
             un petit geste suffit à le garder en ligne.
           </span>
-          <span class="side__action">Soutenir le site →</span>
+          <span class="side__action" i18n="@@owner.home.support-action">Soutenir le site →</span>
         </a>
       }
     </aside>
