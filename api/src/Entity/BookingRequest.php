@@ -47,6 +47,10 @@ class BookingRequest
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private Accommodation $accommodation;
 
+    /** Langue de la page d'où la demande est partie : celle des emails envoyés au voyageur. */
+    #[ORM\Column(length: 2, options: ['default' => 'fr'])]
+    private string $guestLocale = 'fr';
+
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private \DateTimeImmutable $startDate;
 
@@ -365,5 +369,17 @@ class BookingRequest
     public function nights(): int
     {
         return $this->range()->nights();
+    }
+
+    public function getGuestLocale(): string
+    {
+        return $this->guestLocale;
+    }
+
+    public function setGuestLocale(string $locale): static
+    {
+        $this->guestLocale = \App\I18n\Locales::normalize($locale);
+
+        return $this;
     }
 }

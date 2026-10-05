@@ -32,6 +32,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $phone = null;
 
+    /** Langue du site à l'inscription, puis à chaque connexion : celle des emails qu'il reçoit. */
+    #[ORM\Column(length: 2, options: ['default' => 'fr'])]
+    private string $locale = 'fr';
+
     /** @var list<string> */
     #[ORM\Column(type: Types::JSON)]
     private array $roles = ['ROLE_OWNER'];
@@ -134,5 +138,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale;
+    }
+
+    public function setLocale(string $locale): static
+    {
+        $this->locale = \App\I18n\Locales::normalize($locale);
+
+        return $this;
     }
 }

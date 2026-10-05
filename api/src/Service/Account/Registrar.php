@@ -6,6 +6,7 @@ namespace App\Service\Account;
 
 use App\Dto\RegistrationRequest;
 use App\Entity\User;
+use App\I18n\Translator;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -13,6 +14,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final readonly class Registrar
 {
     public function __construct(
+        private Translator $translator,
         private UserRepository $users,
         private EntityManagerInterface $em,
         private UserPasswordHasherInterface $hasher,
@@ -40,6 +42,8 @@ final readonly class Registrar
         }
 
         $user = new User($email, trim($request->displayName));
+        // La langue de la page d'inscription : celle des emails qu'il recevra.
+        $user->setLocale($this->translator->locale());
         $user->setPassword($this->hasher->hashPassword($user, $request->password));
 
         $this->em->persist($user);

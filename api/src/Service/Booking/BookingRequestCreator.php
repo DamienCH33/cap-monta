@@ -6,6 +6,7 @@ namespace App\Service\Booking;
 
 use App\Entity\Accommodation;
 use App\Entity\BookingRequest;
+use App\I18n\Translator;
 use App\Message\ExpireBookingRequest;
 use App\Message\RemindOwnerOfBookingRequest;
 use App\Repository\BookingRequestRepository;
@@ -28,6 +29,7 @@ final class BookingRequestCreator
         private readonly MessageBusInterface $bus,
         private readonly BookingMailer $mailer,
         private readonly BookingRequestRepository $requests,
+        private readonly Translator $translator,
     ) {
     }
 
@@ -63,6 +65,7 @@ final class BookingRequestCreator
             ->setInfants($input->infants)
             ->setPets($input->pets)
             ->setGuestPhone($input->guestPhone)
+            ->setGuestLocale($this->translator->locale())
             ->setMessage($input->message)
             ->setEstimatedPrice($quote->total)
             ->markOutsideRules($quote->outsideRules);
