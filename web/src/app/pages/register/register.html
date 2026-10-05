@@ -1,17 +1,17 @@
 <div class="container auth">
   <div class="auth__card">
     @if (sent()) {
-      <h1 class="auth__title">Vérifiez votre boîte mail</h1>
-      <p class="auth__intro">
+      <h1 class="auth__title" i18n="@@owner.entry.check-inbox-title">Vérifiez votre boîte mail</h1>
+      <p class="auth__intro" i18n="@@owner.entry.register-sent-intro">
         Un message vient de partir vers cette adresse. Cliquez le lien qu'il contient pour confirmer
         votre compte.
       </p>
-      <p class="auth__notice auth__notice--info">
+      <p class="auth__notice auth__notice--info" i18n="@@owner.entry.register-sent-spam">
         Rien au bout de quelques minutes ? Pensez à regarder dans les indésirables.
       </p>
     } @else {
-      <h1 class="auth__title">Créer un compte propriétaire</h1>
-      <p class="auth__intro">
+      <h1 class="auth__title" i18n="@@owner.entry.register-title">Créer un compte propriétaire</h1>
+      <p class="auth__intro" i18n="@@owner.entry.register-intro">
         Publiez votre logement au CHM Montalivet ou à Euronat. Gratuit, sans commission.
       </p>
 
@@ -21,7 +21,9 @@
         }
 
         <label class="auth__field">
-          <span class="auth__label">Nom affiché sur votre annonce</span>
+          <span class="auth__label" i18n="@@owner.entry.register-name-label"
+            >Nom affiché sur votre annonce</span
+          >
           <input
             type="text"
             formControlName="displayName"
@@ -30,16 +32,18 @@
             [attr.aria-invalid]="showError('displayName')"
           />
           @if (showError('displayName')) {
-            <span class="auth__error" role="alert"
+            <span class="auth__error" role="alert" i18n="@@owner.entry.register-name-required"
               >Indiquez le nom à afficher sur votre annonce.</span
             >
           } @else {
-            <span class="auth__hint">Par exemple « Damien C. » ou « Famille Martin ».</span>
+            <span class="auth__hint" i18n="@@owner.entry.register-name-hint"
+              >Par exemple « Damien C. » ou « Famille Martin ».</span
+            >
           }
         </label>
 
         <label class="auth__field">
-          <span class="auth__label">Adresse email</span>
+          <span class="auth__label" i18n="@@owner.entry.email-label">Adresse email</span>
           <input
             type="email"
             formControlName="email"
@@ -48,12 +52,14 @@
             [attr.aria-invalid]="showError('email')"
           />
           @if (showError('email')) {
-            <span class="auth__error" role="alert">Cette adresse email ne semble pas valide.</span>
+            <span class="auth__error" role="alert" i18n="@@owner.entry.email-invalid"
+              >Cette adresse email ne semble pas valide.</span
+            >
           }
         </label>
 
         <label class="auth__field">
-          <span class="auth__label">Mot de passe</span>
+          <span class="auth__label" i18n="@@owner.entry.password-label">Mot de passe</span>
           <input
             type="password"
             formControlName="password"
@@ -62,25 +68,31 @@
             [attr.aria-invalid]="showError('password')"
           />
           @if (showError('password')) {
-            <span class="auth__error" role="alert">
+            <span class="auth__error" role="alert" i18n="@@owner.entry.password-too-short">
               Votre mot de passe doit faire au moins 10 caractères.
             </span>
           } @else {
-            <span class="auth__hint">
+            <span class="auth__hint" i18n="@@owner.entry.password-hint">
               10 caractères minimum. Quatre mots au hasard font un excellent mot de passe.
             </span>
           }
         </label>
 
         <button type="submit" class="auth__submit" [disabled]="submitting()">
-          {{ submitting() ? 'Création…' : 'Créer mon compte' }}
+          @if (submitting()) {
+            <ng-container i18n="@@owner.entry.register-submitting">Création…</ng-container>
+          } @else {
+            <ng-container i18n="@@owner.entry.register-submit">Créer mon compte</ng-container>
+          }
         </button>
       </form>
     }
   </div>
 
   <p class="auth__switch">
-    Vous avez déjà un compte ?
-    <a routerLink="/connexion">Se connecter</a>
+    <ng-container i18n="@@owner.entry.register-has-account"
+      >Vous avez déjà un compte ?</ng-container
+    >&ngsp;
+    <a routerLink="/connexion" i18n="@@owner.entry.login-submit">Se connecter</a>
   </p>
 </div>

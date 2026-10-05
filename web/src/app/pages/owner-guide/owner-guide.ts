@@ -16,12 +16,9 @@ import { SeoService } from '../../core/services/seo';
 export class OwnerGuide {
   constructor() {
     inject(SeoService).apply({
-      title: 'Publier son logement pas à pas',
-      description:
-        'Du compte à la mise en ligne en 10 minutes : importer votre annonce existante, vérifier ' +
-        'tarifs et dates, ajouter vos photos, publier. Et que faire si un message vous bloque.',
+      title: $localize`:@@owner.guide.seo-title:Publier son logement pas à pas`,
+      description: $localize`:@@owner.guide.seo-description:Du compte à la mise en ligne en 10 minutes : importer votre annonce existante, vérifier tarifs et dates, ajouter vos photos, publier. Et que faire si un message vous bloque.`,
       path: '/proprietaire/guide',
-      frenchOnly: true,
     });
   }
 }

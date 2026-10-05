@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth';
 import { Favorites } from '../../core/services/favorites';
 import { GuestRequests } from '../../core/services/guest-requests';
-import { currentLang } from '../../core/i18n/lang';
 import { Icon } from '../../shared/icon/icon';
 import { LangSwitch } from '../../shared/lang-switch/lang-switch';
 
@@ -27,8 +26,6 @@ export class Header {
   /** Demandes envoyées depuis ce navigateur : le lien « Mes demandes » apparaît. */
   readonly guestRequests = inject(GuestRequests).list;
   readonly favoriteCount = inject(Favorites).count;
-  /** L'espace propriétaire n'existe qu'en français. */
-  readonly french = 'fr' === currentLang();
   /** Page de dons (Ko-fi) : le lien n'apparaît que si elle est renseignée. */
   readonly supportUrl = environment.supportUrl;
 

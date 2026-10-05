@@ -47,8 +47,8 @@ export class Login {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Connexion propriétaire',
-      description: 'Accédez à votre espace pour gérer votre calendrier et vos tarifs.',
+      title: $localize`:@@owner.entry.seo-login-title:Connexion propriétaire`,
+      description: $localize`:@@owner.entry.seo-login-description:Accédez à votre espace pour gérer votre calendrier et vos tarifs.`,
       path: '/connexion',
       noindex: true,
     });

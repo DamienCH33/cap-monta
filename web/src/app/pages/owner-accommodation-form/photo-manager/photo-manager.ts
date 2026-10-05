@@ -87,7 +87,29 @@ export class PhotoManager {
 
   constructor() {
     // Les aperçus locaux occupent de la mémoire tant qu'on ne les libère pas.
-    inject(DestroyRef).onDestroy(() => this.queue().forEach((upload) => URL.revokeObjectURL(upload.preview)));
+    inject(DestroyRef).onDestroy(() =>
+      this.queue().forEach((upload) => URL.revokeObjectURL(upload.preview)),
+    );
+  }
+
+  photoAlt(index: number): string {
+    return $localize`:@@owner.form.photos.alt:Photo ${index + 1}:position: du logement`;
+  }
+
+  coverLabel(index: number): string {
+    return $localize`:@@owner.form.photos.make-cover-label:Mettre la photo ${index + 1}:position: en couverture`;
+  }
+
+  forwardLabel(index: number): string {
+    return $localize`:@@owner.form.photos.forward-label:Avancer la photo ${index + 1}:position:`;
+  }
+
+  backwardLabel(index: number): string {
+    return $localize`:@@owner.form.photos.backward-label:Reculer la photo ${index + 1}:position:`;
+  }
+
+  deleteLabel(index: number): string {
+    return $localize`:@@owner.form.photos.delete-label:Supprimer la photo ${index + 1}:position:`;
   }
 
   onConsent(event: Event): void {
@@ -120,7 +142,9 @@ export class PhotoManager {
       return;
     }
     if (!this.noPeople()) {
-      this.error.set("Cochez d'abord la case : aucune personne ne doit apparaître sur les photos.");
+      this.error.set(
+        $localize`:@@owner.form.photos.error.consent:Cochez d'abord la case : aucune personne ne doit apparaître sur les photos.`,
+      );
       return;
     }
 
@@ -129,7 +153,7 @@ export class PhotoManager {
 
     if (kept.length < files.length) {
       this.error.set(
-        `${MAX_PHOTOS} photos maximum par logement : ${files.length - kept.length} photo(s) non ajoutée(s).`,
+        $localize`:@@owner.form.photos.error.too-many:${MAX_PHOTOS}:max: photos maximum par logement : ${files.length - kept.length}:skipped: photo(s) non ajoutée(s).`,
       );
     }
 
@@ -177,7 +201,12 @@ export class PhotoManager {
         },
         error: (error: HttpErrorResponse) => {
           this.busy.set(false);
-          this.error.set(apiErrorMessage(error, "La photo n'a pas pu être supprimée. Réessayez."));
+          this.error.set(
+            apiErrorMessage(
+              error,
+              $localize`:@@owner.form.photos.error.delete-failed:La photo n'a pas pu être supprimée. Réessayez.`,
+            ),
+          );
         },
       }),
     );
@@ -193,18 +222,28 @@ export class PhotoManager {
     this.error.set(null);
 
     this.ensureSaved()().subscribe((slug) =>
-      this.service.reorderPhotos(slug, list.map((photo) => photo.id)).subscribe({
-        next: (saved) => {
-          this.busy.set(false);
-          this.photos.set(saved);
-        },
-        error: (error: HttpErrorResponse) => {
-          this.busy.set(false);
-          this.photos.set(previous);
-          this.photosChange.emit(previous);
-          this.error.set(apiErrorMessage(error, "L'ordre des photos n'a pas pu être enregistré."));
-        },
-      }),
+      this.service
+        .reorderPhotos(
+          slug,
+          list.map((photo) => photo.id),
+        )
+        .subscribe({
+          next: (saved) => {
+            this.busy.set(false);
+            this.photos.set(saved);
+          },
+          error: (error: HttpErrorResponse) => {
+            this.busy.set(false);
+            this.photos.set(previous);
+            this.photosChange.emit(previous);
+            this.error.set(
+              apiErrorMessage(
+                error,
+                $localize`:@@owner.form.photos.error.reorder-failed:L'ordre des photos n'a pas pu être enregistré.`,
+              ),
+            );
+          },
+        }),
     );
   }
 
@@ -223,11 +262,16 @@ export class PhotoManager {
         this.error.set(
           error instanceof Error
             ? error.message
-            : "L'annonce n'a pas pu être enregistrée : vos photos n'ont pas été envoyées.",
+            : $localize`:@@owner.form.photos.error.save-failed:L'annonce n'a pas pu être enregistrée : vos photos n'ont pas été envoyées.`,
         );
         this.queue.update((queue) =>
           queue.map((upload) =>
-            this.isWaiting(upload) ? { ...upload, error: 'Pas encore envoyée.' } : upload,
+            this.isWaiting(upload)
+              ? {
+                  ...upload,
+                  error: $localize`:@@owner.form.photos.error.not-sent:Pas encore envoyée.`,
+                }
+              : upload,
           ),
         );
       },
@@ -259,7 +303,10 @@ export class PhotoManager {
       error: (error: HttpErrorResponse) => {
         this.patch(upload.key, {
           sending: false,
-          error: apiErrorMessage(error, "L'envoi a échoué. Vérifiez votre connexion et réessayez."),
+          error: apiErrorMessage(
+            error,
+            $localize`:@@owner.form.photos.error.upload-failed:L'envoi a échoué. Vérifiez votre connexion et réessayez.`,
+          ),
         });
         this.next(slug);
       },
@@ -283,16 +330,26 @@ export class PhotoManager {
     };
 
     if (!ACCEPTED.includes(file.type)) {
-      return { ...upload, error: 'Format non accepté : JPEG, PNG ou WebP.', retryable: false };
+      return {
+        ...upload,
+        error: $localize`:@@owner.form.photos.error.format:Format non accepté : JPEG, PNG ou WebP.`,
+        retryable: false,
+      };
     }
     if (file.size > MAX_BYTES) {
-      return { ...upload, error: 'Photo trop lourde : 10 Mo maximum.', retryable: false };
+      return {
+        ...upload,
+        error: $localize`:@@owner.form.photos.error.size:Photo trop lourde : 10 Mo maximum.`,
+        retryable: false,
+      };
     }
 
     return upload;
   }
 
   private patch(key: number, changes: Partial<Upload>): void {
-    this.queue.update((queue) => queue.map((upload) => (upload.key === key ? { ...upload, ...changes } : upload)));
+    this.queue.update((queue) =>
+      queue.map((upload) => (upload.key === key ? { ...upload, ...changes } : upload)),
+    );
   }
 }

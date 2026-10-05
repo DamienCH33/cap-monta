@@ -52,8 +52,8 @@ export class OwnerProfile {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Mon profil',
-      description: 'Nom affiché, téléphone et mot de passe du compte propriétaire.',
+      title: $localize`:@@owner.profile.title:Mon profil`,
+      description: $localize`:@@owner.profile.seo-description:Nom affiché, téléphone et mot de passe du compte propriétaire.`,
       path: '/mon-espace/profil',
       noindex: true,
     });

@@ -4,8 +4,9 @@ import { RouterLink } from '@angular/router';
 import { typeLabel } from '../../../core/models/accommodation';
 import {
   AccommodationStatus,
+  bedroomCount,
   OwnerAccommodation,
-  plural,
+  peopleCount,
   statusLabel,
 } from '../../../core/models/owner-accommodation';
 import { NavigationOrigin } from '../../../core/services/navigation-origin';
@@ -13,9 +14,9 @@ import { Icon } from '../../../shared/icon/icon';
 import { ListingShare } from '../listing-share/listing-share';
 
 const HINTS: Record<AccommodationStatus, string> = {
-  draft: "Visible uniquement par vous. Publiez-le pour qu'il apparaisse dans les recherches.",
-  published: 'Visible par tous les visiteurs du site.',
-  archived: 'Retiré du site. Son adresse et ses demandes passées sont conservées.',
+  draft: $localize`:@@owner.listings.hint-draft:Visible uniquement par vous. Publiez-le pour qu'il apparaisse dans les recherches.`,
+  published: $localize`:@@owner.listings.hint-published:Visible par tous les visiteurs du site.`,
+  archived: $localize`:@@owner.listings.hint-archived:Retiré du site. Son adresse et ses demandes passées sont conservées.`,
 };
 
 /**
@@ -50,6 +51,12 @@ export class OwnerListingCard {
   readonly origin = inject(NavigationOrigin);
 
   readonly title = computed(() => `${typeLabel(this.item().type)} · ${this.place()}`);
+  /** Nom accessible de la barre d'outils de la carte. */
+  readonly toolsLabel = computed(() => {
+    const title = this.title();
+
+    return $localize`:@@owner.listings.tools-label:Outils : ${title}:title:`;
+  });
   readonly status = computed(() => statusLabel(this.item().status));
   readonly hint = computed(() => HINTS[this.item().status]);
   readonly cover = computed(() => this.item().photos[0]?.thumbUrl ?? null);
@@ -58,10 +65,7 @@ export class OwnerListingCard {
 
   readonly details = computed(() => {
     const item = this.item();
-    const parts = [
-      plural(item.capacity, 'personne', 'personnes'),
-      plural(item.bedrooms, 'chambre', 'chambres'),
-    ];
+    const parts = [peopleCount(item.capacity), bedroomCount(item.bedrooms)];
 
     if (item.surface) {
       parts.push(`${item.surface} m²`);

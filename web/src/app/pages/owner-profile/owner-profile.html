@@ -1,19 +1,25 @@
 <div class="container profile-page">
-  <nav class="profile-page__breadcrumb" aria-label="Fil d'Ariane">
-    <a routerLink="/mon-espace">Mon espace</a>
+  <nav
+    class="profile-page__breadcrumb"
+    aria-label="Fil d'Ariane"
+    i18n-aria-label="@@owner.common.breadcrumb"
+  >
+    <a routerLink="/mon-espace" i18n="@@owner.common.my-space">Mon espace</a>
     <span aria-hidden="true">/</span>
-    <span>Mon profil</span>
+    <span i18n="@@owner.profile.title">Mon profil</span>
   </nav>
 
-  <h1 class="profile-page__title">Mon profil</h1>
+  <h1 class="profile-page__title" i18n="@@owner.profile.title">Mon profil</h1>
   @if (owner(); as me) {
-    <p class="profile-page__email">
+    <p class="profile-page__email" i18n="@@owner.profile.account">
       Compte : <strong>{{ me.email }}</strong>
     </p>
   }
 
   <section class="auth__card profile-page__card">
-    <h2 class="profile-page__card-title">Ce que voient les voyageurs</h2>
+    <h2 class="profile-page__card-title" i18n="@@owner.profile.public-title">
+      Ce que voient les voyageurs
+    </h2>
     <form
       class="auth__form"
       [formGroup]="profile"
@@ -25,11 +31,15 @@
         <p class="auth__notice auth__notice--error" role="alert">{{ message }}</p>
       }
       @if ('saved' === profileState()) {
-        <p class="auth__notice auth__notice--ok" role="status">Profil enregistré.</p>
+        <p class="auth__notice auth__notice--ok" role="status" i18n="@@owner.profile.saved">
+          Profil enregistré.
+        </p>
       }
 
       <label class="auth__field">
-        <span class="auth__label">Nom affiché sur vos annonces</span>
+        <span class="auth__label" i18n="@@owner.profile.name-label"
+          >Nom affiché sur vos annonces</span
+        >
         <input
           type="text"
           formControlName="displayName"
@@ -38,14 +48,18 @@
           [attr.aria-invalid]="showProfileError('displayName')"
         />
         @if (showProfileError('displayName')) {
-          <span class="auth__error" role="alert">Entre 2 et 80 caractères.</span>
+          <span class="auth__error" role="alert" i18n="@@owner.profile.name-error"
+            >Entre 2 et 80 caractères.</span
+          >
         } @else {
-          <span class="auth__hint">Par exemple « Damien C. » ou « Famille Martin ».</span>
+          <span class="auth__hint" i18n="@@owner.profile.name-hint"
+            >Par exemple « Damien C. » ou « Famille Martin ».</span
+          >
         }
       </label>
 
       <label class="auth__field">
-        <span class="auth__label">Téléphone (facultatif)</span>
+        <span class="auth__label" i18n="@@owner.profile.phone-label">Téléphone (facultatif)</span>
         <input
           type="tel"
           formControlName="phone"
@@ -54,11 +68,11 @@
           [attr.aria-invalid]="showProfileError('phone')"
         />
         @if (showProfileError('phone')) {
-          <span class="auth__error" role="alert">
+          <span class="auth__error" role="alert" i18n="@@owner.profile.phone-error">
             Numéro attendu : 06 12 34 56 78, ou au format international (+32 470 12 34 56).
           </span>
         } @else {
-          <span class="auth__hint">
+          <span class="auth__hint" i18n="@@owner.profile.phone-hint">
             Jamais affiché sur l'annonce. Il n'est donné qu'au voyageur dont vous acceptez la
             demande.
           </span>
@@ -66,13 +80,17 @@
       </label>
 
       <button type="submit" class="auth__submit" [disabled]="'saving' === profileState()">
-        {{ 'saving' === profileState() ? 'Enregistrement…' : 'Enregistrer' }}
+        @if ('saving' === profileState()) {
+          <ng-container i18n="@@owner.profile.saving">Enregistrement…</ng-container>
+        } @else {
+          <ng-container i18n="@@owner.profile.save">Enregistrer</ng-container>
+        }
       </button>
     </form>
   </section>
 
   <section class="auth__card profile-page__card">
-    <h2 class="profile-page__card-title">Mot de passe</h2>
+    <h2 class="profile-page__card-title" i18n="@@owner.profile.password-title">Mot de passe</h2>
     <form
       class="auth__form"
       [formGroup]="password"
@@ -84,11 +102,17 @@
         <p class="auth__notice auth__notice--error" role="alert">{{ message }}</p>
       }
       @if ('saved' === passwordState()) {
-        <p class="auth__notice auth__notice--ok" role="status">Mot de passe changé.</p>
+        <p
+          class="auth__notice auth__notice--ok"
+          role="status"
+          i18n="@@owner.profile.password-saved"
+        >
+          Mot de passe changé.
+        </p>
       }
 
       <label class="auth__field">
-        <span class="auth__label">Mot de passe actuel</span>
+        <span class="auth__label" i18n="@@owner.profile.current-password">Mot de passe actuel</span>
         <input
           type="password"
           formControlName="currentPassword"
@@ -97,12 +121,14 @@
           [attr.aria-invalid]="showPasswordError('currentPassword')"
         />
         @if (showPasswordError('currentPassword')) {
-          <span class="auth__error" role="alert">Indiquez votre mot de passe actuel.</span>
+          <span class="auth__error" role="alert" i18n="@@owner.profile.current-password-error"
+            >Indiquez votre mot de passe actuel.</span
+          >
         }
       </label>
 
       <label class="auth__field">
-        <span class="auth__label">Nouveau mot de passe</span>
+        <span class="auth__label" i18n="@@owner.profile.new-password">Nouveau mot de passe</span>
         <input
           type="password"
           formControlName="newPassword"
@@ -111,29 +137,43 @@
           [attr.aria-invalid]="showPasswordError('newPassword')"
         />
         @if (showPasswordError('newPassword')) {
-          <span class="auth__error" role="alert">10 caractères minimum.</span>
+          <span class="auth__error" role="alert" i18n="@@owner.profile.new-password-error"
+            >10 caractères minimum.</span
+          >
         } @else {
-          <span class="auth__hint">
+          <span class="auth__hint" i18n="@@owner.profile.new-password-hint">
             10 caractères minimum. Quatre mots au hasard font un excellent mot de passe.
           </span>
         }
       </label>
 
       <button type="submit" class="auth__submit" [disabled]="'saving' === passwordState()">
-        {{ 'saving' === passwordState() ? 'Enregistrement…' : 'Changer le mot de passe' }}
+        @if ('saving' === passwordState()) {
+          <ng-container i18n="@@owner.profile.saving">Enregistrement…</ng-container>
+        } @else {
+          <ng-container i18n="@@owner.profile.change-password"
+            >Changer le mot de passe</ng-container
+          >
+        }
       </button>
     </form>
   </section>
 
   <section class="auth__card profile-page__card profile-page__card--danger">
-    <h2 class="profile-page__card-title">Supprimer mon compte</h2>
+    <h2 class="profile-page__card-title" i18n="@@owner.profile.delete-title">
+      Supprimer mon compte
+    </h2>
     @if (!deleteOpen()) {
-      <p class="profile-page__text">
-        Vos annonces, leurs photos, calendriers et tarifs sont effacés. Les voyageurs qui
-        attendent une réponse en reçoivent une. Impossible tant que des séjours acceptés sont à
-        venir.
+      <p class="profile-page__text" i18n="@@owner.profile.delete-text">
+        Vos annonces, leurs photos, calendriers et tarifs sont effacés. Les voyageurs qui attendent
+        une réponse en reçoivent une. Impossible tant que des séjours acceptés sont à venir.
       </p>
-      <button type="button" class="profile-page__danger-link" (click)="deleteOpen.set(true)">
+      <button
+        type="button"
+        class="profile-page__danger-link"
+        (click)="deleteOpen.set(true)"
+        i18n="@@owner.profile.delete-open"
+      >
         Supprimer mon compte…
       </button>
     } @else {
@@ -141,11 +181,11 @@
         @if (deleteError(); as message) {
           <p class="auth__notice auth__notice--error" role="alert">{{ message }}</p>
         }
-        <p class="profile-page__text">
+        <p class="profile-page__text" i18n="@@owner.profile.delete-confirm">
           <strong>C'est définitif.</strong> Confirmez avec votre mot de passe.
         </p>
         <label class="auth__field">
-          <span class="auth__label">Mot de passe</span>
+          <span class="auth__label" i18n="@@owner.profile.password-label">Mot de passe</span>
           <input
             type="password"
             formControlName="password"
@@ -159,9 +199,20 @@
             class="auth__submit profile-page__danger"
             [disabled]="deleting() || deletion.invalid"
           >
-            {{ deleting() ? 'Suppression…' : 'Supprimer définitivement' }}
+            @if (deleting()) {
+              <ng-container i18n="@@owner.profile.deleting">Suppression…</ng-container>
+            } @else {
+              <ng-container i18n="@@owner.profile.delete-submit"
+                >Supprimer définitivement</ng-container
+              >
+            }
           </button>
-          <button type="button" class="profile-page__cancel" (click)="deleteOpen.set(false)">
+          <button
+            type="button"
+            class="profile-page__cancel"
+            (click)="deleteOpen.set(false)"
+            i18n="@@owner.profile.cancel"
+          >
             Annuler
           </button>
         </div>

@@ -35,15 +35,15 @@ const TAB_PARAMS: Record<InboxTab, string> = {
 };
 
 const EMPTY: Record<InboxTab, string> = {
-  pending: 'Aucune demande en attente : vous êtes à jour.',
-  accepted: 'Aucune réservation à venir pour le moment.',
-  history: 'Rien dans l’historique pour l’instant.',
+  pending: $localize`:@@owner.requests.empty-pending:Aucune demande en attente : vous êtes à jour.`,
+  accepted: $localize`:@@owner.requests.empty-accepted:Aucune réservation à venir pour le moment.`,
+  history: $localize`:@@owner.requests.empty-history:Rien dans l’historique pour l’instant.`,
 };
 
 const DONE: Record<Action, string> = {
-  accept: 'Demande acceptée : les dates sont bloquées et le voyageur a reçu vos coordonnées.',
-  decline: 'Demande refusée : le voyageur en est prévenu.',
-  cancel: 'Réservation annulée : les dates sont de nouveau libres et le voyageur est prévenu.',
+  accept: $localize`:@@owner.requests.done-accept:Demande acceptée : les dates sont bloquées et le voyageur a reçu vos coordonnées.`,
+  decline: $localize`:@@owner.requests.done-decline:Demande refusée : le voyageur en est prévenu.`,
+  cancel: $localize`:@@owner.requests.done-cancel:Réservation annulée : les dates sont de nouveau libres et le voyageur est prévenu.`,
 };
 
 /**
@@ -80,9 +80,21 @@ export class OwnerRequests {
     const count = (key: InboxTab) => list.filter((r) => inboxTab(r, this.today) === key).length;
 
     return [
-      { key: 'pending', label: 'À traiter', count: count('pending') },
-      { key: 'accepted', label: 'Acceptées', count: count('accepted') },
-      { key: 'history', label: 'Historique', count: count('history') },
+      {
+        key: 'pending',
+        label: $localize`:@@owner.requests.tab-pending:À traiter`,
+        count: count('pending'),
+      },
+      {
+        key: 'accepted',
+        label: $localize`:@@owner.requests.tab-accepted:Acceptées`,
+        count: count('accepted'),
+      },
+      {
+        key: 'history',
+        label: $localize`:@@owner.requests.tab-history:Historique`,
+        count: count('history'),
+      },
     ];
   });
 
@@ -108,11 +120,12 @@ export class OwnerRequests {
   readonly travellers = travellers;
   readonly bookingPrice = bookingPrice;
   readonly tabParams = TAB_PARAMS;
+  readonly expiresFormat = $localize`:@@owner.requests.expires-format:EEEE d MMMM 'à' HH'h'mm`;
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Demandes de réservation',
-      description: 'Répondez aux demandes de réservation de vos logements.',
+      title: $localize`:@@owner.requests.seo-title:Demandes de réservation`,
+      description: $localize`:@@owner.requests.seo-description:Répondez aux demandes de réservation de vos logements.`,
       path: '/mon-espace/demandes',
       noindex: true,
     });
@@ -176,7 +189,9 @@ export class OwnerRequests {
     const euros = this.price();
 
     if ('accept' === action && null === request.estimatedPrice && (null === euros || euros < 1)) {
-      this.error.set('Indiquez le prix du séjour : aucun tarif ne couvre ces dates.');
+      this.error.set(
+        $localize`:@@owner.requests.price-required:Indiquez le prix du séjour : aucun tarif ne couvre ces dates.`,
+      );
 
       return;
     }
@@ -205,7 +220,10 @@ export class OwnerRequests {
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
         this.error.set(
-          apiErrorMessage(error, 'La réponse n’a pas pu être enregistrée. Réessayez.'),
+          apiErrorMessage(
+            error,
+            $localize`:@@owner.requests.save-failed:La réponse n’a pas pu être enregistrée. Réessayez.`,
+          ),
         );
       },
     });

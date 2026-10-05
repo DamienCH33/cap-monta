@@ -92,11 +92,11 @@ export class OwnerImport {
   readonly minText = MIN_TEXT;
   readonly maxText = MAX_TEXT;
   readonly types = [
-    { value: 'mobile_home', label: 'Mobil-home' },
-    { value: 'bungalow', label: 'Bungalow' },
-    { value: 'caravan', label: 'Caravane' },
-    { value: 'chalet', label: 'Chalet' },
-    { value: 'studio', label: 'Studio' },
+    { value: 'mobile_home', label: $localize`:@@owner.import.type-mobile-home:Mobil-home` },
+    { value: 'bungalow', label: $localize`:@@owner.import.type-bungalow:Bungalow` },
+    { value: 'caravan', label: $localize`:@@owner.import.type-caravan:Caravane` },
+    { value: 'chalet', label: $localize`:@@owner.import.type-chalet:Chalet` },
+    { value: 'studio', label: $localize`:@@owner.import.type-studio:Studio` },
   ];
   readonly petsPolicies = PETS_POLICIES;
   readonly amenityGroups = AMENITY_GROUPS.map((group) => ({
@@ -134,10 +134,12 @@ export class OwnerImport {
     }
 
     return [
-      '' === draft.resort ? 'le domaine' : null,
-      '' === draft.type ? 'le type' : null,
-      null === draft.capacity ? 'la capacité' : null,
-      null === draft.bedrooms ? 'le nombre de chambres' : null,
+      '' === draft.resort ? $localize`:@@owner.import.missing-resort:le domaine` : null,
+      '' === draft.type ? $localize`:@@owner.import.missing-type:le type` : null,
+      null === draft.capacity ? $localize`:@@owner.import.missing-capacity:la capacité` : null,
+      null === draft.bedrooms
+        ? $localize`:@@owner.import.missing-bedrooms:le nombre de chambres`
+        : null,
     ].filter((label): label is string => null !== label);
   });
 
@@ -148,8 +150,8 @@ export class OwnerImport {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Importer mon annonce',
-      description: 'Remplissez votre annonce à partir du texte que vous publiez déjà.',
+      title: $localize`:@@owner.import.seo-title:Importer mon annonce`,
+      description: $localize`:@@owner.import.seo-description:Remplissez votre annonce à partir du texte que vous publiez déjà.`,
       path: '/mon-espace/importer',
       noindex: true,
     });
@@ -167,7 +169,10 @@ export class OwnerImport {
       this.accommodations.get(this.target).subscribe({
         next: (item) =>
           this.targetTitle.set(`${typeLabel(item.type)} · ${item.district ?? 'Euronat'}`),
-        error: () => this.error.set('Ce logement est introuvable dans votre espace.'),
+        error: () =>
+          this.error.set(
+            $localize`:@@owner.import.target-not-found:Ce logement est introuvable dans votre espace.`,
+          ),
       });
     }
 
@@ -201,7 +206,9 @@ export class OwnerImport {
       },
       error: (error: HttpErrorResponse) => {
         this.sending.set(false);
-        this.error.set(errorMessage(error, 'L’envoi a échoué. Réessayez.'));
+        this.error.set(
+          errorMessage(error, $localize`:@@owner.import.send-failed:L’envoi a échoué. Réessayez.`),
+        );
       },
     });
   }
@@ -262,7 +269,7 @@ export class OwnerImport {
     this.rates.update((rows) => [
       ...rows,
       {
-        label: 'Nouvelle période',
+        label: $localize`:@@owner.import.new-period:Nouvelle période`,
         keep: true,
         start: '',
         end: '',
@@ -325,8 +332,8 @@ export class OwnerImport {
           slug,
           tone: 'ok',
           message: created
-            ? 'Brouillon créé à partir de votre annonce. Ajoutez vos photos, relisez, puis publiez.'
-            : 'Tarifs et dates prises ajoutés depuis votre annonce.',
+            ? $localize`:@@owner.import.created:Brouillon créé à partir de votre annonce. Ajoutez vos photos, relisez, puis publiez.`
+            : $localize`:@@owner.import.added:Tarifs et dates prises ajoutés depuis votre annonce.`,
         });
         void this.router.navigate(
           created
@@ -341,7 +348,12 @@ export class OwnerImport {
           this.appliedTo.set(body.slug);
         }
         this.violations.set(body?.violations ?? []);
-        this.error.set(errorMessage(error, 'L’enregistrement a échoué. Réessayez.'));
+        this.error.set(
+          errorMessage(
+            error,
+            $localize`:@@owner.import.save-failed:L’enregistrement a échoué. Réessayez.`,
+          ),
+        );
       },
     });
   }
@@ -360,7 +372,9 @@ export class OwnerImport {
         next: (view) => this.show(view),
         error: () => {
           this.step.set('paste');
-          this.error.set('Cette lecture est introuvable. Collez de nouveau votre annonce.');
+          this.error.set(
+            $localize`:@@owner.import.reading-not-found:Cette lecture est introuvable. Collez de nouveau votre annonce.`,
+          );
         },
       });
   }
@@ -407,10 +421,10 @@ export class OwnerImport {
 /** Les refus de cette API portent « message », ou des violations avec « message ». */
 function errorMessage(error: HttpErrorResponse, fallback: string): string {
   if (0 === error.status) {
-    return 'Connexion impossible. Vérifiez votre connexion et réessayez.';
+    return $localize`:@@owner.import.offline:Connexion impossible. Vérifiez votre connexion et réessayez.`;
   }
   if (503 === error.status) {
-    return 'L’assistant est en pause pour le moment. Réessayez plus tard, ou remplissez le formulaire vous-même.';
+    return $localize`:@@owner.import.paused:L’assistant est en pause pour le moment. Réessayez plus tard, ou remplissez le formulaire vous-même.`;
   }
 
   const body = error.error as { message?: string; violations?: Violation[] } | null;

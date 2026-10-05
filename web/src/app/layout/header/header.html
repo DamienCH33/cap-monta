@@ -31,34 +31,34 @@
         <a routerLink="/mes-demandes" i18n="@@header.my-requests">Mes demandes</a>
       }
 
-      @if (!french) {
-        <!-- L'espace propriétaire n'existe qu'en français : lien vers le site français. -->
-        <a class="header__cta" href="/proprietaire" hreflang="fr" i18n="@@header.list-property"
+      @if (null !== owner()) {
+        <a routerLink="/mon-espace" i18n="@@header.my-space">Mon espace</a>
+      } @else {
+        <a class="header__cta" routerLink="/proprietaire" i18n="@@header.list-property"
           >Louer mon logement</a
         >
-      } @else if (null !== owner()) {
-        <a routerLink="/mon-espace">Mon espace</a>
-      } @else {
-        <a class="header__cta" routerLink="/proprietaire">Louer mon logement</a>
       }
 
-      @if (french) {
-        <span class="header__account">
-          @if (sessionChecked()) {
-            @if (owner(); as me) {
-              <a class="header__who" routerLink="/mon-espace/profil" title="Mon profil">
-                <cm-icon name="user-circle" />
-                {{ me.displayName }}
-              </a>
-              <button type="button" class="header__logout" (click)="logout()">
-                Se déconnecter
-              </button>
-            } @else {
-              <a routerLink="/connexion">Se connecter</a>
-            }
+      <span class="header__account">
+        @if (sessionChecked()) {
+          @if (owner(); as me) {
+            <a
+              class="header__who"
+              routerLink="/mon-espace/profil"
+              title="Mon profil"
+              i18n-title="@@header.profile"
+            >
+              <cm-icon name="user-circle" />
+              {{ me.displayName }}
+            </a>
+            <button type="button" class="header__logout" (click)="logout()" i18n="@@header.logout">
+              Se déconnecter
+            </button>
+          } @else {
+            <a routerLink="/connexion" i18n="@@header.login">Se connecter</a>
           }
-        </span>
-      }
+        }
+      </span>
 
       <cm-lang-switch />
 

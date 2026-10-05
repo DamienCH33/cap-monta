@@ -116,25 +116,31 @@ export function rateHints(period: ProposalPeriod): string[] {
   const hints: string[] = [];
 
   if (period.past) {
-    hints.push('Période passée : pas reprise. Vos tarifs datent peut-être d’une autre année.');
+    hints.push(
+      $localize`:@@owner.import.hint-past:Période passée : pas reprise. Vos tarifs datent peut-être d’une autre année.`,
+    );
   }
   if (period.tooFar) {
-    hints.push('Au-delà de deux ans : les tarifs se saisissent plus tard.');
+    hints.push(
+      $localize`:@@owner.import.hint-too-far:Au-delà de deux ans : les tarifs se saisissent plus tard.`,
+    );
   }
   if (period.datesMissing) {
-    hints.push('Dates à préciser : votre annonce ne les donne pas.');
+    hints.push(
+      $localize`:@@owner.import.hint-dates-missing:Dates à préciser : votre annonce ne les donne pas.`,
+    );
   }
   if (period.unitToConfirm) {
     hints.push(
-      'Votre annonce ne dit pas si c’est la semaine ou la nuit : proposé à la semaine, vérifiez.',
+      $localize`:@@owner.import.hint-unit:Votre annonce ne dit pas si c’est la semaine ou la nuit : proposé à la semaine, vérifiez.`,
     );
   }
   if (null !== period.stayPrice) {
     const stay = toEuros(period.stayPrice);
     hints.push(
       null === period.weeklyPrice && null === period.nightlyPrice
-        ? `${stay} € pour le séjour : indiquez les dates pour le convertir.`
-        : `${stay} € pour le séjour entier, ramené ici à la semaine ou à la nuit.`,
+        ? $localize`:@@owner.import.hint-stay-no-dates:${stay}:stayPrice: € pour le séjour : indiquez les dates pour le convertir.`
+        : $localize`:@@owner.import.hint-stay-converted:${stay}:stayPrice: € pour le séjour entier, ramené ici à la semaine ou à la nuit.`,
     );
   }
 
@@ -146,7 +152,9 @@ export function rangeRows(ranges: ProposalRange[]): RangeRow[] {
     keep: range.selected,
     start: range.start,
     end: range.end,
-    hint: range.tooFar ? 'Au-delà de 18 mois : le calendrier ne va pas si loin.' : null,
+    hint: range.tooFar
+      ? $localize`:@@owner.import.hint-range-too-far:Au-delà de 18 mois : le calendrier ne va pas si loin.`
+      : null,
   }));
 }
 

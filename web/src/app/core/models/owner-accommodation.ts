@@ -29,7 +29,7 @@ export interface OwnerAccommodation {
 /** « vérifié aujourd'hui », « vérifié il y a 34 jours », « jamais vérifié ». */
 export function checkedLabel(checkedAt: string | null, now = new Date()): string {
   if (null === checkedAt) {
-    return 'jamais vérifié';
+    return $localize`:@@owner.common.checked-never:jamais vérifié`;
   }
 
   const day = (date: Date) =>
@@ -37,10 +37,12 @@ export function checkedLabel(checkedAt: string | null, now = new Date()): string
   const days = Math.round((day(now) - day(new Date(checkedAt))) / 86_400_000);
 
   if (days <= 0) {
-    return "vérifié aujourd'hui";
+    return $localize`:@@owner.common.checked-today:vérifié aujourd'hui`;
   }
 
-  return 1 === days ? 'vérifié hier' : `vérifié il y a ${days} jours`;
+  return 1 === days
+    ? $localize`:@@owner.common.checked-yesterday:vérifié hier`
+    : $localize`:@@owner.common.checked-days-ago:vérifié il y a ${days}:days: jours`;
 }
 
 /** Les calendriers à vérifier d'abord, du plus ancien au plus récent ; « jamais » en tête. */
@@ -97,9 +99,9 @@ export interface DistrictOption {
 }
 
 const STATUS_LABELS: Record<AccommodationStatus, string> = {
-  draft: 'Brouillon',
-  published: 'En ligne',
-  archived: 'Retiré du site',
+  draft: $localize`:@@owner.common.status-draft:Brouillon`,
+  published: $localize`:@@owner.common.status-published:En ligne`,
+  archived: $localize`:@@owner.common.status-archived:Retiré du site`,
 };
 
 export function statusLabel(status: AccommodationStatus): string {
@@ -124,21 +126,52 @@ export function statusFromParam(value: string | null): AccommodationStatus | nul
 /** « 4 logements · 3 en ligne · 1 brouillon » : utilisé par Mon espace et Mes logements. */
 export function summarize(list: OwnerAccommodation[]): string {
   const count = (status: AccommodationStatus) => list.filter((a) => a.status === status).length;
-  const parts = [plural(list.length, 'logement', 'logements')];
+  const listings = list.length;
+  const parts = [
+    listings > 1
+      ? $localize`:@@owner.common.listings.other:${listings}:count: logements`
+      : $localize`:@@owner.common.listings.one:${listings}:count: logement`,
+  ];
 
-  if (count('published')) {
-    parts.push(`${count('published')} en ligne`);
+  const online = count('published');
+  if (online) {
+    parts.push($localize`:@@owner.common.online-count:${online}:count: en ligne`);
   }
-  if (count('draft')) {
-    parts.push(plural(count('draft'), 'brouillon', 'brouillons'));
+  const drafts = count('draft');
+  if (drafts) {
+    parts.push(
+      drafts > 1
+        ? $localize`:@@owner.common.drafts.other:${drafts}:count: brouillons`
+        : $localize`:@@owner.common.drafts.one:${drafts}:count: brouillon`,
+    );
   }
-  if (count('archived')) {
-    parts.push(plural(count('archived'), 'retiré', 'retirés'));
+  const retired = count('archived');
+  if (retired) {
+    parts.push(
+      retired > 1
+        ? $localize`:@@owner.common.retired.other:${retired}:count: retirés`
+        : $localize`:@@owner.common.retired.one:${retired}:count: retiré`,
+    );
   }
 
   return parts.join(' · ');
 }
 
+/** « 4 personnes », « 1 personne » (0 et 1 au singulier, comme en français). */
+export function peopleCount(count: number): string {
+  return count > 1
+    ? $localize`:@@owner.common.people.other:${count}:count: personnes`
+    : $localize`:@@owner.common.people.one:${count}:count: personne`;
+}
+
+/** « 2 chambres », « 0 chambre ». */
+export function bedroomCount(count: number): string {
+  return count > 1
+    ? $localize`:@@owner.common.bedrooms.other:${count}:count: chambres`
+    : $localize`:@@owner.common.bedrooms.one:${count}:count: chambre`;
+}
+
+/** Aide française historique : préférer peopleCount / bedroomCount, déjà traduites. */
 export function plural(count: number, one: string, many: string): string {
   return `${count} ${count > 1 ? many : one}`;
 }

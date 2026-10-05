@@ -1,10 +1,22 @@
 <div class="container listing-form">
-  <nav class="listing-form__breadcrumb" aria-label="Fil d'Ariane">
-    <a routerLink="/mon-espace">Mon espace</a>
+  <nav
+    class="listing-form__breadcrumb"
+    aria-label="Fil d'Ariane"
+    i18n-aria-label="@@owner.form.breadcrumb.label"
+  >
+    <a routerLink="/mon-espace" i18n="@@owner.form.breadcrumb.space">Mon espace</a>
     <span aria-hidden="true">›</span>
-    <a routerLink="/mon-espace/logements">Mes logements</a>
+    <a routerLink="/mon-espace/logements" i18n="@@owner.form.breadcrumb.accommodations"
+      >Mes logements</a
+    >
     <span aria-hidden="true">›</span>
-    <span aria-current="page">{{ null === slug ? 'Ajouter' : 'Modifier' }}</span>
+    <span aria-current="page">
+      @if (null === slug) {
+        <ng-container i18n="@@owner.form.breadcrumb.add">Ajouter</ng-container>
+      } @else {
+        <ng-container i18n="@@owner.form.breadcrumb.edit">Modifier</ng-container>
+      }
+    </span>
   </nav>
 
   <header class="listing-form__header">
@@ -17,11 +29,11 @@
   </header>
 
   @if (null === slug) {
-    <p class="listing-form__intro">
+    <p class="listing-form__intro" i18n="@@owner.form.intro.draft">
       Remplissez tout d'une traite pour publier tout de suite, ou enregistrez un brouillon et
       reprenez plus tard : rien n'est visible tant que vous ne publiez pas.
     </p>
-    <p class="listing-form__intro">
+    <p class="listing-form__intro" i18n="@@owner.form.intro.import">
       Déjà une annonce ailleurs ?
       <a routerLink="/mon-espace/importer">Importez son texte</a> : logement, tarifs et dates prises
       remplis pour vous, à vérifier avant d'enregistrer.
@@ -29,14 +41,19 @@
   }
 
   @if (loading()) {
-    <div class="listing-form__skeleton cm-shimmer" aria-busy="true" aria-label="Chargement"></div>
+    <div
+      class="listing-form__skeleton cm-shimmer"
+      aria-busy="true"
+      aria-label="Chargement"
+      i18n-aria-label="@@owner.form.loading"
+    ></div>
   } @else if (loadFailed()) {
-    <p class="listing-form__alert" role="alert">
+    <p class="listing-form__alert" role="alert" i18n="@@owner.form.not-found">
       Ce logement est introuvable. <a routerLink="/mon-espace/logements">Retour à mes logements</a>
     </p>
   } @else {
     @if (!canPublish()) {
-      <p class="listing-form__notice">
+      <p class="listing-form__notice" i18n="@@owner.form.verify-email.notice">
         Confirmez votre adresse email pour pouvoir publier : le lien vous a été envoyé à
         l'inscription. En attendant, enregistrez votre annonce en brouillon, rien ne sera perdu.
       </p>
@@ -57,10 +74,12 @@
 
       <!-- 1. Le logement -->
       <section class="listing-form__section">
-        <h2 class="listing-form__section-title">Le logement</h2>
+        <h2 class="listing-form__section-title" i18n="@@owner.form.section.accommodation">
+          Le logement
+        </h2>
 
         <fieldset class="listing-form__group">
-          <legend class="listing-form__label">Domaine</legend>
+          <legend class="listing-form__label" i18n="@@owner.form.resort.label">Domaine</legend>
           @if (null === existing()) {
             <div class="listing-form__choices listing-form__choices--two">
               @for (option of resorts; track option.value) {
@@ -78,7 +97,9 @@
           } @else {
             <p class="listing-form__readonly">
               {{ 'chm' === form.controls.resort.value ? 'CHM Montalivet' : 'Euronat' }}
-              <span class="listing-form__muted">— ne se modifie pas</span>
+              <span class="listing-form__muted" i18n="@@owner.form.resort.locked"
+                >— ne se modifie pas</span
+              >
             </p>
           }
           @if (error('resort'); as message) {
@@ -87,7 +108,9 @@
         </fieldset>
 
         <fieldset class="listing-form__group">
-          <legend class="listing-form__label">Type de logement</legend>
+          <legend class="listing-form__label" i18n="@@owner.form.type.label">
+            Type de logement
+          </legend>
           <div class="listing-form__choices listing-form__choices--three">
             @for (option of types; track option.value) {
               <label class="listing-form__choice">
@@ -108,24 +131,35 @@
 
         <div class="listing-form__row">
           <div class="listing-form__group">
-            <span class="listing-form__label" id="capacity-label">Capacité</span>
+            <span class="listing-form__label" id="capacity-label" i18n="@@owner.form.capacity.label"
+              >Capacité</span
+            >
             <div class="listing-form__stepper" role="group" aria-labelledby="capacity-label">
               <button
                 type="button"
                 class="listing-form__step"
                 aria-label="Une personne de moins"
+                i18n-aria-label="@@owner.form.capacity.decrease"
                 [disabled]="form.controls.capacity.value <= limits.capacity.min"
                 (click)="step('capacity', -1)"
               >
                 −
               </button>
-              <output class="listing-form__value" aria-live="polite">
-                {{ plural(form.controls.capacity.value, 'personne', 'personnes') }}
+              <output
+                class="listing-form__value"
+                aria-live="polite"
+                i18n="@@owner.form.capacity.value"
+              >
+                {form.controls.capacity.value, plural,
+                  =1 {1 personne}
+                  other {{{ form.controls.capacity.value }} personnes}
+                }
               </output>
               <button
                 type="button"
                 class="listing-form__step"
                 aria-label="Une personne de plus"
+                i18n-aria-label="@@owner.form.capacity.increase"
                 [disabled]="form.controls.capacity.value >= limits.capacity.max"
                 (click)="step('capacity', 1)"
               >
@@ -138,24 +172,36 @@
           </div>
 
           <div class="listing-form__group">
-            <span class="listing-form__label" id="bedrooms-label">Chambres</span>
+            <span class="listing-form__label" id="bedrooms-label" i18n="@@owner.form.bedrooms.label"
+              >Chambres</span
+            >
             <div class="listing-form__stepper" role="group" aria-labelledby="bedrooms-label">
               <button
                 type="button"
                 class="listing-form__step"
                 aria-label="Une chambre de moins"
+                i18n-aria-label="@@owner.form.bedrooms.decrease"
                 [disabled]="form.controls.bedrooms.value <= limits.bedrooms.min"
                 (click)="step('bedrooms', -1)"
               >
                 −
               </button>
-              <output class="listing-form__value" aria-live="polite">
-                {{ plural(form.controls.bedrooms.value, 'chambre', 'chambres') }}
+              <output
+                class="listing-form__value"
+                aria-live="polite"
+                i18n="@@owner.form.bedrooms.value"
+              >
+                {form.controls.bedrooms.value, plural,
+                  =0 {0 chambre}
+                  =1 {1 chambre}
+                  other {{{ form.controls.bedrooms.value }} chambres}
+                }
               </output>
               <button
                 type="button"
                 class="listing-form__step"
                 aria-label="Une chambre de plus"
+                i18n-aria-label="@@owner.form.bedrooms.increase"
                 [disabled]="form.controls.bedrooms.value >= limits.bedrooms.max"
                 (click)="step('bedrooms', 1)"
               >
@@ -168,7 +214,7 @@
           </div>
 
           <label class="listing-form__group">
-            <span class="listing-form__label"
+            <span class="listing-form__label" i18n="@@owner.form.surface.label"
               >Surface <span class="listing-form__muted">(facultatif)</span></span
             >
             <span class="listing-form__suffix">
@@ -193,22 +239,37 @@
       <!-- 2. Emplacement : quartier au CHM, secteur à Euronat -->
       @if (showDistrict()) {
         <section class="listing-form__section">
-          <h2 class="listing-form__section-title">Emplacement</h2>
+          <h2 class="listing-form__section-title" i18n="@@owner.form.section.location">
+            Emplacement
+          </h2>
           <label class="listing-form__group">
-            <span class="listing-form__label">{{
-              'chm' === resort() ? 'Quartier' : 'Secteur'
-            }}</span>
+            <span class="listing-form__label">
+              @if ('chm' === resort()) {
+                <ng-container i18n="@@owner.form.district.label-chm">Quartier</ng-container>
+              } @else {
+                <ng-container i18n="@@owner.form.district.label-sector">Secteur</ng-container>
+              }
+            </span>
             <select formControlName="district" (change)="forget('district')">
-              <option value="">Je le préciserai plus tard</option>
+              <option value="" i18n="@@owner.form.district.later">
+                Je le préciserai plus tard
+              </option>
               @for (district of resortDistricts(); track district.slug) {
                 <option [value]="district.slug">{{ district.name }}</option>
               }
             </select>
-            <span class="listing-form__hint">{{
-              'chm' === resort()
-                ? "Nécessaire pour publier l'annonce."
-                : 'Facultatif : il aide les vacanciers à vous situer (côté plage, côté village…).'
-            }}</span>
+            <span class="listing-form__hint">
+              @if ('chm' === resort()) {
+                <ng-container i18n="@@owner.form.district.hint-chm"
+                  >Nécessaire pour publier l'annonce.</ng-container
+                >
+              } @else {
+                <ng-container i18n="@@owner.form.district.hint-sector"
+                  >Facultatif : il aide les vacanciers à vous situer (côté plage, côté
+                  village…).</ng-container
+                >
+              }
+            </span>
             @if (error('district'); as message) {
               <span class="listing-form__error" role="alert">{{ message }}</span>
             }
@@ -218,7 +279,9 @@
 
       <!-- 3. Équipements -->
       <section class="listing-form__section">
-        <h2 class="listing-form__section-title">Équipements</h2>
+        <h2 class="listing-form__section-title" i18n="@@owner.form.section.amenities">
+          Équipements
+        </h2>
         @for (group of amenityGroups; track group.key) {
           <p class="listing-form__label">{{ group.label }}</p>
           <div class="listing-form__amenities">
@@ -234,7 +297,7 @@
             }
           </div>
         }
-        <p class="listing-form__hint">
+        <p class="listing-form__hint" i18n="@@owner.form.amenities.hint">
           Un équipement qui manque ? Décrivez-le dans la présentation.
         </p>
         @if (error('amenities'); as message) {
@@ -242,7 +305,7 @@
         }
 
         <fieldset class="listing-form__group">
-          <legend class="listing-form__label">Animaux</legend>
+          <legend class="listing-form__label" i18n="@@owner.form.pets.label">Animaux</legend>
           <div class="listing-form__choices listing-form__choices--three">
             @for (option of petsPolicies; track option.value) {
               <label class="listing-form__choice">
@@ -265,12 +328,17 @@
 
       <!-- 4. Description -->
       <section class="listing-form__section">
-        <h2 class="listing-form__section-title">Description</h2>
+        <h2 class="listing-form__section-title" i18n="@@owner.form.section.description">
+          Description
+        </h2>
         <label class="listing-form__group">
-          <span class="listing-form__label">Présentez votre logement</span>
+          <span class="listing-form__label" i18n="@@owner.form.description.label"
+            >Présentez votre logement</span
+          >
           <textarea
             rows="7"
             formControlName="description"
+            i18n-placeholder="@@owner.form.description.placeholder"
             placeholder="L'ambiance, la vue, l'ombre des pins, la distance à la plage, ce que vous aimez dans ce logement…"
             (input)="forget('description')"
           ></textarea>
@@ -278,9 +346,14 @@
             class="listing-form__counter"
             [class.listing-form__counter--ok]="descriptionLength() >= minDescription"
           >
-            {{ descriptionLength() }} caractères
+            <ng-container i18n="@@owner.form.description.count">{descriptionLength(), plural,
+              other {{{ descriptionLength() }} caractères}
+            }</ng-container>
             @if (descriptionLength() < minDescription) {
-              · encore {{ minDescription - descriptionLength() }} pour pouvoir publier
+              <ng-container i18n="@@owner.form.description.remaining"
+                >· encore {{ minDescription - descriptionLength() }} pour pouvoir
+                publier</ng-container
+              >
             }
           </span>
           @if (error('description'); as message) {
@@ -291,28 +364,32 @@
 
       <!-- 5. Conditions et frais -->
       <section class="listing-form__section" formGroupName="terms">
-        <h2 class="listing-form__section-title">
+        <h2 class="listing-form__section-title" i18n="@@owner.form.section.terms">
           Conditions et frais <span class="listing-form__muted">(facultatif)</span>
         </h2>
-        <p class="listing-form__muted">
+        <p class="listing-form__muted" i18n="@@owner.form.terms.intro">
           Affichés sur l'annonce : le voyageur connaît le vrai prix avant d'écrire. Laissez vide ce
           que vous ne voulez pas préciser.
         </p>
 
         <div class="listing-form__row">
           <label class="listing-form__group">
-            <span class="listing-form__label">Arrivée à partir de</span>
+            <span class="listing-form__label" i18n="@@owner.form.terms.check-in"
+              >Arrivée à partir de</span
+            >
             <select formControlName="checkInFrom" (change)="forget('terms')">
-              <option value="">Non précisé</option>
+              <option value="" i18n="@@owner.form.terms.unspecified">Non précisé</option>
               @for (time of timeOptions; track time) {
                 <option [value]="time">{{ timeLabel(time) }}</option>
               }
             </select>
           </label>
           <label class="listing-form__group">
-            <span class="listing-form__label">Départ avant</span>
+            <span class="listing-form__label" i18n="@@owner.form.terms.check-out"
+              >Départ avant</span
+            >
             <select formControlName="checkOutBefore" (change)="forget('terms')">
-              <option value="">Non précisé</option>
+              <option value="" i18n="@@owner.form.terms.unspecified">Non précisé</option>
               @for (time of timeOptions; track time) {
                 <option [value]="time">{{ timeLabel(time) }}</option>
               }
@@ -322,7 +399,9 @@
 
         <div class="listing-form__row">
           <label class="listing-form__group">
-            <span class="listing-form__label">Acompte à l'acceptation</span>
+            <span class="listing-form__label" i18n="@@owner.form.terms.deposit-percent"
+              >Acompte à l'acceptation</span
+            >
             <span class="listing-form__suffix">
               <input
                 inputmode="numeric"
@@ -334,7 +413,9 @@
             </span>
           </label>
           <label class="listing-form__group">
-            <span class="listing-form__label">Caution</span>
+            <span class="listing-form__label" i18n="@@owner.form.terms.security-deposit"
+              >Caution</span
+            >
             <span class="listing-form__suffix">
               <input
                 inputmode="decimal"
@@ -348,10 +429,11 @@
         </div>
 
         <label class="listing-form__group">
-          <span class="listing-form__label">Annulation</span>
+          <span class="listing-form__label" i18n="@@owner.form.terms.cancellation">Annulation</span>
           <textarea
             rows="2"
             formControlName="cancellationPolicy"
+            i18n-placeholder="@@owner.form.terms.cancellation-placeholder"
             placeholder="Par exemple : acompte rendu en cas d'annulation plus de 30 jours avant l'arrivée."
             (input)="forget('terms')"
           ></textarea>
@@ -359,24 +441,30 @@
 
         <div class="listing-form__row">
           <label class="listing-form__group">
-            <span class="listing-form__label">Taxe de séjour, par adulte et par nuit</span>
+            <span class="listing-form__label" i18n="@@owner.form.terms.tourist-tax"
+              >Taxe de séjour, par adulte et par nuit</span
+            >
             <span class="listing-form__suffix">
               <input
                 inputmode="decimal"
                 formControlName="touristTax"
                 placeholder="0,88"
+                i18n-placeholder="@@owner.form.terms.tourist-tax-placeholder"
                 (input)="forget('terms')"
               />
               <span aria-hidden="true">€</span>
             </span>
           </label>
           <label class="listing-form__group">
-            <span class="listing-form__label">Redevance du domaine, par personne et par nuit</span>
+            <span class="listing-form__label" i18n="@@owner.form.terms.resort-fee"
+              >Redevance du domaine, par personne et par nuit</span
+            >
             <span class="listing-form__suffix">
               <input
                 inputmode="decimal"
                 formControlName="resortFee"
                 placeholder="4,50"
+                i18n-placeholder="@@owner.form.terms.resort-fee-placeholder"
                 (input)="forget('terms')"
               />
               <span aria-hidden="true">€</span>
@@ -386,7 +474,9 @@
 
         <div class="listing-form__row">
           <label class="listing-form__group">
-            <span class="listing-form__label">Ménage de fin de séjour, en option</span>
+            <span class="listing-form__label" i18n="@@owner.form.terms.cleaning-fee"
+              >Ménage de fin de séjour, en option</span
+            >
             <span class="listing-form__suffix">
               <input
                 inputmode="decimal"
@@ -398,7 +488,9 @@
             </span>
           </label>
           <label class="listing-form__group">
-            <span class="listing-form__label">Linge, en option, par personne</span>
+            <span class="listing-form__label" i18n="@@owner.form.terms.linen-fee"
+              >Linge, en option, par personne</span
+            >
             <span class="listing-form__suffix">
               <input
                 inputmode="decimal"
@@ -418,8 +510,8 @@
 
       <!-- 6. Photos -->
       <section class="listing-form__section">
-        <h2 class="listing-form__section-title">Photos</h2>
-        <p class="listing-form__muted">
+        <h2 class="listing-form__section-title" i18n="@@owner.form.section.photos">Photos</h2>
+        <p class="listing-form__muted" i18n="@@owner.form.photos.intro">
           La première photo est la couverture : c'est elle qu'on voit dans les résultats de
           recherche. Il en faut au moins une pour publier.
         </p>
@@ -430,7 +522,7 @@
             (photosChange)="photoCount.set($event.length)"
           />
         } @else {
-          <p class="auth__notice auth__notice--warn">
+          <p class="auth__notice auth__notice--warn" i18n="@@owner.form.photos.verify-email">
             Confirmez d'abord votre adresse email : les photos s'ajoutent dès qu'elle l'est. Le lien
             vous a été envoyé à l'inscription. Le reste de l'annonce peut être enregistré en
             brouillon dès maintenant.
@@ -444,7 +536,11 @@
       <div class="listing-form__actions">
         @if (primary(); as action) {
           <button type="submit" class="listing-form__button" [disabled]="null !== saving()">
-            {{ saving() === action.intent ? 'Enregistrement…' : action.label }}
+            @if (saving() === action.intent) {
+              <ng-container i18n="@@owner.form.action.saving">Enregistrement…</ng-container>
+            } @else {
+              {{ action.label }}
+            }
           </button>
         }
         @if (secondary(); as action) {
@@ -454,10 +550,19 @@
             [disabled]="null !== saving()"
             (click)="submit(action.intent)"
           >
-            {{ saving() === action.intent ? 'Enregistrement…' : action.label }}
+            @if (saving() === action.intent) {
+              <ng-container i18n="@@owner.form.action.saving">Enregistrement…</ng-container>
+            } @else {
+              {{ action.label }}
+            }
           </button>
         }
-        <a class="listing-form__cancel" routerLink="/mon-espace/logements">Annuler</a>
+        <a
+          class="listing-form__cancel"
+          routerLink="/mon-espace/logements"
+          i18n="@@owner.form.action.cancel"
+          >Annuler</a
+        >
       </div>
     </form>
   }

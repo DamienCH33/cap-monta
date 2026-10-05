@@ -2,7 +2,12 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { typeLabel } from '../../../core/models/accommodation';
-import { checkedLabel, OwnerAccommodation, plural } from '../../../core/models/owner-accommodation';
+import {
+  bedroomCount,
+  checkedLabel,
+  OwnerAccommodation,
+  peopleCount,
+} from '../../../core/models/owner-accommodation';
 import { Icon } from '../../../shared/icon/icon';
 
 /**
@@ -27,6 +32,6 @@ export class CalendarList {
   }
 
   details(item: OwnerAccommodation): string {
-    return `${plural(item.capacity, 'personne', 'personnes')} · ${plural(item.bedrooms, 'chambre', 'chambres')}`;
+    return `${peopleCount(item.capacity)} · ${bedroomCount(item.bedrooms)}`;
   }
 }

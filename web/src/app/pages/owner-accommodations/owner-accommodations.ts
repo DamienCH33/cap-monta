@@ -24,14 +24,14 @@ const STATUS_ORDER: Record<AccommodationStatus, number> = { draft: 0, published:
 
 const SUCCESS: Record<AccommodationStatus, string> = {
   draft: '',
-  published: 'Votre annonce est en ligne.',
-  archived: 'Annonce retirée du site. Vous pourrez la remettre en ligne à tout moment.',
+  published: $localize`:@@owner.listings.success-published:Votre annonce est en ligne.`,
+  archived: $localize`:@@owner.listings.success-archived:Annonce retirée du site. Vous pourrez la remettre en ligne à tout moment.`,
 };
 
 const EMPTY_FILTER: Record<AccommodationStatus, string> = {
-  draft: 'Aucun brouillon : tous vos logements ont déjà été publiés au moins une fois.',
-  published: "Aucun logement en ligne pour l'instant.",
-  archived: 'Aucun logement retiré du site.',
+  draft: $localize`:@@owner.listings.empty-drafts:Aucun brouillon : tous vos logements ont déjà été publiés au moins une fois.`,
+  published: $localize`:@@owner.listings.empty-published:Aucun logement en ligne pour l'instant.`,
+  archived: $localize`:@@owner.listings.empty-archived:Aucun logement retiré du site.`,
 };
 
 interface Filter {
@@ -88,10 +88,22 @@ export class OwnerAccommodations {
     const count = (status: AccommodationStatus) => list.filter((a) => a.status === status).length;
 
     return [
-      { status: null, label: 'Tous', count: list.length },
-      { status: 'published', label: 'En ligne', count: count('published') },
-      { status: 'draft', label: 'Brouillons', count: count('draft') },
-      { status: 'archived', label: 'Retirés', count: count('archived') },
+      { status: null, label: $localize`:@@owner.listings.filter-all:Tous`, count: list.length },
+      {
+        status: 'published',
+        label: $localize`:@@owner.listings.filter-published:En ligne`,
+        count: count('published'),
+      },
+      {
+        status: 'draft',
+        label: $localize`:@@owner.listings.filter-drafts:Brouillons`,
+        count: count('draft'),
+      },
+      {
+        status: 'archived',
+        label: $localize`:@@owner.listings.filter-archived:Retirés`,
+        count: count('archived'),
+      },
     ];
   });
 
@@ -123,8 +135,8 @@ export class OwnerAccommodations {
 
   constructor() {
     inject(SeoService).apply({
-      title: 'Mes logements',
-      description: 'Publiez, modifiez ou retirez vos logements.',
+      title: $localize`:@@owner.common.my-listings:Mes logements`,
+      description: $localize`:@@owner.listings.seo-description:Publiez, modifiez ou retirez vos logements.`,
       path: '/mon-espace/logements',
       noindex: true,
     });
@@ -188,7 +200,10 @@ export class OwnerAccommodations {
       error: (error: HttpErrorResponse) => {
         this.errors.update((all) => ({
           ...all,
-          [item.slug]: apiErrorMessage(error, "L'opération n'a pas abouti. Réessayez."),
+          [item.slug]: apiErrorMessage(
+            error,
+            $localize`:@@owner.listings.action-failed:L'opération n'a pas abouti. Réessayez.`,
+          ),
         }));
         this.busy.set(null);
       },

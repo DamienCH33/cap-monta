@@ -30,10 +30,10 @@ export interface DayRange {
 }
 
 const SOURCE_LABELS: Record<PeriodSource, string> = {
-  booking: 'Réservation Cap Monta',
-  block: 'Bloqué par vous',
-  import: 'Importé',
-  ical: 'Agenda synchronisé',
+  booking: $localize`:@@owner.calendar.source-booking:Réservation Cap Monta`,
+  block: $localize`:@@owner.calendar.source-block:Bloqué par vous`,
+  import: $localize`:@@owner.calendar.source-import:Importé`,
+  ical: $localize`:@@owner.calendar.source-ical:Agenda synchronisé`,
 };
 
 export function sourceLabel(source: PeriodSource): string {

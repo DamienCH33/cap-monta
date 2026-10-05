@@ -79,21 +79,28 @@ export function typeLabel(type: string): string {
 export type PetsPolicy = 'allowed' | 'on_request' | 'not_allowed';
 
 export const PETS_POLICIES: { value: PetsPolicy; label: string; hint: string }[] = [
-  { value: 'allowed', label: $localize`:@@pets.allowed:Animaux acceptés`, hint: 'Les animaux sont les bienvenus.' },
+  {
+    value: 'allowed',
+    label: $localize`:@@pets.allowed:Animaux acceptés`,
+    hint: $localize`:@@pets.allowed.hint:Les animaux sont les bienvenus.`,
+  },
   {
     value: 'on_request',
     label: $localize`:@@pets.on_request:Animaux sur demande`,
-    hint: 'Le voyageur le précise dans sa demande, vous décidez au cas par cas.',
+    hint: $localize`:@@pets.on-request.hint:Le voyageur le précise dans sa demande, vous décidez au cas par cas.`,
   },
   {
     value: 'not_allowed',
     label: $localize`:@@pets.not_allowed:Animaux non acceptés`,
-    hint: 'Les demandes avec un animal sont refusées automatiquement.',
+    hint: $localize`:@@pets.not-allowed.hint:Les demandes avec un animal sont refusées automatiquement.`,
   },
 ];
 
 export function petsPolicyLabel(policy: PetsPolicy): string {
-  return PETS_POLICIES.find((p) => p.value === policy)?.label ?? $localize`:@@pets.on_request:Animaux sur demande`;
+  return (
+    PETS_POLICIES.find((p) => p.value === policy)?.label ??
+    $localize`:@@pets.on_request:Animaux sur demande`
+  );
 }
 
 export interface AccommodationPage {
