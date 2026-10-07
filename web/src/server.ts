@@ -244,9 +244,14 @@ app.get('/sitemap.xml', async (_request, response) => {
       throw new Error(`API responded ${response.status}`);
     }
 
-    const payload = (await response.json()) as { member: { slug: string }[] };
+    const payload = (await response.json()) as {
+      member: { slug: string; accommodationCount?: number }[];
+    };
 
-    return payload.member.map((district) => district.slug);
+    // Seulement les quartiers qui ont au moins un logement : les autres sont en noindex.
+    return payload.member
+      .filter((district) => (district.accommodationCount ?? 0) > 0)
+      .map((district) => district.slug);
   }
 
   const xml = [

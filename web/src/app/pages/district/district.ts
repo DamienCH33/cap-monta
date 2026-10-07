@@ -178,6 +178,9 @@ export class DistrictPage implements OnInit {
       title: $localize`:@@seo.district.title:Location dans le quartier ${district.name}:name: — ${resort}:resort:`,
       description: $localize`:@@seo.district.description:${count}:count: à louer dans le quartier ${district.name}:name: (${resort}:resort:)${area ? `, ${area.label.toLowerCase()}` : ''}:area:. Calendriers tenus à jour par les propriétaires, réponse sous 48 h.`,
       path: `/quartier/${district.slug}`,
+      // Un quartier sans logement n'a rien à proposer à Google : page pauvre, qui fait baisser
+      // l'estime du site entier (« Explorée, actuellement non indexée »). Indexée dès la 1re annonce.
+      noindex: 0 === total,
     });
 
     const prefix = currentLangOption().prefix;
