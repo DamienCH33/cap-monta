@@ -9,7 +9,7 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 | Responsable du traitement | Damien Chauveau, éditeur du site, à titre non professionnel |
 | Contact | contact@damienchauveau-dev.fr |
 | Délégué à la protection des données | aucun (non obligatoire) |
-| Dernière mise à jour | 30 septembre 2026 |
+| Dernière mise à jour | 13 octobre 2026 |
 
 ## Prestataires (sous-traitants)
 
@@ -40,7 +40,7 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 | Base légale | Exécution du service (art. 6.1.b) |
 | Personnes concernées | Propriétaires |
 | Données | Email, mot de passe (haché), nom affiché, téléphone (facultatif), logements (type, quartier — jamais l'adresse postale —, description, photos, tarifs, calendrier) |
-| Destinataires | Public pour l'annonce (sans email ni téléphone) ; voyageur accepté pour le téléphone ; Railway ; Brevo |
+| Destinataires | Public pour l'annonce (sans email ni téléphone) ; voyageur accepté pour le téléphone ; l'éditeur, par email à chaque mise en ligne d'une annonce (nom affiché, email, début de la description), pour la vérifier ; Railway ; Brevo |
 | Durée | Tant que le compte existe ; suppression immédiate et complète depuis « Mon profil » ; compte jamais confirmé supprimé au bout de 7 jours |
 | Sécurité | Mots de passe hachés ; connexion limitée en débit, temps de réponse identique que le compte existe ou non ; photos réencodées en WebP sous un nom aléatoire, sans métadonnées (GPS compris) ; téléphones et emails refusés dans les textes publics |
 

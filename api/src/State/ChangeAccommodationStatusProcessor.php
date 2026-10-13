@@ -12,6 +12,7 @@ use App\Exception\InvalidStatusTransitionException;
 use App\Exception\PublicationRefusedException;
 use App\Repository\AccommodationRepository;
 use App\Security\Voter\AccommodationVoter;
+use App\Service\Moderation\ModerationMailer;
 use App\Service\Photo\PhotoStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -38,6 +39,7 @@ final readonly class ChangeAccommodationStatusProcessor implements ProcessorInte
         private EntityManagerInterface $em,
         private Security $security,
         private PhotoStorage $photos,
+        private ModerationMailer $moderation,
     ) {
     }
 
@@ -56,6 +58,7 @@ final readonly class ChangeAccommodationStatusProcessor implements ProcessorInte
         }
 
         $transition = $operation->getExtraProperties()['transition'] ?? null;
+        $wasOnline = $accommodation->isPublished();
 
         try {
             if (self::PUBLISH === $transition) {
@@ -72,6 +75,12 @@ final readonly class ChangeAccommodationStatusProcessor implements ProcessorInte
         }
 
         $this->em->flush();
+
+        // The editor hears of every listing that goes online, to check it (photos, text).
+        // Not on a double click: publishing an online listing changes nothing.
+        if (!$wasOnline && $accommodation->isPublished()) {
+            $this->moderation->published($accommodation);
+        }
 
         return OwnerAccommodationResource::fromEntity($accommodation, $this->photos);
     }

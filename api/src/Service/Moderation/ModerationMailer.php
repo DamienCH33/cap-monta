@@ -48,6 +48,38 @@ final readonly class ModerationMailer
         ));
     }
 
+    /**
+     * To the editor, each time an accommodation goes online (first time or back from archive):
+     * who published it, and enough of the listing to check it without opening the site.
+     */
+    public function published(Accommodation $accommodation): void
+    {
+        $owner = $accommodation->getOwner();
+        $name = trim((string) preg_replace('/\s+/u', ' ', $owner->getDisplayName()));
+        $description = trim((string) preg_replace('/\s+/u', ' ', $accommodation->getDescription()));
+        $excerpt = mb_strlen($description) > 300 ? mb_substr($description, 0, 300).'…' : $description;
+        $photos = count($accommodation->getPhotos());
+
+        $this->mailer->send($this->composer->compose(
+            $this->moderationEmail,
+            'Nouvelle annonce en ligne : '.$accommodation->title().' — Cap Monta',
+            <<<TXT
+                Une annonce vient d'être mise en ligne.
+
+                Logement : {$accommodation->title()}
+                Propriétaire : {$name} ({$owner->getEmail()})
+                Photos : {$photos}
+
+                « {$excerpt} »
+
+                {$this->frontUrl}/logement/{$accommodation->getSlug()}
+
+                Si elle pose problème :
+                php bin/console app:accommodation:suspend {$accommodation->getSlug()} --reason="…"
+                TXT,
+        ));
+    }
+
     public function suspended(Accommodation $accommodation, string $reason): void
     {
         $reason = trim((string) preg_replace('/\s+/u', ' ', $reason));

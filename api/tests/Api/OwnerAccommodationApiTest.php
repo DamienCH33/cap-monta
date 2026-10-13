@@ -328,6 +328,41 @@ final class OwnerAccommodationApiTest extends WebTestCase
         self::assertResponseIsSuccessful();
     }
 
+    public function testTheEditorIsAlertedOnceWhenAListingGoesOnline(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-draft', $alice, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->transition('alice-draft', 'publish');
+
+        self::assertEmailCount(1);
+        $mail = self::getMailerMessage(0);
+        self::assertNotNull($mail);
+        self::assertEmailAddressContains($mail, 'To', 'moderation@example.com');
+        self::assertEmailHeaderSame($mail, 'Subject', 'Nouvelle annonce en ligne : Mobil-home · '.$this->testDistrict()->getName().' — Cap Monta');
+        self::assertEmailTextBodyContains($mail, 'alice@example.com');
+        self::assertEmailTextBodyContains($mail, '/logement/alice-draft');
+
+        // A double click publishes nothing new, so no second alert.
+        $this->transition('alice-draft', 'publish');
+        self::assertEmailCount(0);
+    }
+
+    public function testNoAlertWhenPublicationIsRefused(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->em->persist(new Accommodation('alice-short', Resort::Chm, AccommodationType::MobileHome, 4, 2, 'Trop court', $alice));
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $this->transition('alice-short', 'publish');
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertEmailCount(0);
+    }
+
     public function testAnIncompleteDraftIsRefused(): void
     {
         $alice = $this->createOwner('alice@example.com');
