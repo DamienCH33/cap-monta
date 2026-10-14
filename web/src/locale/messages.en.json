@@ -1120,6 +1120,7 @@
     "owner.requests.seo-title": "Booking requests",
     "owner.requests.seo-description": "Reply to booking requests for your homes.",
     "owner.requests.price-required": "Enter the price of the stay: no rate covers these dates.",
-    "owner.requests.save-failed": "Your reply couldn't be saved. Please try again."
+    "owner.requests.save-failed": "Your reply couldn't be saved. Please try again.",
+    "footer.instagram": "Follow Cap Monta on Instagram"
   }
 }

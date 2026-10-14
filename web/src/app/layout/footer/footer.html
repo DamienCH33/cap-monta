@@ -10,6 +10,12 @@
         naturistes du CHM Montalivet et d'Euronat. Calendriers tenus par les propriétaires, sans
         commission.
       </p>
+      @if (instagramUrl) {
+        <a class="footer__social" [href]="instagramUrl" target="_blank" rel="noopener">
+          <cm-icon name="brand-instagram" />
+          <span i18n="@@footer.instagram">Suivre Cap Monta sur Instagram</span>
+        </a>
+      }
       <cm-lang-switch class="footer__langs" mode="list" />
     </div>
 

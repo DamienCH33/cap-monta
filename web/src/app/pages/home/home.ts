@@ -170,6 +170,7 @@ export class Home implements OnInit {
           '@id': `${environment.siteUrl}/#organization`,
           name: 'Cap Monta',
           url: environment.siteUrl,
+          ...(environment.instagramUrl ? { sameAs: [environment.instagramUrl] } : {}),
           description: $localize`:@@seo.org.description:Mise en relation entre propriétaires et locataires de bungalows, mobil-homes, caravanes, chalets et studios au CHM Montalivet et à Euronat. Sans commission.`,
           areaServed: [
             { '@type': 'Place', name: 'CHM Montalivet' },

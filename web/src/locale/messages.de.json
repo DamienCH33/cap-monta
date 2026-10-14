@@ -1120,6 +1120,7 @@
     "owner.requests.seo-title": "Buchungsanfragen",
     "owner.requests.seo-description": "Beantworten Sie die Buchungsanfragen für Ihre Unterkünfte.",
     "owner.requests.price-required": "Geben Sie den Preis des Aufenthalts an: Kein Preis deckt diese Daten ab.",
-    "owner.requests.save-failed": "Ihre Antwort konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+    "owner.requests.save-failed": "Ihre Antwort konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "footer.instagram": "Cap Monta auf Instagram folgen"
   }
 }

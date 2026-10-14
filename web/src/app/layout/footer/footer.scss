@@ -35,6 +35,25 @@
     line-height: 1.6;
   }
 
+  &__social {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--blue);
+    text-decoration: none;
+
+    .ti {
+      font-size: 18px;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
   &__column {
     display: flex;
     flex-direction: column;

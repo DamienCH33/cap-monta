@@ -9,6 +9,7 @@ const NAMES = [
   'alert-circle',
   'arrow-left',
   'beach',
+  'brand-instagram',
   'building-store',
   'calendar',
   'calendar-check',
