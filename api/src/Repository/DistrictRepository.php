@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Accommodation;
 use App\Entity\District;
+use App\Enum\AccommodationStatus;
 use App\Enum\Resort;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
@@ -38,7 +39,8 @@ class DistrictRepository extends ServiceEntityRepository
     }
 
     /**
-     * Every district, including those without any accommodation yet.
+     * Every district, including those without any accommodation yet. Only listings online count:
+     * a draft or a withdrawn listing must not put an empty district in the sitemap.
      *
      * @return list<array{district: District, accommodationCount: int}>
      */
@@ -47,7 +49,8 @@ class DistrictRepository extends ServiceEntityRepository
         /** @var list<array{0: District, accommodationCount: int|string}> $rows */
         $rows = $this->createQueryBuilder('d')
             ->select('d', 'COUNT(a.id) AS accommodationCount')
-            ->leftJoin(Accommodation::class, 'a', Join::WITH, 'a.district = d')
+            ->leftJoin(Accommodation::class, 'a', Join::WITH, 'a.district = d AND a.status = :published')
+            ->setParameter('published', AccommodationStatus::Published)
             ->groupBy('d.id')
             // CHM first, then Euronat, each in plan order: positions restart at 0 per resort.
             ->orderBy('d.resort', 'ASC')

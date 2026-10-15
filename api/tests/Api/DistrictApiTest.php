@@ -6,6 +6,7 @@ namespace App\Tests\Api;
 
 use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
+use App\Enum\AccommodationStatus;
 use App\Enum\DistrictArea;
 use App\Enum\Resort;
 use App\Factory\AccommodationFactory;
@@ -31,6 +32,9 @@ final class DistrictApiTest extends ApiTestCase
         $sables = DistrictFactory::createOne(['name' => 'Sables', 'area' => DistrictArea::Dunes, 'position' => 0]);
         DistrictFactory::createOne(['name' => 'Médoc', 'area' => DistrictArea::Roadside, 'position' => 1]);
         AccommodationFactory::createMany(2, ['district' => $sables]);
+        // Ni un brouillon ni une annonce retirée ne comptent : le quartier resterait vide en ligne.
+        AccommodationFactory::createOne(['district' => $sables, 'status' => AccommodationStatus::Draft]);
+        AccommodationFactory::createOne(['district' => $sables, 'status' => AccommodationStatus::Archived]);
 
         /** @var array{member: list<array{slug: string, area: ?string, accommodationCount: int}>} $body */
         $body = $this->fetch('/api/districts');
