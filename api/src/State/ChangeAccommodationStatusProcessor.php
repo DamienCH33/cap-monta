@@ -16,9 +16,11 @@ use App\Service\Moderation\ModerationMailer;
 use App\Service\Photo\PhotoStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 /**
  * POST /api/owner/accommodations/{slug}/publish and /archive.
@@ -40,6 +42,7 @@ final readonly class ChangeAccommodationStatusProcessor implements ProcessorInte
         private Security $security,
         private PhotoStorage $photos,
         private ModerationMailer $moderation,
+        #[Target('moderation_alerts')] private RateLimiterFactoryInterface $alerts,
     ) {
     }
 
@@ -78,7 +81,9 @@ final readonly class ChangeAccommodationStatusProcessor implements ProcessorInte
 
         // The editor hears of every listing that goes online, to check it (photos, text).
         // Not on a double click: publishing an online listing changes nothing.
-        if (!$wasOnline && $accommodation->isPublished()) {
+        // And not in a loop: past three a day for one owner, the listing goes online without an email.
+        if (!$wasOnline && $accommodation->isPublished()
+            && $this->alerts->create('owner-'.$accommodation->getOwner()->getId())->consume()->isAccepted()) {
             $this->moderation->published($accommodation);
         }
 

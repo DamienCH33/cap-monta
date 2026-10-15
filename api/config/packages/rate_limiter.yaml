@@ -73,6 +73,16 @@ framework:
             limit: 60
             interval: "1 hour"
 
+        # Alerte « nouvelle annonce en ligne » à l'éditeur : publier, retirer, republier en boucle
+        # ne doit pas épuiser le quota d'emails (les emails de réservation passeraient après).
+        # Trois alertes par propriétaire et par jour ; au-delà, l'annonce est publiée sans alerte.
+        moderation_alerts:
+            policy: "sliding_window"
+            cache_pool: rate_limiter.cache
+            lock_factory: null
+            limit: 3
+            interval: "1 day"
+
         # Et un plafond pour tout le site : un bug ou une série de comptes ne vide pas le quota.
         listing_imports_all:
             policy: "fixed_window"
@@ -105,6 +115,10 @@ framework:
 when@test:
     framework:
         rate_limiter:
+            # Dans Redis pour ce test-là : la mémoire est vidée entre deux requêtes. Une clé par
+            # propriétaire (UUID neuf à chaque test), donc aucun compteur partagé entre tests.
+            moderation_alerts:
+                cache_pool: cache.app
             booking_requests:
                 limit: 1000
             quotes:

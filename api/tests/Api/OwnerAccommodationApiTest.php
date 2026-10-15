@@ -350,6 +350,26 @@ final class OwnerAccommodationApiTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
+    public function testAnOwnerPublishingInALoopTriggersThreeAlertsADayAtMost(): void
+    {
+        $alice = $this->createOwner('alice@example.com');
+        $this->createAccommodation('alice-draft', $alice, published: false);
+        $this->em->flush();
+
+        $this->client->loginUser($alice, 'main');
+        $alerts = 0;
+
+        for ($round = 0; $round < 5; ++$round) {
+            $this->transition('alice-draft', 'publish');
+            self::assertResponseIsSuccessful();
+            $alerts += \count(self::getMailerMessages());
+            $this->transition('alice-draft', 'archive');
+        }
+
+        // The listing still goes online every time; only the email to the editor stops.
+        self::assertSame(3, $alerts);
+    }
+
     public function testNoAlertWhenPublicationIsRefused(): void
     {
         $alice = $this->createOwner('alice@example.com');
