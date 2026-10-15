@@ -28,6 +28,8 @@ export class Header {
   readonly favoriteCount = inject(Favorites).count;
   /** Page de dons (Ko-fi) : le lien n'apparaît que si elle est renseignée. */
   readonly supportUrl = environment.supportUrl;
+  /** Compte Instagram : l'icône n'apparaît que s'il est renseigné. */
+  readonly instagramUrl = environment.instagramUrl;
 
   /** Sur téléphone, les liens sont repliés derrière le bouton « Menu ». */
   readonly menuOpen = signal(false);

@@ -18,6 +18,4 @@ export class Footer {
   readonly french = 'fr' === currentLang();
   /** Page de dons : le lien n'apparaît que si elle est renseignée. */
   readonly supportUrl = environment.supportUrl;
-  /** Compte Instagram : le lien n'apparaît que s'il est renseigné. */
-  readonly instagramUrl = environment.instagramUrl;
 }

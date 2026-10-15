@@ -249,3 +249,34 @@
     font-size: 16px;
   }
 }
+
+// Instagram : l'icône seule à droite de « Soutenir ». Son nom reste lu (lecteurs d'écran) et
+// réapparaît en toutes lettres dans le menu mobile.
+.header__social {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  cm-icon {
+    font-size: 20px;
+  }
+}
+
+.header__social-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .header__social-label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+}

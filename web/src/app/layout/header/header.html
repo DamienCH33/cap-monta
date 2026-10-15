@@ -68,6 +68,20 @@
           <span i18n="@@header.support">Soutenir</span>
         </a>
       }
+
+      @if (instagramUrl) {
+        <a
+          class="header__social"
+          [href]="instagramUrl"
+          target="_blank"
+          rel="noopener"
+          title="Cap Monta sur Instagram"
+          i18n-title="@@header.instagram"
+        >
+          <cm-icon name="brand-instagram" />
+          <span class="header__social-label">Instagram</span>
+        </a>
+      }
     </nav>
   </div>
 </header>
