@@ -6,10 +6,10 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 
 | | |
 |---|---|
-| Responsable du traitement | Damien Chauveau, éditeur du site, à titre non professionnel |
+| Responsable du traitement | Damien Chauveau EI (micro-entreprise, SIRET 131 233 488 00017), éditeur du site |
 | Contact | contact@damienchauveau-dev.fr |
 | Délégué à la protection des données | aucun (non obligatoire) |
-| Dernière mise à jour | 13 octobre 2026 |
+| Dernière mise à jour | 15 octobre 2026 |
 
 ## Prestataires (sous-traitants)
 
@@ -27,10 +27,10 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 | Finalité | Transmettre la demande d'un voyageur au propriétaire, lui permettre de répondre, suivre la demande |
 | Base légale | Exécution du service demandé (art. 6.1.b) |
 | Personnes concernées | Voyageurs |
-| Données | Nom, email, téléphone, message, dates, nombre de voyageurs (adultes, enfants, bébés, animaux : de simples nombres), prix estimé |
+| Données | Nom, email, téléphone, message, dates, nombre de voyageurs (adultes, enfants, bébés, animaux : de simples nombres), prix estimé, langue de la page d'envoi (pour écrire au voyageur dans sa langue) |
 | Destinataires | Le propriétaire du logement (coordonnées seulement après acceptation) ; Railway ; Brevo (courriels) |
 | Durée | 1 an après la fin du séjour ; 6 mois après l'envoi si refusée, expirée ou retirée. Ensuite anonymisée : nom, email, téléphone et message effacés, dates et montants gardés sans lien avec une personne (`app:privacy:purge`, toutes les heures) |
-| Sécurité | Lien de suivi par jeton aléatoire distinct de l'identifiant ; limiteur de débit ; une demande identique ne peut être envoyée deux fois |
+| Sécurité | Lien de suivi par jeton aléatoire distinct de l'identifiant, stocké haché (SHA-256) : la base ne permet pas de reconstituer les liens ; limiteur de débit ; une demande identique ne peut être envoyée deux fois |
 
 ## 2. Comptes propriétaires et annonces
 
@@ -39,7 +39,7 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 | Finalité | Publier et gérer des logements, recevoir et traiter les demandes |
 | Base légale | Exécution du service (art. 6.1.b) |
 | Personnes concernées | Propriétaires |
-| Données | Email, mot de passe (haché), nom affiché, téléphone (facultatif), logements (type, quartier — jamais l'adresse postale —, description, photos, tarifs, calendrier) |
+| Données | Email, mot de passe (haché), nom affiché, téléphone (facultatif), langue de la dernière connexion (pour les emails), logements (type, quartier — jamais l'adresse postale —, description, photos, tarifs, calendrier) |
 | Destinataires | Public pour l'annonce (sans email ni téléphone) ; voyageur accepté pour le téléphone ; l'éditeur, par email à chaque mise en ligne d'une annonce (nom affiché, email, début de la description), pour la vérifier ; Railway ; Brevo |
 | Durée | Tant que le compte existe ; suppression immédiate et complète depuis « Mon profil » ; compte jamais confirmé supprimé au bout de 7 jours |
 | Sécurité | Mots de passe hachés ; connexion limitée en débit, temps de réponse identique que le compte existe ou non ; photos réencodées en WebP sous un nom aléatoire, sans métadonnées (GPS compris) ; téléphones et emails refusés dans les textes publics |
