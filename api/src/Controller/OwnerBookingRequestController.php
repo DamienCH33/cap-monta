@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\BookingRequest;
 use App\Entity\User;
+use App\Http\ApiProblem;
 use App\Repository\BookingRequestRepository;
 use App\Security\Voter\AccommodationVoter;
 use App\Service\Booking\BookingAnswerRefused;
@@ -139,11 +140,6 @@ final class OwnerBookingRequestController
 
     private static function refuse(BookingAnswerRefused $refused): JsonResponse
     {
-        return new JsonResponse([
-            'title' => 'An error occurred',
-            'detail' => $refused->getMessage(),
-            'status' => $refused->status,
-            'violations' => [['propertyPath' => $refused->field, 'message' => $refused->getMessage(), 'title' => $refused->getMessage()]],
-        ], $refused->status);
+        return ApiProblem::response($refused->status, $refused->getMessage(), $refused->field);
     }
 }

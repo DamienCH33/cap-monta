@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventListener;
 
+use App\Http\ApiProblem;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -101,10 +102,6 @@ final readonly class ApiRequestGuard
 
     private static function problem(int $status, string $detail): JsonResponse
     {
-        return new JsonResponse(
-            ['title' => 'Requête refusée', 'status' => $status, 'detail' => $detail],
-            $status,
-            ['Content-Type' => 'application/problem+json'],
-        );
+        return ApiProblem::response($status, $detail);
     }
 }

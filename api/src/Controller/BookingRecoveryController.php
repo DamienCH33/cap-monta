@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Http\ApiProblem;
 use App\Repository\BookingRequestRepository;
 use App\Service\Booking\BookingMailer;
 use App\Service\Http\FloodGuard;
@@ -47,12 +48,7 @@ final class BookingRecoveryController
         if (!\is_string($email) || '' === trim($email) || \count($this->validator->validate($email, new Email())) > 0) {
             $message = 'Cette adresse email ne semble pas valide.';
 
-            return new JsonResponse([
-                'title' => 'An error occurred',
-                'detail' => $message,
-                'status' => 422,
-                'violations' => [['propertyPath' => 'email', 'message' => $message, 'title' => $message]],
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return ApiProblem::response(Response::HTTP_UNPROCESSABLE_ENTITY, $message, 'email');
         }
 
         $email = mb_strtolower(trim($email));

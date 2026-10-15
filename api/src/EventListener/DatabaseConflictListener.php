@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventListener;
 
+use App\Http\ApiProblem;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -42,10 +43,6 @@ final class DatabaseConflictListener
 
     private static function conflict(string $detail): JsonResponse
     {
-        return new JsonResponse(
-            ['title' => 'Conflit', 'status' => 409, 'detail' => $detail],
-            409,
-            ['Content-Type' => 'application/problem+json'],
-        );
+        return ApiProblem::response(409, $detail);
     }
 }

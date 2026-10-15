@@ -9,6 +9,7 @@ use App\Dto\DeleteAccountRequest;
 use App\Dto\OwnerProfile;
 use App\Dto\UpdateOwnerProfileRequest;
 use App\Entity\User;
+use App\Http\ApiProblem;
 use App\Service\Account\AccountDeleter;
 use App\Service\Account\AccountDeletionRefused;
 use App\Service\Account\AccountMailer;
@@ -86,12 +87,7 @@ final class OwnerProfileController
         if (!$this->hasher->isPasswordValid($user, $payload->currentPassword)) {
             $message = 'Mot de passe actuel incorrect.';
 
-            return new JsonResponse([
-                'title' => 'An error occurred',
-                'detail' => $message,
-                'status' => 422,
-                'violations' => [['propertyPath' => 'currentPassword', 'message' => $message, 'title' => $message]],
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return ApiProblem::response(Response::HTTP_UNPROCESSABLE_ENTITY, $message, 'currentPassword');
         }
 
         $user->setPassword($this->hasher->hashPassword($user, $payload->newPassword));
@@ -112,12 +108,7 @@ final class OwnerProfileController
         if (!$this->hasher->isPasswordValid($user, $payload->password)) {
             $message = 'Mot de passe incorrect.';
 
-            return new JsonResponse([
-                'title' => 'An error occurred',
-                'detail' => $message,
-                'status' => 422,
-                'violations' => [['propertyPath' => 'password', 'message' => $message, 'title' => $message]],
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return ApiProblem::response(Response::HTTP_UNPROCESSABLE_ENTITY, $message, 'password');
         }
 
         try {

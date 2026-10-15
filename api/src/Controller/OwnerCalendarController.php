@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Accommodation;
 use App\Entity\Unavailability;
 use App\Enum\UnavailabilitySource;
+use App\Http\ApiProblem;
 use App\Repository\AccommodationRepository;
 use App\Repository\UnavailabilityRepository;
 use App\Security\Voter\AccommodationVoter;
@@ -203,11 +204,6 @@ final class OwnerCalendarController
     /** Same shape as API Platform's validation errors: the front reads them the same way. */
     private static function refuse(string $field, string $message, int $status = Response::HTTP_UNPROCESSABLE_ENTITY): JsonResponse
     {
-        return new JsonResponse([
-            'title' => 'An error occurred',
-            'detail' => $message,
-            'status' => $status,
-            'violations' => [['propertyPath' => $field, 'message' => $message, 'title' => $message]],
-        ], $status);
+        return ApiProblem::response($status, $message, $field);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\BookingRequest;
+use App\Http\ApiProblem;
 use App\Repository\BookingRequestRepository;
 use App\Service\Booking\BookingAnswerRefused;
 use App\Service\Booking\BookingDesk;
@@ -42,12 +43,7 @@ final class BookingTrackingController
         try {
             $this->desk->cancelByGuest($request);
         } catch (BookingAnswerRefused $refused) {
-            return new JsonResponse([
-                'title' => 'An error occurred',
-                'detail' => $refused->getMessage(),
-                'status' => $refused->status,
-                'violations' => [['propertyPath' => $refused->field, 'message' => $refused->getMessage(), 'title' => $refused->getMessage()]],
-            ], $refused->status);
+            return ApiProblem::response($refused->status, $refused->getMessage(), $refused->field);
         }
 
         return new JsonResponse($this->view($request));

@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Accommodation;
 use App\Entity\PricePeriod;
+use App\Http\ApiProblem;
 use App\Repository\AccommodationRepository;
 use App\Repository\PricePeriodRepository;
 use App\Security\Voter\AccommodationVoter;
@@ -248,11 +249,6 @@ final class OwnerRatesController
 
     private static function refuse(string $field, string $message, int $status = Response::HTTP_UNPROCESSABLE_ENTITY): JsonResponse
     {
-        return new JsonResponse([
-            'title' => 'An error occurred',
-            'detail' => $message,
-            'status' => $status,
-            'violations' => [['propertyPath' => $field, 'message' => $message, 'title' => $message]],
-        ], $status);
+        return ApiProblem::response($status, $message, $field);
     }
 }

@@ -8,6 +8,7 @@ use App\Entity\ListingImport;
 use App\Entity\User;
 use App\Enum\ListingImportStatus;
 use App\Enum\Resort;
+use App\Http\ApiProblem;
 use App\Message\RunListingImport;
 use App\Repository\AccommodationRepository;
 use App\Repository\DistrictRepository;
@@ -91,7 +92,7 @@ final readonly class OwnerListingImportController
         }
 
         if (!$this->availability->isAvailable()) {
-            return new JsonResponse(['code' => 'assistant_unavailable', ...$this->availabilityView()], Response::HTTP_SERVICE_UNAVAILABLE);
+            return ApiProblem::response(Response::HTTP_SERVICE_UNAVAILABLE, "L'assistant de lecture est indisponible pour le moment.", extra: ['code' => 'assistant_unavailable', ...$this->availabilityView()]);
         }
 
         // The same listing again: no second reading, the first one is given back.
@@ -135,10 +136,9 @@ final readonly class OwnerListingImportController
             return $this->refuse(Response::HTTP_CONFLICT, 'La lecture de votre annonce n\'est pas terminée.');
         }
         if ($import->isApplied()) {
-            return new JsonResponse([
-                'message' => 'Cette lecture a déjà été enregistrée.',
+            return ApiProblem::response(Response::HTTP_CONFLICT, 'Cette lecture a déjà été enregistrée.', extra: [
                 'slug' => $import->getAccommodation()?->getSlug(),
-            ], Response::HTTP_CONFLICT);
+            ]);
         }
 
         $payload = json_decode($request->getContent(), true);
@@ -158,10 +158,7 @@ final readonly class OwnerListingImportController
         $result = $this->applier->apply($import, $this->owner(), $target, $payload);
 
         if (\is_array($result)) {
-            return new JsonResponse([
-                'message' => 'Certaines lignes sont à corriger : rien n\'a été enregistré.',
-                'violations' => $result,
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return ApiProblem::violations('Certaines lignes sont à corriger : rien n\'a été enregistré.', $result);
         }
 
         return new JsonResponse(['slug' => $result->getSlug(), 'created' => null === $target], Response::HTTP_CREATED);
@@ -263,14 +260,11 @@ final readonly class OwnerListingImportController
 
     private function invalid(string $message): JsonResponse
     {
-        return new JsonResponse(
-            ['violations' => [['propertyPath' => 'text', 'message' => $message]]],
-            Response::HTTP_UNPROCESSABLE_ENTITY,
-        );
+        return ApiProblem::response(Response::HTTP_UNPROCESSABLE_ENTITY, $message, 'text');
     }
 
     private function refuse(int $status, string $message): JsonResponse
     {
-        return new JsonResponse(['message' => $message], $status);
+        return ApiProblem::response($status, $message);
     }
 }

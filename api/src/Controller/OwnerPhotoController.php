@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Accommodation;
 use App\Entity\Photo;
+use App\Http\ApiProblem;
 use App\Repository\AccommodationRepository;
 use App\Security\Voter\AccommodationVoter;
 use App\Service\Http\FloodGuard;
@@ -192,11 +193,6 @@ final class OwnerPhotoController
 
     private function refuse(string $field, string $message): JsonResponse
     {
-        return new JsonResponse([
-            'title' => 'An error occurred',
-            'detail' => $message,
-            'status' => Response::HTTP_UNPROCESSABLE_ENTITY,
-            'violations' => [['propertyPath' => $field, 'message' => $message, 'title' => $message]],
-        ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        return ApiProblem::response(Response::HTTP_UNPROCESSABLE_ENTITY, $message, $field);
     }
 }
