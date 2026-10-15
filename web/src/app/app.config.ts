@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { provideClientHydration } from '@angular/platform-browser';
 
 import { routes } from './app.routes';
+import { acceptLanguageInterceptor } from './core/http/accept-language';
 import { sessionExpiredInterceptor } from './core/http/session-expired';
 import { currentLang } from './core/i18n/lang';
 
@@ -16,6 +17,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(),
     // XHR dans le navigateur : c'est lui qui rend la progression de l'envoi des photos.
-    provideHttpClient(withXhr(), withInterceptors([sessionExpiredInterceptor])),
+    provideHttpClient(withXhr(), withInterceptors([acceptLanguageInterceptor, sessionExpiredInterceptor])),
   ],
 };

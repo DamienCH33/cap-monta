@@ -139,7 +139,7 @@ describe('OwnerImport', () => {
         new HttpErrorResponse({
           status: 422,
           error: {
-            message: 'Certaines lignes sont à corriger : rien n’a été enregistré.',
+            detail: 'Certaines lignes sont à corriger : rien n’a été enregistré.',
             violations: [
               { propertyPath: 'periods[0].end', message: 'Cette période est entièrement passée.' },
             ],

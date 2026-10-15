@@ -418,7 +418,7 @@ export class OwnerImport {
   }
 }
 
-/** Les refus de cette API portent « message », ou des violations avec « message ». */
+/** Les refus de l'API (application/problem+json) portent « detail », et des violations. */
 function errorMessage(error: HttpErrorResponse, fallback: string): string {
   if (0 === error.status) {
     return $localize`:@@owner.import.offline:Connexion impossible. Vérifiez votre connexion et réessayez.`;
@@ -427,7 +427,7 @@ function errorMessage(error: HttpErrorResponse, fallback: string): string {
     return $localize`:@@owner.import.paused:L’assistant est en pause pour le moment. Réessayez plus tard, ou remplissez le formulaire vous-même.`;
   }
 
-  const body = error.error as { message?: string; violations?: Violation[] } | null;
+  const body = error.error as { detail?: string; violations?: Violation[] } | null;
 
-  return body?.message ?? body?.violations?.[0]?.message ?? fallback;
+  return body?.detail ?? body?.violations?.[0]?.message ?? fallback;
 }

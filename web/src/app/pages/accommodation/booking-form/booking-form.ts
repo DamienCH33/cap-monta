@@ -90,8 +90,6 @@ export class BookingForm implements OnInit {
 
   readonly euros = euros;
   readonly supportUrl = environment.supportUrl;
-  /** Les messages de l'API sont en français : ailleurs, on les remplace par des messages traduits. */
-  readonly french = 'fr' === currentLang();
   readonly mandatoryExtras = computed(() =>
     (this.quote()?.extras ?? []).filter((e) => !e.optional),
   );
@@ -278,23 +276,22 @@ export class BookingForm implements OnInit {
       return $localize`:@@booking.error-429:Plusieurs demandes viennent d'être envoyées depuis votre connexion. Réessayez dans un quart d'heure.`;
     }
 
-    // L'API explique le refus en français : dates prises, demande déjà envoyée… Dans les
-    // autres langues, un message traduit plus général.
+    // L'API explique le refus dans la langue de la page : dates prises, demande déjà envoyée…
     if (409 === response.status) {
       const detail = (response.error as { detail?: string } | null)?.detail;
 
-      return detail && this.french
-        ? detail
-        : $localize`:@@booking.error-409:Ces dates viennent d'être prises. Choisissez-en d'autres.`;
+      return (
+        detail ??
+        $localize`:@@booking.error-409:Ces dates viennent d'être prises. Choisissez-en d'autres.`
+      );
     }
 
     if (422 === response.status) {
       const violations: Record<string, string> = {};
 
       for (const violation of (response.error?.violations ?? []) as Violation[]) {
-        violations[violation.propertyPath] = this.french
-          ? violation.message
-          : $localize`:@@booking.check-field:Vérifiez ce champ.`;
+        violations[violation.propertyPath] =
+          violation.message || $localize`:@@booking.check-field:Vérifiez ce champ.`;
       }
 
       this.violations.set(violations);
