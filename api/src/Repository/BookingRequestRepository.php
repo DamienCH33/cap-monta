@@ -124,7 +124,7 @@ class BookingRequestRepository extends ServiceEntityRepository
             ->andWhere('b.status = :pending')
             ->andWhere('b.expiresAt <= :now OR b.startDate <= :today')
             ->setParameter('pending', BookingRequestStatus::Pending)
-            ->setParameter('now', $now)
+            ->setParameter('now', $now, 'datetimetz_immutable')
             ->setParameter('today', $now->setTime(0, 0), 'date_immutable')
             ->getQuery()
             ->getResult();

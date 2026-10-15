@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -28,7 +29,7 @@ class BookingTrackingLink
     #[ORM\Column(length: 64, unique: true)]
     private string $tokenHash;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
     public function __construct(BookingRequest $bookingRequest, string $tokenHash, \DateTimeImmutable $createdAt)

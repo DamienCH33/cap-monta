@@ -27,10 +27,10 @@ class Accommodation
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $id;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private \DateTimeImmutable $updatedAt;
 
     #[ORM\Column(length: 255, unique: true)]
@@ -87,7 +87,7 @@ class Accommodation
      * Last time the owner changed his calendar or confirmed it was right. Drives the
      * "Calendrier à jour" badge: a calendar nobody has looked at for weeks is a guess.
      */
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $calendarCheckedAt = null;
 
     /** "On request" until the owner says otherwise: nothing is refused by default. */

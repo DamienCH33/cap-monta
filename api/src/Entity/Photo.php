@@ -38,7 +38,7 @@ class Photo
     #[ORM\Column(type: Types::SMALLINT)]
     private int $height;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
     public function __construct(Accommodation $accommodation, int $width, int $height)

@@ -37,11 +37,11 @@ class ListingReport
     #[ORM\Column(length: 180, nullable: true)]
     private ?string $reporterEmail;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
     /** Set when the listing was suspended or the report dismissed. */
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $handledAt = null;
 
     public function __construct(Accommodation $accommodation, ReportReason $reason, ?string $message, ?string $reporterEmail, \DateTimeImmutable $createdAt)

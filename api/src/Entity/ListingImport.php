@@ -64,10 +64,10 @@ class ListingImport
     #[ORM\Column(nullable: true)]
     private ?int $outputTokens = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $finishedAt = null;
 
     /** The accommodation the owner filled with this reading, once he validated it (lot 4c). */
@@ -75,7 +75,7 @@ class ListingImport
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Accommodation $accommodation = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $appliedAt = null;
 
     public function __construct(User $owner, string $sourceText, \DateTimeImmutable $now)

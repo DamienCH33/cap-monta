@@ -35,7 +35,7 @@ class ListingImportRepository extends ServiceEntityRepository
             ->setParameter('owner', $owner->getId(), UuidType::NAME)
             ->setParameter('hash', ListingImport::hash($text))
             ->setParameter('statuses', [ListingImportStatus::Pending->value, ListingImportStatus::Done->value])
-            ->setParameter('since', $since)
+            ->setParameter('since', $since, 'datetimetz_immutable')
             ->orderBy('i.createdAt', 'DESC')
             ->setMaxResults(1)
             ->getQuery()

@@ -54,7 +54,7 @@ class PricePeriod
     #[ORM\Column(options: ['default' => false])]
     private bool $saturdayArrival = false;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
     public function __construct(

@@ -90,10 +90,10 @@ class BookingRequest
     #[ORM\Column(nullable: true)]
     private ?int $estimatedPrice = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
     private \DateTimeImmutable $expiresAt;
 
     /**
@@ -115,7 +115,7 @@ class BookingRequest
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $ownerMessage = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $respondedAt = null;
 
     /**

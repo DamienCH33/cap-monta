@@ -44,7 +44,8 @@ final readonly class PurgePersonalDataCommand
     {
         $now = $this->clock->now();
         $today = $now->setTime(0, 0);
-        $ago = static fn (\DateTimeImmutable $from, string $duration): string => $from->modify('-'.$duration)->format('Y-m-d H:i:s');
+        // With the offset: compared with TIMESTAMP WITH TIME ZONE columns, the instant is exact.
+        $ago = static fn (\DateTimeImmutable $from, string $duration): string => $from->modify('-'.$duration)->format('Y-m-d H:i:sP');
 
         // Dates, amounts and status stay: the owner's history and the statistics keep working.
         // The tracking links die with the rest: the stored hash becomes the hash of nothing
@@ -64,7 +65,7 @@ final readonly class PurgePersonalDataCommand
                 SQL,
             [
                 'domain' => self::ANONYMOUS_DOMAIN,
-                'stay_end' => $ago($today, self::STAY_RETENTION),
+                'stay_end' => $today->modify('-'.self::STAY_RETENTION)->format('Y-m-d'),
                 'unused_since' => $ago($now, self::UNUSED_REQUEST_RETENTION),
             ],
         );
@@ -96,9 +97,10 @@ final readonly class PurgePersonalDataCommand
             ['since' => $ago($now, self::UNVERIFIED_ACCOUNT_RETENTION)],
         );
 
+        // Messenger's own table: dates without time zone, written in UTC by Messenger.
         $messages = $this->db->executeStatement(
             "DELETE FROM messenger_messages WHERE queue_name = 'failed' AND created_at < :since",
-            ['since' => $ago($now, self::FAILED_MESSAGE_RETENTION)],
+            ['since' => $now->setTimezone(new \DateTimeZone('UTC'))->modify('-'.self::FAILED_MESSAGE_RETENTION)->format('Y-m-d H:i:s')],
         );
 
         $io->success(sprintf(
