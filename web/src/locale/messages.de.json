@@ -260,7 +260,7 @@
     "home.promise-fees": "{$START_BOLD_TEXT}Ohne Provision{$CLOSE_BOLD_TEXT}Sie bezahlen den Eigentümer direkt, wie gewohnt.",
     "home.zones-title": "Im CHM: drei Arten, das Gelände zu erleben",
     "home.zones-lead": "Jedes Viertel hat seine eigene Entfernung zum Strand und seine eigene Atmosphäre.",
-    "count.listings": "{VAR_PLURAL, plural, =1 {1 Unterkunft} other {{INTERPOLATION} Unterkünfte}}",
+    "count.listings": "{VAR_PLURAL, plural, =0 {keine Unterkünfte} =1 {1 Unterkunft} other {{INTERPOLATION} Unterkünfte}}",
     "home.also": "Außerdem:",
     "home.free-title": "Noch frei",
     "home.free-lead": "Die nächsten Wochen auf einen Blick.",

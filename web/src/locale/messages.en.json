@@ -260,7 +260,7 @@
     "home.promise-fees": "{$START_BOLD_TEXT}No commission{$CLOSE_BOLD_TEXT}You pay the owner directly, as usual.",
     "home.zones-title": "At the CHM, three ways to enjoy the resort",
     "home.zones-lead": "Each area has its own distance to the beach and its own feel.",
-    "count.listings": "{VAR_PLURAL, plural, =1 {1 home} other {{INTERPOLATION} homes}}",
+    "count.listings": "{VAR_PLURAL, plural, =0 {no homes} =1 {1 home} other {{INTERPOLATION} homes}}",
     "home.also": "Also:",
     "home.free-title": "Still available",
     "home.free-lead": "The coming weeks at a glance.",

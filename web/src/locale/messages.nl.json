@@ -260,7 +260,7 @@
     "home.promise-fees": "{$START_BOLD_TEXT}Zonder commissie{$CLOSE_BOLD_TEXT}Je betaalt de eigenaar rechtstreeks, zoals gewoonlijk.",
     "home.zones-title": "In het CHM: drie manieren om het domein te beleven",
     "home.zones-lead": "Elke wijk heeft zijn eigen afstand tot het strand en zijn eigen sfeer.",
-    "count.listings": "{VAR_PLURAL, plural, =1 {1 accommodatie} other {{INTERPOLATION} accommodaties}}",
+    "count.listings": "{VAR_PLURAL, plural, =0 {geen accommodaties} =1 {1 accommodatie} other {{INTERPOLATION} accommodaties}}",
     "home.also": "Ook:",
     "home.free-title": "Nog vrij",
     "home.free-lead": "De komende weken in één oogopslag.",

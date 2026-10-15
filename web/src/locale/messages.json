@@ -322,7 +322,7 @@
     "home.promise-fees": "{$START_BOLD_TEXT}Sans commission{$CLOSE_BOLD_TEXT}Vous réglez le propriétaire, comme d'habitude. ",
     "home.zones-title": " Au CHM, trois façons de vivre le domaine ",
     "home.zones-lead": " Chaque quartier a sa distance à la plage et son ambiance. ",
-    "count.listings": "{VAR_PLURAL, plural, =1 {1 logement} other {{INTERPOLATION} logements}}",
+    "count.listings": "{VAR_PLURAL, plural, =0 {aucun logement} =1 {1 logement} other {{INTERPOLATION} logements}}",
     "home.also": "Aussi :",
     "home.euronat-title": " À Euronat, des villages dans la pinède ",
     "home.euronat-lead": " Côté plage, côté village ou côté camping, comme le découpe le domaine. ",

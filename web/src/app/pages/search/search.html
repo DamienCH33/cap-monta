@@ -74,6 +74,7 @@
 
   <p class="results__count">
     <ng-container i18n="@@count.listings">{total(), plural,
+      =0 {aucun logement}
       =1 {1 logement}
       other {{{ total() }} logements}
     }</ng-container>
@@ -120,6 +121,7 @@
                     <strong>
                       &nbsp;·
                       <ng-container i18n="@@count.listings">{suggestion.availableCount, plural,
+                        =0 {aucun logement}
                         =1 {1 logement}
                         other {{{ suggestion.availableCount }} logements}
                       }</ng-container>

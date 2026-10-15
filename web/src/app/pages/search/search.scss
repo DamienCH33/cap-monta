@@ -16,6 +16,11 @@
     color: var(--text-secondary);
   }
 
+  // « aucun logement » : le même texte qu'en milieu de phrase sur l'accueil, en tête de ligne ici.
+  &__count::first-letter {
+    text-transform: uppercase;
+  }
+
   &__empty {
     grid-column: 1 / -1;
     padding: 2rem;
