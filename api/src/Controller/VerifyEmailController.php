@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\I18n\Locales;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
@@ -46,6 +47,7 @@ final class VerifyEmailController
         $user->verifyEmail($this->clock->now());
         $this->em->flush();
 
-        return new RedirectResponse($this->frontUrl.'/connexion?verification=ok');
+        // La page de connexion dans la langue du compte, celle de l'email qui portait le lien.
+        return new RedirectResponse($this->frontUrl.Locales::pathPrefix($user->getLocale()).'/connexion?verification=ok');
     }
 }

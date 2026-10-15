@@ -10,6 +10,7 @@ use App\Enum\PetsPolicy;
 use App\Enum\Resort;
 use App\Exception\InvalidStatusTransitionException;
 use App\Exception\PublicationRefusedException;
+use App\I18n\Locales;
 use App\Repository\AccommodationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -400,10 +401,14 @@ class Accommodation
             && $this->calendarCheckedAt > $now->modify(sprintf('-%d days', self::CALENDAR_FRESHNESS_DAYS));
     }
 
-    /** "Mobil-home · Europa", or the resort when no district is known. As on the site. */
-    public function title(): string
+    /**
+     * "Mobil-home · Europa", or the resort when no district is known. As on the site.
+     * In another language only the type changes ("Mobilheim · Europa"): districts and resorts
+     * are proper names.
+     */
+    public function title(string $locale = Locales::SOURCE): string
     {
-        return $this->type->label().' · '.($this->district?->getName() ?? $this->resort->label());
+        return $this->type->labelIn($locale).' · '.($this->district?->getName() ?? $this->resort->label());
     }
 
     public function isPublished(): bool

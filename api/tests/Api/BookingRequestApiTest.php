@@ -410,12 +410,51 @@ final class BookingRequestApiTest extends ApiTestCase
         );
     }
 
+    public function testTheGuestGetsHisEmailsInTheLanguageOfThePageTheOwnerInHis(): void
+    {
+        $accommodation = $this->createAccommodation('mobil-home-pins');
+        $accommodation->getOwner()->setLocale('en');
+        $this->em->flush();
+
+        $this->post([
+            'accommodationSlug' => 'mobil-home-pins',
+            'arrival' => '2027-07-03',
+            'departure' => '2027-07-10',
+            'adults' => 2,
+            'children' => 1,
+            'guestName' => 'Anna Müller',
+            'guestEmail' => 'anna@example.com',
+        ], language: 'de-DE,de;q=0.9');
+
+        self::assertResponseStatusCodeSame(201);
+        self::assertEmailCount(2);
+
+        $toGuest = self::getMailerMessage(1);
+        self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $toGuest);
+        self::assertEmailAddressContains($toGuest, 'To', 'anna@example.com');
+        self::assertSame('Ihre Anfrage für Mobilheim · Test district wurde gesendet — Cap Monta', $toGuest->getSubject());
+        self::assertEmailTextBodyContains($toGuest, 'Guten Tag Anna Müller,');
+        self::assertEmailTextBodyContains($toGuest, 'Aufenthalt: vom Samstag, 3. Juli 2027 bis Samstag, 10. Juli 2027 (7 Nächte)');
+        self::assertEmailTextBodyContains($toGuest, 'Gäste: 2 Erwachsene, 1 Kind');
+        self::assertMatchesRegularExpression('#^http://\S+/de/demande/[0-9a-f]+$#m', (string) $toGuest->getTextBody());
+        self::assertEmailHtmlBodyContains($toGuest, '<html lang="de">');
+        self::assertEmailHtmlBodyContains($toGuest, 'Meine Anfrage verfolgen');
+        self::assertEmailTextBodyNotContains($toGuest, 'Bonjour');
+
+        // The owner reads English: same request, his own language.
+        $toOwner = self::getMailerMessage(0);
+        self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $toOwner);
+        self::assertSame('New request for your Mobile home · Test district — Cap Monta', $toOwner->getSubject());
+        self::assertEmailTextBodyContains($toOwner, 'Stay: Saturday 3 July 2027 to Saturday 10 July 2027 (7 nights)');
+        self::assertMatchesRegularExpression('#^http://\S+/en/mon-espace/demandes$#m', (string) $toOwner->getTextBody());
+    }
+
     /**
      * @param array<string, mixed> $body
      *
      * @return array<string, mixed>
      */
-    private function post(array $body): array
+    private function post(array $body, string $language = 'fr'): array
     {
         $this->client->request(
             'POST',
@@ -423,6 +462,7 @@ final class BookingRequestApiTest extends ApiTestCase
             server: [
                 'CONTENT_TYPE' => 'application/ld+json',
                 'HTTP_ACCEPT' => 'application/ld+json',
+                'HTTP_ACCEPT_LANGUAGE' => $language,
             ],
             content: (string) json_encode($body),
         );

@@ -81,6 +81,28 @@ final class RegistrationApiTest extends ApiTestCase
         self::assertTrue($this->reload('a-verifier@example.com')->isVerified());
     }
 
+    public function testAnOwnerSigningUpInEnglishGetsHisEmailsInEnglish(): void
+    {
+        $this->register('english@example.com', 'en-GB,en;q=0.8');
+
+        $email = $this->lastEmail();
+        self::assertSame('Confirm your email address — Cap Monta', $email->getSubject());
+        self::assertEmailTextBodyContains($email, 'Hello Proprietaire test,');
+        self::assertEmailTextBodyContains($email, "This link is valid for 24 hours.\nIf you did not sign up, please ignore this message.");
+        self::assertEmailHtmlBodyContains($email, '<html lang="en">');
+        self::assertEmailHtmlBodyContains($email, '>Confirm my address</a>');
+
+        // The link lands on the English login page.
+        $this->client->request('GET', $this->verificationLinkFrom($email));
+        self::assertResponseRedirects();
+        self::assertStringEndsWith('/en/connexion?verification=ok', (string) $this->client->getResponse()->headers->get('Location'));
+
+        // A second sign-up with the same address: the account's language, whatever the page.
+        $this->register('english@example.com');
+        self::assertSame('Your Cap Monta account', $this->lastEmail()->getSubject());
+        self::assertMatchesRegularExpression('#^http://\S+/en/connexion$#m', (string) $this->lastEmail()->getTextBody());
+    }
+
     public function testATamperedLinkVerifiesNothing(): void
     {
         $this->register('intact@example.com');
@@ -156,12 +178,12 @@ final class RegistrationApiTest extends ApiTestCase
         self::assertEmailCount(0);
     }
 
-    private function register(string $email): void
+    private function register(string $email, string $language = 'fr'): void
     {
         $this->client->request(
             'POST',
             '/api/register',
-            server: ['CONTENT_TYPE' => 'application/json'],
+            server: ['CONTENT_TYPE' => 'application/json', 'HTTP_ACCEPT_LANGUAGE' => $language],
             content: (string) json_encode([
                 'email' => $email,
                 'displayName' => 'Proprietaire test',

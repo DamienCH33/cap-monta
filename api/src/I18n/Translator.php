@@ -8,8 +8,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * Traduction des textes de l'API, sans le composant Translation de Symfony : un catalogue par
- * langue (config/i18n/messages.<langue>.php), dont les clés sont les textes français eux-mêmes.
+ * Traduction des textes de l'API, sans le composant Translation de Symfony : des catalogues par
+ * langue (config/i18n/messages.<langue>.php, emails.<langue>.php…), dont les clés sont les
+ * textes français eux-mêmes.
  *
  * - trans() : un texte du code, avec ses paramètres %nom% remplacés après traduction ;
  * - translateMessage() : un message déjà composé (exception, violation, sprintf). Il est cherché
@@ -89,10 +90,14 @@ final class Translator
     private function catalogue(string $locale): array
     {
         if (!isset($this->catalogues[$locale])) {
-            $file = $this->directory.'/messages.'.$locale.'.php';
-            /** @var array<string, string> $entries */
-            $entries = is_file($file) ? require $file : [];
-            $this->catalogues[$locale] = $entries;
+            $this->catalogues[$locale] = [];
+
+            // messages.<langue>.php, emails.<langue>.php… : tous les fichiers de la langue, fusionnés.
+            foreach (glob($this->directory.'/*.'.$locale.'.php') ?: [] as $file) {
+                /** @var array<string, string> $entries */
+                $entries = require $file;
+                $this->catalogues[$locale] += $entries;
+            }
         }
 
         return $this->catalogues[$locale];

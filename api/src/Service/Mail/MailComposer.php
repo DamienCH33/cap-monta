@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service\Mail;
 
+use App\I18n\Locales;
+use App\I18n\Translator;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mime\Email;
 use Twig\Environment;
@@ -18,7 +20,7 @@ use Twig\Environment;
  */
 final readonly class MailComposer
 {
-    /** Button label by link, first match wins. */
+    /** Button labels (French: the catalogues translate them), by link, first match wins. */
     private const BUTTONS = [
         '#/api/verify-email#' => 'Confirmer mon adresse',
         '#/nouveau-mot-de-passe#' => 'Choisir un nouveau mot de passe',
@@ -29,9 +31,12 @@ final readonly class MailComposer
         '#/demande/#' => 'Suivre ma demande',
         '#/recherche#' => 'Voir les logements',
     ];
+    private const SUPPORT_BUTTON = 'Soutenir Cap Monta';
+    private const OTHER_BUTTON = 'Ouvrir le lien';
 
     private const URL = '#^https?://\S+$#';
-    private const FACT = '#^([\p{L} ]{2,20}) : (.+)$#u';
+    /** "Séjour : …" in French, "Stay: …" elsewhere: the label ends with a letter, the space before the colon is optional. */
+    private const FACT = '#^([\p{L} ]{1,19}\p{L}) ?: (.+)$#u';
     private const SIGNATURE = 'Cap Monta';
 
     /** A line at least this long was wrapped by hand: the next one continues the sentence. */
@@ -39,6 +44,7 @@ final readonly class MailComposer
 
     public function __construct(
         private Environment $twig,
+        private Translator $translator,
         #[Autowire('%app.mail_from%')] private string $from,
         /** Only links to the site itself become clickable inside a sentence. */
         #[Autowire('%app.front_url%')] private string $frontUrl,
@@ -47,8 +53,14 @@ final readonly class MailComposer
     ) {
     }
 
-    public function compose(string $to, string $subject, string $text): Email
+    /**
+     * The text and subject come already written in the recipient's language: $locale only
+     * translates what the layout adds (buttons, header, footer).
+     */
+    public function compose(string $to, string $subject, string $text, string $locale = Locales::SOURCE): Email
     {
+        $locale = Locales::normalize($locale);
+
         return (new Email())
             ->from($this->from)
             ->to($to)
@@ -56,14 +68,22 @@ final readonly class MailComposer
             ->text($text)
             ->html($this->twig->render('emails/layout.html.twig', [
                 'subject' => $subject,
-                'blocks' => $this->blocks($text),
+                'blocks' => $this->blocks($text, $locale),
+                'locale' => $locale,
+                'texts' => [
+                    'tagline' => $this->translator->trans('Locations entre particuliers · CHM Montalivet et Euronat', [], $locale),
+                    'pitch' => $this->translator->trans('Cap Monta — sans commission, sans paiement en ligne.', [], $locale),
+                    'support' => $this->translator->trans('Le site vit des dons de ses utilisateurs : %link%.', [], $locale),
+                    'support_link' => $this->translator->trans('le soutenir', [], $locale),
+                    'notice' => $this->translator->trans("Vous recevez ce message à la suite d'une action sur le site.", [], $locale),
+                ],
             ]));
     }
 
     /**
      * @return list<MailBlock>
      */
-    private function blocks(string $text): array
+    private function blocks(string $text, string $locale): array
     {
         $blocks = [];
 
@@ -75,7 +95,7 @@ final readonly class MailComposer
                 continue;
             }
 
-            array_push($blocks, ...$this->chunk($lines));
+            array_push($blocks, ...$this->chunk($lines, $locale));
         }
 
         return $blocks;
@@ -86,7 +106,7 @@ final readonly class MailComposer
      *
      * @return list<MailBlock>
      */
-    private function chunk(array $lines): array
+    private function chunk(array $lines, string $locale): array
     {
         if ([] === $lines) {
             return [];
@@ -124,9 +144,9 @@ final readonly class MailComposer
 
             if ($isLink) {
                 $label = null !== $this->supportUrl && '' !== $this->supportUrl && $line === $this->supportUrl
-                    ? 'Soutenir Cap Monta'
+                    ? self::SUPPORT_BUTTON
                     : self::label($line);
-                $blocks[] = MailBlock::button($line, $label);
+                $blocks[] = MailBlock::button($line, $this->translator->trans($label, [], $locale));
                 continue;
             }
 
@@ -186,6 +206,6 @@ final readonly class MailComposer
             }
         }
 
-        return 'Ouvrir le lien';
+        return self::OTHER_BUTTON;
     }
 }

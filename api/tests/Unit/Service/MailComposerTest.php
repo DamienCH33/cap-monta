@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Service;
 
+use App\I18n\Translator;
 use App\Service\Mail\MailComposer;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twig\Environment;
@@ -64,6 +65,9 @@ final class MailComposerTest extends KernelTestCase
         $twig = self::getContainer()->get(Environment::class);
         self::assertInstanceOf(Environment::class, $twig);
 
-        return new MailComposer($twig, 'noreply@cap-monta.test', 'https://cap-monta.test');
+        $translator = self::getContainer()->get(Translator::class);
+        self::assertInstanceOf(Translator::class, $translator);
+
+        return new MailComposer($twig, $translator, 'noreply@cap-monta.test', 'https://cap-monta.test');
     }
 }

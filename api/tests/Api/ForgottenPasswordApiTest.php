@@ -9,6 +9,7 @@ use App\Tests\ApiTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
+use Symfony\Component\Mime\Email;
 
 final class ForgottenPasswordApiTest extends ApiTestCase
 {
@@ -33,6 +34,28 @@ final class ForgottenPasswordApiTest extends ApiTestCase
         self::assertResponseStatusCodeSame(202);
         self::assertEmailCount(1);
         self::assertEmailAddressContains(self::getMailerMessage(0) ?? self::fail(), 'To', 'proprio@example.com');
+    }
+
+    public function testAnEnglishOwnerGetsTheLinkInEnglish(): void
+    {
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        $owner = new User('owner@example.com', 'Ann Owner');
+        $owner->setLocale('en');
+        $em->persist($owner);
+        $em->flush();
+
+        // Asked from a French page: the email follows the account's language, not the page's.
+        $this->ask('owner@example.com');
+
+        $email = self::getMailerMessage(0);
+        self::assertInstanceOf(Email::class, $email);
+        self::assertSame('Reset your password — Cap Monta', $email->getSubject());
+        self::assertEmailTextBodyContains($email, 'Hello Ann Owner,');
+        self::assertEmailTextBodyContains($email, 'This link is valid for one hour and works only once.');
+        self::assertMatchesRegularExpression('#^http://\S+/en/nouveau-mot-de-passe\?jeton=\S+$#m', (string) $email->getTextBody());
+        self::assertEmailHtmlBodyContains($email, '<html lang="en">');
+        self::assertEmailHtmlBodyContains($email, '>Choose a new password</a>');
+        self::assertEmailHtmlBodyContains($email, 'Cap Monta — no commission, no online payment.');
     }
 
     public function testAnUnknownAddressGetsTheSameAnswerAndNoEmail(): void

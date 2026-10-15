@@ -1,6 +1,7 @@
-{# Mise en page de tous les emails : tableaux et styles en ligne, seuls compris partout (Gmail, Outlook). #}
+{# Mise en page de tous les emails : tableaux et styles en ligne, seuls compris partout (Gmail, Outlook).
+   Les textes fixes (texts) viennent des catalogues, traduits par MailComposer : du texte sûr, sans HTML. #}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ locale }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,7 +16,7 @@
                 <tr>
                     <td style="padding:18px 28px;background:#185fa5;border-radius:10px 10px 0 0;color:#ffffff;font-size:18px;font-weight:600;letter-spacing:0.2px;">
                         Cap Monta
-                        <span style="display:block;margin-top:2px;font-size:12px;font-weight:400;color:#cfe3f5;">Locations entre particuliers · CHM Montalivet et Euronat</span>
+                        <span style="display:block;margin-top:2px;font-size:12px;font-weight:400;color:#cfe3f5;">{{ texts.tagline|raw }}</span>
                     </td>
                 </tr>
                 <tr>
@@ -48,9 +49,9 @@
                 </tr>
                 <tr>
                     <td style="padding:16px 28px;font-size:12px;line-height:1.5;color:#5f5e5a;text-align:center;">
-                        Cap Monta — sans commission, sans paiement en ligne.<br>
-                        {% if support_url %}Le site vit des dons de ses utilisateurs : <a href="{{ support_url }}" style="color:#185fa5;">le soutenir</a>.<br>{% endif %}
-                        Vous recevez ce message à la suite d'une action sur le site.
+                        {{ texts.pitch|raw }}<br>
+                        {% if support_url %}{{ texts.support|replace({'%link%': '<a href="' ~ support_url|e ~ '" style="color:#185fa5;">' ~ texts.support_link ~ '</a>'})|raw }}<br>{% endif %}
+                        {{ texts.notice|raw }}
                     </td>
                 </tr>
             </table>

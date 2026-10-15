@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enum;
 
+use App\I18n\Locales;
+
 /**
  * What a private owner rents out. Tents, "insolite" lodgings and camping pitches are left out on
  * purpose: at the CHM and at Euronat they belong to the operator, not to owners (ADR 026).
@@ -26,6 +28,29 @@ enum AccommodationType: string
             self::Caravan => 'Caravane',
             self::Chalet => 'Chalet',
             self::Studio => 'Studio',
+        };
+    }
+
+    /** The label in one of the site's languages (the same words as the front's catalogues). */
+    public function labelIn(string $locale): string
+    {
+        return match (Locales::normalize($locale)) {
+            'en' => match ($this) {
+                self::MobileHome => 'Mobile home',
+                self::Caravan => 'Caravan',
+                default => $this->label(),
+            },
+            'nl' => match ($this) {
+                self::MobileHome => 'Stacaravan',
+                self::Caravan => 'Caravan',
+                default => $this->label(),
+            },
+            'de' => match ($this) {
+                self::MobileHome => 'Mobilheim',
+                self::Caravan => 'Wohnwagen',
+                default => $this->label(),
+            },
+            default => $this->label(),
         };
     }
 

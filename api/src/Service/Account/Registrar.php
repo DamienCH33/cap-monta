@@ -32,11 +32,11 @@ final readonly class Registrar
         // Damien@example.com et damien@example.com deviennent deux comptes.
         $email = mb_strtolower(trim($request->email));
 
-        if (null !== $this->users->findOneBy(['email' => $email])) {
+        if (null !== $existing = $this->users->findOneBy(['email' => $email])) {
             // Le même travail que pour une vraie inscription : sans ce hachage, l'adresse déjà
             // inscrite répondait vingt fois plus vite, et le chronomètre trahissait le compte.
             $this->hasher->hashPassword(new User($email, 'x'), $request->password);
-            $this->mailer->sendAlreadyRegistered($email);
+            $this->mailer->sendAlreadyRegistered($email, $existing->getLocale());
 
             return;
         }

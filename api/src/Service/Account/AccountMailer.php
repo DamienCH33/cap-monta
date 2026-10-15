@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Service\Account;
 
 use App\Entity\User;
+use App\I18n\Locales;
+use App\I18n\Translator;
 use App\Service\Mail\MailComposer;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\UriSigner;
@@ -14,12 +16,16 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 /**
  * Les deux messages de l'inscription. Ils se ressemblent volontairement de
  * l'extérieur : seule la personne qui relève la boîte sait lequel elle a reçu.
+ *
+ * Chacun part dans la langue du compte (User::getLocale()) ; les textes français sont les clés
+ * des catalogues config/i18n/emails.<langue>.php.
  */
 final readonly class AccountMailer
 {
     public function __construct(
         private MailerInterface $mailer,
         private MailComposer $composer,
+        private Translator $translator,
         private UrlGeneratorInterface $urls,
         private UriSigner $signer,
         #[Autowire('%app.front_url%')] private string $frontUrl,
@@ -35,42 +41,43 @@ final readonly class AccountMailer
         );
 
         $link = $this->signer->sign($url, new \DateTimeImmutable('+24 hours'));
-        $name = $user->getDisplayName();
+        $locale = $user->getLocale();
+        $validity = $this->t("Ce lien est valable 24 heures.\nSi vous n'êtes pas à l'origine de cette inscription, ignorez ce message.", $locale);
 
         $this->mailer->send(
-            $this->composer->compose($user->getEmail(), 'Confirmez votre adresse — Cap Monta', <<<TXT
-                        Bonjour {$name},
+            $this->composer->compose($user->getEmail(), $this->t('Confirmez votre adresse — Cap Monta', $locale), <<<TXT
+                        {$this->t('Bonjour %name%,', $locale, ['%name%' => $user->getDisplayName()])}
 
-                        Confirmez votre adresse pour pouvoir publier votre annonce :
+                        {$this->t('Confirmez votre adresse pour pouvoir publier votre annonce :', $locale)}
 
                         {$link}
 
-                        Ce lien est valable 24 heures.
-                        Si vous n'êtes pas à l'origine de cette inscription, ignorez ce message.
+                        {$validity}
 
                         Cap Monta
-                        TXT),
+                        TXT, $locale),
         );
     }
 
-    public function sendAlreadyRegistered(string $email): void
+    /** The account's language: the address already has one, it is the recipient. */
+    public function sendAlreadyRegistered(string $email, string $locale = Locales::SOURCE): void
     {
-        $login = $this->frontUrl.'/connexion';
+        $login = $this->frontUrl.Locales::pathPrefix($locale).'/connexion';
+        $attempt = $this->t("Une inscription vient d'être tentée avec cette adresse, mais vous avez\ndéjà un compte Cap Monta. Connectez-vous ici :", $locale);
+        $ignore = $this->t("Si vous n'êtes pas à l'origine de cette demande, ignorez ce message :\nvotre compte n'a pas été modifié.", $locale);
 
         $this->mailer->send(
-            $this->composer->compose($email, 'Votre compte Cap Monta', <<<TXT
-                        Bonjour,
+            $this->composer->compose($email, $this->t('Votre compte Cap Monta', $locale), <<<TXT
+                        {$this->t('Bonjour,', $locale)}
 
-                        Une inscription vient d'être tentée avec cette adresse, mais vous avez
-                        déjà un compte Cap Monta. Connectez-vous ici :
+                        {$attempt}
 
                         {$login}
 
-                        Si vous n'êtes pas à l'origine de cette demande, ignorez ce message :
-                        votre compte n'a pas été modifié.
+                        {$ignore}
 
                         Cap Monta
-                        TXT),
+                        TXT, $locale),
         );
     }
 
@@ -85,24 +92,23 @@ final readonly class AccountMailer
             new \DateTimeImmutable('+1 hour'),
         );
 
+        $locale = $user->getLocale();
         $query = parse_url($signed, PHP_URL_QUERY);
-        $link = $this->frontUrl.'/nouveau-mot-de-passe?jeton='.rawurlencode(is_string($query) ? $query : '');
-        $name = $user->getDisplayName();
+        $link = $this->frontUrl.Locales::pathPrefix($locale).'/nouveau-mot-de-passe?jeton='.rawurlencode(is_string($query) ? $query : '');
+        $validity = $this->t("Ce lien est valable une heure et ne fonctionne qu'une fois.\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message :\nvotre mot de passe actuel reste valable.", $locale);
 
         $this->mailer->send(
-            $this->composer->compose($user->getEmail(), 'Réinitialiser votre mot de passe — Cap Monta', <<<TXT
-                        Bonjour {$name},
+            $this->composer->compose($user->getEmail(), $this->t('Réinitialiser votre mot de passe — Cap Monta', $locale), <<<TXT
+                        {$this->t('Bonjour %name%,', $locale, ['%name%' => $user->getDisplayName()])}
 
-                        Vous avez demandé à changer votre mot de passe. Choisissez-en un nouveau ici :
+                        {$this->t('Vous avez demandé à changer votre mot de passe. Choisissez-en un nouveau ici :', $locale)}
 
                         {$link}
 
-                        Ce lien est valable une heure et ne fonctionne qu'une fois.
-                        Si vous n'êtes pas à l'origine de cette demande, ignorez ce message :
-                        votre mot de passe actuel reste valable.
+                        {$validity}
 
                         Cap Monta
-                        TXT),
+                        TXT, $locale),
         );
     }
 
@@ -113,5 +119,15 @@ final readonly class AccountMailer
     public static function fingerprint(User $user): string
     {
         return substr(hash('sha256', (string) $user->getPassword()), 0, 16);
+    }
+
+    /**
+     * Un texte du catalogue (config/i18n/emails.<langue>.php) dans la langue du destinataire.
+     *
+     * @param array<string, string> $parameters
+     */
+    private function t(string $text, string $locale, array $parameters = []): string
+    {
+        return $this->translator->trans($text, $parameters, $locale);
     }
 }
