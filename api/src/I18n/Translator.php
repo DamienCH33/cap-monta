@@ -48,6 +48,14 @@ final class Translator
         return strtr($translated, array_map(static fn (string|int|float $value): string => (string) $value, $parameters));
     }
 
+    /** Un texte du catalogue tel quel, sans modèle ni découpage en lignes ; inchangé sinon. */
+    public function exact(string $text, string $locale): string
+    {
+        $locale = Locales::normalize($locale);
+
+        return Locales::SOURCE === $locale ? $text : ($this->catalogue($locale)[$text] ?? $text);
+    }
+
     /** Un message déjà composé, ligne par ligne (les violations sont jointes par des retours à la ligne). */
     public function translateMessage(string $message, ?string $locale = null): string
     {

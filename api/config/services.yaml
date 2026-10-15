@@ -60,4 +60,15 @@ when@dev: &dev_only
         App\Factory\:
             resource: "../src/Factory/"
 
-when@test: *dev_only
+when@test:
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+        App\DataFixtures\:
+            resource: "../src/DataFixtures/"
+        App\Factory\:
+            resource: "../src/Factory/"
+        # Le client de test de Symfony envoie « Accept-Language: en-us », que l'API prendrait
+        # pour un visiteur anglais : voir la classe.
+        App\Tests\Support\SyntheticAcceptLanguageListener: ~
