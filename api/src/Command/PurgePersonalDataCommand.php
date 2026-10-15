@@ -47,7 +47,8 @@ final readonly class PurgePersonalDataCommand
         $ago = static fn (\DateTimeImmutable $from, string $duration): string => $from->modify('-'.$duration)->format('Y-m-d H:i:s');
 
         // Dates, amounts and status stay: the owner's history and the statistics keep working.
-        // The tracking link dies with the rest (new random token).
+        // The tracking links die with the rest: the stored hash becomes the hash of nothing
+        // anyone holds, and the links sent later are deleted (below).
         $requests = $this->db->executeStatement(
             <<<'SQL'
                 UPDATE booking_request
@@ -56,7 +57,7 @@ final readonly class PurgePersonalDataCommand
                     guest_phone = NULL,
                     message = NULL,
                     owner_message = NULL,
-                    tracking_token = substr(md5(random()::text || id::text) || md5(random()::text), 1, 48)
+                    tracking_token = encode(sha256(convert_to(gen_random_uuid()::text || id::text, 'UTF8')), 'hex')
                 WHERE guest_email NOT LIKE '%@' || :domain
                   AND (end_date < :stay_end
                        OR (status IN ('declined', 'expired', 'cancelled') AND created_at < :unused_since))
@@ -66,6 +67,11 @@ final readonly class PurgePersonalDataCommand
                 'stay_end' => $ago($today, self::STAY_RETENTION),
                 'unused_since' => $ago($now, self::UNUSED_REQUEST_RETENTION),
             ],
+        );
+
+        $this->db->executeStatement(
+            "DELETE FROM booking_tracking_link l USING booking_request b WHERE b.id = l.booking_request_id AND b.guest_email LIKE '%@' || :domain",
+            ['domain' => self::ANONYMOUS_DOMAIN],
         );
 
         // The extraction result keeps the fields read (no contact: ContactDetector masked them);

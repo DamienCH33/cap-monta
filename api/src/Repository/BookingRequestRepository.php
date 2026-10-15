@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Accommodation;
 use App\Entity\BookingRequest;
+use App\Entity\BookingTrackingLink;
 use App\Entity\Unavailability;
 use App\Entity\User;
 use App\Enum\BookingRequestStatus;
@@ -173,8 +174,30 @@ class BookingRequestRepository extends ServiceEntityRepository
         return $result;
     }
 
+    /**
+     * The key arrives in clear (the link); only its hash is stored. The lookup goes through a
+     * unique index on the hash: nothing to compare in PHP, so no timing to measure.
+     */
     public function findOneByTrackingToken(string $token): ?BookingRequest
     {
-        return $this->findOneBy(['trackingToken' => $token]);
+        $hash = BookingRequest::hashTrackingToken($token);
+
+        $request = $this->findOneBy(['trackingTokenHash' => $hash]);
+
+        if (null !== $request) {
+            return $request;
+        }
+
+        /** @var BookingRequest|null $linked */
+        $linked = $this->getEntityManager()->createQueryBuilder()
+            ->select('b')
+            ->from(BookingTrackingLink::class, 'l')
+            ->join(BookingRequest::class, 'b', 'WITH', 'l.bookingRequest = b')
+            ->andWhere('l.tokenHash = :hash')
+            ->setParameter('hash', $hash)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $linked;
     }
 }

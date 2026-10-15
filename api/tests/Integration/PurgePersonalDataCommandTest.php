@@ -45,7 +45,12 @@ final class PurgePersonalDataCommandTest extends DatabaseTestCase
         $db = self::getContainer()->get(Connection::class);
         $db->executeStatement("UPDATE booking_request SET created_at = now() - interval '7 months' WHERE id = ?", [$oldRefusal->getId()->toRfc4122()]);
         $db->executeStatement("UPDATE \"user\" SET created_at = now() - interval '8 days' WHERE id = ?", [$forgotten->getId()->toRfc4122()]);
-        $tokenBefore = $oldStay->getTrackingToken();
+        $tokenBefore = $db->fetchOne('SELECT tracking_token FROM booking_request WHERE id = ?', [$oldStay->getId()->toRfc4122()]);
+        // A link sent later (acceptance email, « Retrouver mes demandes »).
+        $db->executeStatement(
+            "INSERT INTO booking_tracking_link (id, token_hash, created_at, booking_request_id) VALUES (gen_random_uuid(), repeat('a', 64), now(), ?)",
+            [$oldStay->getId()->toRfc4122()],
+        );
 
         $tester = new CommandTester(new Application(self::$kernel)->find('app:privacy:purge'));
         self::assertSame(0, $tester->execute([]));
@@ -57,6 +62,8 @@ final class PurgePersonalDataCommandTest extends DatabaseTestCase
         self::assertStringEndsWith('@anonyme.invalid', $stay['guest_email']);
         self::assertNull($stay['guest_phone']);
         self::assertNotSame($tokenBefore, $stay['tracking_token'], 'the old tracking link must stop working');
+        self::assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $stay['tracking_token']);
+        self::assertSame(0, (int) $db->fetchOne('SELECT count(*) FROM booking_tracking_link'), 'the links sent later die too');
         self::assertSame('accepted', $stay['status'], 'the owner keeps his history');
 
         self::assertSame('Voyageur', $row($oldRefusal->getId()->toRfc4122())['guest_name']);

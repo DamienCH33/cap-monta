@@ -132,6 +132,67 @@ final class BookingRequestApiTest extends ApiTestCase
         self::assertNull($tracked['ownerContact'], 'The owner\'s contact comes with the acceptance only.');
     }
 
+    public function testTheDatabaseHoldsOnlyTheHashOfTheTrackingKey(): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+        $created = $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
+            'adults' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+        ]);
+        $token = $created['trackingToken'] ?? self::fail('No key in the creation response.');
+        self::assertIsString($token);
+        self::assertEmailTextBodyContains(self::getMailerMessage(1) ?? self::fail(), '/demande/'.$token);
+
+        $db = $this->em->getConnection();
+        self::assertSame([hash('sha256', $token)], $db->fetchFirstColumn('SELECT tracking_token FROM booking_request'));
+        self::assertSame(0, (int) $db->fetchOne(
+            "SELECT count(*) FROM booking_request b WHERE row_to_json(b)::text LIKE '%' || ? || '%'",
+            [$token],
+        ), 'The key in clear appears in no column.');
+
+        // The guest's page never sends the key back.
+        $this->client->request('GET', '/api/booking-requests/track/'.$token);
+        self::assertResponseIsSuccessful();
+        self::assertStringNotContainsString($token, (string) $this->client->getResponse()->getContent());
+        self::assertStringNotContainsString(hash('sha256', $token), (string) $this->client->getResponse()->getContent());
+    }
+
+    public function testALinkSentBeforeTheKeysWereHashedStillWorks(): void
+    {
+        $this->createAccommodation('bungalow-ocean');
+        $this->post([
+            'accommodationSlug' => 'bungalow-ocean',
+            'arrival' => '2027-07-01',
+            'departure' => '2027-07-08',
+            'adults' => 2,
+            'guestName' => 'Damien Chauveau',
+            'guestEmail' => 'damien@example.com',
+        ]);
+
+        // A key stored in clear, as before, then hashed by the same SQL as the migration.
+        $legacy = bin2hex(random_bytes(24));
+        $db = $this->em->getConnection();
+        $db->executeStatement('UPDATE booking_request SET tracking_token = ?', [$legacy]);
+        $db->executeStatement("UPDATE booking_request SET tracking_token = encode(sha256(convert_to(tracking_token, 'UTF8')), 'hex') WHERE length(tracking_token) = 48");
+
+        $this->client->request('GET', '/api/booking-requests/track/'.$legacy);
+        self::assertResponseIsSuccessful();
+
+        // The stored hash is not a key: cut to the format of a key, it opens nothing.
+        $this->client->request('GET', '/api/booking-requests/track/'.substr(hash('sha256', $legacy), 0, 48));
+        self::assertResponseStatusCodeSame(404);
+
+        $this->client->request('GET', '/api/booking-requests/track/'.bin2hex(random_bytes(24)));
+        self::assertResponseStatusCodeSame(404);
+
+        $this->client->request('POST', '/api/booking-requests/track/'.bin2hex(random_bytes(24)).'/cancel');
+        self::assertResponseStatusCodeSame(404);
+    }
+
     public function testTheSameRequestTwiceIsRefusedWithAClearMessage(): void
     {
         $this->createAccommodation('bungalow-ocean');
@@ -173,7 +234,16 @@ final class BookingRequestApiTest extends ApiTestCase
         self::assertEmailCount(1);
         $mail = self::getMailerMessage(0) ?? self::fail('No email.');
         self::assertEmailAddressContains($mail, 'To', 'damien@example.com');
-        self::assertEmailTextBodyContains($mail, '/demande/'.$created['trackingToken']);
+        // Only hashes are stored: the email carries a new key, and the first link still works.
+        self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $mail);
+        if (1 !== preg_match('#/demande/([0-9a-f]{48})#', (string) $mail->getTextBody(), $match)) {
+            self::fail('No tracking link in the email.');
+        }
+
+        foreach ([$match[1], $created['trackingToken']] as $token) {
+            $this->client->request('GET', '/api/booking-requests/track/'.$token);
+            self::assertResponseIsSuccessful();
+        }
 
         // Unknown address: exactly the same answer, and no email at all (no mail to strangers).
         $this->recover('personne@example.com');

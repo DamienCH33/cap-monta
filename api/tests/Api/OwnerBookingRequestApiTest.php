@@ -210,6 +210,33 @@ final class OwnerBookingRequestApiTest extends WebTestCase
         self::assertEmailAddressContains(self::getMailerMessage(0) ?? self::fail(), 'To', 'alice@example.com');
     }
 
+    public function testTheAcceptanceEmailCarriesAWorkingLinkAndTheFirstOneStillWorks(): void
+    {
+        $request = $this->request($this->home, 10, 17, 'Jeanne Martin', estimated: 50000);
+        $first = $request->getTrackingToken() ?? self::fail('No key right after creation.');
+        $this->em->clear(); // As in production: the owner answers in another HTTP request.
+        $this->login();
+        $this->client->request('POST', '/api/owner/booking-requests/'.$request->getId()->toRfc4122().'/accept');
+        self::assertResponseIsSuccessful();
+
+        $mail = self::getMailerMessage(0) ?? self::fail();
+        self::assertEmailAddressContains($mail, 'To', 'jeanne-martin@example.com');
+        self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $mail);
+        if (1 !== preg_match('#/demande/([0-9a-f]{48})#', (string) $mail->getTextBody(), $match)) {
+            self::fail('No tracking link in the email.');
+        }
+        self::assertNotSame($first, $match[1], 'The first key is not stored: the email carries a new one.');
+
+        foreach ([$match[1], $first] as $token) {
+            $this->client->request('GET', '/api/booking-requests/track/'.$token);
+            self::assertResponseIsSuccessful();
+            self::assertSame('accepted', $this->json()['status']);
+        }
+
+        $stored = $this->em->getConnection()->fetchFirstColumn('SELECT token_hash FROM booking_tracking_link');
+        self::assertSame([hash('sha256', $match[1])], $stored);
+    }
+
     public function testAnUnansweredRequestExpiresAfter48Hours(): void
     {
         $request = $this->request($this->home, 10, 17, 'Jeanne Martin');

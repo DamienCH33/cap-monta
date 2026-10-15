@@ -97,11 +97,15 @@ class BookingRequest
     private \DateTimeImmutable $expiresAt;
 
     /**
-     * The guest's private key to follow or cancel the request, sent by email. Random, unlike
-     * the id (a UUID v7 starts with a timestamp): knowing one request says nothing of another.
+     * SHA-256 (hex) of the guest's private key to follow or cancel the request. The key itself
+     * is random, unlike the id (a UUID v7 starts with a timestamp), and never stored: whoever
+     * reads the database cannot open a request. Links sent by later emails: BookingTrackingLink.
      */
-    #[ORM\Column(length: 48, unique: true)]
-    private string $trackingToken;
+    #[ORM\Column(name: 'tracking_token', length: 64, unique: true)]
+    private string $trackingTokenHash;
+
+    /** The key in clear, known only to the instance that created it (not mapped). */
+    private ?string $trackingToken = null;
 
     /** Price agreed on acceptance, in cents: the estimate, or the owner's when it was "à convenir". */
     #[ORM\Column(nullable: true)]
@@ -141,7 +145,19 @@ class BookingRequest
         $this->guestName = $guestName;
         // Une adresse n'a pas de casse : « Anna@… » et « anna@… » sont la même personne.
         $this->guestEmail = mb_strtolower(trim($guestEmail));
-        $this->trackingToken = bin2hex(random_bytes(24));
+        $this->trackingToken = self::newTrackingToken();
+        $this->trackingTokenHash = self::hashTrackingToken($this->trackingToken);
+    }
+
+    /** 48 hex characters: the format of every tracking link (/demande/{token}). */
+    public static function newTrackingToken(): string
+    {
+        return bin2hex(random_bytes(24));
+    }
+
+    public static function hashTrackingToken(string $token): string
+    {
+        return hash('sha256', $token);
     }
 
     public function getId(): Uuid
@@ -276,7 +292,11 @@ class BookingRequest
         return BookingRequestStatus::Accepted === $this->status;
     }
 
-    public function getTrackingToken(): string
+    /**
+     * The tracking key in clear: only right after creation, null once read back from the
+     * database. To put a link in a later email, issue a new one (BookingTrackingLinks).
+     */
+    public function getTrackingToken(): ?string
     {
         return $this->trackingToken;
     }

@@ -29,6 +29,7 @@ final readonly class BookingMailer
         private MailerInterface $mailer,
         private MailComposer $composer,
         private Translator $translator,
+        private BookingTrackingLinks $trackingLinks,
         #[Autowire('%app.front_url%')] private string $frontUrl,
         #[Autowire(env: 'default::SUPPORT_URL')] private ?string $supportUrl = null,
     ) {
@@ -386,7 +387,7 @@ final readonly class BookingMailer
 
     private function trackingUrl(BookingRequest $request, string $locale): string
     {
-        return $this->frontUrl($locale).'/demande/'.$request->getTrackingToken();
+        return $this->frontUrl($locale).'/demande/'.$this->trackingLinks->keyFor($request);
     }
 
     /** The same search again: dates and travellers, so the results fit at once. */
