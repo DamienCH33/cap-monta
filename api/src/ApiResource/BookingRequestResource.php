@@ -44,38 +44,38 @@ final class BookingRequestResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?string $id = null;
 
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(message: 'Choisissez un logement.')]
     public string $accommodationSlug = '';
 
-    #[Assert\NotNull]
+    #[Assert\NotNull(message: 'Choisissez une date d\'arrivée.')]
     #[Assert\GreaterThan('today', message: 'Choisissez une arrivée à partir de demain : le propriétaire doit avoir le temps de répondre.')]
     #[Assert\LessThanOrEqual('+24 months', message: 'Les calendriers ne vont pas au-delà de deux ans.')]
     #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     public ?\DateTimeImmutable $arrival = null;
 
-    #[Assert\NotNull]
-    #[Assert\GreaterThan(propertyPath: 'arrival', message: 'The departure must come after the arrival.')]
+    #[Assert\NotNull(message: 'Choisissez une date de départ.')]
+    #[Assert\GreaterThan(propertyPath: 'arrival', message: 'Le départ doit être après l\'arrivée.')]
     #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     public ?\DateTimeImmutable $departure = null;
 
-    #[Assert\Positive]
-    #[Assert\LessThanOrEqual(30)]
+    #[Assert\Positive(message: 'Indiquez au moins un adulte.')]
+    #[Assert\LessThanOrEqual(30, message: '{{ compared_value }} adultes au plus.')]
     public int $adults = 1;
 
-    #[Assert\PositiveOrZero]
-    #[Assert\LessThanOrEqual(30)]
+    #[Assert\PositiveOrZero(message: 'Le nombre d\'enfants ne peut pas être négatif.')]
+    #[Assert\LessThanOrEqual(30, message: '{{ compared_value }} enfants au plus.')]
     public int $children = 0;
 
-    #[Assert\PositiveOrZero]
-    #[Assert\LessThanOrEqual(5)]
+    #[Assert\PositiveOrZero(message: 'Le nombre de bébés ne peut pas être négatif.')]
+    #[Assert\LessThanOrEqual(5, message: '{{ compared_value }} bébés au plus.')]
     public int $infants = 0;
 
-    #[Assert\PositiveOrZero]
-    #[Assert\LessThanOrEqual(5)]
+    #[Assert\PositiveOrZero(message: 'Le nombre d\'animaux ne peut pas être négatif.')]
+    #[Assert\LessThanOrEqual(5, message: '{{ compared_value }} animaux au plus.')]
     public int $pets = 0;
 
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 80)]
+    #[Assert\NotBlank(message: 'Indiquez votre nom.')]
+    #[Assert\Length(max: 80, maxMessage: 'Le nom fait {{ limit }} caractères au plus.')]
     // Un nom, pas un message : il est repris dans « Bonjour … » des emails envoyés. Un lien ou
     // un retour à la ligne permettrait d'y glisser un faux bouton (hameçonnage).
     #[Assert\Regex(
@@ -84,12 +84,12 @@ final class BookingRequestResource
     )]
     public string $guestName = '';
 
-    #[Assert\NotBlank]
-    #[Assert\Email]
-    #[Assert\Length(max: 255)]
+    #[Assert\NotBlank(message: 'Indiquez votre adresse email.')]
+    #[Assert\Email(message: 'Cette adresse email ne semble pas valide.')]
+    #[Assert\Length(max: 255, maxMessage: 'L\'adresse email fait {{ limit }} caractères au plus.')]
     public string $guestEmail = '';
 
-    #[Assert\Length(max: 30)]
+    #[Assert\Length(max: 30, maxMessage: 'Le numéro fait {{ limit }} caractères au plus.')]
     // Numéro français, ou étranger au format international : les locataires viennent aussi
     // des Pays-Bas, d'Allemagne, de Belgique…
     #[Assert\Regex(
@@ -98,7 +98,7 @@ final class BookingRequestResource
     )]
     public ?string $guestPhone = null;
 
-    #[Assert\Length(max: 2000)]
+    #[Assert\Length(max: 2000, maxMessage: 'Le message fait {{ limit }} caractères au plus.')]
     public ?string $message = null;
 
     // ---- filled by the processor, never by the client ----
