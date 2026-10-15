@@ -95,7 +95,11 @@ export function apiProxy(target: string): RequestHandler {
         timeout: TIMEOUT_MS,
       },
       (answer) => {
-        response.writeHead(answer.statusCode ?? 502, withoutHopByHop(answer.headers));
+        const answerHeaders = withoutHopByHop(answer.headers);
+        // Ce qui tourne derrière ne regarde personne (« X-Powered-By: PHP/8.4 », « Server »).
+        delete answerHeaders['x-powered-by'];
+        delete answerHeaders['server'];
+        response.writeHead(answer.statusCode ?? 502, answerHeaders);
         answer.pipe(response);
         answer.on('error', () => response.destroy());
       },
