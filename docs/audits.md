@@ -164,3 +164,72 @@ Tout est prêt dans le dépôt : `api/Dockerfile`, `web/Dockerfile`, les fichier
 4. **Un seul format d'erreur** pour toute l'API (`problem+json`).
 5. **Emails aux voyageurs en français** dans toutes les langues.
 6. **Écart « adultes 13 ans et plus » / taxe de séjour à partir de 18 ans** : à trancher.
+
+---
+
+# Passe du 15/10/2026
+
+Revue de code des 80 commits arrivés depuis le 25/09, tests d'intrusion rejoués, parcours dans un
+vrai navigateur, montée en charge en local. Tout en local sur le build de production (API en
+`APP_ENV=prod`, rendu serveur Angular), sauf mention.
+
+## Bilan
+
+| | |
+|---|---|
+| Bloquants | 1 : la CI Web était rouge depuis le 01/10 (5 failles npm), donc le front ne se déployait plus |
+| Importants | 5, tous corrigés (détail ci-dessous) |
+| Tests | API : 377 (PHPUnit), front : 118 (Vitest) |
+| Intrusion | 73 essais, 73 OK (`scratchpad/intrusion.py`) |
+| Parcours navigateur | 34 étapes, 34 OK, 0 erreur console, 0 réponse 5xx (`parcours.mjs`) |
+| Migrations | montées, descendues, remontées sur une base vide ; schéma = entités |
+
+## Trouvé et corrigé
+
+| Point | Comment | État |
+|---|---|---|
+| CI Web rouge depuis le 01/10 | `npm audit` : router Angular (SSR), braces, proxy-addr, source-map-js | **Corrigé** — Angular 22.2, relais `/api` réécrit avec `node:http` (plus de `http-proxy-middleware`) |
+| Nombre de logements par quartier | Comptait brouillons et annonces retirées : quartier vide dans le sitemap, page en noindex | **Corrigé** — annonces en ligne seulement, test |
+| Alerte « annonce en ligne » | Publier / retirer en boucle épuisait le quota d'emails | **Corrigé** — 3 alertes par propriétaire et par jour, test |
+| Langue enregistrée | Celle du navigateur, pas celle de la page | **Corrigé** — le front envoie `Accept-Language`, test navigateur (voyageur allemand au navigateur français) |
+| Messages anglais de Symfony | « This value is not a valid email address. » sur le formulaire de demande, même en français | **Corrigé** — chaque contrainte a son message français, traduit |
+| Connexion bloquée | 401 avec un message anglais même après blocage | **Corrigé** — 429 au format de l'API, traduit |
+| `X-Powered-By: PHP` relayé | En-tête de l'API repris par le relais | **Corrigé** — retiré par le relais |
+| `robots.txt` | `/en`, `/nl`, `/de/mon-espace` explorables | **Corrigé** |
+| RGPD | Langue du compte et de la demande absentes du registre | **Corrigé** — registre et politique de confidentialité |
+
+## Points restés ouverts au 25/09, traités
+
+| Point | État |
+|---|---|
+| Jetons de suivi stockés en clair | **Corrigé** — SHA-256 en base, liens déjà envoyés toujours valables |
+| Horodatages sans fuseau | **Corrigé** — `TIMESTAMP WITH TIME ZONE`, valeurs existantes lues à l'heure de Paris |
+| Plusieurs formats d'erreur | **Corrigé** — `application/problem+json` partout (`ApiProblem`) |
+| Emails aux voyageurs en français | **Corrigé** — 23 emails en anglais, néerlandais, allemand ; le français inchangé à l'octet |
+| Messages de l'API en français | **Corrigé** — 170 messages traduits ; les textes écrits par les gens ne sont jamais traduits |
+
+## Tests d'intrusion (73 essais)
+
+Accès aux données d'un autre propriétaire (16 routes : 404), accès anonyme (401), formulaires
+piégés et autre origine (403 / 415), champs interdits à la création d'une demande (400), valeurs
+absurdes (422, aucune 500), injection SQL dans les filtres (aucune 500, aucune fuite), jetons de
+suivi inventés ou copiés depuis la base (404), traversée de chemin par le relais `/api` et
+`/media/photos`, en-tête Host étranger (400), fuites d'information (aucune trace, documentation de
+l'API coupée), en-têtes de sécurité, `Accept-Language` piégé, emails vers une adresse inconnue
+(réponse identique), fichiers piégés (PHP, SVG, vide : 422), limiteurs malgré `X-Forwarded-For`
+changeant (connexion, demandes), même temps de réponse que le compte existe ou non.
+
+## Montée en charge
+
+En local (bac à sable à 2 cœurs, non représentatif en valeur absolue) : la traduction ne coûte
+rien de mesurable (45 réponses/s pour l'API en français comme en allemand), le limiteur du devis
+répond 429 au-delà de 60 par minute comme prévu. Les chiffres de référence restent ceux de la
+production (05/10) : à rejouer avec `charge-prod.sh` après déploiement.
+
+## Reste ouvert
+
+1. **Pagination en SQL** : utile vers 4 000 annonces.
+2. **Écart « adultes 13 ans et plus » / taxe de séjour à partir de 18 ans** : à trancher.
+3. **Statut « suspendu »** : une annonce retirée par l'éditeur peut être republiée tout de suite.
+4. **Néerlandais** : le front tutoie (« je »), les emails vouvoient (« u ») : à harmoniser.
+5. **Hors code** : `composer audit` à vérifier sur la CI (Packagist inaccessible ici).
