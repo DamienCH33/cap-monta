@@ -6,9 +6,8 @@ import {
 } from '@angular/ssr/node';
 import compression from 'compression';
 import express from 'express';
-import { createProxyMiddleware } from 'http-proxy-middleware';
-import { isIP } from 'node:net';
 import { join } from 'node:path';
+import { apiProxy } from './api-proxy';
 import { APP_PATHS } from './app/app.paths';
 import { LangOption, LANGS, pathIn } from './app/core/i18n/lang';
 
@@ -109,51 +108,12 @@ app.use((request, response, next) => {
   next();
 });
 
-/** Une seule adresse IPv4 ou IPv6 bien formée, sinon null (en local, pas de X-Real-IP). */
-export function clientIp(header: string | string[] | undefined): string | null {
-  const value = (Array.isArray(header) ? header[0] : header)?.trim() ?? '';
-
-  return isIP(value) ? value : null;
-}
-
 /**
  * Un seul domaine public (décision 009) : « /api/… » (et les photos, « /media/photos/… ») est relayé
- * tel quel vers Symfony.
- * Les cookies de session restent sur le même domaine, sans CORS.
- *
- * L'adresse du visiteur : le bord de Railway ajoute l'IP réelle au X-Forwarded-For envoyé par
- * le client, qui peut donc y glisser de fausses adresses privées, que Symfony (qui fait
- * confiance aux réseaux privés) prenait pour la vraie : les limiteurs de débit se
- * contournaient (audit de prod du 30/09). Railway pose aussi X-Real-IP, que le client ne
- * peut pas fixer : c'est elle qu'on transmet, seule, dans X-Forwarded-For.
+ * tel quel vers Symfony. Les cookies de session restent sur le même domaine, sans CORS.
+ * Pas tout « /media » : Angular y range aussi les polices du site, que ce serveur sert lui-même.
  */
-app.use(
-  createProxyMiddleware({
-    // /media/photos : les photos des logements, servies par l'API (volume Railway). Pas tout
-    // « /media » : Angular y range aussi les polices du site, que ce serveur sert lui-même.
-    pathFilter: ['/api', '/media/photos'],
-    target: apiUrl,
-    changeOrigin: false,
-    xfwd: false,
-    proxyTimeout: 30_000,
-    timeout: 30_000,
-    on: {
-      proxyReq: (proxyRequest, request) => {
-        const realIp = clientIp(request.headers['x-real-ip']);
-
-        if (null !== realIp) {
-          proxyRequest.setHeader('x-forwarded-for', realIp);
-        }
-      },
-      error: (_error, _request, response) => {
-        if ('writeHead' in response && !response.headersSent) {
-          response.writeHead(502, { 'Content-Type': 'application/problem+json' });
-        }
-        response.end('{"title":"L’API ne répond pas.","status":502}');
-      },
-    },
-  }),
-);
+app.use(apiProxy(apiUrl));
 
 interface AccommodationSummary {
   slug: string;
