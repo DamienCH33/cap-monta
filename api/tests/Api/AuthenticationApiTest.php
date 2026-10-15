@@ -48,9 +48,12 @@ final class AuthenticationApiTest extends ApiTestCase
 
     public function testAWrongPasswordIsRefused(): void
     {
-        $this->login('faux');
+        $payload = $this->login('faux');
 
         self::assertResponseStatusCodeSame(401);
+        // The API's error format, in French by default; the same answer for an unknown address.
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json');
+        self::assertSame('Adresse email ou mot de passe incorrect.', $payload['detail'] ?? null);
     }
 
     /** Refused before the password is even checked: no session opened from another site. */

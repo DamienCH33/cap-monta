@@ -76,7 +76,7 @@ export class Login {
       error: (error: HttpErrorResponse) => {
         this.submitting.set(false);
         this.failed.set(true);
-        this.throttled.set(/too many/i.test(String(error.error?.error ?? '')));
+        this.throttled.set(429 === error.status);
         this.emailInput().nativeElement.focus();
       },
     });

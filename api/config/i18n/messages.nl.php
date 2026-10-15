@@ -190,4 +190,6 @@ return [
     'Près de l\'accueil' => 'Dicht bij de receptie',
     'Zone des mobil-homes' => 'Stacaravanzone',
     'L\'assistant de lecture est indisponible pour le moment.' => 'De leesassistent is op dit moment niet beschikbaar.',
+    'Trop de tentatives de connexion : réessayez dans un quart d\'heure.' => 'Te veel inlogpogingen: probeer het over een kwartier opnieuw.',
+    'Adresse email ou mot de passe incorrect.' => 'Onjuist e-mailadres of wachtwoord.',
 ];

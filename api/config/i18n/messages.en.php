@@ -190,4 +190,6 @@ return [
     'Près de l\'accueil' => 'Near the reception',
     'Zone des mobil-homes' => 'Mobile home area',
     'L\'assistant de lecture est indisponible pour le moment.' => 'The reading assistant is unavailable at the moment.',
+    'Trop de tentatives de connexion : réessayez dans un quart d\'heure.' => 'Too many login attempts: try again in a quarter of an hour.',
+    'Adresse email ou mot de passe incorrect.' => 'Incorrect email address or password.',
 ];

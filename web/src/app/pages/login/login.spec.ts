@@ -70,8 +70,11 @@ describe('Login', () => {
     httpMock
       .expectOne((req) => req.url.endsWith('/api/login'))
       .flush(
-        { error: 'Too many failed login attempts, please try again in 15 minutes.' },
-        { status: 401, statusText: 'Unauthorized' },
+        {
+          status: 429,
+          detail: "Trop de tentatives de connexion : réessayez dans un quart d'heure.",
+        },
+        { status: 429, statusText: 'Too Many Requests' },
       );
     fixture.detectChanges();
 

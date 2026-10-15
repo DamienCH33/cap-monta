@@ -190,4 +190,6 @@ return [
     'Près de l\'accueil' => 'In der Nähe der Rezeption',
     'Zone des mobil-homes' => 'Mobilheim-Bereich',
     'L\'assistant de lecture est indisponible pour le moment.' => 'Der Leseassistent ist im Moment nicht verfügbar.',
+    'Trop de tentatives de connexion : réessayez dans un quart d\'heure.' => 'Zu viele Anmeldeversuche: Bitte versuchen Sie es in einer Viertelstunde erneut.',
+    'Adresse email ou mot de passe incorrect.' => 'E-Mail-Adresse oder Passwort falsch.',
 ];
