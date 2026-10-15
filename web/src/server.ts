@@ -153,7 +153,7 @@ async function listSlugs(): Promise<string[]> {
  * La page propriétaires publique (/proprietaire) est indexable.
  */
 app.get('/robots.txt', (_request, response) => {
-  const privatePaths = ['/api/', '/mon-espace', '/demande/', '/*/demande/'];
+  const privatePaths = ['/api/', '/mon-espace', '/*/mon-espace', '/demande/', '/*/demande/'];
 
   response
     .type('text/plain')
