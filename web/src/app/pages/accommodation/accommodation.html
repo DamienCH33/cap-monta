@@ -308,6 +308,32 @@
       </aside>
     </div>
 
+    @if (!ownedByMe() && others().length > 0) {
+      <section class="others" aria-labelledby="others-title">
+        <h2 id="others-title" class="others__title">
+          @if (othersForDates()) {
+            <ng-container i18n="@@fiche.others-dates"
+              >D'autres logements libres à ces dates</ng-container
+            >
+          } @else {
+            <ng-container i18n="@@fiche.others-more">D'autres logements à découvrir</ng-container>
+          }
+        </h2>
+        <div class="others__grid">
+          @for (other of others(); track other.slug) {
+            <cm-accommodation-card [accommodation]="other" />
+          }
+        </div>
+        <a
+          class="others__all"
+          routerLink="/recherche"
+          [queryParams]="searchParams()"
+          i18n="@@fiche.others-all"
+          >Voir tous les logements</a
+        >
+      </section>
+    }
+
     <!-- Téléphone : le formulaire est tout en bas de la fiche, cette barre y mène. -->
     @if (!ownedByMe()) {
       <div class="stickybar">

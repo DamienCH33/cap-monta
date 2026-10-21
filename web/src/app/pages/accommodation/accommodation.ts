@@ -24,6 +24,7 @@ import { currentLang, currentLangOption } from '../../core/i18n/lang';
 import { FavoriteButton } from '../../shared/favorite-button/favorite-button';
 import { ShareButton } from '../../shared/share-button/share-button';
 import { Icon } from '../../shared/icon/icon';
+import { AccommodationCard } from '../../shared/accommodation-card/accommodation-card';
 import { NavigationOrigin } from '../../core/services/navigation-origin';
 import { AuthService } from '../../core/services/auth';
 import { OwnerAccommodationService } from '../../core/services/owner-accommodation';
@@ -42,6 +43,7 @@ import { ReportListing } from './report-listing/report-listing';
     BookingForm,
     PhotoGallery,
     ReportListing,
+    AccommodationCard,
   ],
   templateUrl: './accommodation.html',
   styleUrl: './accommodation.scss',
@@ -96,6 +98,14 @@ export class AccommodationPage implements OnInit {
   private readonly httpStatus = inject(HttpStatus);
   readonly searchParams = signal<Params>({});
   readonly busy = signal<BusyPeriod[]>([]);
+  /**
+   * Trois autres logements du même domaine, libres aux dates cherchées s'il y en a : un visiteur
+   * venu d'un lien Facebook sur une seule fiche repartait sans voir le reste du site.
+   */
+  readonly others = signal<Accommodation[]>([]);
+  readonly othersForDates = computed(
+    () => !!this.searchParams()['arrivee'] && !!this.searchParams()['depart'],
+  );
 
   readonly initialArrival = computed(() => this.searchParams()['arrivee'] ?? '');
   readonly initialDeparture = computed(() => this.searchParams()['depart'] ?? '');
@@ -160,6 +170,7 @@ export class AccommodationPage implements OnInit {
         if (found) {
           this.accommodation.set(found);
           this.applySeo(found);
+          this.loadOthers(found);
 
           return;
         }
@@ -194,6 +205,28 @@ export class AccommodationPage implements OnInit {
         ),
       )
       .subscribe((busy) => this.busy.set(busy));
+  }
+
+  private loadOthers(logement: Accommodation): void {
+    this.others.set([]);
+    const dated = this.othersForDates();
+    const params = this.searchParams();
+
+    this.accommodations
+      .search({
+        resort: logement.resort,
+        ...(dated
+          ? {
+              arrival: params['arrivee'],
+              departure: params['depart'],
+              guests: travellerCount(this.initialGuests()),
+            }
+          : {}),
+      })
+      .pipe(catchError(() => of([] as Accommodation[])))
+      .subscribe((found) =>
+        this.others.set(found.filter((other) => other.slug !== logement.slug).slice(0, 3)),
+      );
   }
 
   private applySeo(logement: Accommodation): void {

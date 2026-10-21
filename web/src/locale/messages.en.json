@@ -1121,6 +1121,24 @@
     "owner.requests.seo-description": "Reply to booking requests for your homes.",
     "owner.requests.price-required": "Enter the price of the stay: no rate covers these dates.",
     "owner.requests.save-failed": "Your reply couldn't be saved. Please try again.",
-    "header.instagram": "Cap Monta on Instagram"
+    "header.instagram": "Cap Monta on Instagram",
+    "owner.listings.fb-heading": "{$type} for rent, {$place}",
+    "owner.listings.fb-rates": "Rates:",
+    "owner.listings.fb-per-week": "{$price} per week",
+    "owner.listings.fb-per-night": "{$price} per night",
+    "owner.listings.fb-period": "- {$from} to {$to}: {$price}",
+    "owner.listings.fb-free-weeks": "Weeks still free in summer {$year} (Saturday arrival): {$weeks}{$more}",
+    "owner.listings.fb-summer-full": "Summer {$year} is fully booked: other free dates are on the link.",
+    "owner.listings.fb-link": "Calendar, rates and booking request:",
+    "fiche.others-dates": "Other homes free on these dates",
+    "fiche.others-more": "More homes to discover",
+    "fiche.others-all": "See all homes",
+    "owner.listings.share-post-title": "The text for Facebook",
+    "owner.listings.share-post-text": " Ready to paste into a rental group: your rates, your free summer weeks and the link to your listing, up to date today. ",
+    "owner.listings.share-post-label": "Text for Facebook",
+    "owner.listings.share-post-copied": "✓ Text copied",
+    "owner.listings.share-post-copy": "Copy the text",
+    "owner.listings.share-post-failed": " The text couldn't be prepared. Try again in a moment, or share the link below. ",
+    "owner.listings.share-post-loading": " Preparing the text… "
   }
 }

@@ -426,3 +426,28 @@
     text-decoration: none;
   }
 }
+
+// Sous la fiche : trois autres logements, pour qui arrive d'un lien sur une seule annonce.
+.others {
+  margin-top: 48px;
+}
+
+.others__title {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.others__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.others__all {
+  display: inline-block;
+  margin-top: 16px;
+  color: var(--blue);
+  font-weight: 600;
+}

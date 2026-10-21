@@ -1121,6 +1121,24 @@
     "owner.requests.seo-description": "Beantwoord de boekingsaanvragen voor uw accommodaties.",
     "owner.requests.price-required": "Vul de prijs van het verblijf in: geen tarief dekt deze data.",
     "owner.requests.save-failed": "Uw antwoord kon niet worden opgeslagen. Probeer het opnieuw.",
-    "header.instagram": "Cap Monta op Instagram"
+    "header.instagram": "Cap Monta op Instagram",
+    "owner.listings.fb-heading": "{$type} te huur, {$place}",
+    "owner.listings.fb-rates": "Prijzen:",
+    "owner.listings.fb-per-week": "{$price} per week",
+    "owner.listings.fb-per-night": "{$price} per nacht",
+    "owner.listings.fb-period": "- van {$from} tot {$to}: {$price}",
+    "owner.listings.fb-free-weeks": "Nog vrije weken in de zomer van {$year} (aankomst op zaterdag): {$weeks}{$more}",
+    "owner.listings.fb-summer-full": "De zomer van {$year} is volgeboekt: andere vrije data staan op de link.",
+    "owner.listings.fb-link": "Kalender, prijzen en boekingsaanvraag:",
+    "fiche.others-dates": "Andere accommodaties vrij op deze data",
+    "fiche.others-more": "Meer accommodaties ontdekken",
+    "fiche.others-all": "Alle accommodaties bekijken",
+    "owner.listings.share-post-title": "De tekst voor Facebook",
+    "owner.listings.share-post-text": " Klaar om in een verhuurgroep te plakken: je prijzen, je vrije zomerweken en de link naar je advertentie, vandaag bijgewerkt. ",
+    "owner.listings.share-post-label": "Tekst voor Facebook",
+    "owner.listings.share-post-copied": "✓ Tekst gekopieerd",
+    "owner.listings.share-post-copy": "Tekst kopiëren",
+    "owner.listings.share-post-failed": " De tekst kon niet worden voorbereid. Probeer het zo opnieuw, of deel de link hieronder. ",
+    "owner.listings.share-post-loading": " Tekst wordt voorbereid… "
   }
 }

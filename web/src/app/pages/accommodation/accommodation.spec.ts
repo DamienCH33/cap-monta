@@ -50,10 +50,24 @@ describe('AccommodationPage', () => {
     http
       .expectOne((r) => r.url.endsWith('/availability'))
       .flush({ slug: 'bungalow-hawai', busy: [] });
+    // Les autres logements du domaine, sous la fiche.
+    http
+      .expectOne((r) => r.url.endsWith('/api/accommodations') && 'chm' === r.params.get('resort'))
+      .flush({ member: [listing, { ...listing, slug: 'mobil-home-pins' }], totalItems: 2 });
     harness.detectChanges();
 
     return harness;
   }
+
+  it('suggests other homes of the resort under the listing, never the listing itself', async () => {
+    const harness = await open();
+    const titles = harness.routeNativeElement?.querySelectorAll('.others cm-accommodation-card');
+
+    expect(titles?.length).toBe(1);
+    expect(harness.routeNativeElement?.querySelector('.others__title')?.textContent).toContain(
+      "D'autres logements à découvrir",
+    );
+  });
 
   it('shows the booking form to a visitor, even after opening it from the owner space in the same tab', async () => {
     // The owner opened it from his space, then logged out: the flag is still in memory.
