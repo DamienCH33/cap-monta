@@ -11,7 +11,11 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { forkJoin } from 'rxjs';
+
 import { environment } from '../../../../environments/environment';
+import { facebookPost } from '../../../core/models/facebook-post';
+import { AccommodationService } from '../../../core/services/accommodation';
 import { Icon } from '../../../shared/icon/icon';
 
 /** Le QR code d'une vitre : lisible à un mètre, donc de gros modules. */
@@ -19,9 +23,10 @@ const PNG_CELL = 24;
 const PNG_MARGIN = 4;
 
 /**
- * « Partager » une annonce en ligne, depuis Mes logements : le lien à coller dans un post
- * Facebook, et un QR code à imprimer pour la vitre du mobil-home. Le QR code porte
- * `?utm_source=qrcode` : Umami compte à part les visites venues d'une vitre.
+ * « Partager » une annonce en ligne, depuis Mes logements : un texte prêt à poster dans un groupe
+ * Facebook (logement, tarifs, semaines libres de l'été, lien), le lien seul, et un QR code à
+ * imprimer pour la vitre du mobil-home. Le QR code porte `?utm_source=qrcode` et le texte
+ * `?utm_source=facebook` : Umami compte à part ce que rapporte chacun.
  */
 @Component({
   selector: 'cm-listing-share',
@@ -32,6 +37,7 @@ const PNG_MARGIN = 4;
 })
 export class ListingShare {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly accommodations = inject(AccommodationService);
 
   readonly slug = input.required<string>();
   /** « Mobil-home · Les Pins » : repris sous le QR code imprimé. */
@@ -46,6 +52,11 @@ export class ListingShare {
   readonly qrImage = signal<string | null>(null);
   readonly copied = signal(false);
   readonly copyFailed = signal(false);
+
+  /** Le texte pour Facebook, composé à l'ouverture avec les tarifs et le calendrier du jour. */
+  readonly post = signal<string | null>(null);
+  readonly postUnavailable = signal(false);
+  readonly postCopied = signal(false);
 
   /** Chargée au premier clic : la bibliothèque ne pèse rien sur le reste du site. */
   private async qrcode() {
@@ -63,10 +74,46 @@ export class ListingShare {
     }
     this.copied.set(false);
     this.copyFailed.set(false);
+    this.postCopied.set(false);
     this.dialog().nativeElement.showModal();
+    this.composePost();
 
     if (null === this.qrImage()) {
       this.qrImage.set((await this.qrcode()).createDataURL(8, 2));
+    }
+  }
+
+  /** Recomposé à chaque ouverture : les semaines libres changent avec les réservations. */
+  private composePost(): void {
+    this.postUnavailable.set(false);
+    forkJoin([
+      this.accommodations.getBySlug(this.slug()),
+      this.accommodations.getAvailability(this.slug()),
+    ]).subscribe({
+      next: ([accommodation, availability]) =>
+        this.post.set(
+          facebookPost(
+            accommodation,
+            availability.busy,
+            this.url(),
+            new Date().toISOString().slice(0, 10),
+          ),
+        ),
+      error: () => this.postUnavailable.set(true),
+    });
+  }
+
+  async copyPost(): Promise<void> {
+    const text = this.post();
+    if (null === text) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      this.postCopied.set(true);
+    } catch {
+      // Le texte reste sélectionnable dans la zone : le propriétaire le copie à la main.
+      this.postCopied.set(false);
     }
   }
 

@@ -110,3 +110,17 @@
   // Des modules nets, pas flous, une fois agrandis.
   image-rendering: pixelated;
 }
+
+.share__post {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+}

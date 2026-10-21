@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../../environments/environment';
@@ -6,6 +8,12 @@ import { ListingShare } from './listing-share';
 const URL = `${environment.siteUrl}/logement/mobil-home-les-pins`;
 
 describe('ListingShare', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }),
+  );
+
   function create() {
     const fixture = TestBed.createComponent(ListingShare);
     fixture.componentRef.setInput('slug', 'mobil-home-les-pins');
