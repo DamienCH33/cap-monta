@@ -35,3 +35,7 @@ when@test:
                 # Compteurs remis à zéro à chaque test : la purge ne touche que les entités.
                 rate_limiter.cache:
                     adapter: cache.adapter.array
+                # Un compteur qui doit survivre d'une requête à l'autre dans un même test (alertes
+                # de modération) : sur disque, sans dépendre de Redis sur la machine qui teste.
+                rate_limiter.test_persistent:
+                    adapter: cache.adapter.filesystem

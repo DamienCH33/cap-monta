@@ -115,10 +115,11 @@ framework:
 when@test:
     framework:
         rate_limiter:
-            # Dans Redis pour ce test-là : la mémoire est vidée entre deux requêtes. Une clé par
-            # propriétaire (UUID neuf à chaque test), donc aucun compteur partagé entre tests.
+            # Sur disque pour ce test-là : la mémoire est vidée entre deux requêtes, et Redis n'est
+            # pas forcément lancé sur la machine qui teste. Une clé par propriétaire (UUID neuf à
+            # chaque test), donc aucun compteur partagé entre tests.
             moderation_alerts:
-                cache_pool: cache.app
+                cache_pool: rate_limiter.test_persistent
             booking_requests:
                 limit: 1000
             quotes:
