@@ -2,7 +2,7 @@
 # Une seule image pour trois services Railway : l'API, le worker Messenger et la tâche
 # planifiée. Seule la commande de démarrage change (railway.*.json).
 
-FROM dunglas/frankenphp:1-php8.4 AS base
+FROM dunglas/frankenphp:1.13.2-php8.4-bookworm AS base
 
 # gd : redimensionnement des photos (JPEG, PNG, WebP). exif : sens des photos de téléphone
 # (sans elle, elles arrivent couchées). redis : cache du calendrier et verrous.
