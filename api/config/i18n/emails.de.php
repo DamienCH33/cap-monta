@@ -23,6 +23,8 @@ return [
     'Voir les logements' => 'Unterkünfte ansehen',
     'Soutenir Cap Monta' => 'Cap Monta unterstützen',
     'Ouvrir le lien' => 'Link öffnen',
+    'Activer mon alerte' => 'Benachrichtigung aktivieren',
+    'Arrêter mon alerte' => 'Benachrichtigung beenden',
 
     // Allgemein
     'Bonjour,' => 'Guten Tag,',
@@ -106,4 +108,18 @@ return [
     "Votre annonce %title% a été retirée du site à la suite d'un\nsignalement." => 'Ihre Anzeige %title% wurde nach einer Meldung von der Website entfernt.',
     'Motif : %reason%' => 'Grund: %reason%',
     "Elle n'est pas supprimée : corrigez-la puis republiez-la depuis votre espace, ou\nrépondez à ce message si vous pensez qu'il s'agit d'une erreur." => 'Sie ist nicht gelöscht: Korrigieren Sie sie und veröffentlichen Sie sie erneut in Ihrem Bereich, oder antworten Sie auf diese Nachricht, wenn Sie glauben, dass es sich um einen Irrtum handelt.',
+
+    // Benachrichtigung « Prévenez-moi » (an den Gast)
+    'Activez votre alerte' => 'Aktivieren Sie Ihre Benachrichtigung',
+    'Vous avez demandé à être prévenu si un logement se libère :' => 'Sie möchten benachrichtigt werden, sobald eine Unterkunft frei wird:',
+    'Pour activer l\'alerte, ouvrez ce lien :' => 'Öffnen Sie diesen Link, um die Benachrichtigung zu aktivieren:',
+    "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message :\nsans activation, l'alerte et votre adresse sont effacées sous deux jours." => 'Wenn Sie das nicht selbst angefordert haben, ignorieren Sie diese Nachricht: Ohne Aktivierung werden die Benachrichtigung und Ihre Adresse innerhalb von zwei Tagen gelöscht.',
+    'Un logement est libre à vos dates' => 'Eine Unterkunft ist zu Ihren Daten frei',
+    'Un logement vient de se libérer à vos dates.' => 'Zu Ihren Daten ist gerade eine Unterkunft frei geworden.',
+    '%count% logements viennent de se libérer à vos dates.' => 'Zu Ihren Daten sind gerade %count% Unterkünfte frei geworden.',
+    "Les dates libres partent vite en saison : la demande de réservation\nest gratuite et le propriétaire répond sous 48 heures." => 'In der Saison sind freie Termine schnell weg: Eine Buchungsanfrage ist kostenlos, und der Eigentümer antwortet innerhalb von 48 Stunden.',
+    'Vous ne voulez plus de ces messages ? Arrêtez l\'alerte ici :' => 'Sie möchten diese Nachrichten nicht mehr erhalten? Beenden Sie die Benachrichtigung hier:',
+    '%count% personne' => '%count% Person',
+    '%count% personnes' => '%count% Personen',
+    'Domaine : %resort%' => 'Anlage: %resort%',
 ];

@@ -180,6 +180,15 @@ return [
     'Liste de dates illisible (%d au plus).' => 'The list of dates could not be read (%d at most).',
     'Le calendrier s’arrête à 18 mois : décochez cette ligne.' => 'The calendar stops at 18 months: untick this line.',
 
+    // « Prévenez-moi » alert (StayAlertRequest, StayAlertController) and the owner's sign-up source (RegistrationRequest)
+    'Choisissez vos dates.' => 'Choose your dates.',
+    'Indiquez entre %d et %d voyageurs.' => 'Enter between %d and %d guests.',
+    'Acceptez de recevoir ces emails pour créer l’alerte.' => 'Agree to receive these emails to create the alert.',
+    'La date de départ doit venir après l’arrivée.' => 'The departure date must come after the arrival.',
+    'Choisissez une arrivée à partir de demain.' => 'Choose an arrival from tomorrow onwards.',
+    'Ce séjour est trop long pour une alerte.' => 'This stay is too long for an alert.',
+    'Choisissez une réponse dans la liste.' => 'Choose an answer from the list.',
+
     // Euronat districts: the highlights sent by /api/districts (Reference\EuronatDistricts)
     'Côté plage' => 'Beach side',
     'Accès direct à la plage Nord' => 'Direct access to the North beach',

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Api;
 
 use App\Entity\User;
+use App\Enum\HeardFrom;
 use App\Repository\UserRepository;
 use App\Tests\ApiTestCase;
 use Doctrine\ORM\EntityManagerInterface;
@@ -37,6 +38,21 @@ final class RegistrationApiTest extends ApiTestCase
         $user = $this->findUser('nouveau@example.com');
         self::assertNotNull($user);
         self::assertFalse($user->isVerified(), 'Le compte ne doit pas être vérifié avant le clic.');
+    }
+
+    public function testTheOwnerMaySayHowHeHeardOfTheSite(): void
+    {
+        $this->register('facebook@example.com', extra: ['heardFrom' => 'facebook_group']);
+        self::assertResponseStatusCodeSame(202);
+        self::assertSame(HeardFrom::FacebookGroup, $this->findUser('facebook@example.com')?->getHeardFrom());
+
+        $this->register('muet@example.com', extra: ['heardFrom' => null]);
+        self::assertResponseStatusCodeSame(202);
+        self::assertNull($this->findUser('muet@example.com')?->getHeardFrom());
+
+        $this->register('tiktok@example.com', extra: ['heardFrom' => 'tiktok']);
+        self::assertResponseStatusCodeSame(422);
+        self::assertNull($this->findUser('tiktok@example.com'));
     }
 
     public function testAnAlreadyRegisteredAddressGetsTheExactSameAnswer(): void
@@ -178,7 +194,10 @@ final class RegistrationApiTest extends ApiTestCase
         self::assertEmailCount(0);
     }
 
-    private function register(string $email, string $language = 'fr'): void
+    /**
+     * @param array<string, string|null> $extra
+     */
+    private function register(string $email, string $language = 'fr', array $extra = []): void
     {
         $this->client->request(
             'POST',
@@ -188,7 +207,7 @@ final class RegistrationApiTest extends ApiTestCase
                 'email' => $email,
                 'displayName' => 'Proprietaire test',
                 'password' => 'chevalpileagrafe',
-            ]),
+            ] + $extra),
         );
     }
 

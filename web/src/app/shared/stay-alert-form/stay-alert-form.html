@@ -1,0 +1,54 @@
+<section class="alert" aria-labelledby="stay-alert-title">
+  @if (sent()) {
+    <p class="alert__done" role="status" i18n="@@alert.sent">
+      C'est noté. Ouvrez l'email que nous venons d'envoyer et cliquez le lien pour activer l'alerte.
+      Rien au bout de quelques minutes ? Regardez dans les indésirables.
+    </p>
+  } @else {
+    <h2 class="alert__title" id="stay-alert-title" i18n="@@alert.title">
+      Prévenez-moi si un logement se libère
+    </h2>
+    <p class="alert__intro" i18n="@@alert.intro">
+      Une demande expire, un propriétaire libère une semaine, une annonce arrive : vous recevez un
+      email, une seule fois par logement. L'alerte s'arrête d'elle-même le jour de votre arrivée.
+    </p>
+
+    <form class="alert__form" (ngSubmit)="submit()" novalidate>
+      <label class="alert__field">
+        <span class="alert__label" i18n="@@alert.email">Votre email</span>
+        <input
+          type="email"
+          name="email"
+          autocomplete="email"
+          required
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+        />
+      </label>
+
+      <label class="alert__consent">
+        <input
+          type="checkbox"
+          name="consent"
+          [ngModel]="consent()"
+          (ngModelChange)="consent.set($event)"
+        />
+        <span i18n="@@alert.consent"
+          >J'accepte de recevoir ces emails. Chacun contient un lien pour arrêter l'alerte.</span
+        >
+      </label>
+
+      @if (error(); as message) {
+        <p class="alert__error" role="alert">{{ message }}</p>
+      }
+
+      <button type="submit" class="alert__submit" [disabled]="sending()">
+        @if (sending()) {
+          <ng-container i18n="@@common.sending">Envoi…</ng-container>
+        } @else {
+          <ng-container i18n="@@alert.submit">Créer l'alerte</ng-container>
+        }
+      </button>
+    </form>
+  }
+</section>

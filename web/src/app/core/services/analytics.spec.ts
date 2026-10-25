@@ -6,6 +6,7 @@ describe('Analytics.cleanPath', () => {
     expect(Analytics.cleanPath('/en/demande/3fa9c0de12/annuler#top')).toBe(
       '/en/demande/:lien/annuler',
     );
+    expect(Analytics.cleanPath('/nl/alerte/AZJx.c2lnbmVk/activer')).toBe('/nl/alerte/:lien/activer');
     expect(Analytics.cleanPath('/nouveau-mot-de-passe?token=secret')).toBe('/nouveau-mot-de-passe');
     expect(Analytics.cleanPath('/recherche?arrivee=2027-07-01&adultes=2')).toBe('/recherche');
     expect(Analytics.cleanPath('/logement/bungalow-europa')).toBe('/logement/bungalow-europa');

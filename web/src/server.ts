@@ -149,11 +149,19 @@ async function listSlugs(): Promise<string[]> {
 
 /**
  * robots.txt servi par le serveur : l'adresse du sitemap suit SITE_URL. Les pages privées
- * (espace propriétaire, suivi d'une demande par son lien personnel) restent hors index.
+ * (espace propriétaire, suivi d'une demande ou alerte par son lien personnel) restent hors index.
  * La page propriétaires publique (/proprietaire) est indexable.
  */
 app.get('/robots.txt', (_request, response) => {
-  const privatePaths = ['/api/', '/mon-espace', '/*/mon-espace', '/demande/', '/*/demande/'];
+  const privatePaths = [
+    '/api/',
+    '/mon-espace',
+    '/*/mon-espace',
+    '/demande/',
+    '/*/demande/',
+    '/alerte/',
+    '/*/alerte/',
+  ];
 
   response
     .type('text/plain')

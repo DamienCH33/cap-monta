@@ -9,7 +9,7 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 | Responsable du traitement | Damien Chauveau EI (micro-entreprise, SIRET 131 233 488 00017), éditeur du site |
 | Contact | contact@damienchauveau-dev.fr |
 | Délégué à la protection des données | aucun (non obligatoire) |
-| Dernière mise à jour | 15 octobre 2026 |
+| Dernière mise à jour | 25 octobre 2026 |
 
 ## Prestataires (sous-traitants)
 
@@ -39,7 +39,7 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 | Finalité | Publier et gérer des logements, recevoir et traiter les demandes |
 | Base légale | Exécution du service (art. 6.1.b) |
 | Personnes concernées | Propriétaires |
-| Données | Email, mot de passe (haché), nom affiché, téléphone (facultatif), langue de la dernière connexion (pour les emails), logements (type, quartier — jamais l'adresse postale —, description, photos, tarifs, calendrier) |
+| Données | Email, mot de passe (haché), nom affiché, téléphone (facultatif), langue de la dernière connexion (pour les emails), réponse facultative à « Comment avez-vous connu Cap Monta ? » (un choix dans une liste, jamais de texte libre, compté pour savoir quel canal amène des propriétaires), logements (type, quartier — jamais l'adresse postale —, description, photos, tarifs, calendrier) |
 | Destinataires | Public pour l'annonce (sans email ni téléphone) ; voyageur accepté pour le téléphone ; l'éditeur, par email à chaque mise en ligne d'une annonce (nom affiché, email, début de la description), pour la vérifier ; Railway ; Brevo |
 | Durée | Tant que le compte existe ; suppression immédiate et complète depuis « Mon profil » ; compte jamais confirmé supprimé au bout de 7 jours |
 | Sécurité | Mots de passe hachés ; connexion limitée en débit, temps de réponse identique que le compte existe ou non ; photos réencodées en WebP sous un nom aléatoire, sans métadonnées (GPS compris) ; téléphones et emails refusés dans les textes publics |
@@ -67,7 +67,19 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 | Destinataires | L'éditeur seul ; le propriétaire ne reçoit que le motif du retrait |
 | Durée | 1 an |
 
-## 5. Sécurité du service et journaux techniques
+## 5. Alertes « Prévenez-moi »
+
+| | |
+|---|---|
+| Finalité | Prévenir un voyageur par email quand un logement se libère aux dates où il n'a rien trouvé |
+| Base légale | Consentement (art. 6.1.a) : case à cocher, puis lien d'activation reçu par email ; retrait à tout moment par le lien « Arrêter mon alerte » de chaque email |
+| Personnes concernées | Voyageurs |
+| Données | Email, dates, nombre de voyageurs, domaine choisi, langue de la page, logements déjà annoncés |
+| Destinataires | Railway ; Brevo (courriels) |
+| Durée | Jusqu'au jour d'arrivée ; 2 jours si l'alerte n'est jamais activée (`app:privacy:purge`) |
+| Sécurité | Liens signés (HMAC avec le secret du serveur), rien de stocké ; même réponse que l'adresse ait déjà une alerte ou non ; 10 alertes au plus par adresse ; limiteur de débit (5 par heure et par IP) ; les statistiques (`app:stay-alerts:stats`) ne comptent que des nombres |
+
+## 6. Sécurité du service et journaux techniques
 
 | | |
 |---|---|
@@ -78,7 +90,7 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 | Destinataires | Railway |
 | Durée | Journaux : 12 mois au plus ; compteurs : de quelques minutes à une journée |
 
-## 6. Mesure d'audience
+## 7. Mesure d'audience
 
 | | |
 |---|---|
@@ -88,7 +100,7 @@ publique (`/confidentialite`) doit dire la même chose que ce registre.
 | Destinataires | Umami |
 | Durée | Selon Umami Cloud ; aucune donnée identifiante |
 
-## 7. Sauvegardes de la base
+## 8. Sauvegardes de la base
 
 | | |
 |---|---|

@@ -19,9 +19,9 @@ declare global {
  * Mesure d'audience Umami : sans cookie, donc sans bandeau de consentement.
  *
  * Le script (index.html) ne compte rien tout seul (data-auto-track="false") : c'est ce
- * service qui envoie chaque page vue, avec une adresse nettoyée. Le lien personnel de suivi
- * d'une demande (/demande/<jeton>) et les paramètres (?token=…, dates, voyageurs) ne
- * sortent jamais du site. Ne compte qu'en ligne : data-domains écarte localhost.
+ * service qui envoie chaque page vue, avec une adresse nettoyée. Les liens personnels (suivi
+ * d'une demande /demande/<jeton>, alerte /alerte/<clé>) et les paramètres (?token=…, dates,
+ * voyageurs) ne sortent jamais du site. Ne compte qu'en ligne : data-domains écarte localhost.
  */
 @Injectable({ providedIn: 'root' })
 export class Analytics {
@@ -48,11 +48,13 @@ export class Analytics {
     }
   }
 
-  /** « /en/demande/3fa9…?x=1#y » → « /en/demande/:lien ». */
+  /** « /en/demande/3fa9…?x=1#y » → « /en/demande/:lien », de même pour /alerte/<clé>. */
   static cleanPath(url: string): string {
     const path = url.split(/[?#]/)[0] || '/';
 
-    return path.replace(/\/demande\/[^/]+/, '/demande/:lien');
+    return path
+      .replace(/\/demande\/[^/]+/, '/demande/:lien')
+      .replace(/\/alerte\/[^/]+/, '/alerte/:lien');
   }
 
   private page(path: string): void {

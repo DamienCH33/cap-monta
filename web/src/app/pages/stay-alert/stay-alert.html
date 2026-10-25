@@ -1,0 +1,61 @@
+<div class="container stay-alert">
+  @if (notFound()) {
+    <div class="stay-alert__box">
+      <h1 class="stay-alert__title" i18n="@@alert.missing-title">Alerte introuvable</h1>
+      <p i18n="@@alert.missing">
+        Ce lien n'est plus valable : l'alerte a été arrêtée, ou elle n'a pas été activée dans les
+        deux jours. Vous pouvez en créer une nouvelle depuis la recherche.
+      </p>
+      <a class="button" routerLink="/recherche" i18n="@@alert.search">Voir les logements</a>
+    </div>
+  } @else if (stopped()) {
+    <div class="stay-alert__box">
+      <h1 class="stay-alert__title" i18n="@@alert.stopped-title">Alerte arrêtée</h1>
+      <p i18n="@@alert.stopped">
+        Vous ne recevrez plus d'email pour ces dates. Votre adresse est effacée.
+      </p>
+      <a class="button" routerLink="/recherche" i18n="@@alert.search">Voir les logements</a>
+    </div>
+  } @else if (alert(); as current) {
+    <h1 class="stay-alert__title" i18n="@@alert.page-title">Votre alerte</h1>
+
+    <section class="stay-alert__box" aria-live="polite">
+      @if (current.confirmed) {
+        <p class="stay-alert__state" i18n="@@alert.active">
+          Alerte active. Vous recevrez un email dès qu'un logement se libère, une seule fois par
+          logement.
+        </p>
+      } @else {
+        <p class="stay-alert__state" i18n="@@alert.inactive">
+          Alerte pas encore activée : ouvrez le lien de l'email d'activation.
+        </p>
+      }
+
+      <p class="stay-alert__stay">
+        <ng-container i18n="@@alert.stay"
+          >Du {{ current.arrival | date: 'd MMMM y' }} au
+          {{ current.departure | date: 'd MMMM y' }}</ng-container
+        >
+        ·
+        <ng-container i18n="@@count.people-short">{{ current.guests }} pers.</ng-container>
+      </p>
+
+      <a
+        class="button"
+        routerLink="/recherche"
+        [queryParams]="searchParams(current)"
+        i18n="@@alert.search"
+        >Voir les logements</a
+      >
+    </section>
+
+    <section class="stay-alert__box stay-alert__box--quiet">
+      @if (error(); as message) {
+        <p class="stay-alert__error" role="alert">{{ message }}</p>
+      }
+      <button type="button" class="stay-alert__stop" [disabled]="saving()" (click)="stop()">
+        <ng-container i18n="@@alert.stop">Arrêter l'alerte</ng-container>
+      </button>
+    </section>
+  }
+</div>

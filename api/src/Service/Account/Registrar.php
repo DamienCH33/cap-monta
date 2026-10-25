@@ -6,6 +6,7 @@ namespace App\Service\Account;
 
 use App\Dto\RegistrationRequest;
 use App\Entity\User;
+use App\Enum\HeardFrom;
 use App\I18n\Translator;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -45,6 +46,7 @@ final readonly class Registrar
         // La langue de la page d'inscription : celle des emails qu'il recevra.
         $user->setLocale($this->translator->locale());
         $user->setPassword($this->hasher->hashPassword($user, $request->password));
+        $user->setHeardFrom(null === $request->heardFrom ? null : HeardFrom::tryFrom($request->heardFrom));
 
         $this->em->persist($user);
         $this->em->flush();

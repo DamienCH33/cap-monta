@@ -19,7 +19,19 @@ export class Register {
     displayName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(10)]],
+    /** « Comment avez-vous connu Cap Monta ? » : facultatif, '' = pas de réponse. */
+    heardFrom: [''],
   });
+
+  /** Les valeurs sont celles de l'API (App\Enum\HeardFrom). */
+  readonly heardFromOptions: { value: string; label: string }[] = [
+    { value: 'facebook_group', label: $localize`:@@owner.entry.heard-facebook:Un groupe Facebook` },
+    { value: 'other_owner', label: $localize`:@@owner.entry.heard-owner:Un autre propriétaire` },
+    { value: 'cote_monta', label: $localize`:@@owner.entry.heard-cotemonta:Le site CôtéMonta` },
+    { value: 'press', label: $localize`:@@owner.entry.heard-press:La presse` },
+    { value: 'search', label: $localize`:@@owner.entry.heard-search:Une recherche sur Google` },
+    { value: 'other', label: $localize`:@@owner.entry.heard-other:Autre` },
+  ];
 
   readonly submitting = signal(false);
   readonly sent = signal(false);
@@ -48,7 +60,9 @@ export class Register {
     this.submitting.set(true);
     this.failed.set(null);
 
-    this.auth.register(this.form.getRawValue()).subscribe({
+    const { heardFrom, ...account } = this.form.getRawValue();
+
+    this.auth.register({ ...account, heardFrom: heardFrom || null }).subscribe({
       next: () => {
         this.submitting.set(false);
         this.sent.set(true);

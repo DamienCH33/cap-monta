@@ -30,6 +30,8 @@ final readonly class MailComposer
         '#/mon-espace/demandes#' => 'Voir mes demandes',
         '#/demande/#' => 'Suivre ma demande',
         '#/recherche#' => 'Voir les logements',
+        '#/alerte/[^/]+/activer$#' => 'Activer mon alerte',
+        '#/alerte/#' => 'Arrêter mon alerte',
     ];
     private const SUPPORT_BUTTON = 'Soutenir Cap Monta';
     private const OTHER_BUTTON = 'Ouvrir le lien';

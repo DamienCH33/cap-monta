@@ -78,6 +78,21 @@
           }
         </label>
 
+        <label class="auth__field">
+          <span class="auth__label" i18n="@@owner.entry.heard-label"
+            >Comment avez-vous connu Cap Monta ? (facultatif)</span
+          >
+          <select formControlName="heardFrom">
+            <option value="" i18n="@@owner.entry.heard-none">Je préfère ne pas répondre</option>
+            @for (option of heardFromOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          <span class="auth__hint" i18n="@@owner.entry.heard-hint"
+            >Ça m'aide à savoir où parler du site.</span
+          >
+        </label>
+
         <button type="submit" class="auth__submit" [disabled]="submitting()">
           @if (submitting()) {
             <ng-container i18n="@@owner.entry.register-submitting">Création…</ng-container>

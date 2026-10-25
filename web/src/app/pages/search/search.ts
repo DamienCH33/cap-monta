@@ -27,10 +27,11 @@ import { FilterSheet } from '../../shared/filter-sheet/filter-sheet';
 import { District } from '../../core/models/district';
 import { DistrictService } from '../../core/services/district';
 import { Pagination } from '../../shared/pagination/pagination';
+import { StayAlertForm } from '../../shared/stay-alert-form/stay-alert-form';
 
 @Component({
   selector: 'cm-search',
-  imports: [SearchBar, AccommodationCard, FilterSheet, RouterLink, DatePipe, Pagination],
+  imports: [SearchBar, AccommodationCard, FilterSheet, RouterLink, DatePipe, Pagination, StayAlertForm],
   templateUrl: './search.html',
   styleUrl: './search.scss',
 })

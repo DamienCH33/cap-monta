@@ -23,6 +23,8 @@ return [
     'Voir les logements' => 'See the homes',
     'Soutenir Cap Monta' => 'Support Cap Monta',
     'Ouvrir le lien' => 'Open the link',
+    'Activer mon alerte' => 'Activate my alert',
+    'Arrêter mon alerte' => 'Stop my alert',
 
     // Common
     'Bonjour,' => 'Hello,',
@@ -106,4 +108,18 @@ return [
     "Votre annonce %title% a été retirée du site à la suite d'un\nsignalement." => 'Your listing %title% has been removed from the site following a report.',
     'Motif : %reason%' => 'Reason: %reason%',
     "Elle n'est pas supprimée : corrigez-la puis republiez-la depuis votre espace, ou\nrépondez à ce message si vous pensez qu'il s'agit d'une erreur." => 'It has not been deleted: correct it and publish it again from your account, or reply to this message if you think this is a mistake.',
+
+    // Alert « Prévenez-moi » (to the guest)
+    'Activez votre alerte' => 'Activate your alert',
+    'Vous avez demandé à être prévenu si un logement se libère :' => 'You asked to be told when a home becomes free:',
+    'Pour activer l\'alerte, ouvrez ce lien :' => 'To activate the alert, open this link:',
+    "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message :\nsans activation, l'alerte et votre adresse sont effacées sous deux jours." => 'If you did not make this request, please ignore this message: without activation, the alert and your address are deleted within two days.',
+    'Un logement est libre à vos dates' => 'A home is free for your dates',
+    'Un logement vient de se libérer à vos dates.' => 'A home has just become free for your dates.',
+    '%count% logements viennent de se libérer à vos dates.' => '%count% homes have just become free for your dates.',
+    "Les dates libres partent vite en saison : la demande de réservation\nest gratuite et le propriétaire répond sous 48 heures." => 'Free dates go fast in season: a booking request is free and the owner replies within 48 hours.',
+    'Vous ne voulez plus de ces messages ? Arrêtez l\'alerte ici :' => 'No longer want these messages? Stop the alert here:',
+    '%count% personne' => '%count% person',
+    '%count% personnes' => '%count% people',
+    'Domaine : %resort%' => 'Resort: %resort%',
 ];

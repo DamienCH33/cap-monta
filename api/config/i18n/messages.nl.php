@@ -180,6 +180,15 @@ return [
     'Liste de dates illisible (%d au plus).' => 'De lijst met data kon niet worden gelezen (maximaal %d).',
     'Le calendrier s’arrête à 18 mois : décochez cette ligne.' => 'De kalender loopt tot 18 maanden vooruit: vink deze regel uit.',
 
+    // Melding « Prévenez-moi » (StayAlertRequest, StayAlertController) en de herkomst bij inschrijving (RegistrationRequest)
+    'Choisissez vos dates.' => 'Kies uw data.',
+    'Indiquez entre %d et %d voyageurs.' => 'Geef tussen %d en %d gasten op.',
+    'Acceptez de recevoir ces emails pour créer l’alerte.' => 'Ga akkoord met deze e-mails om de melding aan te maken.',
+    'La date de départ doit venir après l’arrivée.' => 'De vertrekdatum moet na de aankomst liggen.',
+    'Choisissez une arrivée à partir de demain.' => 'Kies een aankomst vanaf morgen.',
+    'Ce séjour est trop long pour une alerte.' => 'Dit verblijf is te lang voor een melding.',
+    'Choisissez une réponse dans la liste.' => 'Kies een antwoord uit de lijst.',
+
     // Wijken van Euronat: de kenmerken die /api/districts teruggeeft
     'Côté plage' => 'Aan de strandkant',
     'Accès direct à la plage Nord' => 'Directe toegang tot het noordstrand',

@@ -5,7 +5,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "sh -c 'php bin/console app:booking-requests:expire && php bin/console app:privacy:purge && php bin/console cache:pool:prune'",
+    "startCommand": "sh -c 'php bin/console app:booking-requests:expire && php bin/console app:stay-alerts:notify && php bin/console app:privacy:purge && php bin/console cache:pool:prune'",
     "cronSchedule": "17 * * * *",
     "restartPolicyType": "NEVER"
   }

@@ -31,6 +31,8 @@ final readonly class PurgePersonalDataCommand
     public const string UNVERIFIED_ACCOUNT_RETENTION = '7 days';
     /** Emails that could not be sent (Messenger's « failed » queue holds their content). */
     public const string FAILED_MESSAGE_RETENTION = '30 days';
+    /** A « Prévenez-moi » alert never activated: the address was perhaps typed by someone else. */
+    public const string UNCONFIRMED_ALERT_RETENTION = '2 days';
 
     public const string ANONYMOUS_DOMAIN = 'anonyme.invalid';
 
@@ -97,6 +99,12 @@ final readonly class PurgePersonalDataCommand
             ['since' => $ago($now, self::UNVERIFIED_ACCOUNT_RETENTION)],
         );
 
+        // An alert dies with its arrival day; an alert never activated, after two days.
+        $alerts = $this->db->executeStatement(
+            'DELETE FROM stay_alert WHERE arrival <= :today OR (confirmed_at IS NULL AND created_at < :since)',
+            ['today' => $today->format('Y-m-d'), 'since' => $ago($now, self::UNCONFIRMED_ALERT_RETENTION)],
+        );
+
         // Messenger's own table: dates without time zone, written in UTC by Messenger.
         $messages = $this->db->executeStatement(
             "DELETE FROM messenger_messages WHERE queue_name = 'failed' AND created_at < :since",
@@ -104,11 +112,12 @@ final readonly class PurgePersonalDataCommand
         );
 
         $io->success(sprintf(
-            '%d demande(s) anonymisée(s), %d texte(s) d’import effacé(s), %d signalement(s), %d compte(s) jamais confirmé(s), %d email(s) en échec supprimé(s).',
+            '%d demande(s) anonymisée(s), %d texte(s) d’import effacé(s), %d signalement(s), %d compte(s) jamais confirmé(s), %d alerte(s), %d email(s) en échec supprimé(s).',
             $requests,
             $imports,
             $reports,
             $accounts,
+            $alerts,
             $messages,
         ));
 

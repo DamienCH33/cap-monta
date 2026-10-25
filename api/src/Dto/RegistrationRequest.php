@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
+use App\Enum\HeardFrom;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class RegistrationRequest
@@ -39,6 +40,18 @@ final class RegistrationRequest
             skipOnError: true,
         )]
         public string $password = '',
+
+        /** « Comment avez-vous connu Cap Monta ? » : facultatif. */
+        #[Assert\Choice(callback: [self::class, 'heardFromChoices'], message: 'Choisissez une réponse dans la liste.')]
+        public ?string $heardFrom = null,
     ) {
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function heardFromChoices(): array
+    {
+        return array_map(static fn (HeardFrom $choice): string => $choice->value, HeardFrom::cases());
     }
 }

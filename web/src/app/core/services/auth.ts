@@ -132,10 +132,22 @@ export class AuthService {
 
   private static readonly HINT = 'cm.owner-session';
 
-  register(payload: { email: string; displayName: string; password: string }): Observable<void> {
+  register(payload: {
+    email: string;
+    displayName: string;
+    password: string;
+    heardFrom?: string | null;
+  }): Observable<void> {
     return this.http
       .post<void>(`${this.api}/register`, payload, { withCredentials: true })
-      .pipe(tap(() => this.analytics.event('inscription-proprietaire')));
+      .pipe(
+        tap(() =>
+          this.analytics.event(
+            'inscription-proprietaire',
+            payload.heardFrom ? { canal: payload.heardFrom } : undefined,
+          ),
+        ),
+      );
   }
 
   /** Nouveau lien de confirmation, pour un propriétaire connecté dont le premier email s'est perdu. */

@@ -180,6 +180,15 @@ return [
     'Liste de dates illisible (%d au plus).' => 'Die Datumsliste konnte nicht gelesen werden (höchstens %d).',
     'Le calendrier s’arrête à 18 mois : décochez cette ligne.' => 'Der Kalender reicht 18 Monate weit: Entfernen Sie das Häkchen bei dieser Zeile.',
 
+    // Benachrichtigung « Prévenez-moi » (StayAlertRequest, StayAlertController) und Herkunft bei der Registrierung (RegistrationRequest)
+    'Choisissez vos dates.' => 'Wählen Sie Ihre Daten.',
+    'Indiquez entre %d et %d voyageurs.' => 'Geben Sie zwischen %d und %d Gäste an.',
+    'Acceptez de recevoir ces emails pour créer l’alerte.' => 'Stimmen Sie dem Erhalt dieser E-Mails zu, um die Benachrichtigung anzulegen.',
+    'La date de départ doit venir après l’arrivée.' => 'Das Abreisedatum muss nach der Anreise liegen.',
+    'Choisissez une arrivée à partir de demain.' => 'Wählen Sie eine Anreise ab morgen.',
+    'Ce séjour est trop long pour une alerte.' => 'Dieser Aufenthalt ist für eine Benachrichtigung zu lang.',
+    'Choisissez une réponse dans la liste.' => 'Wählen Sie eine Antwort aus der Liste.',
+
     // Viertel von Euronat: die Merkmale, die /api/districts liefert
     'Côté plage' => 'Strandseite',
     'Accès direct à la plage Nord' => 'Direkter Zugang zum Nordstrand',

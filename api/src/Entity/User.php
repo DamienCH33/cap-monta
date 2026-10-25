@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\HeardFrom;
 use App\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -35,6 +36,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /** Langue du site à l'inscription, puis à chaque connexion : celle des emails qu'il reçoit. */
     #[ORM\Column(length: 2, options: ['default' => 'fr'])]
     private string $locale = 'fr';
+
+    /** « Comment avez-vous connu Cap Monta ? » : facultatif, une seule fois à l'inscription. */
+    #[ORM\Column(length: 20, nullable: true, enumType: HeardFrom::class)]
+    private ?HeardFrom $heardFrom = null;
 
     /** @var list<string> */
     #[ORM\Column(type: Types::JSON)]
@@ -118,6 +123,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhone(?string $phone): void
     {
         $this->phone = $phone;
+    }
+
+    public function getHeardFrom(): ?HeardFrom
+    {
+        return $this->heardFrom;
+    }
+
+    public function setHeardFrom(?HeardFrom $heardFrom): void
+    {
+        $this->heardFrom = $heardFrom;
     }
 
     public function isVerified(): bool

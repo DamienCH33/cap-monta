@@ -24,6 +24,8 @@ export const APP_PATHS: readonly string[] = [
   'favoris',
   'mes-demandes',
   'demande/:token',
+  'alerte/:token',
+  'alerte/:token/activer',
   'mon-espace/logements/:slug/calendrier',
   'mon-espace/logements',
   'inscription',

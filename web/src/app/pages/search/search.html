@@ -131,6 +131,13 @@
               }
             </ul>
           }
+
+          <cm-stay-alert-form
+            [arrival]="criteria().arrival ?? ''"
+            [departure]="criteria().departure ?? ''"
+            [guests]="criteria().guests ?? 1"
+            [resort]="criteria().resort ?? null"
+          />
         } @else {
           <p i18n="@@search.none">Aucun logement ne correspond à cette recherche.</p>
         }

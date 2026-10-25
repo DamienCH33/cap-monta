@@ -24,6 +24,8 @@ return [
     'Voir les logements' => 'Accommodaties bekijken',
     'Soutenir Cap Monta' => 'Cap Monta steunen',
     'Ouvrir le lien' => 'Link openen',
+    'Activer mon alerte' => 'Mijn melding activeren',
+    'Arrêter mon alerte' => 'Mijn melding stoppen',
 
     // Algemeen
     'Bonjour,' => 'Goedendag,',
@@ -107,4 +109,18 @@ return [
     "Votre annonce %title% a été retirée du site à la suite d'un\nsignalement." => 'Uw advertentie %title% is na een melding van de site gehaald.',
     'Motif : %reason%' => 'Reden: %reason%',
     "Elle n'est pas supprimée : corrigez-la puis republiez-la depuis votre espace, ou\nrépondez à ce message si vous pensez qu'il s'agit d'une erreur." => 'De advertentie is niet verwijderd: u kunt deze aanpassen en opnieuw publiceren vanuit uw account, of dit bericht beantwoorden als u denkt dat het om een vergissing gaat.',
+
+    // Melding « Prévenez-moi » (aan de gast)
+    'Activez votre alerte' => 'Activeer uw melding',
+    'Vous avez demandé à être prévenu si un logement se libère :' => 'U hebt gevraagd om bericht als er een accommodatie vrijkomt:',
+    'Pour activer l\'alerte, ouvrez ce lien :' => 'Open deze link om de melding te activeren:',
+    "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message :\nsans activation, l'alerte et votre adresse sont effacées sous deux jours." => 'Hebt u dit niet zelf aangevraagd? Negeer dan dit bericht: zonder activering worden de melding en uw adres binnen twee dagen gewist.',
+    'Un logement est libre à vos dates' => 'Er is een accommodatie vrij op uw data',
+    'Un logement vient de se libérer à vos dates.' => 'Er is net een accommodatie vrijgekomen op uw data.',
+    '%count% logements viennent de se libérer à vos dates.' => 'Er zijn net %count% accommodaties vrijgekomen op uw data.',
+    "Les dates libres partent vite en saison : la demande de réservation\nest gratuite et le propriétaire répond sous 48 heures." => 'In het seizoen zijn vrije data snel weg: een reserveringsaanvraag is gratis en de eigenaar antwoordt binnen 48 uur.',
+    'Vous ne voulez plus de ces messages ? Arrêtez l\'alerte ici :' => 'Wilt u deze berichten niet meer ontvangen? Stop de melding hier:',
+    '%count% personne' => '%count% persoon',
+    '%count% personnes' => '%count% personen',
+    'Domaine : %resort%' => 'Domein: %resort%',
 ];

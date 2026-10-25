@@ -98,6 +98,14 @@ export const routes: Routes = [
       import('./pages/booking-tracking/booking-tracking').then((m) => m.BookingTracking),
   },
   {
+    path: 'alerte/:token',
+    loadComponent: () => import('./pages/stay-alert/stay-alert').then((m) => m.StayAlertPage),
+  },
+  {
+    path: 'alerte/:token/activer',
+    loadComponent: () => import('./pages/stay-alert/stay-alert').then((m) => m.StayAlertPage),
+  },
+  {
     path: 'mon-espace/logements/:slug/calendrier',
     canActivate: [ownerGuard],
     loadComponent: () =>

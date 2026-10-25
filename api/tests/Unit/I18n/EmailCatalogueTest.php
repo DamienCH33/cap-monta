@@ -21,6 +21,7 @@ final class EmailCatalogueTest extends TestCase
         'src/Service/Booking/BookingMailer.php',
         'src/Service/Account/AccountMailer.php',
         'src/Service/Moderation/ModerationMailer.php',
+        'src/Service/StayAlert/StayAlertMailer.php',
         'src/Service/Mail/MailComposer.php',
     ];
 
